@@ -289,6 +289,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .event-flavor{margin-top:12px;font-size:15px;font-weight:600;color:#e2e8f0}
 .decision-options{display:flex;flex-direction:column;gap:9px;margin-top:20px}
 .decision-btn{padding:14px 16px;border-radius:13px;font-weight:700;font-size:14px;background:#0c1220;border:1px solid #2f365a;color:#e2e8f0;text-align:left;transition:all .15s}
+.decision-btn.disabled,.decision-btn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.6)}
 .decision-btn:hover{border-color:#8b5cf6;background:#1a1435;transform:translateX(4px)}
 
 .end-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at center,rgba(139,92,246,.1),transparent 60%)}
@@ -970,7 +971,7 @@ function startGame(){
     actuallyStartGame();
   }catch(e){ console.error(e); alert('Start error: '+e.message); }
 }
-function actuallyStartGame(){try{initAudio();if(isMobile()){ try{localStorage.setItem('tfcb_mute','1');muted=true;}catch(e){} } playSound('click');const name=(document.getElementById('player-name').value||'Degen').trim();const archKey=document.querySelector('#archetypes .selected').dataset.arch;const diff=document.querySelector('#diffs .selected').dataset.diff;const country=document.querySelector('#countries .selected').dataset.country;const avatar=document.querySelector('#avatars .selected').textContent;const ironman=document.getElementById('ironman').checked;const pmode=document.querySelector('#presale-mode .selected').dataset.pmode;const d=DIFF[diff];const a=ARCH[archKey];const cash=Math.round(a.cash*d.cash);const debt=a.debt;state={name,arch:archKey,diff,country,avatar,ironman,pmode,month:0,day:1,cash,debt,holdings:{},avg:{},prices:{},noise:{},risk:8,hunger:20,stress:15,health:100,sentiment:50,feeLevel:1,businesses:{},quests:[],questsDone:0,achievements:[],netHistory:[cash],lastSellMonth:0,btcHoldStart:-1,memeHeld:new Set(),presaleWins:0,usedPresales:[],paused:false,speed:1,dayProgress:0,_mode:{},_amt:{},_presales:[],memeBonus:a.memeBonus,feeMult:a.feeMult,riskMult:a.riskMult*d.risk,stressMult:a.stressMult*(COUNTRIES[country].stressMod||1),countryRiskMod:COUNTRIES[country].riskMod||1,airdropMod:COUNTRIES[country].airdropMod||1,decisionCooldown:0,storage:null,job:null,narrative:null,earlyDone:{},newsLog:[],jobIncome:0,l1Bonus:1,defiBonus:1,xp:0,farms:[],airOffers:[],bags:[],launchOffers:[],perps:[],_perpLev:10,airdropTotal:0,rugged:0,moons:0,liquidations:0,minigames:0,snipes:0,farmCount:0};COINS.forEach(c=>{state.prices[c.s]=getHistPrice(c.s,0)||(c.base||1);state.noise[c.s]=1;state.holdings[c.s]=0;state.avg[c.s]=0});generateQuests();refreshPresales();refreshAirdrops();refreshLaunches();updateXPBar();renderDegenOps();document.getElementById('start-screen').style.display='none';document.getElementById('game-screen').style.display='block';if(ironman){document.getElementById('btn-week').disabled=true;document.getElementById('btn-month').disabled=true;document.getElementById('btn-pause').disabled=true}initChart();updateHeader();updateSidePanels();renderMarket();startTimer();toast('Game started – stay solvent!','buy');
+function actuallyStartGame(){try{initAudio();if(isMobile()){ try{localStorage.setItem('tfcb_mute','1');muted=true;}catch(e){} } playSound('click');const name=(document.getElementById('player-name').value||'Degen').trim();const archKey=document.querySelector('#archetypes .selected').dataset.arch;const diff=document.querySelector('#diffs .selected').dataset.diff;const country=document.querySelector('#countries .selected').dataset.country;const avatar=document.querySelector('#avatars .selected').textContent;const ironman=document.getElementById('ironman').checked;const pmode=document.querySelector('#presale-mode .selected').dataset.pmode;const d=DIFF[diff];const a=ARCH[archKey];const cash=Math.round(a.cash*d.cash);const debt=a.debt;state={name,arch:archKey,diff,country,avatar,ironman,pmode,month:0,day:1,cash,debt,holdings:{},avg:{},prices:{},noise:{},risk:8,hunger:20,stress:15,health:100,sentiment:50,feeLevel:1,businesses:{},quests:[],questsDone:0,achievements:[],netHistory:[cash],lastSellMonth:0,btcHoldStart:-1,memeHeld:new Set(),presaleWins:0,usedPresales:[],paused:false,speed:1,dayProgress:0,_mode:{},_amt:{},_presales:[],memeBonus:a.memeBonus,feeMult:a.feeMult,riskMult:a.riskMult*d.risk,stressMult:a.stressMult*(COUNTRIES[country].stressMod||1),countryRiskMod:COUNTRIES[country].riskMod||1,airdropMod:COUNTRIES[country].airdropMod||1,decisionCooldown:0,storage:null,job:null,narrative:null,earlyDone:{},newsLog:[],jobIncome:0,l1Bonus:1,defiBonus:1,xp:0,farms:[],airOffers:[],bags:[],launchOffers:[],perps:[],_perpLev:10,airdropTotal:0,rugged:0,moons:0,liquidations:0,minigames:0,snipes:0,farmCount:0,histDone:{},histSkip:{},histLast:{},_histShownThisMonth:false};initHistPool();COINS.forEach(c=>{state.prices[c.s]=getHistPrice(c.s,0)||(c.base||1);state.noise[c.s]=1;state.holdings[c.s]=0;state.avg[c.s]=0});generateQuests();refreshPresales();refreshAirdrops();refreshLaunches();updateXPBar();renderDegenOps();document.getElementById('start-screen').style.display='none';document.getElementById('game-screen').style.display='block';if(ironman){document.getElementById('btn-week').disabled=true;document.getElementById('btn-month').disabled=true;document.getElementById('btn-pause').disabled=true}initChart();updateHeader();updateSidePanels();renderMarket();startTimer();toast('Game started – stay solvent!','buy');
 setTimeout(()=>{if(state&&state.month===0&&!state.earlyDone['storage']){const ed=EARLY_DECISIONS.find(e=>e.id==='storage');if(ed)showEarlyDecision(ed);}},800)}catch(e){console.error(e);alert('Start error: '+e.message)}}
 
 function startTimer(){clearInterval(timer);timer=setInterval(()=>{if(!state||state.paused)return;if(!document.getElementById('event-overlay').classList.contains('hidden'))return;if(!document.getElementById('presale-overlay').classList.contains('hidden'))return;if(!document.getElementById('decision-overlay').classList.contains('hidden'))return;if(!document.getElementById('settings-overlay').classList.contains('hidden'))return;const ms={1:14000,2:7000,3:3500}[state.speed]||14000;state.dayProgress+=100/(ms/100);if(state.dayProgress>=100){state.dayProgress=0;advanceDays(1)}const el=document.getElementById('day-progress');if(el)el.style.width=state.dayProgress+'%'},100)}
@@ -988,6 +989,7 @@ function applyPrices(){COINS.forEach(c=>{if(state.month<c.launch){state.prices[c
 
 function nextMonth(){
   state.month++;
+  state._histShownThisMonth=false;
   if(state.month>=84){if(netWorth()<-1000&&state.cash<100){endGame(false,'You reached 2027 broke – REKT');return}endGame(true);return}
   COINS.forEach(c=>{state.noise[c.s]=1+(Math.random()-.5)*.04});
 
@@ -1060,6 +1062,7 @@ function nextMonth(){
       showEarlyDecision(ed);
     }
   });
+  maybeHistorical();
   checkDecision();
 
   // Debt service
@@ -1185,14 +1188,595 @@ function pushRandomNews(){
   if(n.s)state.sentiment=Math.max(0,Math.min(100,state.sentiment+n.s));
 }
 
+
+/* ================= HISTORICAL QUEST POOL 2020-2026 =================
+   Every entry is bound to a real month window on the 84-month timeline
+   (month 0 = January 2020). Each build() re-rolls amounts and odds so the
+   same event never plays out identically twice. */
+const HM=(y,mo)=>(y-2020)*12+mo;
+const hR=(a,b)=>a+Math.random()*(b-a);
+const hRI=(a,b)=>Math.round(hR(a,b));
+function hCash(pct,min){ if(!state)return min; return Math.max(min,Math.round(state.cash*pct*hR(0.8,1.2))) }
+function hHold(){ let v=0; if(state)COINS.forEach(c=>{v+=(state.holdings[c.s]||0)*(state.prices[c.s]||0)}); return v }
+
+const HIST_QUESTS=[
+/* ---------------- 2020 ---------------- */
+{id:'h_2020_accum',era:'JAN 2020',m:[HM(2020,0),HM(2020,1)],w:2,build:()=>{const c=hCash(.4,250);return{
+ title:"Bitcoin is boring at $8,000",
+ desc:"January 2020. Nobody on your timeline cares about crypto. BTC trades around $8k, ETH around $140. A friend calls it dead money.",
+ options:[
+  {label:"Accumulate "+fmt(c)+" quietly",cash:-c,risk:3,stress:2,chance:.78,winCash:Math.round(c*hR(1.9,3.1)),winMsg:"Boring accumulation. It pays later.",failMsg:"Chop for months. Patience costs you.",xp:80,xpLabel:"EARLY ACCUMULATION"},
+  {label:"Wait for a clearer signal",stress:-3,msg:"You stay in cash. Safe, for now.",xp:20},
+  {label:"Tell your friend he is right",stress:-2,sent:-3,msg:"You talk yourself out of the cycle.",xp:10}]}}},
+
+{id:'h_covid',era:'MAR 2020',m:[HM(2020,2),HM(2020,2)],w:5,build:()=>{const c=hCash(.45,300);const dip=hR(2.1,3.4);return{
+ title:"Black Thursday – 12 March 2020",
+ desc:"COVID panic wipes 50% off BTC in a single day. BitMEX nearly breaks. Every timeline says crypto is finished. You have "+fmt(state.cash)+" in cash.",
+ options:[
+  {label:"Buy the blood with "+fmt(c),cash:-c,risk:8,stress:10,chance:.74,winCash:Math.round(c*dip),winMsg:"You caught the generational bottom.",failMsg:"It bled further before turning. Brutal timing.",winXP:260,winLabel:"BOUGHT THE CRASH"},
+  {label:"Sell what is left, save the rest",act:'sellHalf',risk:-8,stress:6,msg:"You de-risk into the panic.",xp:30},
+  {label:"Close the app and go outside",stress:-8,health:4,msg:"You survive mentally. That counts too.",xp:40}]}}},
+
+{id:'h_fed_qe',era:'MAR 2020',m:[HM(2020,2),HM(2020,3)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"The Fed goes unlimited",
+ desc:"23 March 2020: unlimited quantitative easing announced. Money printer memes take over the timeline. Hard assets start moving.",
+ options:[
+  {label:"Front-run the liquidity with "+fmt(c),cash:-c,risk:6,stress:4,chance:.7,winCash:Math.round(c*hR(1.8,2.6)),winMsg:"Liquidity lifted everything. You were early.",failMsg:"You were early and it hurt first.",winXP:180},
+  {label:"Buy a gold ETF instead",cash:-Math.round(c*.6),risk:-3,stress:-2,chance:.6,winCash:Math.round(c*.85),winMsg:"Slow, safe, positive.",failMsg:"Flat. At least you slept.",xp:40},
+  {label:"Ignore macro entirely",stress:-2,msg:"You keep trading charts, not narratives.",xp:15}]}}},
+
+{id:'h_halving3',era:'MAY 2020',m:[HM(2020,4),HM(2020,4)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"Third Bitcoin Halving",
+ desc:"11 May 2020. Block reward drops from 12.5 to 6.25 BTC. Half the timeline says it is priced in, the other half says supply shock.",
+ options:[
+  {label:"Load up pre-halving ("+fmt(c)+")",cash:-c,risk:5,stress:3,chance:.72,winCash:Math.round(c*hR(1.7,2.9)),winMsg:"Supply shock played out. Nice.",failMsg:"Priced in. Months of nothing.",winXP:200,winLabel:"HALVING PLAY"},
+  {label:"Buy miners' capitulation dip later",stress:2,chance:.55,winCash:hRI(400,1400),winMsg:"Patience paid a small bonus.",failMsg:"The dip never came.",xp:50},
+  {label:"It is priced in. Do nothing.",stress:-2,msg:"You sit this one out.",xp:15}]}}},
+
+{id:'h_defi_summer',era:'JUN 2020',m:[HM(2020,5),HM(2020,7)],w:4,build:()=>{const c=hCash(.4,300);return{
+ title:"DeFi Summer – yield farming goes vertical",
+ desc:"June 2020. Compound launches COMP and farmers earn four-digit APY on unaudited contracts. Gas is $40 a click. Your feed is nothing but food coins.",
+ options:[
+  {label:"Farm the highest APY with "+fmt(c),cash:-c,risk:14,stress:9,chance:.5,winCash:Math.round(c*hR(2.4,4.5)),winMsg:"You farmed and exited before the rot.",failCash:0,failDrain:.06,failMsg:"Contract drained. Unaudited means unaudited.",winXP:280,winLabel:"DEGEN FARMER"},
+  {label:"Farm blue-chip pools only ("+fmt(Math.round(c*.5))+")",cash:-Math.round(c*.5),risk:5,stress:3,chance:.74,winCash:Math.round(c*hR(.9,1.5)),winMsg:"Boring yield. Boring is good.",failMsg:"Impermanent loss ate the yield.",xp:90},
+  {label:"Gas fees are insane. Skip.",stress:-3,msg:"You keep your capital and your sanity.",xp:20}]}}},
+
+{id:'h_yfi',era:'JUL 2020',m:[HM(2020,6),HM(2020,7)],w:3,build:()=>{const c=hCash(.25,200);return{
+ title:"A fair launch with zero premine",
+ desc:"July 2020: YFI launches with no premine and no VC allocation. It goes from nothing to five figures. Anon devs are the new rockstars.",
+ options:[
+  {label:"Ape the fair launch ("+fmt(c)+")",cash:-c,risk:12,stress:7,chance:.42,winCash:Math.round(c*hR(4,11)),winMsg:"Life-changing multiple. You actually caught one.",failMsg:"You bought the top of the hype candle.",winXP:400,winLabel:"FAIR LAUNCH HIT"},
+  {label:"Read the contract first (–$"+hRI(60,160)+")",cash:-hRI(60,160),stress:2,chance:.6,winCash:hRI(900,3200),winMsg:"Due diligence paid. You sized in correctly.",failMsg:"You read too long and missed the entry.",xp:120,xpLabel:"DID THE RESEARCH"},
+  {label:"Anon devs? Hard pass.",stress:-2,msg:"You skip it. Sometimes that is alpha.",xp:20}]}}},
+
+{id:'h_uni_airdrop',era:'SEP 2020',m:[HM(2020,8),HM(2020,8)],w:5,build:()=>{const v=hRI(1100,2400);return{
+ title:"Uniswap drops UNI on everyone",
+ desc:"17 September 2020. Every wallet that ever touched Uniswap gets 400 UNI, worth about "+fmt(v)+" today. The airdrop era officially begins.",
+ options:[
+  {label:"Claim and sell immediately",cash:v,risk:1,stress:-2,msg:"Instant "+fmt(v)+". Free money is free money.",xp:120,xpLabel:"AIRDROP CLAIMED"},
+  {label:"Claim and hold the bag",cash:0,risk:4,stress:3,chance:.5,winCash:Math.round(v*hR(1.8,3.4)),winMsg:"Holding paid off massively.",failCash:Math.round(v*.35),failMsg:"It bled out. You sold lower anyway.",xp:150},
+  {label:"Claim, sell half, hold half",cash:Math.round(v*.5),risk:2,chance:.62,winCash:Math.round(v*hR(.9,1.7)),winMsg:"Balanced. The other half printed.",failCash:Math.round(v*.2),failMsg:"The rest faded, but you banked half.",xp:180,xpLabel:"SMART EXIT"}]}}},
+
+{id:'h_sushi',era:'SEP 2020',m:[HM(2020,8),HM(2020,9)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"The vampire attack",
+ desc:"SushiSwap forks Uniswap and drains its liquidity with token rewards. Then Chef Nomi sells the dev fund. Then he gives it back. Chaos.",
+ options:[
+  {label:"Migrate liquidity for the rewards ("+fmt(c)+")",cash:-c,risk:11,stress:8,chance:.5,winCash:Math.round(c*hR(1.9,3.2)),winMsg:"You farmed the vampire and got out.",failDrain:.04,failMsg:"The dev fund dump caught you holding.",winXP:220},
+  {label:"Stay with the original protocol",risk:-2,stress:-2,chance:.6,winCash:hRI(300,1100),winMsg:"Loyalty paid a modest fee share.",failMsg:"You earned nothing while others farmed.",xp:60},
+  {label:"Short the drama",cash:-Math.round(c*.4),risk:9,chance:.45,winCash:Math.round(c*hR(1.2,2.2)),winMsg:"You shorted the top of the hype.",failMsg:"Squeezed. Shorting memes is hard.",xp:70}]}}},
+
+{id:'h_kucoin_hack',era:'SEP 2020',m:[HM(2020,8),HM(2020,9)],w:3,build:()=>({
+ title:"An exchange just got drained",
+ desc:"September 2020: KuCoin loses roughly $280M in a hot wallet breach. Withdrawals are halted. Everyone suddenly rediscovers self-custody.",
+ options:[
+  {label:"Move everything to self-custody (–$"+hRI(90,200)+" fees)",cash:-hRI(90,200),risk:-9,stress:-4,flags:{storage:'ledger'},msg:"Not your keys, not your coins. Locked in.",xp:160,xpLabel:"SELF CUSTODY"},
+  {label:"Split across two exchanges",cash:-hRI(30,90),risk:-3,flags:{storage:'split'},msg:"Diversified counterparty risk.",xp:80},
+  {label:"It will not happen to my exchange",risk:6,stress:3,chance:.82,winCash:0,winMsg:"Nothing happened. This time.",failDrain:.12,ledgerSave:true,failMsg:"Your exchange froze withdrawals. Part of your bags is gone.",xp:20}]})},
+
+{id:'h_paypal',era:'OCT 2020',m:[HM(2020,9),HM(2020,10)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"PayPal opens the gates",
+ desc:"21 October 2020: PayPal lets 300 million users buy crypto. Retail access just changed forever. Price reacts instantly.",
+ options:[
+  {label:"Buy the adoption narrative ("+fmt(c)+")",cash:-c,risk:5,stress:3,chance:.75,winCash:Math.round(c*hR(1.6,2.4)),winMsg:"Retail flooded in behind you.",failMsg:"You bought the news candle.",winXP:170},
+  {label:"Sell the news",act:'sellHalf',stress:4,msg:"You take profit into the headline.",xp:50},
+  {label:"Do nothing",stress:-1,msg:"You watch it run without you.",xp:10}]}}},
+
+{id:'h_ath_2020',era:'DEC 2020',m:[HM(2020,11),HM(2021,0)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"The 2017 top finally breaks",
+ desc:"16 December 2020. BTC takes out $20k, the level that trapped a whole generation. MicroStrategy keeps buying. Nothing is above us but air.",
+ options:[
+  {label:"Add into strength ("+fmt(c)+")",cash:-c,risk:7,stress:5,chance:.7,winCash:Math.round(c*hR(1.8,3.2)),winMsg:"Breakouts run further than you think.",failMsg:"You bought a local top and had to sit through it.",winXP:210},
+  {label:"Take profit at the old high",act:'sellHalf',stress:3,msg:"You bank the round trip from 2017.",xp:80},
+  {label:"Set a leverage long ("+fmt(Math.round(c*.5))+" margin)",cash:-Math.round(c*.5),risk:17,stress:12,chance:.48,winCash:Math.round(c*hR(2,3.6)),winMsg:"Leverage worked. Do not get used to it.",failMsg:"Liquidated on a 12% wick.",xp:60}]}}},
+
+/* ---------------- 2021 ---------------- */
+{id:'h_gamestop',era:'JAN 2021',m:[HM(2021,0),HM(2021,0)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"Retail versus Wall Street",
+ desc:"January 2021. GameStop squeezes hedge funds, brokers restrict buying, and half of that crowd rotates straight into crypto.",
+ options:[
+  {label:"Front-run the rotation with "+fmt(c),cash:-c,risk:8,stress:6,chance:.66,winCash:Math.round(c*hR(1.7,2.8)),winMsg:"The rotation was real. You were positioned.",failMsg:"They stayed in equities. You chased.",winXP:180},
+  {label:"Buy meme coins specifically",cash:-Math.round(c*.6),risk:14,stress:8,chance:.5,winCash:Math.round(c*hR(2.2,4.5)),winMsg:"Meme season front-run. Absolute cinema.",failMsg:"Wrong meme, wrong week.",xp:90},
+  {label:"Stay out of the circus",stress:-4,msg:"You keep your powder dry.",xp:20}]}}},
+
+{id:'h_tesla',era:'FEB 2021',m:[HM(2021,1),HM(2021,1)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"Tesla puts $1.5B into Bitcoin",
+ desc:"8 February 2021. A corporate treasury buys BTC and the timeline loses its mind. Institutional adoption is no longer theoretical.",
+ options:[
+  {label:"Follow the institutions ("+fmt(c)+")",cash:-c,risk:6,stress:4,chance:.72,winCash:Math.round(c*hR(1.6,2.5)),winMsg:"Institutions kept buying. So did you.",failMsg:"You bought the announcement wick.",winXP:190},
+  {label:"Rotate into alts instead",cash:-Math.round(c*.8),risk:11,stress:6,chance:.6,winCash:Math.round(c*hR(1.9,3.4)),winMsg:"Alt season front-run perfectly.",failMsg:"Majors ran, your alts did not.",xp:110},
+  {label:"Sell into the euphoria",act:'sellHalf',stress:3,msg:"You take profit into the headline.",xp:70}]}}},
+
+{id:'h_nft_beeple',era:'MAR 2021',m:[HM(2021,2),HM(2021,3)],w:3,build:()=>{const c=hCash(.28,300);return{
+ title:"A JPEG sells for $69 million",
+ desc:"11 March 2021. Christie's sells a Beeple collage for $69.3M. Suddenly every artist, athlete and brand is minting NFTs.",
+ options:[
+  {label:"Mint into the NFT mania ("+fmt(c)+")",cash:-c,risk:15,stress:9,chance:.44,winCash:Math.round(c*hR(2.5,6)),winMsg:"You flipped the mint for a fortune.",failMsg:"Illiquid JPEGs. Zero bids.",winXP:300,winLabel:"NFT FLIPPER"},
+  {label:"Buy the marketplace tokens instead",cash:-Math.round(c*.6),risk:8,stress:5,chance:.6,winCash:Math.round(c*hR(1.4,2.6)),winMsg:"Picks and shovels. Smart.",failMsg:"The infra tokens lagged the mania.",xp:130},
+  {label:"JPEGs are not an asset class",stress:-2,sent:-2,msg:"You sit out the whole cycle.",xp:20}]}}},
+
+{id:'h_coinbase_ipo',era:'APR 2021',m:[HM(2021,3),HM(2021,3)],w:3,build:()=>{const c=hCash(.3,250);return{
+ title:"Coinbase lists on Nasdaq",
+ desc:"14 April 2021. The biggest US exchange goes public at a $100B valuation. Veterans whisper that IPOs mark cycle tops.",
+ options:[
+  {label:"Buy the top-signal fear – sell "+fmt(Math.round(hHold()*.5)),act:'sellHalf',stress:5,msg:"You de-risk into the listing.",xp:150,xpLabel:"TOP SIGNAL READ"},
+  {label:"Add more, adoption is winning",cash:-c,risk:9,stress:6,chance:.45,winCash:Math.round(c*hR(1.5,2.2)),winMsg:"One more leg up before the pain.",failMsg:"That really was the local top.",xp:60},
+  {label:"Hold and do nothing",stress:1,msg:"You let it ride.",xp:30}]}}},
+
+{id:'h_doge_snl',era:'MAY 2021',m:[HM(2021,4),HM(2021,4)],w:4,build:()=>{const c=hCash(.3,200);return{
+ title:"The Dogefather hosts SNL",
+ desc:"8 May 2021. Musk calls DOGE a hustle live on TV and it dumps 30% mid-broadcast. Everyone you know is holding a dog coin.",
+ options:[
+  {label:"Buy the dog dip ("+fmt(c)+")",cash:-c,risk:16,stress:10,chance:.38,winCash:Math.round(c*hR(2.2,4)),winMsg:"Dogs bounced. You escaped green.",failMsg:"The dog never recovered that wick.",winXP:250},
+  {label:"Sell your memes into the show",act:'sellHalf',stress:4,msg:"You exit the meme bag on live TV.",xp:120},
+  {label:"Buy a different dog coin",cash:-Math.round(c*.5),risk:19,stress:11,chance:.33,winCash:Math.round(c*hR(3,8)),winMsg:"The newer dog outran the old one.",failMsg:"Rug. Of course it was a rug.",xp:60}]}}},
+
+{id:'h_may_crash',era:'MAY 2021',m:[HM(2021,4),HM(2021,5)],w:5,build:()=>{const c=hCash(.4,250);return{
+ title:"19 May – everything liquidates at once",
+ desc:"Over $8B of leverage gets wiped in hours. Exchanges lag, order books vanish, BTC prints -30% intraday. China follows with a mining crackdown.",
+ options:[
+  {label:"Buy the liquidation cascade ("+fmt(c)+")",cash:-c,risk:10,stress:12,chance:.6,winCash:Math.round(c*hR(1.8,2.9)),winMsg:"Cascades overshoot. You caught the wick.",failMsg:"It kept bleeding for two more months.",winXP:280},
+  {label:"Cut everything and reset",act:'sellAll',stress:16,risk:-14,msg:"Full exit. Painful but clean.",xp:80},
+  {label:"Hold and stop looking",stress:14,health:-4,chance:.55,winCash:0,winMsg:"You survived the drawdown intact.",failStress:8,failMsg:"Months of pain and no relief.",xp:100,xpLabel:"DIAMOND HANDS"}]}}},
+
+{id:'h_elsalvador',era:'JUN 2021',m:[HM(2021,5),HM(2021,6)],w:3,build:()=>{const c=hCash(.25,200);return{
+ title:"A country adopts Bitcoin",
+ desc:"9 June 2021. El Salvador makes BTC legal tender. The IMF is furious. Nation-state adoption is officially on the board.",
+ options:[
+  {label:"Buy the nation-state thesis ("+fmt(c)+")",cash:-c,risk:5,stress:3,chance:.66,winCash:Math.round(c*hR(1.6,2.4)),winMsg:"The thesis kept compounding.",failMsg:"Headline pump, immediate fade.",winXP:170},
+  {label:"Volcano bonds sound risky. Skip.",stress:-2,msg:"You watch from the sidelines.",xp:25},
+  {label:"Short the hype",cash:-Math.round(c*.4),risk:12,chance:.4,winCash:Math.round(c*hR(1.3,2)),winMsg:"You faded the headline correctly.",failMsg:"Squeezed by nation-state FOMO.",xp:50}]}}},
+
+{id:'h_poly_hack',era:'AUG 2021',m:[HM(2021,7),HM(2021,7)],w:3,build:()=>({
+ title:"$600M bridge exploit",
+ desc:"August 2021: Poly Network is drained for over $600M — then the hacker gives most of it back. Cross-chain bridges are officially the weakest link.",
+ options:[
+  {label:"Pull funds off all bridges (–$"+hRI(80,220)+")",cash:-hRI(80,220),risk:-8,stress:-3,msg:"Bridge risk removed. Cheap insurance.",xp:150,xpLabel:"RISK MANAGED"},
+  {label:"Keep farming cross-chain yield",risk:9,stress:5,chance:.72,winCash:hRI(500,2600),winMsg:"Yield kept flowing. No exploit hit you.",failDrain:.09,ledgerSave:false,failMsg:"Your bridge got drained. Funds are gone.",xp:60},
+  {label:"Buy the exploited protocol's token",cash:-hCash(.15,150),risk:14,chance:.42,winCash:hRI(800,4000),winMsg:"Recovery trade printed.",failMsg:"It never recovered. Obviously.",xp:70}]})},
+
+{id:'h_sol_outage',era:'SEP 2021',m:[HM(2021,8),HM(2021,9)],w:3,build:()=>{const c=hCash(.28,200);return{
+ title:"The fast chain stops producing blocks",
+ desc:"September 2021: Solana halts for 17 hours. Maximalists celebrate. Builders shrug and keep shipping. The token dips hard.",
+ options:[
+  {label:"Buy the outage dip ("+fmt(c)+")",cash:-c,risk:10,stress:6,chance:.6,winCash:Math.round(c*hR(1.7,2.9)),winMsg:"Outages get forgotten. Price did not.",failMsg:"More outages followed. So did the bleed.",winXP:200},
+  {label:"Rotate to a slower, safer chain",cash:-Math.round(c*.6),risk:3,chance:.62,winCash:Math.round(c*hR(1.1,1.7)),winMsg:"Boring chain, steady gains.",failMsg:"You rotated into the laggard.",xp:80},
+  {label:"Downtime is a dealbreaker. Out.",act:'sellHalf',stress:3,msg:"You reduce exposure.",xp:40}]}}},
+
+{id:'h_ath69k',era:'NOV 2021',m:[HM(2021,10),HM(2021,10)],w:5,build:()=>{const h=hHold();return{
+ title:"$69,000 – the top of the cycle",
+ desc:"10 November 2021. Euphoria everywhere. Your portfolio is worth "+fmt(h)+". Every indicator is red hot and every influencer says $100k by Christmas.",
+ options:[
+  {label:"Sell 50% and lock the cycle in",act:'sellHalf',stress:6,msg:"You take real profit at the real top.",xp:400,xpLabel:"SOLD THE TOP"},
+  {label:"Sell everything, go full cash",act:'sellAll',stress:10,risk:-16,msg:"Complete exit at the cycle high.",xp:500,xpLabel:"PERFECT EXIT"},
+  {label:"$100k or nothing. Hold it all.",risk:9,stress:12,chance:.18,winCash:hRI(3000,14000),winMsg:"One more push. You got lucky.",failStress:12,failMsg:"That was the top. Two years of pain start now.",xp:60}]}}},
+
+{id:'h_p2e',era:'NOV 2021',m:[HM(2021,9),HM(2021,11)],w:3,build:()=>{const c=hCash(.3,250);return{
+ title:"Play-to-earn is a real job",
+ desc:"Late 2021: Axie scholars in the Philippines out-earn local wages. Guild tokens moon. The economics rely on new players joining forever.",
+ options:[
+  {label:"Buy guild tokens ("+fmt(c)+")",cash:-c,risk:15,stress:8,chance:.4,winCash:Math.round(c*hR(2.4,5)),winMsg:"You exited before the ponzinomics unwound.",failMsg:"The player growth stopped. So did the token.",winXP:260},
+  {label:"Run a scholarship program",cash:-Math.round(c*.5),risk:8,stress:6,chance:.5,winCash:Math.round(c*hR(1.4,2.6)),winMsg:"Steady scholar revenue for months.",failMsg:"Rewards got cut. Your scholars left.",xp:120},
+  {label:"Infinite growth required? Pass.",stress:-2,msg:"You recognise the structure and walk.",xp:60,xpLabel:"SAW THROUGH IT"}]}}},
+
+{id:'h_omicron',era:'DEC 2021',m:[HM(2021,11),HM(2022,0)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"The December flush",
+ desc:"4 December 2021: a sudden overnight cascade takes BTC from $57k to $42k on thin weekend liquidity. Alts get destroyed twice as hard.",
+ options:[
+  {label:"Buy the weekend wick ("+fmt(c)+")",cash:-c,risk:11,stress:8,chance:.5,winCash:Math.round(c*hR(1.5,2.3)),winMsg:"Wick bought, bounce collected.",failMsg:"That was the start of the bear, not a dip.",xp:120},
+  {label:"Reduce risk into the weakness",act:'sellHalf',risk:-9,stress:5,msg:"You lighten up before the winter.",xp:200,xpLabel:"RISK OFF"},
+  {label:"Add leverage, it always bounces",cash:-Math.round(c*.5),risk:20,stress:14,chance:.35,winCash:Math.round(c*hR(1.8,3)),winMsg:"It bounced. You got away with it.",failMsg:"Liquidated again. The bear does not care.",xp:40}]}}},
+
+/* ---------------- 2022 ---------------- */
+{id:'h_anchor',era:'APR 2022',m:[HM(2022,1),HM(2022,3)],w:5,build:()=>{const c=hCash(.45,300);return{
+ title:"20% APY on a stablecoin",
+ desc:"Anchor Protocol pays a guaranteed 19.5% on UST. It is algorithmic, not backed by dollars. Everyone says the yield is subsidised but nobody is leaving.",
+ options:[
+  {label:"Deposit "+fmt(c)+" for the yield",cash:-c,risk:12,stress:-2,chance:.35,winCash:Math.round(c*hR(1.08,1.2)),winMsg:"You withdrew in time with the yield banked.",failMsg:"Your stablecoin went to zero. All of it.",winXP:150},
+  {label:"Deposit a small test amount",cash:-Math.round(c*.2),risk:4,chance:.45,winCash:Math.round(c*.24),winMsg:"Small yield, small risk, clean exit.",failMsg:"Small loss. Lesson learned cheaply.",xp:90},
+  {label:"Algorithmic stables always break",stress:-2,msg:"You keep your dollars real.",xp:220,xpLabel:"AVOIDED THE TRAP"}]}}},
+
+{id:'h_luna',era:'MAY 2022',m:[HM(2022,4),HM(2022,4)],w:6,build:()=>{const c=hCash(.3,200);return{
+ title:"LUNA / UST death spiral",
+ desc:"May 2022. UST loses its peg and LUNA goes from $80 to fractions of a cent in four days. $40 billion evaporates. Founders are on a livestream promising a fix.",
+ options:[
+  {label:"Catch the falling knife ("+fmt(c)+")",cash:-c,risk:22,stress:16,chance:.12,winCash:Math.round(c*hR(2,4)),winMsg:"Unbelievable. You scalped the collapse.",failMsg:"It went to zero. It was always going to zero.",xp:60},
+  {label:"Exit every algorithmic position now",risk:-12,stress:8,msg:"You cut all exposure before contagion spreads.",xp:300,xpLabel:"CONTAGION DODGED"},
+  {label:"Short the recovery bounce",cash:-Math.round(c*.4),risk:14,stress:9,chance:.62,winCash:Math.round(c*hR(1.5,2.6)),winMsg:"Fading dead-cat bounces works.",failMsg:"Squeezed on a 400% dead-cat.",xp:140}]}}},
+
+{id:'h_celsius',era:'JUN 2022',m:[HM(2022,5),HM(2022,5)],w:5,build:()=>{const risky=Math.max(0,Math.round(hHold()*.4));return{
+ title:"Celsius pauses all withdrawals",
+ desc:"12 June 2022. A lender with billions in customer deposits freezes the exits overnight. 3AC is rumoured insolvent. Roughly "+fmt(risky)+" of your value sits with third parties.",
+ options:[
+  {label:"Withdraw everything immediately (–$"+hRI(120,340)+" fees)",cash:-hRI(120,340),risk:-12,stress:-5,flags:{storage:'ledger'},msg:"You got out before the gates closed.",xp:320,xpLabel:"BEAT THE FREEZE"},
+  {label:"Withdraw half, keep earning yield",cash:-hRI(60,150),risk:-4,chance:.5,winCash:hRI(300,1400),winMsg:"You kept some yield and lost nothing.",failDrain:.14,ledgerSave:true,failMsg:"The rest is locked in bankruptcy court. Gone.",xp:120},
+  {label:"They will honour withdrawals. Wait.",risk:10,stress:9,chance:.22,winCash:hRI(400,1800),winMsg:"Somehow you got paid out.",failDrain:.3,ledgerSave:true,failMsg:"Frozen, then written down to cents. Brutal.",xp:40}]}}},
+
+{id:'h_3ac',era:'JUL 2022',m:[HM(2022,6),HM(2022,7)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"Contagion keeps spreading",
+ desc:"July 2022: 3AC liquidates, Voyager files Chapter 11, and every lender is suddenly under scrutiny. Nobody knows who is next.",
+ options:[
+  {label:"Buy maximum-fear prices ("+fmt(c)+")",cash:-c,risk:12,stress:10,chance:.55,winCash:Math.round(c*hR(1.6,2.6)),winMsg:"Bought fear, sold greed. Textbook.",failMsg:"More contagion followed. Early again.",winXP:230},
+  {label:"Go 100% cash until it clears",act:'sellAll',risk:-16,stress:6,msg:"Full de-risk. You wait it out.",xp:130},
+  {label:"Do nothing and stop reading news",stress:-6,health:3,msg:"You protect your mental health.",xp:70}]}}},
+
+{id:'h_merge',era:'SEP 2022',m:[HM(2022,8),HM(2022,8)],w:4,build:()=>{const c=hCash(.32,250);return{
+ title:"Ethereum completes The Merge",
+ desc:"15 September 2022. Proof of stake goes live and energy use drops 99.9%. Miners fork a PoW chain nobody wants. Price sells the news anyway.",
+ options:[
+  {label:"Buy the upgrade ("+fmt(c)+")",cash:-c,risk:6,stress:4,chance:.6,winCash:Math.round(c*hR(1.5,2.4)),winMsg:"Staking yield plus price. Good hold.",failMsg:"Classic sell-the-news. You bought it.",winXP:200},
+  {label:"Stake for the yield instead",cash:-Math.round(c*.7),risk:4,stress:-2,chance:.74,winCash:Math.round(c*hR(.95,1.5)),winMsg:"Steady staking rewards accumulate.",failMsg:"Locked and illiquid while price fell.",xp:150,xpLabel:"STAKING"},
+  {label:"Sell the news and take the fork coins",act:'sellHalf',cash:hRI(100,500),stress:2,msg:"You dump into the event and grab the fork dust.",xp:90}]}}},
+
+{id:'h_ftx',era:'NOV 2022',m:[HM(2022,10),HM(2022,10)],w:6,build:()=>{const risky=Math.max(0,Math.round(hHold()*.5));return{
+ title:"FTX is insolvent",
+ desc:"8 November 2022. A balance sheet leak shows customer funds were never there. Withdrawals halt within 48 hours. Roughly "+fmt(risky)+" of your value could be sitting on that exchange.",
+ options:[
+  {label:"Withdraw everything right now (–$"+hRI(150,400)+")",cash:-hRI(150,400),risk:-14,stress:-4,flags:{storage:'ledger'},msg:"You made it out with hours to spare.",xp:420,xpLabel:"ESCAPED FTX"},
+  {label:"Withdraw only what you can move fast",cash:-hRI(70,180),risk:-6,chance:.45,winMsg:"Most of it cleared before the freeze.",failDrain:.18,ledgerSave:true,failMsg:"Withdrawals halted mid-transfer. Locked.",xp:180},
+  {label:"He is a regulated billionaire. Relax.",risk:14,stress:12,chance:.08,winCash:0,winMsg:"Somehow your funds cleared. Pure luck.",failDrain:.45,ledgerSave:true,failMsg:"Everything on the exchange is gone. This is the one that broke people.",xp:30}]}}},
+
+{id:'h_genesis',era:'DEC 2022',m:[HM(2022,11),HM(2023,0)],w:3,build:()=>{const c=hCash(.35,200);return{
+ title:"Peak despair",
+ desc:"December 2022. Genesis halts, DCG is under pressure, BTC sits near $16k. Google searches for crypto are at multi-year lows. Nobody is left to sell.",
+ options:[
+  {label:"Accumulate the bear bottom ("+fmt(c)+")",cash:-c,risk:7,stress:5,chance:.78,winCash:Math.round(c*hR(2.2,4.2)),winMsg:"You bought when nobody wanted it. This is how it is done.",failMsg:"Sideways for months before it moved.",winXP:340,winLabel:"BEAR MARKET BUYER"},
+  {label:"Take a job and stop trading",cash:hRI(1200,2600),stress:-10,health:5,flags:{job:'hybrid'},msg:"Income restored. Stress down.",xp:150},
+  {label:"Quit crypto entirely",act:'sellAll',stress:-12,health:6,msg:"You walk away. For now.",xp:50}]}}},
+
+/* ---------------- 2023 ---------------- */
+{id:'h_ordinals',era:'FEB 2023',m:[HM(2023,1),HM(2023,4)],w:3,build:()=>{const c=hCash(.25,150);return{
+ title:"JPEGs on Bitcoin",
+ desc:"Early 2023: Ordinals inscribe images directly on-chain, then BRC-20 tokens push fees to absurd levels. Maximalists are at war with each other.",
+ options:[
+  {label:"Inscribe and flip ("+fmt(c)+")",cash:-c,risk:13,stress:7,chance:.45,winCash:Math.round(c*hR(2,4.5)),winMsg:"Early inscription numbers sold well.",failMsg:"Fees ate you alive and nobody bid.",winXP:240},
+  {label:"Farm the BRC-20 mania",cash:-Math.round(c*.7),risk:16,stress:9,chance:.4,winCash:Math.round(c*hR(2.4,5.5)),winMsg:"You minted early and exited hot.",failMsg:"Mint failed, fees burned, zero bids.",xp:110},
+  {label:"Bitcoin is for money. Skip.",stress:-2,msg:"You stay out of the fee war.",xp:30}]}}},
+
+{id:'h_svb',era:'MAR 2023',m:[HM(2023,2),HM(2023,2)],w:5,build:()=>{const c=hCash(.4,250);return{
+ title:"USDC breaks the buck",
+ desc:"10-13 March 2023. Silicon Valley Bank fails with $3.3B of USDC reserves inside. The stablecoin trades at $0.87 over the weekend. Banks are the counterparty risk now.",
+ options:[
+  {label:"Buy discounted USDC with "+fmt(c),cash:-c,risk:9,stress:11,chance:.74,winCash:Math.round(c*hR(1.1,1.18)),winMsg:"Peg restored. Free arbitrage collected.",failMsg:"You panicked out at the bottom of the depeg.",winXP:280,winLabel:"DEPEG ARB"},
+  {label:"Swap everything into BTC",risk:6,stress:5,chance:.72,winCash:hRI(600,3200),winMsg:"BTC ran hard on the banking crisis.",failMsg:"You swapped at the worst possible rate.",xp:160},
+  {label:"Hold and pray for the peg",stress:9,chance:.8,winMsg:"Peg came back. Nothing lost but sleep.",failCash:-hCash(.1,100),failMsg:"You took a real haircut on the depeg.",xp:60}]}}},
+
+{id:'h_pepe',era:'APR 2023',m:[HM(2023,3),HM(2023,4)],w:4,build:()=>{const c=hCash(.22,150);return{
+ title:"A frog with no utility",
+ desc:"April 2023. PEPE launches with no roadmap, no team and no promises, and does billions in volume within weeks. Utility is dead. Culture is the product.",
+ options:[
+  {label:"Ape the frog ("+fmt(c)+")",cash:-c,risk:18,stress:9,chance:.4,winCash:Math.round(c*hR(3,9)),winMsg:"Generational meme trade. You caught it.",failMsg:"You bought hours after the top.",winXP:360,winLabel:"MEME LEGEND"},
+  {label:"Buy a smaller position and hold long",cash:-Math.round(c*.4),risk:9,stress:4,chance:.55,winCash:Math.round(c*hR(1.6,3.4)),winMsg:"Sensible size, real profit.",failMsg:"It faded before you sold.",xp:150},
+  {label:"No utility, no buy",stress:-2,sent:-3,msg:"You miss the biggest meme of the year.",xp:25}]}}},
+
+{id:'h_sec_sues',era:'JUN 2023',m:[HM(2023,5),HM(2023,5)],w:4,build:()=>{const c=hCash(.3,200);return{
+ title:"The SEC sues the exchanges",
+ desc:"June 2023. Lawsuits land against the two largest US exchanges, naming a dozen tokens as unregistered securities. Those tokens dump 20-30% instantly.",
+ options:[
+  {label:"Buy the named tokens at a discount ("+fmt(c)+")",cash:-c,risk:14,stress:9,chance:.5,winCash:Math.round(c*hR(1.7,3)),winMsg:"Regulatory fear was overdone. Nice fade.",failMsg:"Delistings followed. Liquidity vanished.",winXP:230},
+  {label:"Rotate into BTC and ETH only",risk:-6,stress:-3,chance:.7,winCash:hRI(400,2200),winMsg:"Majors outperformed through the mess.",failMsg:"You sold alts right before they bounced.",xp:150},
+  {label:"Move funds to a non-US venue (–$"+hRI(80,220)+")",cash:-hRI(80,220),risk:-4,stress:2,msg:"Jurisdiction risk reduced.",xp:110}]}}},
+
+{id:'h_blackrock',era:'JUN 2023',m:[HM(2023,5),HM(2023,6)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"BlackRock files for a spot ETF",
+ desc:"15 June 2023. The largest asset manager on earth files for a Bitcoin ETF with a near-perfect approval record. The bear market ends right here, quietly.",
+ options:[
+  {label:"Go heavy before approval ("+fmt(c)+")",cash:-c,risk:7,stress:4,chance:.8,winCash:Math.round(c*hR(2,3.6)),winMsg:"You positioned before the whole ETF run.",failMsg:"The approval took longer than your patience.",winXP:330,winLabel:"ETF FRONT-RUN"},
+  {label:"Wait for the actual approval",stress:-2,msg:"You wait for confirmation. It costs you entry price.",xp:50},
+  {label:"They will get rejected like everyone else",sent:-4,stress:2,msg:"You fade the filing.",xp:20}]}}},
+
+{id:'h_curve_hack',era:'JUL 2023',m:[HM(2023,6),HM(2023,7)],w:3,build:()=>({
+ title:"A compiler bug drains DeFi",
+ desc:"July 2023: a Vyper reentrancy bug hits Curve pools for tens of millions. The founder's massive loans against CRV threaten to cascade across all of DeFi.",
+ options:[
+  {label:"Exit all LP positions now (–$"+hRI(60,180)+")",cash:-hRI(60,180),risk:-8,stress:-3,msg:"You are out before the cascade risk peaks.",xp:170,xpLabel:"EXITED IN TIME"},
+  {label:"Provide liquidity into the panic",cash:-hCash(.25,200),risk:15,stress:10,chance:.55,winCash:hRI(800,4500),winMsg:"Huge fees during the chaos. Well played.",failDrain:.07,failMsg:"Another pool got hit. You were in it.",xp:140},
+  {label:"Buy CRV at liquidation prices",cash:-hCash(.2,150),risk:16,chance:.48,winCash:hRI(700,3800),winMsg:"OTC deals saved it. You profited.",failMsg:"Forced selling ground it down for months.",xp:90}]})},
+
+{id:'h_grayscale',era:'AUG 2023',m:[HM(2023,7),HM(2023,8)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"Grayscale beats the SEC in court",
+ desc:"29 August 2023. A federal court calls the SEC's rejection arbitrary and capricious. The legal path to a spot ETF is now open. Price spikes 7% in minutes, then fades.",
+ options:[
+  {label:"Buy the legal breakthrough ("+fmt(c)+")",cash:-c,risk:6,stress:3,chance:.72,winCash:Math.round(c*hR(1.7,2.8)),winMsg:"The court win was the real turning point.",failMsg:"Faded straight back down. Painful entry.",winXP:220},
+  {label:"Buy the discounted trust instead",cash:-Math.round(c*.7),risk:5,chance:.75,winCash:Math.round(c*hR(1.4,2.2)),winMsg:"The discount closed. Clean trade.",failMsg:"The discount stayed wide longer than expected.",xp:170,xpLabel:"ARB TRADE"},
+  {label:"Appeals take years. Wait.",stress:-1,msg:"You stay patient.",xp:30}]}}},
+
+{id:'h_binance_settle',era:'NOV 2023',m:[HM(2023,10),HM(2023,11)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"$4.3 billion settlement",
+ desc:"November 2023. The largest exchange settles with the DOJ, its founder steps down and pleads guilty. The market barely dips — regulatory clarity is bullish now.",
+ options:[
+  {label:"Buy the clarity ("+fmt(c)+")",cash:-c,risk:5,stress:3,chance:.74,winCash:Math.round(c*hR(1.6,2.6)),winMsg:"Uncertainty removed. Market ran.",failMsg:"You bought a quiet chop range.",winXP:190},
+  {label:"Move funds off that exchange (–$"+hRI(60,160)+")",cash:-hRI(60,160),risk:-7,stress:-3,flags:{storage:'ledger'},msg:"Counterparty risk reduced anyway.",xp:130},
+  {label:"Nothing changes. Carry on.",msg:"Business as usual.",xp:25}]}}},
+
+/* ---------------- 2024 ---------------- */
+{id:'h_fake_tweet',era:'JAN 2024',m:[HM(2024,0),HM(2024,0)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"The SEC account gets hacked",
+ desc:"9 January 2024. A fake approval tweet from the SEC's own account sends BTC up $2,000 in seconds, then straight back down. The real approval comes the next day.",
+ options:[
+  {label:"Buy the tweet instantly ("+fmt(c)+")",cash:-c,risk:16,stress:11,chance:.35,winCash:Math.round(c*hR(1.4,2)),winMsg:"You bought and flipped before the retraction.",failMsg:"Bought the fake, sold the retraction. Ouch.",xp:80},
+  {label:"Verify the source first",stress:-2,chance:.8,winCash:hRI(400,2400),winMsg:"You bought the real approval calmly.",failMsg:"You verified so long the move was over.",xp:230,xpLabel:"VERIFIED FIRST"},
+  {label:"Short the obvious fake",cash:-Math.round(c*.4),risk:14,chance:.55,winCash:Math.round(c*hR(1.3,2.1)),winMsg:"You faded the fake perfectly.",failMsg:"Real approval next day squeezed you out.",xp:110}]}}},
+
+{id:'h_etf_approved',era:'JAN 2024',m:[HM(2024,0),HM(2024,1)],w:5,build:()=>{const c=hCash(.35,250);return{
+ title:"Spot ETFs are live",
+ desc:"11 January 2024. Eleven spot Bitcoin ETFs start trading and pull in billions within weeks. The old rule says sell the news. The new rule is that Wall Street buys daily now.",
+ options:[
+  {label:"Buy the inflow trade ("+fmt(c)+")",cash:-c,risk:6,stress:4,chance:.72,winCash:Math.round(c*hR(1.8,3.1)),winMsg:"Daily inflows carried price for months.",failMsg:"Sell the news hit first. You bled early.",winXP:280},
+  {label:"Sell the news like every cycle",act:'sellHalf',stress:4,chance:.4,winCash:hRI(300,1500),winMsg:"You dodged a short-term dip.",failMsg:"This time the news kept buying. You sold too early.",xp:90},
+  {label:"Rotate into ETH ahead of its ETF",cash:-Math.round(c*.8),risk:9,chance:.6,winCash:Math.round(c*hR(1.5,2.7)),winMsg:"The rotation trade worked.",failMsg:"ETH underperformed all year.",xp:150}]}}},
+
+{id:'h_sol_memes',era:'MAR 2024',m:[HM(2024,2),HM(2024,3)],w:4,build:()=>{const c=hCash(.25,150);return{
+ title:"Solana meme season",
+ desc:"March 2024. Dog and hat coins do billions in daily volume, launchpads mint a new token every few seconds, and 90% of them rug within an hour.",
+ options:[
+  {label:"Snipe fresh launches ("+fmt(c)+")",cash:-c,risk:20,stress:12,chance:.33,winCash:Math.round(c*hR(3.5,10)),winMsg:"You sniped a real one and took profit.",failMsg:"Rugged in the first block. Classic.",winXP:380,winLabel:"SNIPER"},
+  {label:"Buy the established memes only",cash:-Math.round(c*.7),risk:11,stress:6,chance:.55,winCash:Math.round(c*hR(1.8,3.4)),winMsg:"Blue-chip memes ran hard.",failMsg:"You bought the rotation top.",xp:170},
+  {label:"Buy the launchpad infrastructure",cash:-Math.round(c*.6),risk:8,chance:.62,winCash:Math.round(c*hR(1.6,2.8)),winMsg:"The house always wins. You were the house.",failMsg:"Infra lagged the casino.",xp:200,xpLabel:"PICKS AND SHOVELS"}]}}},
+
+{id:'h_halving4',era:'APR 2024',m:[HM(2024,3),HM(2024,4)],w:4,build:()=>{const c=hCash(.3,250);return{
+ title:"Fourth Halving",
+ desc:"20 April 2024. Reward drops to 3.125 BTC and Runes launch on the same block, pushing fees to record highs. Miners get squeezed immediately.",
+ options:[
+  {label:"Accumulate through the halving ("+fmt(c)+")",cash:-c,risk:5,stress:3,chance:.7,winCash:Math.round(c*hR(1.6,2.7)),winMsg:"Post-halving expansion delivered.",failMsg:"Six months of chop first. Painful hold.",winXP:230},
+  {label:"Buy miner equities instead",cash:-Math.round(c*.7),risk:9,chance:.5,winCash:Math.round(c*hR(1.5,2.6)),winMsg:"Miners caught the AI pivot bid.",failMsg:"Margin compression crushed them.",xp:120},
+  {label:"Wait for the post-halving dip",stress:1,chance:.55,winCash:hRI(400,2000),winMsg:"The dip came and you bought it well.",failMsg:"No dip. You watched it leave.",xp:80}]}}},
+
+{id:'h_yen_carry',era:'AUG 2024',m:[HM(2024,7),HM(2024,7)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"5 August – the carry trade unwinds",
+ desc:"A surprise Bank of Japan rate hike detonates the yen carry trade. Global risk assets gap down. BTC loses 15% in hours with no crypto-specific news at all.",
+ options:[
+  {label:"Buy the macro flush ("+fmt(c)+")",cash:-c,risk:10,stress:9,chance:.7,winCash:Math.round(c*hR(1.6,2.5)),winMsg:"Macro shocks mean-revert fast. Recovered in weeks.",failMsg:"You bought the first leg of a longer unwind.",winXP:250},
+  {label:"De-risk, macro is broken",act:'sellHalf',risk:-10,stress:6,msg:"You cut exposure into the shock.",xp:90},
+  {label:"Hold. It is not a crypto problem.",stress:7,chance:.72,winMsg:"Correct. It recovered without you moving.",failStress:6,failMsg:"It kept sliding for weeks.",xp:120}]}}},
+
+{id:'h_election',era:'NOV 2024',m:[HM(2024,10),HM(2024,10)],w:5,build:()=>{const c=hCash(.35,250);return{
+ title:"The most pro-crypto election ever",
+ desc:"November 2024. Crypto PACs spent nine figures and the industry gets the result it paid for. Prediction markets called it hours before the networks did.",
+ options:[
+  {label:"Position before the result ("+fmt(c)+")",cash:-c,risk:13,stress:10,chance:.6,winCash:Math.round(c*hR(2,3.4)),winMsg:"You front-ran the entire post-election run.",failMsg:"Wrong side of a binary event. Brutal.",winXP:320},
+  {label:"Wait for confirmation, then buy",cash:-Math.round(c*.8),risk:6,stress:4,chance:.72,winCash:Math.round(c*hR(1.5,2.3)),winMsg:"Slower entry, still a strong run.",failMsg:"You bought the first euphoria candle.",xp:180},
+  {label:"Sit out the political trade",stress:-4,msg:"You avoid binary risk entirely.",xp:60}]}}},
+
+{id:'h_100k',era:'DEC 2024',m:[HM(2024,11),HM(2025,0)],w:4,build:()=>{const c=hCash(.3,250);return{
+ title:"Six figures",
+ desc:"5 December 2024. BTC prints $100,000 for the first time. Your normie friends are texting again. Funding rates are extreme in every venue.",
+ options:[
+  {label:"Take profit at six figures",act:'sellHalf',stress:4,msg:"You bank real money at a historic level.",xp:260,xpLabel:"BANKED SIX FIGURES"},
+  {label:"Add more, $250k is next ("+fmt(c)+")",cash:-c,risk:12,stress:8,chance:.42,winCash:Math.round(c*hR(1.5,2.4)),winMsg:"One more leg. You caught it.",failMsg:"You bought the euphoria top.",xp:90},
+  {label:"Rotate profits into alts",cash:-Math.round(c*.7),risk:14,chance:.5,winCash:Math.round(c*hR(1.8,3.2)),winMsg:"Alt rotation caught fire.",failMsg:"Alts never rotated this cycle.",xp:120}]}}},
+
+/* ---------------- 2025 ---------------- */
+{id:'h_trump_coin',era:'JAN 2025',m:[HM(2025,0),HM(2025,0)],w:4,build:()=>{const c=hCash(.25,200);return{
+ title:"A sitting president launches a memecoin",
+ desc:"17 January 2025. An official memecoin launches days before inauguration, does tens of billions in market cap within 48 hours, then bleeds out. 80% of supply is insider-held.",
+ options:[
+  {label:"Buy the launch ("+fmt(c)+")",cash:-c,risk:19,stress:11,chance:.3,winCash:Math.round(c*hR(2.5,6)),winMsg:"You sold into the launch euphoria. Rare.",failMsg:"Insider unlocks dumped on you.",xp:100},
+  {label:"Wait 48 hours, then buy the dip",cash:-Math.round(c*.6),risk:13,chance:.4,winCash:Math.round(c*hR(1.6,2.8)),winMsg:"The bounce came. You took it.",failMsg:"There was no bounce, only supply.",xp:130},
+  {label:"80% insider supply. Absolutely not.",stress:-2,msg:"You read the tokenomics and walk away.",xp:200,xpLabel:"READ THE TOKENOMICS"}]}}},
+
+{id:'h_bybit_hack',era:'FEB 2025',m:[HM(2025,1),HM(2025,1)],w:4,build:()=>({
+ title:"The largest hack in crypto history",
+ desc:"21 February 2025. A state-sponsored group drains roughly $1.5B of ETH from an exchange cold wallet through a compromised signing interface. Even cold storage was not cold enough.",
+ options:[
+  {label:"Withdraw to self-custody immediately (–$"+hRI(100,260)+")",cash:-hRI(100,260),risk:-11,stress:-4,flags:{storage:'ledger'},msg:"Your keys. Your coins. Finally.",xp:280,xpLabel:"SELF CUSTODY"},
+  {label:"Stay put, they promised to cover it",risk:9,stress:8,chance:.62,winMsg:"They covered the losses. You were fine.",failDrain:.16,ledgerSave:true,failMsg:"Withdrawals were throttled for weeks and you took a haircut.",xp:50},
+  {label:"Short the exchange token",cash:-hCash(.15,150),risk:13,chance:.52,winCash:hRI(600,3200),winMsg:"The token bled. You profited from the panic.",failMsg:"They restored confidence fast. Squeezed.",xp:90}]})},
+
+{id:'h_reserve',era:'MAR 2025',m:[HM(2025,2),HM(2025,2)],w:4,build:()=>{const c=hCash(.3,250);return{
+ title:"Strategic Bitcoin Reserve",
+ desc:"6 March 2025. An executive order creates a national Bitcoin reserve from forfeited coins. No new buying is announced. The market wanted purchases and sells off on the detail.",
+ options:[
+  {label:"Buy the disappointment dip ("+fmt(c)+")",cash:-c,risk:8,stress:5,chance:.62,winCash:Math.round(c*hR(1.5,2.4)),winMsg:"Structural bid remains. Dip bought well.",failMsg:"No buying meant no bid. It kept sliding.",winXP:220},
+  {label:"Sell into the announcement",act:'sellHalf',stress:3,chance:.55,winCash:hRI(300,1600),winMsg:"You read the fine print and exited first.",failMsg:"It recovered without you.",xp:150},
+  {label:"Ignore politics, keep stacking",cash:-Math.round(c*.4),risk:3,stress:-2,msg:"Steady accumulation regardless of headlines.",xp:110}]}}},
+
+{id:'h_tariff',era:'APR 2025',m:[HM(2025,3),HM(2025,3)],w:4,build:()=>{const c=hCash(.35,250);return{
+ title:"Tariff shock",
+ desc:"April 2025. A global tariff announcement wipes trillions off equities in two days. Crypto trades as a pure risk asset and falls with everything else. So much for the hedge narrative.",
+ options:[
+  {label:"Buy the correlated crash ("+fmt(c)+")",cash:-c,risk:11,stress:10,chance:.66,winCash:Math.round(c*hR(1.6,2.6)),winMsg:"Policy reversed within weeks. V-shaped recovery.",failMsg:"The drawdown extended for months.",winXP:250},
+  {label:"Move to stablecoins and wait",act:'sellHalf',risk:-11,stress:5,msg:"You sit in cash through the volatility.",xp:120},
+  {label:"Hedge with a short position",cash:-Math.round(c*.35),risk:12,stress:8,chance:.5,winCash:Math.round(c*hR(1.4,2.2)),winMsg:"The hedge worked as designed.",failMsg:"Whipsawed on the reversal.",xp:140,xpLabel:"HEDGED"}]}}},
+
+{id:'h_stablecoin_law',era:'JUL 2025',m:[HM(2025,6),HM(2025,7)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"Stablecoins get a legal framework",
+ desc:"July 2025. Federal stablecoin legislation passes. Banks announce their own tokens. Payment volume goes institutional overnight and infrastructure tokens rip.",
+ options:[
+  {label:"Buy the infrastructure play ("+fmt(c)+")",cash:-c,risk:7,stress:4,chance:.68,winCash:Math.round(c*hR(1.6,2.7)),winMsg:"Rails got repriced. You were on them.",failMsg:"Banks built their own. Your tokens lagged.",winXP:220},
+  {label:"Yield-farm regulated stablecoins",cash:-Math.round(c*.8),risk:2,stress:-3,chance:.85,winCash:Math.round(c*hR(.9,1.15)),winMsg:"Safe, legal, boring yield. Collected.",failMsg:"Rates compressed. Barely broke even.",xp:130},
+  {label:"Regulation is bad for degens",sent:-3,msg:"You stay in the wild west.",xp:30}]}}},
+
+{id:'h_oct_flush',era:'OCT 2025',m:[HM(2025,9),HM(2025,9)],w:5,build:()=>{const c=hCash(.4,250);return{
+ title:"10 October – the great deleveraging",
+ desc:"The largest liquidation event ever recorded: roughly $19B of leverage wiped in 24 hours. Market makers pull quotes, alts print -80% wicks, and nothing is bid for minutes.",
+ options:[
+  {label:"Bid the wicks with "+fmt(c),cash:-c,risk:14,stress:14,chance:.55,winCash:Math.round(c*hR(2,3.8)),winMsg:"You filled on wicks nobody else caught. Legendary.",failMsg:"Your orders filled and then it fell further.",winXP:400,winLabel:"CAUGHT THE WICK"},
+  {label:"Close all leveraged positions now",risk:-16,stress:9,msg:"You exit leverage before the second cascade.",xp:200,xpLabel:"SURVIVED THE FLUSH"},
+  {label:"Add margin to defend your longs",cash:-Math.round(c*.5),risk:24,stress:18,chance:.28,winCash:Math.round(c*hR(2,3.5)),winMsg:"You defended and it bounced. Insane risk.",failMsg:"Liquidated anyway. The margin is gone too.",xp:50}]}}},
+
+/* ---------------- 2026 ---------------- */
+{id:'h_ai_agents',era:'2026',m:[HM(2026,0),HM(2026,3)],w:4,build:()=>{const c=hCash(.28,200);return{
+ title:"Autonomous agents trade their own bags",
+ desc:"2026. AI agents run wallets, post their own theses and manage treasuries without humans. Half the volume on your feed is bots trading against bots.",
+ options:[
+  {label:"Buy the agent narrative ("+fmt(c)+")",cash:-c,risk:15,stress:8,chance:.48,winCash:Math.round(c*hR(2,4.2)),winMsg:"The narrative ran hard. You rode it.",failMsg:"Narrative rotated in three weeks. You held the bag.",winXP:270},
+  {label:"Let an agent trade for you",cash:-Math.round(c*.6),risk:12,stress:-4,chance:.5,winCash:Math.round(c*hR(1.6,2.9)),winMsg:"The bot outperformed you. Slightly embarrassing.",failMsg:"The bot overtraded your account into fees.",xp:160},
+  {label:"Humans still front-run bots. Skip.",stress:-2,msg:"You keep trading manually.",xp:40}]}}},
+
+{id:'h_airdrop_fatigue',era:'2026',m:[HM(2026,1),HM(2026,6)],w:4,build:()=>{const c=hCash(.3,200);return{
+ title:"Airdrop fatigue",
+ desc:"2026. Farmers outnumber real users ten to one, Sybil filters are aggressive, and the last three big drops all vested over two years instead of paying out day one.",
+ options:[
+  {label:"Farm harder with more wallets ("+fmt(c)+" gas)",cash:-c,risk:14,stress:9,chance:.35,winCash:Math.round(c*hR(2,4)),winMsg:"You slipped past the filters. Rare these days.",failMsg:"Every wallet got flagged as Sybil. Gas burned.",xp:120},
+  {label:"Farm one wallet properly with real usage",cash:-Math.round(c*.5),risk:5,stress:3,chance:.62,winCash:Math.round(c*hR(1.4,2.4)),winMsg:"Genuine usage got the full allocation.",failMsg:"Even real users got filtered out.",xp:210,xpLabel:"REAL USER"},
+  {label:"Airdrop farming is over. Move on.",stress:-3,msg:"You stop chasing free money.",xp:60}]}}},
+
+{id:'h_quantum_fud',era:'2026',m:[HM(2026,2),HM(2026,8)],w:3,build:()=>{const c=hCash(.3,200);return{
+ title:"Quantum FUD wave",
+ desc:"2026. A hardware milestone gets published and the timeline decides Bitcoin's cryptography is dead by Friday. Researchers say it needs a million more qubits. The market panics anyway.",
+ options:[
+  {label:"Buy the FUD dip ("+fmt(c)+")",cash:-c,risk:9,stress:6,chance:.7,winCash:Math.round(c*hR(1.5,2.4)),winMsg:"FUD faded, price recovered. Easy money.",failMsg:"The fear stuck around longer than expected.",winXP:210},
+  {label:"Move to quantum-resistant chains",cash:-Math.round(c*.6),risk:11,chance:.4,winCash:Math.round(c*hR(1.7,3.2)),winMsg:"The narrative trade paid.",failMsg:"Nobody cared after two weeks.",xp:110},
+  {label:"Panic sell everything",act:'sellAll',stress:12,msg:"You sell on a headline you did not read.",xp:20}]}}},
+
+{id:'h_tcfb',era:'2026',m:[HM(2026,5),HM(2026,9)],w:6,build:()=>{const c=hCash(.35,300);return{
+ title:"$TCFB launches on Pump.fun",
+ desc:"The community token you have been hearing about all cycle finally launches. No VC allocation, no unlocks, pure community distribution. The bonding curve is filling fast.",
+ options:[
+  {label:"Ape the launch ("+fmt(c)+")",cash:-c,risk:16,stress:9,chance:.55,winCash:Math.round(c*hR(2.5,6)),winMsg:"$TCFB sent. You were early to the final boss.",failMsg:"You bought the first wick and got shaken out.",winXP:450,winLabel:"TCFB HOLDER"},
+  {label:"Buy a measured position and hold",cash:-Math.round(c*.5),risk:8,stress:4,chance:.68,winCash:Math.round(c*hR(1.8,3.4)),winMsg:"Sized properly, held properly. This is the way.",failMsg:"It chopped sideways while you waited.",xp:300},
+  {label:"Wait for the chart to confirm",stress:-2,chance:.4,winCash:hRI(500,2500),winMsg:"You entered late but still green.",failMsg:"Confirmation came at 3x your entry price.",xp:80}]}}},
+
+{id:'h_final_boss',era:'DEC 2026',m:[HM(2026,10),HM(2026,11)],w:6,build:()=>{const h=hHold();return{
+ title:"The Final Boss",
+ desc:"December 2026. Seven years of cycles, rugs, hacks and comebacks come down to this. Your portfolio is worth "+fmt(h)+". One last call before the timeline closes.",
+ options:[
+  {label:"Cash out everything and walk away a winner",act:'sellAll',stress:-6,health:4,msg:"You exit on your own terms. Nobody can take it now.",xp:500,xpLabel:"FINAL EXIT"},
+  {label:"Hold to the last candle",risk:8,stress:10,chance:.5,winCash:Math.round(Math.max(500,h*hR(.25,.6))),winMsg:"The final candle was green. Absolute boss.",failStress:10,failMsg:"The last month took a bite out of you.",xp:350},
+  {label:"Go all in one final time",cash:-hCash(.6,400),risk:26,stress:20,chance:.35,winCash:hCash(1.8,1200),winMsg:"Reckless. Legendary. It worked.",failMsg:"The final boss won. Respect for trying.",xp:250}]}}},
+
+/* ---------------- RECURRING THREATS (any era) ---------------- */
+{id:'h_drainer',era:'PHISHING',m:[HM(2020,6),HM(2026,11)],w:5,repeat:true,build:()=>{const v=hRI(600,4200);return{
+ title:"A claim link lands in your DMs",
+ desc:"An account you follow posts an airdrop claim worth about "+fmt(v)+". The site asks you to connect your wallet and sign a message titled 'SetApprovalForAll'.",
+ options:[
+  {label:"Sign it and claim",cash:0,risk:12,stress:6,chance:.22,winCash:v,winMsg:"It was actually real. Do not do that again.",failDrain:.35,ledgerSave:true,failMsg:"Drainer. Your approvals were farmed and your wallet emptied.",xp:40},
+  {label:"Check the contract in a burner wallet first (–$"+hRI(20,80)+")",cash:-hRI(20,80),stress:2,chance:.6,winCash:Math.round(v*.7),winMsg:"Burner confirmed it was safe. You claimed cleanly.",failMsg:"Burner got drained instead of your main. Cheap lesson.",xp:240,xpLabel:"OPSEC"},
+  {label:"Never sign blind. Ignore it.",stress:-2,msg:"You ignore free money and keep your bags.",xp:150,xpLabel:"NOT TODAY"}]}}},
+
+{id:'h_seed_phish',era:'PHISHING',m:[HM(2020,4),HM(2026,11)],w:4,repeat:true,build:()=>({
+ title:"Wallet support is messaging you",
+ desc:"A verified-looking support account says your wallet needs re-validation after a security incident. The form asks for your twelve words to 'restore access'.",
+ options:[
+  {label:"Enter the seed phrase to be safe",risk:16,stress:10,drain:.55,ledgerSave:true,msg:"Nobody legitimate ever asks for your seed. Your wallet is empty now.",xp:10},
+  {label:"Report and block",stress:-2,msg:"Blocked. Support never DMs first.",xp:180,xpLabel:"PHISH DODGED"},
+  {label:"Move funds to a fresh wallet (–$"+hRI(30,120)+")",cash:-hRI(30,120),risk:-6,stress:-2,msg:"New keys, clean slate.",xp:200,xpLabel:"ROTATED KEYS"}]})},
+
+{id:'h_sim_swap',era:'SECURITY',m:[HM(2021,0),HM(2026,11)],w:3,repeat:true,build:()=>({
+ title:"Your phone loses signal",
+ desc:"Mid-afternoon your phone drops to 'No Service'. Ten minutes later you get password reset emails from two exchanges. This is a SIM swap in progress.",
+ options:[
+  {label:"Call the carrier and lock everything down now",cash:-hRI(40,150),stress:9,chance:.75,winMsg:"You froze the line in time. Nothing was taken.",failDrain:.2,ledgerSave:true,failMsg:"They got into one exchange account before you did.",xp:220,xpLabel:"FAST REACTION"},
+  {label:"Switch every account to hardware 2FA (–$"+hRI(60,140)+")",cash:-hRI(60,140),risk:-9,stress:-3,msg:"SMS 2FA removed everywhere. Permanent fix.",xp:260,xpLabel:"HARDWARE 2FA"},
+  {label:"Probably just a network outage",risk:11,stress:5,chance:.35,winMsg:"It really was an outage. Lucky.",failDrain:.28,ledgerSave:true,failMsg:"They drained your exchange account overnight.",xp:20}]})},
+
+{id:'h_tax',era:'TAX',m:[HM(2021,2),HM(2026,10)],w:4,repeat:true,build:()=>{const bill=Math.max(400,Math.round(hCash(.22,400)));return{
+ title:"Letter from the tax office",
+ desc:"Exchange reporting caught up with you. They want "+fmt(bill)+" on realised gains, plus documentation for every trade you have ever made.",
+ options:[
+  {label:"Pay it in full now",cash:-bill,stress:6,risk:-3,msg:"Painful but clean. You are compliant.",xp:180,xpLabel:"PAID UP"},
+  {label:"Hire an accountant (–$"+hRI(300,900)+")",cash:-hRI(300,900),stress:2,chance:.7,winCash:Math.round(bill*.55),winMsg:"They found deductions. Bill cut significantly.",failCash:-Math.round(bill*.9),failMsg:"Fees on top of the full bill. Worst outcome.",xp:150},
+  {label:"Ignore the letter",risk:14,stress:12,chance:.4,winMsg:"Nothing happened. Yet.",failCash:-Math.round(bill*1.7),failStress:10,failMsg:"Penalties and interest. Now it is much worse.",xp:20}]}}},
+
+{id:'h_exchange_freeze',era:'COUNTERPARTY',m:[HM(2021,6),HM(2026,10)],w:4,repeat:true,build:()=>({
+ title:"Withdrawals are 'temporarily delayed'",
+ desc:"Your exchange posts about a routine wallet migration. Support replies are slow, the Telegram is in meltdown, and withdrawal queues are hours deep.",
+ options:[
+  {label:"Withdraw everything at any fee (–$"+hRI(80,300)+")",cash:-hRI(80,300),risk:-10,stress:-3,flags:{storage:'ledger'},msg:"You paid the exit tax and got out.",xp:230,xpLabel:"GOT OUT EARLY"},
+  {label:"Withdraw half and watch",cash:-hRI(40,140),risk:-4,chance:.55,winMsg:"It really was maintenance. All fine.",failDrain:.12,ledgerSave:true,failMsg:"The rest is frozen indefinitely.",xp:130},
+  {label:"Trust the announcement",risk:9,stress:6,chance:.5,winMsg:"Back online in six hours. No damage.",failDrain:.25,ledgerSave:true,failMsg:"Insolvency. Your balance is now a bankruptcy claim.",xp:40}]})},
+
+{id:'h_clawback',era:'AIRDROP',m:[HM(2022,0),HM(2026,10)],w:3,repeat:true,build:()=>({
+ title:"Sybil purge announced",
+ desc:"A protocol you farmed publishes its Sybil report. Thousands of clustered wallets are being removed from the allocation list and already-claimed tokens are being clawed back.",
+ options:[
+  {label:"Appeal with proof of real usage (–$"+hRI(30,120)+")",cash:-hRI(30,120),stress:4,chance:.5,winCash:hRI(600,3400),winMsg:"Appeal accepted. Allocation restored.",failCash:-hRI(200,900),failMsg:"Appeal rejected. Allocation gone.",xp:170},
+  {label:"Sell everything before the clawback lands",cash:hRI(200,1500),risk:4,stress:3,msg:"You dumped ahead of the purge.",xp:200,xpLabel:"FRONT-RAN THE PURGE"},
+  {label:"Do nothing and hope",stress:5,chance:.4,winMsg:"Your wallets were not flagged.",failCash:-hRI(400,2200),failMsg:"Clawed back. The farm was worthless.",xp:50}]})},
+
+{id:'h_health',era:'LIFE',m:[HM(2020,8),HM(2026,10)],w:3,repeat:true,build:()=>({
+ title:"Your body sends an invoice",
+ desc:"Six months of watching four-hour candles at 3am. Your back hurts, you have not eaten a real meal in days, and the doctor wants to talk about your blood pressure.",
+ options:[
+  {label:"Take a real break (–$"+hRI(200,700)+")",cash:-hRI(200,700),health:16,stress:-18,hunger:-25,msg:"You come back sharper. Health is capital.",xp:200,xpLabel:"TOUCHED GRASS"},
+  {label:"Buy a standing desk and keep grinding (–$"+hRI(120,400)+")",cash:-hRI(120,400),health:6,stress:-6,msg:"A compromise. Better than nothing.",xp:110},
+  {label:"Sleep is for people without positions",health:-12,stress:14,risk:5,msg:"You keep going. Your body keeps score.",xp:30}]})},
+
+{id:'h_friend_rug',era:'SOCIAL',m:[HM(2021,0),HM(2026,10)],w:3,repeat:true,build:()=>{const c=hCash(.25,250);return{
+ title:"Your friend is launching a token",
+ desc:"A close friend wants "+fmt(c)+" as a seed investment in his project. He has a deck, a Telegram of 4,000 people and no working product yet.",
+ options:[
+  {label:"Invest "+fmt(c)+" as a friend",cash:-c,risk:12,stress:6,chance:.35,winCash:Math.round(c*hR(2.5,5)),winMsg:"He actually shipped. You got paid.",failMsg:"He soft-rugged and stopped replying. Friendship over.",xp:100},
+  {label:"Invest a quarter and stay quiet",cash:-Math.round(c*.25),risk:5,stress:3,chance:.4,winCash:Math.round(c*hR(.8,1.8)),winMsg:"Small bet, decent return, friendship intact.",failMsg:"Small loss, awkward dinners.",xp:150},
+  {label:"Decline and stay friends",stress:-3,msg:"You keep the money and the friendship.",xp:120,xpLabel:"BOUNDARIES"}]}}}
+];
+
+/* Picker: only quests inside their real month window, minus a per-run skip set,
+   so no two runs surface the same sequence of history. */
+function initHistPool(){
+  if(!state)return;
+  state.histDone=state.histDone||{};
+  state.histSkip=state.histSkip||{};
+  HIST_QUESTS.forEach(q=>{
+    if(q.w>=5)return;                 // anchor events always available
+    if(Math.random()<0.3)state.histSkip[q.id]=true;
+  });
+}
+function maybeHistorical(){
+  if(!state||state._gameEnded)return false;
+  state.histDone=state.histDone||{};
+  state.histSkip=state.histSkip||{};
+  const m=state.month;
+  const pool=HIST_QUESTS.filter(q=>
+    m>=q.m[0]&&m<=q.m[1]&&
+    !state.histSkip[q.id]&&
+    (q.repeat?((state.histDone[q.id]||0)<2&&(m-(state.histLast&&state.histLast[q.id]!==undefined?state.histLast[q.id]:-99))>=9):!state.histDone[q.id])
+  );
+  if(!pool.length)return false;
+  const anchored=pool.filter(q=>q.w>=5);
+  const chance=anchored.length?0.92:0.55;
+  if(Math.random()>chance)return false;
+  let total=0;pool.forEach(q=>total+=q.w);
+  let r=Math.random()*total,pick=pool[0];
+  for(const q of pool){r-=q.w;if(r<=0){pick=q;break}}
+  let d;
+  try{ d=pick.build() }catch(e){ console.error('hist build failed',pick.id,e); return false }
+  if(!d||!d.options||!d.options.length)return false;
+  d._hist=true; d._era=pick.era||'REAL HISTORY';
+  state.histDone[pick.id]=(state.histDone[pick.id]||0)+1;
+  state.histLast=state.histLast||{};
+  state.histLast[pick.id]=m;
+  state._histShownThisMonth=true;
+  showDecision(d);
+  addNews('📜 '+(pick.era||'HISTORY')+': '+d.title);
+  return true;
+}
+
 function checkDecision(){if(state.month<8)return;if(state.decisionCooldown>0){state.decisionCooldown--;return}
   if(state._histShownThisMonth)return;
   if(Math.random()<0.28){const d=DECISIONS[Math.floor(Math.random()*DECISIONS.length)];showDecision(d);state.decisionCooldown=2+Math.floor(Math.random()*4)}}
 function showDecision(d){pqEnqueue('decision',()=>_showDecisionNow(d),d._hist?8:7)}
-function _showDecisionNow(d){if(state)state.paused=true;playSound('decision');document.getElementById('decision-title').textContent=d.title;document.getElementById('decision-desc').textContent=d.desc;const badge=document.getElementById('decision-badge');if(badge){badge.textContent=d._hist?('📜 '+(d._era||'REAL HISTORY')+' • DECISION REQUIRED'):'DECISION REQUIRED';badge.style.color=d._hist?'#f0b429':'#a78bfa'}const opts=document.getElementById('decision-options');opts.innerHTML='';d.options.forEach(opt=>{const btn=document.createElement('button');btn.className='decision-btn';btn.textContent=opt.label;btn.onclick=()=>resolveDecision(opt);opts.appendChild(btn)});document.getElementById('decision-overlay').classList.remove('hidden')}
+function _showDecisionNow(d){if(state)state.paused=true;playSound('decision');document.getElementById('decision-title').textContent=d.title;document.getElementById('decision-desc').textContent=d.desc;const badge=document.getElementById('decision-badge');if(badge){badge.textContent=d._hist?('📜 '+(d._era||'REAL HISTORY')+' • DECISION REQUIRED'):'DECISION REQUIRED';badge.style.color=d._hist?'#f0b429':'#a78bfa'}const opts=document.getElementById('decision-options');opts.innerHTML='';let affordable=0;d.options.forEach(opt=>{const btn=document.createElement('button');btn.className='decision-btn';const cost=(opt.cash&&opt.cash<0)?-opt.cash:0;const broke=cost>0&&state&&state.cash<cost&&portValue()<=0;if(broke){btn.classList.add('disabled');btn.disabled=true;btn.textContent=opt.label+' — not enough cash';}else{affordable++;btn.textContent=opt.label;btn.onclick=()=>resolveDecision(opt);}opts.appendChild(btn)});if(!affordable){const btn=document.createElement('button');btn.className='decision-btn';btn.textContent='You are broke. Walk away.';btn.onclick=()=>resolveDecision({msg:'You had no capital left to act. You walk away.',stress:6,xp:20});opts.appendChild(btn)}document.getElementById('decision-overlay').classList.remove('hidden')}
 function resolveDecision(opt){
   playSound('click');
-  if(opt.cash&&opt.cash<0&&state.cash+opt.cash<0){toast('Not enough cash for this choice','sell');return}
+  if(opt.cash&&opt.cash<0&&state.cash+opt.cash<0){
+    // Try to fund the choice by liquidating bags before refusing, so a broke
+    // player can never get locked in front of an unclosable decision card.
+    const need=(-opt.cash)-state.cash+25;
+    const got=portValue()>0?emergencyRaise(need):0;
+    if(got>0){state.stress=Math.min(100,state.stress+4);toast('⚠️ Sold '+fmt(got)+' of your bags to fund this move','sell');addNews('Forced sale to fund a decision')}
+    if(state.cash+opt.cash<0){toast('Not enough cash for this choice','sell');return}
+  }
   // Special handling for Panic Sell decisions - actually sell portfolio
   const label = (opt.label||'').toLowerCase();
   const act = opt.act || (label.includes('sell everything')?'sellAll':label.includes('sell 50%')?'sellHalf':'');
@@ -1634,11 +2218,16 @@ function pqPump(){
   try{ it.run() }catch(e){ console.error('popup failed',e); PQ.active=null; setTimeout(pqPump,120) }
 }
 function pqRelease(kind){
-  if(!PQ.active)return;
-  if(kind&&PQ.active.kind!==kind)return;
+  if(PQ.active&&kind&&PQ.active.kind!==kind)return;
   PQ.active=null; pqBadge();
   setTimeout(pqPump,350);
 }
+/* Watchdog: if the queue ever ends up idle with items still waiting (a popup
+   closed through an unexpected path), pump it again instead of stalling. */
+setInterval(()=>{
+  if(!PQ.active&&PQ.items.length>0)pqPump();
+  else pqBadge();
+},1500);
 function pqBusy(){return !!PQ.active||PQ.items.length>0}
 function pqReset(){PQ.items=[];PQ.active=null;pqBadge()}
 
