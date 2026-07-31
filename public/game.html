@@ -1257,19 +1257,60 @@ function resolveDecision(opt){
   if(opt.chance!==undefined){
     if(Math.random()<opt.chance){
       if(opt.winCash)state.cash+=opt.winCash;
+      if(opt.winXP)awardXP(opt.winXP,(opt.winLabel||'GOOD CALL'));
+      if(opt.winSent)state.sentiment=Math.max(0,Math.min(100,state.sentiment+opt.winSent));
       msg=opt.winMsg||'It worked out.';
       toast(msg,'buy');
     } else {
-      msg='It went against you.';
+      if(opt.failCash)state.cash=Math.max(0,state.cash+opt.failCash);
+      if(opt.failDrain)drainHoldings(opt.failDrain,opt.ledgerSave);
+      if(opt.failStress)state.stress=Math.max(0,Math.min(100,state.stress+opt.failStress));
+      msg=opt.failMsg||'It went against you.';
       toast(msg,'sell');
     }
   } else {
     if(!act){ toast(msg,(opt.cash||0)>=0?'buy':'sell'); }
   }
+  // Extra effect types used by the historical quest pool
+  if(opt.drain)drainHoldings(opt.drain,opt.ledgerSave);
+  if(opt.health)state.health=Math.max(0,Math.min(100,state.health+opt.health));
+  if(opt.hunger)state.hunger=Math.max(0,Math.min(100,state.hunger+opt.hunger));
+  if(opt.sent)state.sentiment=Math.max(0,Math.min(100,state.sentiment+opt.sent));
+  if(opt.xp)awardXP(opt.xp,opt.xpLabel||'DECISION');
+  if(opt.flags)Object.keys(opt.flags).forEach(k=>{state[k]=opt.flags[k]});
+  if(opt.news)addNews(opt.news);
   document.getElementById('decision-overlay').classList.add('hidden');
   if(state&&!state._gameEnded)state.paused=false;
+  pqRelease('decision');
   if(checkGameOver())return;
   updateHeader();updateSidePanels();renderMarket();updateCriticalWarning();
+}
+
+/* Removes a fraction of every holding (wallet drains, exchange insolvency, clawbacks).
+   A Ledger cuts the damage; split custody cuts it in half. */
+function drainHoldings(frac,ledgerSave){
+  if(!state)return 0;
+  let f=Math.max(0,Math.min(1,frac));
+  if(ledgerSave){
+    if(state.storage==='ledger')f*=0.15;
+    else if(state.storage==='split')f*=0.55;
+  }
+  let lost=0;
+  COINS.forEach(c=>{
+    const held=state.holdings[c.s]||0;
+    if(held>0){
+      const take=held*f;
+      lost+=take*(state.prices[c.s]||0);
+      state.holdings[c.s]=held-take;
+    }
+  });
+  if(lost>0){
+    toast('−'+fmt(lost)+' of your bags are gone','sell');
+    addNews('You lost '+fmt(lost)+' worth of holdings');
+    state.stress=Math.min(100,state.stress+8);
+  }
+  applyPrices();
+  return lost;
 }
 
 function buy(sym){
