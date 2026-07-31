@@ -2218,11 +2218,16 @@ function pqPump(){
   try{ it.run() }catch(e){ console.error('popup failed',e); PQ.active=null; setTimeout(pqPump,120) }
 }
 function pqRelease(kind){
-  if(!PQ.active)return;
-  if(kind&&PQ.active.kind!==kind)return;
+  if(PQ.active&&kind&&PQ.active.kind!==kind)return;
   PQ.active=null; pqBadge();
   setTimeout(pqPump,350);
 }
+/* Watchdog: if the queue ever ends up idle with items still waiting (a popup
+   closed through an unexpected path), pump it again instead of stalling. */
+setInterval(()=>{
+  if(!PQ.active&&PQ.items.length>0)pqPump();
+  else pqBadge();
+},1500);
 function pqBusy(){return !!PQ.active||PQ.items.length>0}
 function pqReset(){PQ.items=[];PQ.active=null;pqBadge()}
 
