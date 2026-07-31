@@ -1754,7 +1754,7 @@ function xpFloat(text,sub,neg){
 }
 function awardXP(base,label){
   if(!state||state._gameEnded)return 0;
-  const amt=Math.max(1,Math.round(base*getXPMultiplier()));
+  const amt=Math.max(1,Math.round(base*Math.pow(getXPMultiplier(),0.6)));
   const before=xpLevel(state.xp||0);
   state.xp=(state.xp||0)+amt;
   state.xpEvents=(state.xpEvents||0)+1;
@@ -1816,7 +1816,7 @@ function farmAirdrop(id){
   if(!state||state._gameEnded)return;
   const o=(state.airOffers||[]).find(x=>x.id===id); if(!o)return;
   if((state.farms||[]).length>=4){toast('Max 4 farms running','sell');return}
-  if(state.cash<o.gas&&!emergencyRaise(o.gas)){toast('Not enough cash for gas','sell');return}
+  if(state.cash<o.gas){toast('Not enough cash for gas','sell');return}
   state.cash-=o.gas;
   state.stress=Math.min(100,state.stress+3);
   state.farms=state.farms||[];
@@ -1877,7 +1877,7 @@ function auditLaunch(id){
   if(!state||state._gameEnded)return;
   const o=(state.launchOffers||[]).find(x=>x.id===id); if(!o)return;
   const cost=Math.round(150*(1+state.month*0.05));
-  if(state.cash<cost&&!emergencyRaise(cost)){toast('Not enough cash for audit','sell');return}
+  if(state.cash<cost){toast('Not enough cash for audit','sell');return}
   state.cash-=cost; o.audited=true;
   o.report=Math.random()<0.82?o.type:(['rug','honeypot','slow','moon'][Math.floor(Math.random()*4)]);
   playSound('click'); awardXP(35,'CONTRACT AUDIT');
@@ -1888,7 +1888,7 @@ function snipeLaunch(id){
   if(!state||state._gameEnded)return;
   const o=(state.launchOffers||[]).find(x=>x.id===id); if(!o)return;
   const size=Math.max(50,Math.floor(Math.min(state.cash*0.15,2500*(1+state.month*0.2))));
-  if(state.cash<size&&!emergencyRaise(size)){toast('Not enough cash to snipe','sell');return}
+  if(state.cash<size){toast('Not enough cash to snipe','sell');return}
   state.cash-=size;
   state.risk=Math.min(99,state.risk+4*state.riskMult);
   state.bags=state.bags||[];
