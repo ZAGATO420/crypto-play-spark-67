@@ -1108,6 +1108,10 @@ function checkEvent(){const ev=EVENTS[state.month];if(ev){let mult=1-(1-ev.mult)
 
 function showEarlyDecision(d){
   if(!state)return;
+  pqEnqueue('early',()=>_showEarlyDecisionNow(d),9);
+}
+function _showEarlyDecisionNow(d){
+  if(!state)return;
   state.paused=true;
   playSound('decision');
   document.getElementById('decision-title').textContent=d.title;
@@ -1154,6 +1158,7 @@ function resolveEarlyDecision(d,opt){
   addNews('Decision: '+d.title.replace(/\?$/,''),'');
   document.getElementById('decision-overlay').classList.add('hidden');
   if(state&&!state._gameEnded)state.paused=false;
+  pqRelease('early');
   updateHeader();updateSidePanels();updateCriticalWarning();
 }
 
