@@ -46,7 +46,7 @@ function isPlausible(run: z.infer<typeof runSchema>): boolean {
   const monthCeiling = 25_000 * Math.pow(1.85, Math.max(run.months, 1));
   if (run.net > Math.min(monthCeiling, 1e10)) return false;
   // XP is earned per action; it cannot outrun the number of months by orders of magnitude.
-  if (run.xp > 6_000 + run.months * 9_000) return false;
+  if (run.xp > 20_000 + run.months * 30_000) return false;
   if (run.trades > 40 + run.months * 60) return false;
   if (run.level > 1 + Math.floor(run.xp / 900)) return false;
   return true;
@@ -88,16 +88,16 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           name: r.player_name,
           arch: r.archetype,
           country: r.country,
-          diff: r.difficulty,
+          difficulty: r.difficulty,
           mode: r.mode,
-          net: Number(r.net_worth),
+          netWorth: Number(r.net_worth),
           xp: r.xp,
           level: r.level,
           rank: r.rank_title,
           months: r.months_survived,
           achievements: r.achievements,
           survived: r.survived,
-          date: r.created_at,
+          timestamp: r.created_at,
         }));
 
         return Response.json(rows, { headers: CORS });
@@ -143,7 +143,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
 
-        return Response.json({ ok: true }, { status: 201, headers: CORS });
+        return Response.json({ ok: true, success: true }, { status: 201, headers: CORS });
       },
     },
   },

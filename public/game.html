@@ -1661,7 +1661,7 @@ function renderGlobalLeaderboard(listId){
         <div class="global-lb-rank">#${i+1} ${rankIcon}</div>
         <div>
           <div class="global-lb-name">${(()=>{const c=p.country||''; const map={DE:'🇩🇪',USA:'🇺🇸',CH:'🇨🇭',SG:'🇸🇬',PT:'🇵🇹',NG:'🇳🇬'}; return map[c]||c||'🏳️';})()} ${escapeHtml(p.name||'Anon')}</div>
-          <div class="global-lb-meta">${escapeHtml(p.difficulty||'BOSS')} • ${p.months||0} mo • ${new Date(p.timestamp||Date.now()).toLocaleDateString()}</div>
+          <div class="global-lb-meta">${escapeHtml(p.difficulty||'BOSS')} ${p.level?('• LVL '+p.level+' '):''} • ${p.months||0} mo • ${new Date(p.timestamp||Date.now()).toLocaleDateString()}</div>
         </div>
       </div>
       <div class="global-lb-right">
@@ -1680,18 +1680,21 @@ async function submitGlobalScore(){
   if(name.length <2 || name.length>15){ alert('Name muss 2-15 Zeichen haben'); return; }
   if(btn){ btn.textContent='SEND...'; btn.disabled=true; }
   try{
+    const lvl = (typeof xpLevel==='function'? xpLevel(finalXP()) : 0) + 1;
     const payload = {
       name: name,
-      country: (()=>{
-        const code = state?.country || 'DE';
-        const map = {DE:'🇩🇪',USA:'🇺🇸',CH:'🇨🇭',SG:'🇸🇬',PT:'🇵🇹',NG:'🇳🇬'};
-        return map[code] || '🇩🇪';
-      })(),
+      arch: state.arch || 'trader',
+      country: state.country || 'DE',
       difficulty: state.diff || 'BOSS',
-      netWorth: finalNet(),
-      xp: finalXP(),
+      mode: (state.ironman ? 'IRONMAN-' : '') + (state.pmode || 'classic'),
+      net: Math.round(finalNet()),
+      xp: Math.round(finalXP()),
+      level: Math.max(1, Math.min(50, lvl)),
+      rank: (typeof getRank==='function'? getRank(!!state._finalWin).title : ''),
       months: state.month||0,
-      avatar: state.avatar || 'trader'
+      achievements: (state.achievements||[]).length,
+      trades: (typeof tradeLog!=='undefined'? tradeLog.length : 0),
+      survived: !!state._finalWin
     };
     // Try Vercel API first
     try{
@@ -1701,7 +1704,7 @@ async function submitGlobalScore(){
         body: JSON.stringify(payload)
       });
       const j = await res.json();
-      if(j.success){
+      if(j.success||j.ok){
         toast('Score global eingetragen! 🚀','buy');
         document.getElementById('global-submit-area')?.classList.add('hidden');
         localStorage.setItem('tfcb_last_name', name);
