@@ -1057,12 +1057,7 @@ function nextMonth(){
   applyPrices();checkEvent();
   EARLY_DECISIONS.forEach(ed=>{
     if(state.month===ed.month&&!state.earlyDone[ed.id]){
-      setTimeout(()=>{
-        if(!state)return;
-        const busy=!document.getElementById('event-overlay').classList.contains('hidden')||!document.getElementById('presale-overlay').classList.contains('hidden');
-        if(busy){setTimeout(()=>{if(state&&!state.earlyDone[ed.id])showEarlyDecision(ed);},800);return}
-        showEarlyDecision(ed);
-      },400);
+      showEarlyDecision(ed);
     }
   });
   checkDecision();
