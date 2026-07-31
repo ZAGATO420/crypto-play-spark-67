@@ -1185,10 +1185,10 @@ function pushRandomNews(){
 }
 
 function checkDecision(){if(state.month<8)return;if(state.decisionCooldown>0){state.decisionCooldown--;return}
-  const busy=!document.getElementById('event-overlay').classList.contains('hidden')||!document.getElementById('decision-overlay').classList.contains('hidden')||!document.getElementById('presale-overlay').classList.contains('hidden');
-  if(busy)return;
-  if(Math.random()<0.32){const d=DECISIONS[Math.floor(Math.random()*DECISIONS.length)];showDecision(d);state.decisionCooldown=2+Math.floor(Math.random()*4)}}
-function showDecision(d){if(state)state.paused=true;playSound('decision');document.getElementById('decision-title').textContent=d.title;document.getElementById('decision-desc').textContent=d.desc;const opts=document.getElementById('decision-options');opts.innerHTML='';d.options.forEach(opt=>{const btn=document.createElement('button');btn.className='decision-btn';btn.textContent=opt.label;btn.onclick=()=>resolveDecision(opt);opts.appendChild(btn)});document.getElementById('decision-overlay').classList.remove('hidden')}
+  if(state._histShownThisMonth)return;
+  if(Math.random()<0.28){const d=DECISIONS[Math.floor(Math.random()*DECISIONS.length)];showDecision(d);state.decisionCooldown=2+Math.floor(Math.random()*4)}}
+function showDecision(d){pqEnqueue('decision',()=>_showDecisionNow(d),d._hist?8:7)}
+function _showDecisionNow(d){if(state)state.paused=true;playSound('decision');document.getElementById('decision-title').textContent=d.title;document.getElementById('decision-desc').textContent=d.desc;const badge=document.querySelector('#decision-card > div');if(badge)badge.textContent=d._hist?('📜 '+(d._era||'HISTORY')+' • DECISION REQUIRED'):'DECISION REQUIRED';const opts=document.getElementById('decision-options');opts.innerHTML='';d.options.forEach(opt=>{const btn=document.createElement('button');btn.className='decision-btn';btn.textContent=opt.label;btn.onclick=()=>resolveDecision(opt);opts.appendChild(btn)});document.getElementById('decision-overlay').classList.remove('hidden')}
 function resolveDecision(opt){
   playSound('click');
   if(opt.cash&&opt.cash<0&&state.cash+opt.cash<0){toast('Not enough cash for this choice','sell');return}
