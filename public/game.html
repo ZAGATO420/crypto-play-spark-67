@@ -1737,6 +1737,7 @@ const XP_LEVELS=[
  {xp:36000,t:'Whale Watcher'},{xp:50000,t:'Market Maker'},{xp:70000,t:'Crypto Chad'},
  {xp:95000,t:'Cycle Veteran'},{xp:130000,t:'Whale'},{xp:180000,t:'Legend'},{xp:250000,t:'THE FINAL BOSS'}
 ];
+let _xpSlot=0;
 let _ptr={x:window.innerWidth*0.5,y:window.innerHeight*0.55};
 document.addEventListener('pointerdown',e=>{_ptr={x:e.clientX,y:e.clientY}},true);
 function xpLevel(xp){let i=0;for(let k=0;k<XP_LEVELS.length;k++){if(xp>=XP_LEVELS[k].xp)i=k}return i}
@@ -1745,8 +1746,9 @@ function xpFloat(text,sub,neg){
   const d=document.createElement('div');
   d.className='xp-float'+(neg?' neg':'');
   d.innerHTML=text+(sub?'<small>'+sub+'</small>':'');
-  const x=Math.min(window.innerWidth-90,Math.max(80,_ptr.x+(Math.random()*40-20)));
-  const y=Math.min(window.innerHeight-90,Math.max(70,_ptr.y-14));
+  _xpSlot=(_xpSlot+1)%5;
+  const x=Math.min(window.innerWidth-90,Math.max(80,_ptr.x+(Math.random()*36-18)));
+  const y=Math.min(window.innerHeight-90,Math.max(70,_ptr.y-14-_xpSlot*22));
   d.style.left=x+'px'; d.style.top=y+'px';
   layer.appendChild(d); setTimeout(()=>d.remove(),1450);
 }
