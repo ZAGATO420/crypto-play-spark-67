@@ -1567,7 +1567,18 @@ function initChart(){const ctx=document.getElementById('pnl-chart').getContext('
 function updateChart(){if(!chart||!state)return;chart.data.labels=state.netHistory.map((_,i)=>i);chart.data.datasets[0].data=state.netHistory;const last=state.netHistory[state.netHistory.length-1],first=state.netHistory[0];chart.data.datasets[0].borderColor=last>=first?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=last>=first?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)';chart.update('none')}
 function showEvent(title,type='neutral',flavor=''){if(state)state.paused=true;playSound(type==='crash'?'rug':'moon');document.body.classList.add(type==='crash'?'flash-red':'flash-green');setTimeout(()=>document.body.classList.remove('flash-red','flash-green'),600);const card=document.getElementById('event-card');card.className='event-card '+type;document.getElementById('event-emoji').textContent=type==='crash'?'💥':type==='pump'?'🚀':'⚡';document.getElementById('event-title').textContent=title;document.getElementById('event-flavor').textContent=flavor||(type==='crash'?'This one hurts.':'The market is moving.');document.getElementById('event-sub').textContent=dateStr();document.getElementById('event-overlay').classList.remove('hidden');setTimeout(closeEvent,4500)}
 function closeEvent(){document.getElementById('event-overlay').classList.add('hidden');if(state&&!state._gameEnded)state.paused=false}
-function toast(msg,kind){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+kind;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2800)}
+/* Toast stack: up to 3 visible at once, each with its own lifetime.
+   Previously a single element was overwritten, so back-to-back messages
+   (quest complete + level up) silently swallowed each other. */
+function toast(msg,kind){
+  const stack=document.getElementById('toast-stack'); if(!stack)return;
+  while(stack.children.length>=3){ stack.removeChild(stack.firstElementChild) }
+  const t=document.createElement('div');
+  t.className='toast '+(kind||'');
+  t.textContent=msg;
+  stack.appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); setTimeout(()=>t.remove(),340) },2800);
+}
 function quitGame(){if(confirm('Really quit?')){if(state)state._quit=true;endGame(false,'Quit')}}
 function getRank(win){if(!state)return{title:'Unknown',color:'#6b7394'};const net=netWorth();const months=state.month;const ach=state.achievements.length;if(!win){if(months<12)return{title:'Early Rekt',color:'#ef4444'};if(months<36)return{title:'Certified Rekt',color:'#ef4444'};return{title:'Late Game Rekt',color:'#f97316'}}if(net>1000000)return{title:'Final Boss Material',color:'#a855f7'};if(net>300000)return{title:'Top 3% Diamond Hands',color:'#22c55e'};if(net>100000)return{title:'Top 8% Survivor',color:'#22c55e'};if(net>30000)return{title:'Solid Survivor',color:'#38bdf8'};if(ach>=8)return{title:'Achievement Hunter',color:'#eab308'};return{title:'Made It',color:'#94a3b8'}}
 function endGame(win,reason=''){if(state&&state._gameEnded)return;if(state)state._gameEnded=true;if(state){state.paused=true;state._finalWin=!!win;state._finalNet=netWorth();state._finalXP=calculateXP();state._finalMonth=state.month;}clearInterval(timer);playSound(win?'survive':'rekt');if(state&&state.ironman&&win)unlockAch('ironman');if(state)checkAchievements();
