@@ -77,18 +77,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Most people think crypto is about making money.\nIt’s not.\nIt’s about surviving yourself.\nThe greed.\nThe fear." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Most people think crypto is about making money.\nIt’s not.\nIt’s about surviving yourself.\nThe greed.\nThe fear." },
+      { title: "THE CRYPTO FINAL BOSS" },
+      { name: "author", content: "The Crypto Final Boss" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "THE CRYPTO FINAL BOSS" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Most people think crypto is about making money.\nIt’s not.\nIt’s about surviving yourself.\nThe greed.\nThe fear." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0ecbba0-79a2-4955-b7a6-c8d465adcd7a/id-preview-c53c0856--2a796c05-ed68-4e85-996a-dca7fcf09410.lovable.app-1785515630030.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0ecbba0-79a2-4955-b7a6-c8d465adcd7a/id-preview-c53c0856--2a796c05-ed68-4e85-996a-dca7fcf09410.lovable.app-1785515630030.png" },
+      { name: "twitter:site", content: "@TCFB_game" },
     ],
     links: [
       {
