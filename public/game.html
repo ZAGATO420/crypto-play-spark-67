@@ -289,6 +289,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .event-flavor{margin-top:12px;font-size:15px;font-weight:600;color:#e2e8f0}
 .decision-options{display:flex;flex-direction:column;gap:9px;margin-top:20px}
 .decision-btn{padding:14px 16px;border-radius:13px;font-weight:700;font-size:14px;background:#0c1220;border:1px solid #2f365a;color:#e2e8f0;text-align:left;transition:all .15s}
+.decision-btn.disabled,.decision-btn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.6)}
 .decision-btn:hover{border-color:#8b5cf6;background:#1a1435;transform:translateX(4px)}
 
 .end-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at center,rgba(139,92,246,.1),transparent 60%)}
@@ -1768,7 +1769,14 @@ function showDecision(d){pqEnqueue('decision',()=>_showDecisionNow(d),d._hist?8:
 function _showDecisionNow(d){if(state)state.paused=true;playSound('decision');document.getElementById('decision-title').textContent=d.title;document.getElementById('decision-desc').textContent=d.desc;const badge=document.getElementById('decision-badge');if(badge){badge.textContent=d._hist?('📜 '+(d._era||'REAL HISTORY')+' • DECISION REQUIRED'):'DECISION REQUIRED';badge.style.color=d._hist?'#f0b429':'#a78bfa'}const opts=document.getElementById('decision-options');opts.innerHTML='';let affordable=0;d.options.forEach(opt=>{const btn=document.createElement('button');btn.className='decision-btn';const cost=(opt.cash&&opt.cash<0)?-opt.cash:0;const broke=cost>0&&state&&state.cash<cost&&portValue()<=0;if(broke){btn.classList.add('disabled');btn.disabled=true;btn.textContent=opt.label+' — not enough cash';}else{affordable++;btn.textContent=opt.label;btn.onclick=()=>resolveDecision(opt);}opts.appendChild(btn)});if(!affordable){const btn=document.createElement('button');btn.className='decision-btn';btn.textContent='You are broke. Walk away.';btn.onclick=()=>resolveDecision({msg:'You had no capital left to act. You walk away.',stress:6,xp:20});opts.appendChild(btn)}document.getElementById('decision-overlay').classList.remove('hidden')}
 function resolveDecision(opt){
   playSound('click');
-  if(opt.cash&&opt.cash<0&&state.cash+opt.cash<0){toast('Not enough cash for this choice','sell');return}
+  if(opt.cash&&opt.cash<0&&state.cash+opt.cash<0){
+    // Try to fund the choice by liquidating bags before refusing, so a broke
+    // player can never get locked in front of an unclosable decision card.
+    const need=(-opt.cash)-state.cash+25;
+    const got=portValue()>0?emergencyRaise(need):0;
+    if(got>0){state.stress=Math.min(100,state.stress+4);toast('⚠️ Sold '+fmt(got)+' of your bags to fund this move','sell');addNews('Forced sale to fund a decision')}
+    if(state.cash+opt.cash<0){toast('Not enough cash for this choice','sell');return}
+  }
   // Special handling for Panic Sell decisions - actually sell portfolio
   const label = (opt.label||'').toLowerCase();
   const act = opt.act || (label.includes('sell everything')?'sellAll':label.includes('sell 50%')?'sellHalf':'');
