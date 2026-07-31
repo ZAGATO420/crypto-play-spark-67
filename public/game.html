@@ -1858,13 +1858,31 @@ function awardXP(base,label){
   const before=xpLevel(state.xp||0);
   state.xp=(state.xp||0)+amt;
   state.xpEvents=(state.xpEvents||0)+1;
-  xpFloat('+'+amt.toLocaleString()+' XP',label||'');
+  xpQueue(amt,label||'');
   const after=xpLevel(state.xp);
   if(after>before)levelUp(after);
   updateXPBar();
   return amt;
 }
+/* Several XP gains inside ~600ms are merged into one floating number so the
+   month-change burst does not spam five overlapping labels. */
+let _xpBuf={amt:0,label:'',best:0,timer:null};
+function xpQueue(amt,label){
+  _xpBuf.amt+=amt;
+  if(amt>=_xpBuf.best){_xpBuf.best=amt;_xpBuf.label=label}
+  if(_xpBuf.timer)return;
+  _xpBuf.timer=setTimeout(xpFlush,600);
+}
+function xpFlush(){
+  const b=_xpBuf;
+  _xpBuf={amt:0,label:'',best:0,timer:null};
+  if(b.timer)clearTimeout(b.timer);
+  if(b.amt>0)xpFloat('+'+b.amt.toLocaleString()+' XP',b.label||'');
+}
 function levelUp(idx){
+  pqEnqueue('levelup',()=>_levelUpNow(idx),4);
+}
+function _levelUpNow(idx){
   const lv=XP_LEVELS[idx];
   const card=document.getElementById('levelup-flash');
   if(card){
@@ -1872,7 +1890,9 @@ function levelUp(idx){
     card.querySelector('.lu-t').textContent=lv.t;
     card.querySelector('.lu-p').textContent=(state.xp||0).toLocaleString()+' XP • keep stacking';
     card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
-    setTimeout(()=>card.classList.remove('show'),2100);
+    setTimeout(()=>{card.classList.remove('show');pqRelease('levelup')},2100);
+  } else {
+    pqRelease('levelup');
   }
   playSound('quest');
   toast('⚡ LEVEL UP → '+lv.t,'buy');
