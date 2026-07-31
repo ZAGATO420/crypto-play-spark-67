@@ -83,6 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "THE CRYPTO FINAL BOSS" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@TCFB_game" },
+      { property: "og:title", content: "THE CRYPTO FINAL BOSS" },
+      { name: "twitter:title", content: "THE CRYPTO FINAL BOSS" },
+      { name: "description", content: "Survive 2020 → 2026. 🤑\n🎮Free crypto survival game🎮" },
+      { property: "og:description", content: "Survive 2020 → 2026. 🤑\n🎮Free crypto survival game🎮" },
+      { name: "twitter:description", content: "Survive 2020 → 2026. 🤑\n🎮Free crypto survival game🎮" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/374f7fa9-425f-456d-8442-13c927255caf" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/374f7fa9-425f-456d-8442-13c927255caf" },
     ],
     links: [
       {
