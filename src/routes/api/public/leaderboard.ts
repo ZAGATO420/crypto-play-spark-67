@@ -1,0 +1,150 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Cache-Control": "no-store",
+};
+
+const RANKS = [
+  "Exit Liquidity",
+  "Jeet",
+  "Paper Hands",
+  "Degen",
+  "Trader",
+  "Chad",
+  "Whale",
+  "Final Boss",
+  "Legend",
+  "Rekt",
+  "Survivor",
+  "Dead",
+];
+
+const runSchema = z.object({
+  name: z.string().trim().min(1).max(18),
+  arch: z.string().trim().min(1).max(24),
+  country: z.string().trim().min(1).max(24),
+  difficulty: z.string().trim().min(1).max(16),
+  mode: z.string().trim().min(1).max(24),
+  net: z.number().finite().min(-1e9).max(1e10),
+  xp: z.number().int().min(0).max(5_000_000),
+  level: z.number().int().min(1).max(50),
+  rank: z.string().trim().max(32).default(""),
+  months: z.number().int().min(0).max(84),
+  achievements: z.number().int().min(0).max(200),
+  trades: z.number().int().min(0).max(20_000),
+  survived: z.boolean().default(false),
+});
+
+// Plausibility gate: a run cannot be richer than the game's own math allows.
+// Ceiling scales with how long the player actually played, so a "month 3,
+// one trillion dollars" payload is rejected before it ever reaches the table.
+function isPlausible(run: z.infer<typeof runSchema>): boolean {
+  const monthCeiling = 25_000 * Math.pow(1.85, Math.max(run.months, 1));
+  if (run.net > Math.min(monthCeiling, 1e10)) return false;
+  // XP is earned per action; it cannot outrun the number of months by orders of magnitude.
+  if (run.xp > 6_000 + run.months * 9_000) return false;
+  if (run.trades > 40 + run.months * 60) return false;
+  if (run.level > 1 + Math.floor(run.xp / 900)) return false;
+  return true;
+}
+
+function sanitizeName(name: string): string {
+  return name.replace(/[^\p{L}\p{N} _.\-]/gu, "").slice(0, 18) || "anon";
+}
+
+export const Route = createFileRoute("/api/public/leaderboard")({
+  server: {
+    handlers: {
+      OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
+
+      GET: async ({ request }) => {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const url = new URL(request.url);
+        const mode = url.searchParams.get("mode");
+        const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
+
+        let query = supabaseAdmin
+          .from("leaderboard_runs")
+          .select(
+            "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, created_at",
+          )
+          .order("net_worth", { ascending: false })
+          .limit(limit);
+
+        if (mode && mode !== "all") query = query.eq("mode", mode);
+
+        const { data, error } = await query;
+        if (error) {
+          console.error("leaderboard read failed", error);
+          return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
+        }
+
+        const rows = (data ?? []).map((r, i) => ({
+          pos: i + 1,
+          name: r.player_name,
+          arch: r.archetype,
+          country: r.country,
+          diff: r.difficulty,
+          mode: r.mode,
+          net: Number(r.net_worth),
+          xp: r.xp,
+          level: r.level,
+          rank: r.rank_title,
+          months: r.months_survived,
+          achievements: r.achievements,
+          survived: r.survived,
+          date: r.created_at,
+        }));
+
+        return Response.json(rows, { headers: CORS });
+      },
+
+      POST: async ({ request }) => {
+        let body: unknown;
+        try {
+          body = await request.json();
+        } catch {
+          return Response.json({ error: "invalid json" }, { status: 400, headers: CORS });
+        }
+
+        const parsed = runSchema.safeParse(body);
+        if (!parsed.success) {
+          return Response.json({ error: "invalid payload" }, { status: 400, headers: CORS });
+        }
+        const run = parsed.data;
+
+        if (!isPlausible(run)) {
+          return Response.json({ error: "score rejected" }, { status: 422, headers: CORS });
+        }
+
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error } = await supabaseAdmin.from("leaderboard_runs").insert({
+          player_name: sanitizeName(run.name),
+          archetype: run.arch,
+          country: run.country,
+          difficulty: run.difficulty,
+          mode: run.mode,
+          net_worth: run.net,
+          xp: run.xp,
+          level: run.level,
+          rank_title: RANKS.includes(run.rank) ? run.rank : run.rank.slice(0, 32),
+          months_survived: run.months,
+          achievements: run.achievements,
+          trades: run.trades,
+          survived: run.survived,
+        });
+
+        if (error) {
+          console.error("leaderboard write failed", error);
+          return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
+        }
+
+        return Response.json({ ok: true }, { status: 201, headers: CORS });
+      },
+    },
+  },
+});
