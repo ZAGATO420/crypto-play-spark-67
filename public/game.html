@@ -2091,7 +2091,7 @@ function setPerpLev(v){state._perpLev=+v;const e=document.getElementById('perp-l
 
 /* ---------- MINIGAMES ---------- */
 let _mini={};
-function closeMini(){const o=document.getElementById('mini-overlay');if(o)o.classList.add('hidden');if(_mini.timer)clearInterval(_mini.timer);_mini={}}
+function closeMini(){const o=document.getElementById('mini-overlay');if(o)o.classList.add('hidden');if(_mini.timer)clearInterval(_mini.timer);_mini={};if(state&&!state._gameEnded)state.paused=false;pqRelease('mini')}
 function miniCard(html){const o=document.getElementById('mini-overlay');o.classList.remove('hidden');o.querySelector('.mini-card').innerHTML=html}
 function miniPayout(mult,label,xp){
   const stake=_mini.stake||0;
@@ -2105,9 +2105,14 @@ function miniPayout(mult,label,xp){
 }
 function startMinigame(force){
   if(!state||state._gameEnded)return;
+  pqEnqueue('mini',()=>_startMinigameNow(force),force?9:3);
+}
+function _startMinigameNow(force){
+  if(!state||state._gameEnded)return;
   const stake=Math.max(25,Math.floor(Math.min(state.cash*0.08,4000*(1+state.month*0.15))));
-  if(state.cash<stake){if(force)toast('Not enough cash for a side quest','sell');return}
+  if(state.cash<stake){if(force)toast('Not enough cash for a side quest','sell');pqRelease('mini');return}
   state.cash-=stake; _mini={stake};
+  state.paused=true;
   state.minigames=(state.minigames||0)+1;
   const games=['gas','rug','candle'];
   const g=games[Math.floor(Math.random()*games.length)];
