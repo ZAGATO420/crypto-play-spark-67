@@ -143,7 +143,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           net_worth: run.net,
           xp: run.xp,
           level: run.level,
-          rank_title: RANKS.includes(run.rank) ? run.rank : run.rank.slice(0, 32),
+          rank_title: RANKS.includes(run.rank) ? run.rank : "",
           months_survived: run.months,
           achievements: run.achievements,
           trades: run.trades,
