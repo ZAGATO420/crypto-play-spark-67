@@ -2359,7 +2359,7 @@ function renderGlobalLeaderboard(listId){
     </div>`;
   }).join('');
 }
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 async function submitGlobalScore(){
   const input = document.getElementById('global-name-input');
