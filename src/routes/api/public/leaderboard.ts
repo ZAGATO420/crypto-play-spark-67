@@ -68,6 +68,23 @@ function sanitizeName(name: string): string {
   return name.replace(/[^\p{L}\p{N} _.\-]/gu, "").slice(0, 18) || "anon";
 }
 
+// Ranking score: a 3-month bail-out with +$100 must not outrank a 32-month run
+// that ended slightly negative. Net worth still dominates, but survival time,
+// XP and achievements count — and unfinished mini-runs get a soft penalty.
+function rankScore(r: {
+  net_worth: number | string;
+  xp: number;
+  months_survived: number;
+  achievements: number;
+  survived: boolean;
+}): number {
+  const net = Number(r.net_worth) || 0;
+  let score = net + r.xp * 10 + r.months_survived * 500 + r.achievements * 250;
+  if (r.survived) score += 25_000;
+  if (r.months_survived < 6) score -= 5_000;
+  return score;
+}
+
 export const Route = createFileRoute("/api/public/leaderboard")({
   server: {
     handlers: {
@@ -84,8 +101,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           .select(
             "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, created_at",
           )
-          .order("net_worth", { ascending: false })
-          .limit(limit);
+          .order("created_at", { ascending: false })
+          .limit(500);
 
         if (mode && mode !== "all") query = query.eq("mode", mode);
 
@@ -95,7 +112,11 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
 
-        const rows = (data ?? []).map((r, i) => ({
+        const rows = (data ?? [])
+          .slice()
+          .sort((a, b) => rankScore(b) - rankScore(a))
+          .slice(0, limit)
+          .map((r, i) => ({
           pos: i + 1,
           name: r.player_name,
           arch: r.archetype,
@@ -110,6 +131,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           achievements: r.achievements,
           survived: r.survived,
           timestamp: r.created_at,
+          score: Math.round(rankScore(r)),
         }));
 
         return Response.json(rows, { headers: CORS });
