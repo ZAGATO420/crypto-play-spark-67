@@ -15,6 +15,7 @@ export const Shot: React.FC<{
         width: "100%",
         transform: `scale(${s}) translate(${tx}px, ${ty}px)`,
         borderRadius: 18,
+        filter: "brightness(1.35) saturate(1.15) contrast(1.05)",
       }}
     />
   );
