@@ -1,40 +1,43 @@
 ## Ziel
+Zwei fehlende Content-Dateien für den X-Account @CryptoBossFInal erstellen, die im Projekt erwähnt aber nie gespeichert wurden. Stil und Sprache wie die bestehende `x-assets/x-reply-library.md`: Posts auf Englisch, Regeln/Erklärungen auf Deutsch, keine KI-Floskeln.
 
-Eine Reply-Bibliothek, aus der du in 5 Sekunden eine passende Antwort kopierst — kurz, menschlich, mit klarem Hook, der Leute auf dein Profil zieht. Keine KI-Floskeln ("Absolutely!", "This is huge", Em-Dashes, Emoji-Ketten, Hashtags).
+## Datei 1: `x-assets/x-30-day-calendar.md`
+Ein 30-Tage-Content-Kalender mit **30 fertigen Posts** (Tag 1–30), sofort kopierbar.
 
-## Was gebaut wird
+Aufbau:
+- Kurze Einleitung: wie der Kalender benutzt wird (1 Post/Tag, Best-Posting-Zeiten EU+US).
+- 30 durchnummerierte Posts, je mit:
+  - **Tag** (Tag 1, Tag 2 …)
+  - **Format-Tag**: z.B. `[Hook]`, `[Thread]`, `[Meme-Konzept]`, `[Game-Screen]`, `[Quote-Tweet]`, `[Poll]`
+  - **Fertiger Post-Text** (Englisch, unter 280 Zeichen, Platzhalter wie `[zahl]` wo nötig)
+  - **Bild/Media-Hinweis** (was dazugehört: Screenshot, Trailer-Frame, Meme, OG-Bild)
+  - **Ziel**: warum dieser Post (Reach, Engagement, Follower, Profile-Klicks)
 
-Eine neue Datei `x-assets/x-reply-library.md` mit 300+ Replies, gruppiert nach den Themen, unter denen Crypto-X wirklich postet:
+Mix über 30 Tage:
+- ~8 Game-Hook-Posts (gameplay-spannend, "play 2020-2026", Rekt-Stories)
+- ~6 Community/Engagement-Posts (Polls, "what was your biggest L", Fragen)
+- ~5 Meme/Humor-Posts (ohne Pitch)
+- ~5 Value/Crypto-Wissen-Posts (Historie, LUNA/FTX, Marktlehren)
+- ~4 Soft-Pitch/Build-Posts ("6 Monate solo an nem game gebaut")
+- ~2 Quote-Tweet- oder Trailer-Push-Posts
 
-1. **Loss / Rekt Posts** (liquidiert, Rug erwischt, "down 90%")
-2. **Gains / Flex Posts** (100x, PnL-Screenshots)
-3. **Memecoins & Pump.fun** (Launches, Snipes, Dev sold)
-4. **Airdrops & Farming** (Sybil, Claims, "war es das wert?")
-5. **Scams, Hacks, Drainer, Wallet-Security**
-6. **Market Calls & Predictions** (Bull/Bear, "Top ist drin")
-7. **Nostalgie / Zyklen** (2021, LUNA, FTX, "wo warst du 2020")
-8. **Trading-Psychologie & Burnout** (Stress, Schlaf, Beziehung)
-9. **CT-Drama & Influencer-Calls**
-10. **Gaming / Crypto-Games / Web3-Gaming**
-11. **Builder- & Dev-Posts** (Shipping, Solo-Builder)
-12. **Fragen-Posts von großen Accounts** ("What's your biggest L?" — die stärkste Follower-Quelle)
-13. **Meme / Humor-Posts** (Pure Punchline, kein Pitch)
-14. **Newbie-Fragen** (Hilfe geben = Autorität aufbauen)
+Jeder Post respektiert die Anti-KI-Checkliste aus der Reply-Library.
 
-Pro Thema ca. 20–25 Replies, aufgeteilt in drei Typen:
-- **Pure Value/Witz** (~60%) — kein Link, kein Spielname. Baut Reputation, bekommt Likes.
-- **Soft Hook** (~30%) — erwähnt beiläufig, dass du ein Game gebaut hast, ohne Link. Neugierige klicken aufs Profil.
-- **Direkter Pitch** (~10%) — nur für Threads, in denen aktiv nach Games/Tools gefragt wird.
+## Datei 2: `x-assets/x-playbook.md`
+Die übergeordnete Strategie- und Regeldatei. Aufbau (Deutsch):
 
-## Zusätzlich in der Datei
-
-- **Reply-Regeln:** wann welcher Typ, max. 1 Pitch pro 10 Replies, Timing (erste 10 Min nach Post), Ziel-Accountgrößen, kein Link in Replies bei kleinen Accounts (Reach-Nachteil).
-- **Anti-KI-Checkliste:** verbotene Wörter/Zeichen, Kleinschreibung wo passend, Tippfehler-Toleranz, max. Länge (unter 120 Zeichen performt am besten).
-- **Variablen-Platzhalter** wie `[coin]`, `[jahr]`, `[zahl]`, damit jede Reply an den konkreten Post angepasst wird und nichts als Copy-Paste-Spam auffällt.
-- **20 Quote-Tweet-Vorlagen** für fremde Posts, die du auf deine Timeline holst.
+1. **Ziel & North-Star-Metriken** — Follower, Profile-Klicks, Reply-Impressions (nicht Likes als Hauptmetrik).
+2. **Account-Setup-Checkliste** — Bio, Pinned Post, Header/Banner, Link, DMs offen, Account-Tonfall.
+3. **Die 60/30/10 Content-Regel** — Pure / Soft Hook / Pitch, erklärt mit Beispielen.
+4. **Posting-Frequenz & Timing** — wie oft, welche Uhrzeiten (EU Morgen, US Open), Wochentage.
+5. **Reply-Strategie** — Bezug auf `x-reply-library.md`, Reply-Guying-Routine, Ziel-Accountgrößen, Timing-Regel (5–10 Min).
+6. **Tonalität & Anti-KI-Regeln** — die Checkliste aus der Reply-Library, erweitert für eigene Posts (keine Hashtags, keine Em-Dashes, Kleinschreibung ok).
+7. **Growth-Hebel** — Threads, Quote-Tweets, die "eigne Reply beantworten + Link"-Technik, Liste von 30–40 Ziel-Accounts aufbauen.
+8. **Game-Integration** — wie der Trailer, OG-Bild, Screenshots und Stats eingesetzt werden; wann der Link sicher gepostet werden kann (ab ~2k Follower).
+9. **30-Tage-Routinen** — Tagesstruktur (Morgen/Mittag/Abend), Wochencheck, was wöchentlich angepasst wird.
+10. **Was NICHT tun** — keine gekauften Follower, kein Follow-for-Follow, keine Link-Replies früh, keine Bot-Tools.
 
 ## Technische Details
-
-- Reine Markdown-Datei unter `x-assets/`, kein Code-Impact, kein Deploy nötig.
-- Sprache der Replies: Englisch (dein Account postet englisch), Regeln und Erklärungen auf Deutsch.
-- Bei Bedarf danach als Aufteilung in mehrere Dateien pro Thema oder als CSV für schnelles Filtern.
+- Reine Markdown-Dateien unter `x-assets/`, kein Code-Impact, kein Deploy.
+- Beide Dateien ergänzen die bestehende `x-reply-library.md` und verweisen auf sie.
+- Keine externen Links, keine Secrets.
