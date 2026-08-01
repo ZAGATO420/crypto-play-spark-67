@@ -1,69 +1,76 @@
-## Was ich im Spiel gefunden habe
+## Was ich recherchiert habe
 
-**Popups überlagern sich, weil es keine Warteschlange gibt.** Es existieren sechs voneinander unabhängige Anzeige-Ebenen: das Event-Fenster, das Presale-Fenster, das Decision-Fenster, das Minigame-Fenster, der Level-Up-Blitz und die Toast-Leiste. Jede wird direkt eingeblendet, sobald ihr Auslöser feuert — keine prüft, ob gerade schon etwas anderes sichtbar ist. Besonders auffällig:
+Die 2026er Crypto-X-Playbooks sind sich in vier Punkten einig:
 
-- Die Toast-Leiste ist ein einziges Element. Kommen zwei Meldungen kurz nacheinander (z. B. „Quest complete" und „Level Up"), überschreibt die zweite die erste sofort, und der alte Timer blendet sie zu früh aus. Genau das ist der Fall, in dem eine Meldung „untergeht".
-- Beim Monatswechsel laufen Quest-Prüfung, XP-Vergabe, Achievement, Level-Up, Monats-Event und Minigame in derselben Sekunde ab.
-- Die Decision-Prüfung schaut nur auf Event-, Decision- und Presale-Fenster — Minigame und Level-Up-Blitz werden nicht berücksichtigt.
+1. **Replies schlagen Posts.** Reichweite entsteht bei kleinen Accounts fast ausschließlich durch Antworten unter großen Accounts, nicht durch eigene Posts. Wer nur postet, wächst nicht.
+2. **Kadenz 2–4 Posts/Tag + 1 Thread/Woche.** Ein Post pro Tag reicht laut allen Quellen nicht.
+3. **Der Algorithmus bewertet Interaktionsqualität, nicht Reichweite.** Gekaufte Follower, Engagement-Groups und Follow-for-Follow schaden aktiv der Sichtbarkeit.
+4. **Externe Links drücken die Reichweite.** Link gehört in den ersten Reply, nicht in den Hauptpost.
 
-**Der Quest-Pool ist klein und zeitlos.** Aktuell rund 20 Quests, alle datumsunabhängig („Kaufe BTC", „Halte 3 Coins"), plus 6 Zufalls-Entscheidungen und 14 historische Monats-Events (Black Thursday, China-Mining-Ban, LUNA, FTX, PEPE, Halvings usw.). Die Zeitachse läuft über 84 Monate von Januar 2020 bis Dezember 2026 — die Grundlage für datumsgenaue Inhalte ist also schon da, wird aber kaum genutzt.
+Bei 15–30 Min/Tag heißt das: die Zeit gehört zu ~70% in Replies. Deine Posts müssen vorproduziert sein, damit das Zeitbudget aufgeht.
 
-## Plan
+## Der Plan
 
-### 1. Zentrale Popup-Warteschlange
+### 1. Account-Fundament (einmalig, Tag 1)
 
-Ein Warteschlangen-Manager, durch den **jede** Vollbild-Meldung läuft: Event, Presale-Ergebnis, Decision, Minigame, Level-Up, historische Quest.
+- Bio, Header, Pinned Post und Profilbild als Conversion-Einheit: Wer aus einem Reply auf dein Profil klickt, muss in 3 Sekunden verstehen „kostenloses Crypto-Survival-Game, 2020–2026, Leaderboard".
+- Pinned Post: ein 20-Sekunden-Gameplay-Clip mit Hook-Text + Link im ersten Reply.
+- Ich liefere: fertige Bio-Varianten, Header-Grafik, Pinned-Post-Text und -Video.
 
-- Immer nur ein Fenster gleichzeitig sichtbar. Alles Weitere wartet in der Reihenfolge, in der es ausgelöst wurde.
-- Erst wenn der Spieler schließt bzw. antwortet, öffnet sich mit kurzer Pause (~350 ms) das nächste.
-- Priorität: existenzielle Ereignisse (Hack, Crash, Game-Over-Warnung) vor Level-Ups und optionalen Minispielen.
-- Kleiner Zähler am Rand („2 weitere Meldungen"), damit klar ist, dass noch etwas kommt.
-- Das Spiel bleibt pausiert, solange die Warteschlange läuft — kein Preis-Tick im Hintergrund.
+### 2. Deine tägliche 20-Minuten-Routine
 
-### 2. Toast-Meldungen stapeln statt überschreiben
+Ich schreibe dir eine feste Routine als Checkliste:
 
-Statt eines einzelnen Elements eine Toast-Spalte: bis zu drei Meldungen gleichzeitig, jede mit eigenem Timer, neue schieben sich darunter ein. Nichts wird mehr überschrieben.
+- **12 Min Reply-Runde.** Eine kuratierte Liste von ~40 Accounts (Crypto-Gaming, Pump.fun-Szene, Trading-Twitter, Meme-Coin-Kommentatoren), aufgeteilt in Tiers. Regel: nur Antworten innerhalb der ersten 20 Minuten nach dem Original-Post, immer ein eigener Gedanke oder eine Zahl aus dem Game, nie „great post 🔥".
+- **5 Min posten.** Post aus dem vorproduzierten Kalender kopieren, Bild/Video anhängen, raus.
+- **3 Min eigene Replies beantworten.** Jede Antwort unter dem eigenen Post bekommt eine Antwort — das ist der stärkste Reach-Hebel überhaupt.
 
-### 3. XP-Anzeigen entzerren
+### 3. Content-Kalender bis Oktober
 
-XP-Zahlen fliegen weiter direkt am Klickpunkt hoch (das ist gut und soll schnell bleiben), aber:
-- Mehrere XP-Gewinne innerhalb von ~600 ms werden zu einer Zahl zusammengefasst („+340 XP · MONAT ÜBERLEBT").
-- Level-Up-Blitz und XP-Flug kollidieren nicht mehr: Der Blitz geht in die Warteschlange, die XP-Zahl bleibt sofort sichtbar.
+Ich baue einen 30-Tage-Kalender, der monatlich rotiert, aus sechs Post-Formaten mit klarer Rollenverteilung:
 
-### 4. Historischer Quest- und Event-Pool 2020–2026
+- **Score-Flex** — Screenshot eines Runs mit Zahl und Rang, plus Challenge („beat this or stay poor"). Treibt Nachahmung.
+- **Real-History-Karte** — „On this day in 2021…" mit dem echten Ereignis aus dem Game und der Frage, was der Leser getan hätte. Treibt Replies, weil jeder eine Meinung hat.
+- **Roast/Meme** — der Affe reagiert auf Marktereignisse der Woche. Treibt Reposts.
+- **Build-in-Public** — was ich diese Woche am Game geändert habe. Baut Vertrauen für den TCFB-Launch.
+- **Leaderboard-Update** — Top 5 der Woche, namentlich. Bindet Spieler, weil sie erwähnt werden wollen.
+- **Poll/Frage** — „Would you have sold at 69k?" Billigste Engagement-Form, 1× pro Woche.
 
-Ein neuer, an das Spieldatum gebundener Pool mit echten Ereignissen. Jede Quest hat ein Zeitfenster und erscheint nur dann. Geplant sind ca. 55–70 Einträge, unter anderem:
+Jeder Eintrag enthält den fertigen Text, den Hook in Zeile 1, das nötige Asset und die Reply-Strategie.
 
-**2020** — COVID-Crash im März, DeFi-Summer und Yield-Farming, das UNI-Airdrop im September, Sushi-Vampir-Angriff, PayPal öffnet für Krypto, BTC durchbricht das alte Hoch im Dezember.
+### 4. Assets, die ich produziere
 
-**2021** — Tesla kauft BTC, GameStop-Wahnsinn, DOGE-Mania rund um Musk, der Mai-Crash und Chinas Mining-Verbot, El Salvador macht BTC zum gesetzlichen Zahlungsmittel, Axie/Play-to-Earn, das ATH bei 69k im November, NFT-Blase.
+- **Bilder:** Header, Meme-Set mit dem Affen, Stat-Card-Vorlagen im Gold/Purple-CI, „Real History"-Serie für die stärksten historischen Events.
+- **Videos:** 3–4 Clips von 15–25 Sekunden — ein Trailer für den Pinned Post, ein „Rekt in 60 Monaten"-Clip, ein Leaderboard-Clip. Vertikal 9:16, ohne Ton verständlich, Loop-fähig.
 
-**2022** — LUNA/UST-Kollaps, Celsius friert Auszahlungen ein, 3AC geht pleite, das Ethereum-Merge, FTX-Kollaps im November und die Frage, ob du deine Coins von der Börse holst.
+### 5. Zwei Wachstumsmotoren im Game selbst (empfohlen, optional)
 
-**2023** — Banken-Krise und USDC-Depeg, Ordinals/BRC-20, PEPE-Launch, SEC verklagt Börsen, Grayscale gewinnt vor Gericht, Binance-Settlement.
+Beides erhöht die Zahl der Posts, die andere über dein Game schreiben — die einzige Skalierung, die nicht an deiner Zeit hängt:
 
-**2024** — Spot-ETF-Zulassung im Januar, Halving im April, Solana-Meme-Season, Politik wird pro-Krypto, Trump-Wahl und die Rallye danach.
+- **Share-Bild aufwerten:** Das End-Bild wird zur Visitenkarte — Rang, Nettovermögen, Monate, überlebte historische Events, Affe, Domain. Ein teilbares Bild ist mehr wert als zehn eigene Posts.
+- **Weekly Challenge:** Ein fester Seed pro Woche, sodass alle Spieler dieselbe Ausgangslage haben. Das macht Vergleiche fair und Screenshots wettbewerbsfähig — der klassische Wordle-Effekt.
 
-**2025–2026** — BTC über 100k, Regulierungsschübe, Airdrop-Müdigkeit, KI-Coin-Narrativ, und im Finale das $TCFB-Kapitel als Höhepunkt der Zeitachse.
+### 6. Messen und nachsteuern
 
-Jede Quest ist eine echte Entscheidung mit Gewinn- und Verlustrisiko, nicht bloß eine Nachricht. Beispiel-Muster:
-- „Deine Coins liegen auf einer Börse, die gerade Auszahlungen stoppt" — sofort abziehen (Gebühr) oder abwarten (Chance auf Totalverlust).
-- „Ein Airdrop-Claim-Link taucht in deiner DM auf" — Seed eingeben, Wallet verbinden oder ignorieren. Ledger schützt teilweise.
+Wöchentlich mit X Premium Analytics: Profil-Klicks pro Post (nicht Likes), Follower-Zuwachs, welches der sechs Formate Profil-Klicks bringt. Nach zwei Wochen streiche ich die zwei schwächsten Formate und verdopple die zwei stärksten.
 
-### 5. Nicht auswendig lernbar
+### 7. Launch-Rampe Oktober
 
-- Aus dem passenden Zeitfenster wird jeweils nur eine Teilmenge gezogen, nicht immer alles.
-- Beträge, Prozente und Textvarianten werden pro Run gewürfelt.
-- Bei manchen Quests wechselt der Ausgang: dasselbe Ereignis kann in einem Run gutgehen und im nächsten schmerzen — die historische Tendenz bleibt aber erhalten (z. B. FTX ist grundsätzlich gefährlich).
+Ab September ein separater Countdown-Track: Teaser-Serie, „letzte Chance vor Launch"-Runs, Leaderboard-Finale, koordinierter Launch-Tag-Post. Diesen Teil detailliere ich, sobald wir Traktion sehen — mit 200 echten Followern sieht die Rampe anders aus als mit 2.000.
+
+## Was du am Ende bekommst
+
+Vier Dateien in deinem Dokumente-Bereich:
+
+- `x-playbook.md` — Strategie, Bio/Header/Pinned, Reply-Regeln, Do-nots
+- `x-30-day-calendar.md` — 30 fertige Posts mit Hook, Text, Asset und Reply-Plan
+- `x-target-accounts.md` — ~40 Accounts in Tiers plus die Regeln der Reply-Runde
+- `x-daily-routine.md` — die 20-Minuten-Checkliste zum Ausdrucken
+
+Plus die Bild- und Video-Assets als Dateien zum Download.
 
 ## Technische Details
 
-- Alles bleibt in der einen Datei `public/game.html` — keine externen Dateien, kein Asset-Nachladen.
-- Neuer Warteschlangen-Manager wickelt die bestehenden Funktionen `showEvent`, `showDecision`, `showPresaleResult`, `miniCard` und `levelUp` ein; die bisherigen `busy`-Prüfungen entfallen, weil die Warteschlange das übernimmt.
-- Toast wird von einem Element auf eine Container-Liste umgestellt (`#toast` → Stack), `toast()` behält seine Signatur, damit alle ~40 bestehenden Aufrufe unverändert funktionieren.
-- Der historische Pool kommt als neue Datenstruktur mit Monatsfenster, Gewichtung und Varianten-Feldern; die bestehenden 14 `EVENTS` bleiben als Ankerpunkte erhalten und werden nicht doppelt ausgespielt.
-- Leaderboard, XP-Kurve und die Plausibilitätsprüfung im Backend bleiben unangetastet.
+Playbook, Kalender und Assets sind Dateien im Dokumente-Bereich — sie berühren das Game nicht. Nur Punkt 5 (Share-Bild und Weekly Challenge) würde `public/game.html` ändern; das setze ich als eigenen Schritt nach den Social-Deliverables um, damit du in der Zwischenzeit schon posten kannst. Videos entstehen als MP4 über die Motion-Pipeline, keine externen Tools nötig.
 
-## Nach der Umsetzung
-
-Ich spiele mehrere komplette Runs automatisiert durch (verschiedene Schwierigkeiten und Modi), prüfe per Screenshot, dass nie zwei Fenster gleichzeitig offen sind, dass keine Toast-Meldung verschluckt wird, und dass in jedem Jahr die passenden historischen Quests auftauchen.
+Was ich nicht mache: gekaufte Follower, Engagement-Groups, Follow-for-Follow, automatisiertes Massen-Replying. Das kostet in 2026 nachweislich Reichweite und riskiert den Account vor dem Launch.
