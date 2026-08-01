@@ -23,12 +23,24 @@ const RANKS = [
   "Dead",
 ];
 
+const COUNTRIES = ["DE", "USA", "CH", "SG", "PT", "NG"] as const;
+const ARCHETYPES = ["degen", "trader", "influencer", "hodler"] as const;
+const DIFFICULTIES = ["EASY", "NORMAL", "BOSS"] as const;
+const MODES = [
+  "classic",
+  "chaos",
+  "historical",
+  "IRONMAN-classic",
+  "IRONMAN-chaos",
+  "IRONMAN-historical",
+] as const;
+
 const runSchema = z.object({
   name: z.string().trim().min(1).max(18),
-  arch: z.string().trim().min(1).max(24),
-  country: z.string().trim().min(1).max(24),
-  difficulty: z.string().trim().min(1).max(16),
-  mode: z.string().trim().min(1).max(24),
+  arch: z.enum(ARCHETYPES),
+  country: z.enum(COUNTRIES),
+  difficulty: z.enum(DIFFICULTIES),
+  mode: z.enum(MODES),
   net: z.number().finite().min(-1e9).max(1e10),
   xp: z.number().int().min(0).max(5_000_000),
   level: z.number().int().min(1).max(50),
@@ -131,7 +143,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           net_worth: run.net,
           xp: run.xp,
           level: run.level,
-          rank_title: RANKS.includes(run.rank) ? run.rank : run.rank.slice(0, 32),
+          rank_title: RANKS.includes(run.rank) ? run.rank : "",
           months_survived: run.months,
           achievements: run.achievements,
           trades: run.trades,

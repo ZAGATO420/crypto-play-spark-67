@@ -2349,8 +2349,8 @@ function renderGlobalLeaderboard(listId){
       <div class="global-lb-left">
         <div class="global-lb-rank">#${i+1} ${rankIcon}</div>
         <div>
-          <div class="global-lb-name">${(()=>{const c=p.country||''; const map={DE:'🇩🇪',USA:'🇺🇸',CH:'🇨🇭',SG:'🇸🇬',PT:'🇵🇹',NG:'🇳🇬'}; return map[c]||c||'🏳️';})()} ${escapeHtml(p.name||'Anon')}</div>
-          <div class="global-lb-meta">${escapeHtml(p.difficulty||'BOSS')} ${p.level?('• LVL '+p.level+' '):''} • ${p.months||0} mo • ${new Date(p.timestamp||Date.now()).toLocaleDateString()}</div>
+          <div class="global-lb-name">${(()=>{const c=p.country||''; const map={DE:'🇩🇪',USA:'🇺🇸',CH:'🇨🇭',SG:'🇸🇬',PT:'🇵🇹',NG:'🇳🇬'}; return map[c]||escapeHtml(c)||'🏳️';})()} ${escapeHtml(p.name||'Anon')}</div>
+          <div class="global-lb-meta">${escapeHtml(p.difficulty||'BOSS')} ${p.level?('• LVL '+escapeHtml(p.level)+' '):''} • ${escapeHtml(p.months||0)} mo • ${escapeHtml(new Date(p.timestamp||Date.now()).toLocaleDateString())}</div>
         </div>
       </div>
       <div class="global-lb-right">
@@ -2359,7 +2359,7 @@ function renderGlobalLeaderboard(listId){
     </div>`;
   }).join('');
 }
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 async function submitGlobalScore(){
   const input = document.getElementById('global-name-input');
