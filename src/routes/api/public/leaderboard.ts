@@ -21,6 +21,17 @@ const RANKS = [
   "Rekt",
   "Survivor",
   "Dead",
+  // titles produced by the client's getRank()
+  "Early Rekt",
+  "Certified Rekt",
+  "Late Game Rekt",
+  "Final Boss Material",
+  "Top 3% Diamond Hands",
+  "Top 8% Survivor",
+  "Solid Survivor",
+  "Achievement Hunter",
+  "Made It",
+  "Unknown",
 ];
 
 const COUNTRIES = ["DE", "USA", "CH", "SG", "PT", "NG"] as const;
