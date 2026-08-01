@@ -21,8 +21,8 @@ export const W4Choice: React.FC<{ dur: number }> = ({ dur }) => {
   return (
     <AbsoluteFill>
       <WBg tint={C.purple} />
-      <div style={{ position: "absolute", left: -40, top: 40, width: 1120, height: 1000, overflow: "hidden", borderRadius: 20, opacity: interpolate(f, [4, 20], [0, 1], { extrapolateRight: "clamp" }) }}>
-        <Shot src="img/s_ov0_decision-overlay.png" from={1.16} to={1.3} y={-50} dur={dur} />
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 1080, overflow: "hidden", opacity: interpolate(f, [4, 20], [0, 1], { extrapolateRight: "clamp" }) }}>
+        <Shot src="img/s_ov0_decision-overlay.png" from={2.0} to={2.24} y={-150} dur={dur} />
       </div>
       <AbsoluteFill style={{ background: `linear-gradient(270deg, ${C.bg} 36%, transparent 66%)` }} />
 
