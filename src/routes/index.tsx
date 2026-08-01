@@ -3,8 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 const TITLE = "THE CRYPTO FINAL BOSS — Crypto Trading Survival Game 2020–2026";
 const DESCRIPTION =
   "Trade real historical crypto prices from 2020 to 2026. Survive presales, rugs, airdrops, leverage and liquidations across 84 months — climb the global leaderboard.";
-const OG_IMAGE =
-  "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e0ecbba0-79a2-4955-b7a6-c8d465adcd7a/id-preview-c53c0856--2a796c05-ed68-4e85-996a-dca7fcf09410.lovable.app-1785515630030.png";
+// Own branded 1200x630 card. The previous value was an auto-generated preview
+// screenshot, which is why shared links showed platform branding.
+const OG_IMAGE = "https://thecryptofinalboss.app" + ogAsset.url;
 
 export const Route = createFileRoute("/")({
   head: () => ({
