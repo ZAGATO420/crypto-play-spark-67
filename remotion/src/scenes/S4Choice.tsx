@@ -31,8 +31,8 @@ export const S4Choice: React.FC<{ dur: number }> = ({ dur }) => {
         </div>
       </div>
 
-      <div style={{ position: "absolute", top: 560, left: 40, right: 40, opacity: interpolate(f, [6, 22], [0, 1], { extrapolateRight: "clamp" }) }}>
-        <Shot src="img/s_ov0_decision-overlay.png" from={1.04} to={1.14} y={-40} dur={dur} />
+      <div style={{ position: "absolute", top: 620, left: -60, right: -60, height: 700, overflow: "hidden", borderRadius: 22, opacity: interpolate(f, [6, 22], [0, 1], { extrapolateRight: "clamp" }) }}>
+        <Shot src="img/s_ov0_decision-overlay.png" from={1.3} to={1.44} y={-60} dur={dur} />
       </div>
 
       <div style={{ position: "absolute", top: 1400, left: 80, right: 80 }}>
