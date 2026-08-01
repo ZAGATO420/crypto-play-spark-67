@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig, spring, interpolate, Sequence } from "remotion";
+import { AbsoluteFill, Img, staticFile, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import { WBg } from "./WBg";
 import { Ticker } from "./Ticker";
 import { display, mono } from "./fonts";
@@ -17,14 +17,12 @@ export const W1Hook: React.FC = () => {
     <AbsoluteFill>
       <WBg tint={C.purple} />
       <AbsoluteFill style={{ transform: `scale(${push})` }}>
-        <div style={{ position: "absolute", left: 96, top: 0, bottom: 0, width: 820, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <Row delay={10} text="JANUARY 2020." size={112} color={C.text} />
-          <Row delay={22} text="YOU HAVE $5,000." size={112} color={C.gold} />
-          <Sequence from={38}>
-            <div style={{ fontFamily: mono, fontSize: 44, letterSpacing: "0.16em", color: C.purple2, marginTop: 26, opacity: interpolate(f - 38, [0, 12], [0, 1], { extrapolateRight: "clamp" }) }}>
-              84 MONTHS TO SURVIVE
-            </div>
-          </Sequence>
+        <div style={{ position: "absolute", left: 96, top: 0, bottom: 0, width: 940, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <Row delay={10} text="JANUARY 2020." size={96} color={C.text} />
+          <Row delay={22} text="YOU HAVE $5,000." size={96} color={C.gold} />
+          <div style={{ fontFamily: mono, fontSize: 40, letterSpacing: "0.16em", color: C.purple2, marginTop: 28, whiteSpace: "nowrap", opacity: interpolate(f, [38, 50], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
+            84 MONTHS TO SURVIVE
+          </div>
         </div>
         <div style={{ position: "absolute", right: 40, bottom: -60, transform: `translateY(${float}px) scale(${interpolate(ape, [0, 1], [0.68, 1])})` }}>
           <div style={{ position: "absolute", inset: -90, borderRadius: 999, background: `radial-gradient(circle, ${C.gold}3a, transparent 70%)` }} />
