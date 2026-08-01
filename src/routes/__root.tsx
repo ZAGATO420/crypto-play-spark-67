@@ -88,8 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "The Crypto Final Boss is LIVE.\nThe game is harder than the market itself\n\nSurvive 2020 → 2026. 🤑" },
       { property: "og:description", content: "The Crypto Final Boss is LIVE.\nThe game is harder than the market itself\n\nSurvive 2020 → 2026. 🤑" },
       { name: "twitter:description", content: "The Crypto Final Boss is LIVE.\nThe game is harder than the market itself\n\nSurvive 2020 → 2026. 🤑" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785527829319-social-image.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785527829319-social-image.webp" },
     ],
     links: [
       {
