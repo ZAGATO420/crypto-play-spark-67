@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ogAsset from "@/assets/tcfb-og.jpg.asset.json";
 
 const TITLE = "THE CRYPTO FINAL BOSS — Crypto Trading Survival Game 2020–2026";
 const DESCRIPTION =
