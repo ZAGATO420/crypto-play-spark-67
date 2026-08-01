@@ -859,7 +859,7 @@ const DIFF={EASY:{cash:1.45,cost:.85,risk:.75,fee:.55,infl:.055},NORMAL:{cash:1.
 function inflMult(){ if(!state)return 1; const y=Math.floor((state.month||0)/12); return Math.pow(1+((DIFF[state.diff]&&DIFF[state.diff].infl)||.1), y) }
 /* Rookie ramp: cheap first year so you can build a stack, then the real
    cost of living kicks in and compounds with inflation. */
-function rampMult(){ if(!state)return 1; const m=state.month||0; return m<6?.5:m<12?.72:m<24?.88:1 }
+function rampMult(){ if(!state)return 1; const m=state.month||0; return m<6?.5:m<12?.72:m<24?.85:m<36?.95:1 }
 function costMult(){ return rampMult()*inflMult() }
 const ARCH={degen:{cash:5000,debt:0,memeBonus:1.2,feeMult:1,riskMult:1.15,stressMult:1.1},trader:{cash:10000,debt:0,memeBonus:1,feeMult:.5,riskMult:1,stressMult:1},influencer:{cash:9000,debt:12000,memeBonus:1.05,feeMult:1,riskMult:1.05,stressMult:1.05},hodler:{cash:8000,debt:0,memeBonus:1,feeMult:1,riskMult:.85,stressMult:.85}};
 
