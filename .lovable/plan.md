@@ -1,42 +1,40 @@
-## Umfang
+## Ziel
 
-Historical-Wissen bleibt unangetastet — wer die echten Projekte kennt, soll in diesem Modus belohnt werden. Stattdessen: Side Quests limitieren, alle Stufen (inklusive EASY und NORMAL) härter machen, End-Screen im CI neu bauen, plus neue Features.
+Eine Reply-Bibliothek, aus der du in 5 Sekunden eine passende Antwort kopierst — kurz, menschlich, mit klarem Hook, der Leute auf dein Profil zieht. Keine KI-Floskeln ("Absolutely!", "This is huge", Em-Dashes, Emoji-Ketten, Hashtags).
 
-## 1. Side Quests begrenzen
+## Was gebaut wird
 
-Aktuell ist der Button „PLAY SIDE QUEST" in `public/game.html` dauerhaft aktiv (nur durch Cash begrenzt), zusätzlich 22% Zufallschance pro Monat. Der Erwartungswert ist positiv (Gas War zahlt 2.6×, „Backrun" gibt den Einsatz voll zurück) — damit ist es eine Geldmaschine.
+Eine neue Datei `x-assets/x-reply-library.md` mit 300+ Replies, gruppiert nach den Themen, unter denen Crypto-X wirklich postet:
 
-- **Ticket-System:** 1 Ticket pro Quartal, weitere nur als Belohnung aus Quests/Achievements. Sichtbarer Ticket-Zähler im Ops-Panel.
-- Zufalls-Trigger bleibt, wird aber kontextgebunden: Gas War beim Sniping, Rug Detector bei Launches, Candle Call bei hoher Volatilität.
-- Erwartungswert wird negativ: „Backrun" zahlt nur 0.6×, das Gas-Fenster schrumpft mit steigendem Monat, Einsätze skalieren mit dem Netto. Side Quests = Gamble, nicht Einkommen.
+1. **Loss / Rekt Posts** (liquidiert, Rug erwischt, "down 90%")
+2. **Gains / Flex Posts** (100x, PnL-Screenshots)
+3. **Memecoins & Pump.fun** (Launches, Snipes, Dev sold)
+4. **Airdrops & Farming** (Sybil, Claims, "war es das wert?")
+5. **Scams, Hacks, Drainer, Wallet-Security**
+6. **Market Calls & Predictions** (Bull/Bear, "Top ist drin")
+7. **Nostalgie / Zyklen** (2021, LUNA, FTX, "wo warst du 2020")
+8. **Trading-Psychologie & Burnout** (Stress, Schlaf, Beziehung)
+9. **CT-Drama & Influencer-Calls**
+10. **Gaming / Crypto-Games / Web3-Gaming**
+11. **Builder- & Dev-Posts** (Shipping, Solo-Builder)
+12. **Fragen-Posts von großen Accounts** ("What's your biggest L?" — die stärkste Follower-Quelle)
+13. **Meme / Humor-Posts** (Pure Punchline, kein Pitch)
+14. **Newbie-Fragen** (Hilfe geben = Autorität aufbauen)
 
-## 2. Härtere Balance auf allen Stufen
+Pro Thema ca. 20–25 Replies, aufgeteilt in drei Typen:
+- **Pure Value/Witz** (~60%) — kein Link, kein Spielname. Baut Reputation, bekommt Likes.
+- **Soft Hook** (~30%) — erwähnt beiläufig, dass du ein Game gebaut hast, ohne Link. Neugierige klicken aufs Profil.
+- **Direkter Pitch** (~10%) — nur für Threads, in denen aktiv nach Games/Tools gefragt wird.
 
-- **Startkapital-Boni runter:** EASY 1.25× (statt 1.5×), NORMAL 1.05× (statt 1.2×), BOSS 0.85×.
-- **Kostenfaktoren rauf:** EASY 0.85 (statt 0.6), NORMAL 1.0 (statt 0.8), BOSS 1.25.
-- **Risikofaktoren rauf:** EASY 0.75 (statt 0.5), NORMAL 0.9 (statt 0.75) — auch auf EASY tut ein Drainer weh.
-- **Inflation:** Miete, Essen und Fees steigen jährlich um 8–12%, mit sichtbarem Hinweis im Kostenpanel. Fixkosten wachsen also über die 84 Monate mit.
-- **Sicherheitsnetze entschärfen:** Zwangsverkauf nur noch mit 6% Notverkaufs-Abschlag plus Stress-Strafe und maximal 3× pro Run; Auto-Mahlzeit kostet mehr und greift nur bei ausreichend Cash.
-- **Jahresende-Steuer:** realisierte Gewinne werden mit dem echten Ländersatz nachversteuert statt pauschal 35% — CH bleibt günstig, DE/USA tun weh.
-- **Schulden verzinsen sich** monatlich, Margin-Call bei zu hohem Perp-Risiko, harte Verlust-Events (CEX-Insolvenz, Wallet-Drainer) bekommen echtes Gewicht.
+## Zusätzlich in der Datei
 
-## 3. End-Screen komplett neu im CI
-
-Aktuell technisch alt: doppelte `id="end-lb-list"` (lokales und globales Board kollidieren), doppelte `style`-Attribute, Label „RUN RECAP // v2.1 DEV", per JS nachgehängte CTA-Box, keine CI-Farben.
-
-- Neuer Aufbau: Boss-Rank-Karte mit Affe, Gold/Purple-Verlauf, animierte Zähler für Netto/XP/Monate.
-- Kacheln für Trades, Rugs, Moons, Liquidationen, Airdrops; Achievements als Grid.
-- Globales und lokales Leaderboard klar getrennt (ID-Kollision behoben), Submit-Feld im neuen Stil, durchgehend Englisch.
-- Share-Card als Bild-Export im CI plus X-Share mit vorformuliertem Text und Score.
-
-## 4. Neue Features
-
-1. **Daily Challenge / Seed-Run** — täglich fester Seed, alle spielen dasselbe Szenario, direkt vergleichbare Scores. Ideal für X-Posts und tägliche Rückkehr.
-2. **Rivalen** — 3 KI-Degens mit eigenem Portfolio, laufender Vergleich während des Runs.
-3. **Prestige** — nach dem Run permanente Perks freischalten, NG+ mit härteren Modifikatoren.
+- **Reply-Regeln:** wann welcher Typ, max. 1 Pitch pro 10 Replies, Timing (erste 10 Min nach Post), Ziel-Accountgrößen, kein Link in Replies bei kleinen Accounts (Reach-Nachteil).
+- **Anti-KI-Checkliste:** verbotene Wörter/Zeichen, Kleinschreibung wo passend, Tippfehler-Toleranz, max. Länge (unter 120 Zeichen performt am besten).
+- **Variablen-Platzhalter** wie `[coin]`, `[jahr]`, `[zahl]`, damit jede Reply an den konkreten Post angepasst wird und nichts als Copy-Paste-Spam auffällt.
+- **20 Quote-Tweet-Vorlagen** für fremde Posts, die du auf deine Timeline holst.
 
 ## Technische Details
 
-- Alles im Single-File `public/game.html`: Balance-Konstanten, Minigame-Gating, End-Screen-Markup und Renderer.
-- `src/routes/api/public/leaderboard.ts`: Plausibilitätsgrenzen an die neue Ökonomie anpassen, `mode`-Enum um die Daily-Challenge-Modi erweitern.
-- Verifikation per Playwright: automatisierte Runs auf EASY/NORMAL/BOSS (je mit und ohne Ironman) mit „nur essen und durchklicken"-Strategie. Ziel: diese Strategie überlebt keine 84 Monate mehr, auch nicht auf EASY.
+- Reine Markdown-Datei unter `x-assets/`, kein Code-Impact, kein Deploy nötig.
+- Sprache der Replies: Englisch (dein Account postet englisch), Regeln und Erklärungen auf Deutsch.
+- Bei Bedarf danach als Aufteilung in mehrere Dateien pro Thema oder als CSV für schnelles Filtern.
