@@ -853,10 +853,14 @@ const HISTORICAL_WINS={
 };
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COUNTRIES={DE:{rent:1500,tax:.3,flag:'🇩🇪',riskMod:.85,stressMod:.9,airdropMod:1,name:'Germany'},USA:{rent:2000,tax:.25,flag:'🇺🇸',riskMod:1,stressMod:1.05,airdropMod:1.25,name:'USA'},CH:{rent:2000,tax:.18,flag:'🇨🇭',riskMod:.78,stressMod:.85,airdropMod:.9,name:'Switzerland'},SG:{rent:2200,tax:.15,flag:'🇸🇬',riskMod:.9,stressMod:1.15,airdropMod:1.1,name:'Singapore'},PT:{rent:1250,tax:.2,flag:'🇵🇹',riskMod:.95,stressMod:.8,airdropMod:1,name:'Portugal'},NG:{rent:800,tax:.1,flag:'🇳🇬',riskMod:1.22,stressMod:1.08,airdropMod:.85,name:'Nigeria'}};
-const DIFF={EASY:{cash:1.25,cost:.85,risk:.75,fee:.55,infl:.08},NORMAL:{cash:1.05,cost:1,risk:.9,fee:.8,infl:.10},BOSS:{cash:.85,cost:1.25,risk:1.15,fee:1,infl:.12}};
+const DIFF={EASY:{cash:1.45,cost:.85,risk:.75,fee:.55,infl:.08},NORMAL:{cash:1.2,cost:1,risk:.9,fee:.8,infl:.10},BOSS:{cash:1,cost:1.25,risk:1.15,fee:1,infl:.12}};
 /* Inflation: living costs compound every survived year, so a passive
    "click next month" run slowly bleeds out. */
 function inflMult(){ if(!state)return 1; const y=Math.floor((state.month||0)/12); return Math.pow(1+((DIFF[state.diff]&&DIFF[state.diff].infl)||.1), y) }
+/* Rookie ramp: cheap first year so you can build a stack, then the real
+   cost of living kicks in and compounds with inflation. */
+function rampMult(){ if(!state)return 1; const m=state.month||0; return m<6?.5:m<12?.72:m<24?.88:1 }
+function costMult(){ return rampMult()*inflMult() }
 const ARCH={degen:{cash:5000,debt:0,memeBonus:1.2,feeMult:1,riskMult:1.15,stressMult:1.1},trader:{cash:10000,debt:0,memeBonus:1,feeMult:.5,riskMult:1,stressMult:1},influencer:{cash:9000,debt:12000,memeBonus:1.05,feeMult:1,riskMult:1.05,stressMult:1.05},hodler:{cash:8000,debt:0,memeBonus:1,feeMult:1,riskMult:.85,stressMult:.85}};
 
 const EARLY_DECISIONS=[
