@@ -24,18 +24,26 @@ const Beat: React.FC<(typeof BEATS)[number]> = ({ img, tag, line, sub, tint, dur
       <WBg tint={tint} flash />
       <div
         style={{
-          position: "absolute", top: 0, bottom: 0, width: 1150, overflow: "hidden",
+          position: "absolute", top: 0, bottom: 0, width: 1020, overflow: "hidden",
           [imgLeft ? "left" : "right"]: -60,
           transform: `translateX(${shake}px)`,
         }}
       >
         <Img src={staticFile(img)} style={{ width: "100%", transform: `scale(${sc})`, filter: "brightness(.9) saturate(1.1)" }} />
       </div>
-      <AbsoluteFill style={{ background: `linear-gradient(${imgLeft ? "270deg" : "90deg"}, ${C.bg} 32%, ${C.bg}cc 46%, transparent 68%)` }} />
+      <AbsoluteFill style={{ background: `linear-gradient(${imgLeft ? "270deg" : "90deg"}, ${C.bg} 40%, ${C.bg}dd 52%, transparent 72%)` }} />
 
-      <div style={{ position: "absolute", top: 330, [imgLeft ? "right" : "left"]: 96, width: 720, textAlign: imgLeft ? "right" : "left" } as React.CSSProperties}>
+      <div style={{ position: "absolute", top: 330, [imgLeft ? "right" : "left"]: 90, width: 780, textAlign: imgLeft ? "right" : "left" } as React.CSSProperties}>
         <div style={{ fontFamily: mono, fontSize: 28, letterSpacing: "0.26em", color: tint, opacity: interpolate(s, [0, 1], [0, 1]) }}>{tag}</div>
-        <div style={{ fontFamily: display, fontWeight: 900, fontSize: 110, color: C.text, marginTop: 12, letterSpacing: "-0.03em", clipPath: `inset(0 ${imgLeft ? "" : ""}${interpolate(s, [0, 1], [100, 0])}% 0 0)`, textShadow: `0 0 60px ${tint}55` }}>{line}</div>
+        <div
+          style={{
+            fontFamily: display, fontWeight: 900, fontSize: 96, color: C.text, marginTop: 12, letterSpacing: "-0.03em", whiteSpace: "nowrap",
+            clipPath: imgLeft
+              ? `inset(0 0 0 ${interpolate(s, [0, 1], [100, 0])}%)`
+              : `inset(0 ${interpolate(s, [0, 1], [100, 0])}% 0 0)`,
+            textShadow: `0 0 60px ${tint}55`,
+          }}
+        >{line}</div>
         <div style={{ fontFamily: mono, fontWeight: 700, fontSize: 42, color: tint, marginTop: 10, transform: `translateY(${interpolate(s, [0, 1], [24, 0])}px)`, opacity: s }}>{sub}</div>
       </div>
     </AbsoluteFill>
