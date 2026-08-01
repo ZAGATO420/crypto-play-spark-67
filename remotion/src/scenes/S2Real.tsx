@@ -26,7 +26,7 @@ export const S2Real: React.FC<{ dur: number }> = ({ dur }) => {
         }}>EVERY PRICE<br /><span style={{ color: C.gold }}>IS HISTORICAL.</span></div>
       </div>
 
-      <div style={{ position: "absolute", top: 560, left: -220, right: -220, overflow: "hidden", opacity: interpolate(f, [8, 26], [0, 1], { extrapolateRight: "clamp" }) }}>
+      <div style={{ position: "absolute", top: 580, left: -220, right: -220, height: 740, overflow: "hidden", opacity: interpolate(f, [8, 26], [0, 1], { extrapolateRight: "clamp" }) }}>
         <Shot src="img/s_late.png" from={1.22} to={1.4} y={-120} dur={dur} />
       </div>
 
