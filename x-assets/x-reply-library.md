@@ -312,7 +312,7 @@ ehrlich, nie therapeutisch.
 4. `[P]` deleted tweets are the only reliable indicator left
 5. `[P]` the alpha group costs $300 a month and the alpha is "buy bitcoin"
 6. `[P]` nobody posts their losing calls and thats the entire business model
-7. `[P]" the guy calling everyone a scammer usually has the most interesting wallet
+7. `[P]` the guy calling everyone a scammer usually has the most interesting wallet
 8. `[P]` popcorn out. learning nothing. loving it
 9. `[P]` 2 weeks and nobody will remember any of this
 10. `[P]` the screenshot war is my favorite genre of content
