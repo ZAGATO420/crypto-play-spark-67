@@ -1061,7 +1061,7 @@ function nextMonth(){
 
   const c=COUNTRIES[state.country];
   const d=DIFF[state.diff];
-  const infl=inflMult();
+  const infl=costMult();
   const monthlyCost=Math.round((c.rent+400+[80,50,30,15][Math.min(3,state.feeLevel||0)])*d.cost*infl);
   state.cash-=monthlyCost;
   state._monthlyCost=monthlyCost;
@@ -1108,7 +1108,7 @@ function nextMonth(){
   }
   // auto-eat if starving: cheapest possible meal, scales with inflation, no free bags
   if(state.hunger>85){
-    const meal=Math.round(30*infl);
+    const meal=Math.round(30*Math.max(.6,infl));
     if(state.cash>=meal){state.cash-=meal;state.hunger=Math.max(0,state.hunger-18);toast('🍜 Auto-meal bought (-'+fmt(meal)+')','buy')}
     else {state.health=Math.max(0,state.health-7);addNews('No money for food – health dropping')}
   }
@@ -2256,7 +2256,7 @@ function emergencyRaise(need){
   if(raised>0){state.cash+=raised;state.lastSellMonth=state.month;}
   return raised;
 }
-function itemPrice(type){const base={food:34,therapy:260,gym:170}[type]||0;return Math.round(base*(DIFF[state.diff]?DIFF[state.diff].cost:1)*inflMult())}
+function itemPrice(type){const base={food:34,therapy:260,gym:170}[type]||0;return Math.round(base*(DIFF[state.diff]?DIFF[state.diff].cost:1)*Math.max(.6,costMult()))}
 function buyItem(type){if(!state||state._gameEnded)return;const items={food:{h:-22,s:-4},therapy:{s:-26,r:-3,hp:4},gym:{h:-16,s:-14,hp:11}};const it=items[type];if(!it)return;
   const cost=itemPrice(type);
   if(state.cash<cost){toast('Not enough cash for '+type+' ('+fmt(cost)+') – sell something','sell');return}
@@ -2264,10 +2264,10 @@ function buyItem(type){if(!state||state._gameEnded)return;const items={food:{h:-
 function updateHeader(){if(!state)return;document.getElementById('hdr-name').textContent=state.name;document.getElementById('hdr-avatar').textContent=state.avatar;const storIcon=state.storage==='ledger'?'🔒 Ledger':state.storage==='exchange'?'🏦 Exchange':state.storage==='split'?'⚖️ Split':'';
   const narrIcon=state.narrative==='meme'?'🐸 Meme':state.narrative==='l1'?'⛓️ L1':state.narrative==='defi'?'📈 DeFi':'';
   document.getElementById('hdr-meta').textContent=COUNTRIES[state.country].flag+' '+dateStr()+' • '+state.arch+' • '+state.diff+(storIcon?' • '+storIcon:'')+(narrIcon?' • '+narrIcon:'')+(state.ironman?' • IRONMAN':'');document.getElementById('stat-cash').textContent=fmt(state.cash);document.getElementById('stat-net').textContent=fmt(netWorth());document.getElementById('stat-port').textContent=fmt(portValue());document.getElementById('stat-risk').textContent=state.risk.toFixed(0)+'%';document.getElementById('risk-fill').style.width=Math.min(100,state.risk)+'%';document.getElementById('h-val').textContent=Math.round(state.hunger)+'%';document.getElementById('s-val').textContent=Math.round(state.stress)+'%';document.getElementById('hp-val').textContent=Math.round(state.health)+'%';document.getElementById('h-fill').style.width=state.hunger+'%';document.getElementById('s-fill').style.width=state.stress+'%';document.getElementById('hp-fill').style.width=state.health+'%';document.getElementById('h-fill').style.background=state.hunger>70?'#ef4444':state.hunger>40?'#facc15':'#22c55e';document.getElementById('s-fill').style.background=state.stress>70?'#ef4444':state.stress>40?'#facc15':'#22c55e';document.getElementById('hp-fill').style.background=state.health<35?'#ef4444':state.health<65?'#facc15':'#22c55e';document.getElementById('date-label').textContent=dateStr().toUpperCase();document.getElementById('month-prog').textContent=(state.month+1)+' / 84';document.getElementById('timeline-fill').style.width=(state.month/84*100)+'%';const s=state.sentiment;document.getElementById('sent-fill').style.width=s+'%';document.getElementById('sent-fill').style.background=s>65?'#22c55e':s<35?'#ef4444':'#facc15';document.getElementById('sent-label').textContent=s>70?'GREED':s>55?'BULLISH':s<30?'FEAR':s<45?'BEARISH':'NEUTRAL';updateChart();updateCriticalWarning();renderNews()}
-function updateSidePanels(){if(!state)return;const c=COUNTRIES[state.country];const d=DIFF[state.diff];const infl=inflMult();const rent=Math.round(c.rent*d.cost*infl);const food=Math.round(400*d.cost*infl);let passive=0;Object.keys(state.businesses).forEach(id=>{const b=BUSINESS.find(x=>x.id===id);if(b)passive+=b.monthly});
+function updateSidePanels(){if(!state)return;const c=COUNTRIES[state.country];const d=DIFF[state.diff];const infl=costMult();const rent=Math.round(c.rent*d.cost*infl);const food=Math.round(400*d.cost*infl);let passive=0;Object.keys(state.businesses).forEach(id=>{const b=BUSINESS.find(x=>x.id===id);if(b)passive+=b.monthly});
   try{['food','therapy','gym'].forEach(t=>{const el=document.getElementById('price-'+t);if(el)el.textContent=fmt(itemPrice(t))})}catch(e){}
   document.getElementById('cost-list').innerHTML=`
-    ${infl>1.001?`<div style="font-size:10px;color:var(--gold);margin-bottom:5px;font-weight:700">🔥 Inflation +${Math.round((infl-1)*100)}% since 2020</div>`:''}
+    ${state.month<24?`<div style="font-size:10px;color:#22d3ee;margin-bottom:5px;font-weight:700">🌱 Rookie discount active – costs rise in ${Math.max(1,(state.month<6?6:state.month<12?12:24)-state.month)} mo</div>`:''}${inflMult()>1.001?`<div style="font-size:10px;color:var(--gold);margin-bottom:5px;font-weight:700">🔥 Inflation +${Math.round((inflMult()-1)*100)}% since 2020</div>`:''}
     <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Rent</span><span>-${fmt(rent)}</span></div>
     <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Food</span><span>-${fmt(food)}</span></div>
     <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Tax (on profit)</span><span>${(c.tax*100).toFixed(0)}%</span></div>
