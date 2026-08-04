@@ -32,6 +32,16 @@ Ziel: weniger Scrollen, klare Bereiche, große Tap-Flächen.
 - Popups und Events füllen auf Mobile die Breite und sitzen mittig ohne Scroll-Sprung.
 
 ## Technische Notizen
+
+## 5. Neue Hintergrundmusik (kräftiger)
+Die aktuelle generative Ambient-Fläche ist zu lasch. Neu: ein richtiger Track mit Puls.
+
+- Dunkler Synthwave/Trading-Floor-Loop: tiefer Bass-Puls, dezente Kick, Arpeggio in Gold/Violett-Stimmung — treibend, aber nicht nervig über 15+ Minuten.
+- Produziert als echter Audio-Loop (ca. 90–120 s, saubere Schleife) und als CDN-Asset eingebunden, damit die Spieldatei leicht bleibt.
+- Der bestehende Musik-Regler steuert weiter Lautstärke (Default etwas höher, ~40 %), 0 % = aus; Ducking bei Event-Sounds und Pause bei inaktivem Tab bleiben.
+- Fallback: wenn der Loop nicht lädt, greift die bisherige generative Fläche.
+
+## Technische Notizen
 Alles in `public/game.html`:
 - `.start-card::before` (Ape-Wasserzeichen) entfällt; neuer freigestellter Affe wird per `imagegen` erzeugt, als `lovable-assets`-Pointer eingebunden und im `.logo-hero` als `<img class="title-ape">` rechts neben dem Titel positioniert (Flex-Zeile, `clamp()`-Höhe, Float-Keyframe, Glow via `drop-shadow`).
 - `.logo-hero::after` / `.howto::before` / `.leaderboard::before`-Backdrops entfallen; `#start-screen` bekommt statt des Affen zwei radiale Auren.
