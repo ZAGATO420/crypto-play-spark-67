@@ -955,6 +955,7 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
           <div class="surv-item"><div class="top"><span>🧠</span><span id="s-val">15%</span></div><div class="bar"><div class="fill" id="s-fill" style="width:15%;background:#22c55e"></div></div></div>
           <div class="surv-item"><div class="top"><span>❤️</span><span id="hp-val">100%</span></div><div class="bar"><div class="fill" id="hp-fill" style="width:100%;background:#22c55e"></div></div></div>
         </div>
+        <button class="tc-btn" id="sound-btn" style="background:#1a1e33;border-color:#3f3f46" onclick="toggleSoundBtn()" title="Sound an">🔊</button>
         <button class="tc-btn" style="background:#1a1e33;border-color:#3f3f46" onclick="openSettings()">⚙️</button>
         <button class="tc-btn" style="background:#2a1620;border-color:#5a2338;color:#ff8fa3" onclick="quitGame()">QUIT</button>
       </div>
@@ -1151,7 +1152,7 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
     <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Audio & Preferences</div>
     <div class="settings-row">
       <label>Music Volume</label>
-      <input type="range" class="vol-slider" id="music-vol" min="0" max="100" value="40" oninput="setMusicVol(this.value)">
+      <input type="range" class="vol-slider" id="music-vol" min="0" max="100" value="30" oninput="setMusicVol(this.value)">
     </div>
     <div class="settings-row">
       <label>SFX Volume</label>
@@ -1171,15 +1172,106 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
 <script>
 
 /* ===================== AUDIO ===================== */
-let audioCtx=null,musicVol=0.4,sfxVol=0.7,muted=false;
-function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
-function playTone(freq,type,duration,volScale=1){if(muted||!audioCtx)return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=type;osc.frequency.value=freq;gain.gain.value=sfxVol*volScale*0.15;osc.connect(gain);gain.connect(audioCtx.destination);osc.start();gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration);osc.stop(audioCtx.currentTime+duration)}
-function playSound(name){if(muted)return;initAudio();switch(name){case'buy':playTone(520,'sine',0.12);setTimeout(()=>playTone(680,'sine',0.1),80);break;case'sell':playTone(380,'triangle',0.15);setTimeout(()=>playTone(280,'triangle',0.12),90);break;case'moon':playTone(600,'sine',0.15);setTimeout(()=>playTone(800,'sine',0.15),100);setTimeout(()=>playTone(1000,'sine',0.2),200);break;case'rug':playTone(200,'sawtooth',0.25);setTimeout(()=>playTone(120,'sawtooth',0.3),150);break;case'quest':playTone(660,'square',0.1);setTimeout(()=>playTone(880,'square',0.12),90);break;case'critical':playTone(150,'sawtooth',0.4);break;case'decision':playTone(440,'triangle',0.18);break;case'survive':playTone(523,'sine',0.2);setTimeout(()=>playTone(659,'sine',0.2),150);setTimeout(()=>playTone(784,'sine',0.3),300);break;case'rekt':playTone(180,'sawtooth',0.5);break;case'click':playTone(800,'sine',0.05,0.5);break}}
-function setMusicVol(v){musicVol=v/100;localStorage.setItem('tfcb_music',v)}
+let audioCtx=null,musicVol=0.30,sfxVol=0.7,muted=false,musicOn=true;
+let masterGain=null,sfxGain=null,musicGain=null,musicNodes=[],musicTimer=null,musicRunning=false;
+function initAudio(){
+  if(!audioCtx){
+    try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+    masterGain=audioCtx.createGain();masterGain.gain.value=1;masterGain.connect(audioCtx.destination);
+    sfxGain=audioCtx.createGain();sfxGain.gain.value=1;sfxGain.connect(masterGain);
+    musicGain=audioCtx.createGain();musicGain.gain.value=0;musicGain.connect(masterGain);
+  }
+  if(audioCtx.state==='suspended'){try{audioCtx.resume()}catch(e){}}
+  return audioCtx;
+}
+function playTone(freq,type,duration,volScale=1){if(muted||!audioCtx||sfxVol<=0)return;const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=type;osc.frequency.value=freq;gain.gain.value=sfxVol*volScale*0.15;osc.connect(gain);gain.connect(sfxGain||audioCtx.destination);osc.start();gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration);osc.stop(audioCtx.currentTime+duration)}
+/* --- music ducks briefly while a sound plays so feedback stays clear --- */
+function duckMusic(){if(!musicGain||!audioCtx||!musicRunning)return;const t=audioCtx.currentTime,tgt=targetMusicGain();musicGain.gain.cancelScheduledValues(t);musicGain.gain.setValueAtTime(Math.max(0.0001,musicGain.gain.value),t);musicGain.gain.linearRampToValueAtTime(tgt*0.45,t+0.06);musicGain.gain.linearRampToValueAtTime(tgt,t+1.1)}
+function targetMusicGain(){return (muted||!musicOn)?0:musicVol*0.42}
+
+/* ===================== CHILL AMBIENT ENGINE =====================
+   Generative slow pad + soft sub + sparse bells. Never loops audibly,
+   built to run 15+ minutes in the background without fatigue. */
+const MUSIC_ROOTS=[110.00,116.54,98.00,87.31,130.81]; /* A2 Bb2 G2 F2 C3 */
+const MUSIC_CHORDS=[[0,7,10,15],[0,3,7,14],[0,5,10,12],[0,7,12,19]];
+let musicStep=0;
+function musicPad(){
+  if(!audioCtx||!musicRunning)return;
+  const t=audioCtx.currentTime, root=MUSIC_ROOTS[musicStep%MUSIC_ROOTS.length], chord=MUSIC_CHORDS[(musicStep>>1)%MUSIC_CHORDS.length];
+  const dur=17+Math.random()*5;
+  chord.forEach((semi,i)=>{
+    const f=root*Math.pow(2,semi/12);
+    const o=audioCtx.createOscillator(),o2=audioCtx.createOscillator(),g=audioCtx.createGain(),lp=audioCtx.createBiquadFilter();
+    o.type='sawtooth';o2.type='triangle';
+    o.frequency.value=f;o2.frequency.value=f*1.004;
+    lp.type='lowpass';lp.frequency.value=340+i*160;lp.Q.value=0.6;
+    g.gain.value=0;
+    o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(musicGain);
+    const peak=(0.16/(i+1.1));
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(peak,t+5.5+i*0.7);
+    g.gain.linearRampToValueAtTime(0.0001,t+dur);
+    o.start(t);o2.start(t);o.stop(t+dur+0.2);o2.stop(t+dur+0.2);
+    musicNodes.push(o,o2);
+  });
+  /* sparse bell, ~55% of cycles */
+  if(Math.random()<0.55){
+    const semi=[12,15,19,22,24][Math.floor(Math.random()*5)];
+    const f=root*Math.pow(2,semi/12);
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.value=f;
+    const bt=t+3+Math.random()*8;
+    g.gain.setValueAtTime(0.0001,bt);
+    g.gain.linearRampToValueAtTime(0.055,bt+0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001,bt+5.5);
+    o.connect(g);g.connect(musicGain);o.start(bt);o.stop(bt+6);
+    musicNodes.push(o);
+  }
+  musicNodes=musicNodes.slice(-60);
+  musicStep++;
+}
+function startMusic(){
+  if(musicRunning)return;
+  if(!initAudio())return;
+  if(muted||!musicOn)return;
+  musicRunning=true;
+  musicGain.gain.setValueAtTime(0.0001,audioCtx.currentTime);
+  musicGain.gain.linearRampToValueAtTime(targetMusicGain(),audioCtx.currentTime+6);
+  musicPad();
+  musicTimer=setInterval(musicPad,12000);
+}
+function stopMusic(fade=2.5){
+  if(!musicRunning)return;
+  musicRunning=false;
+  if(musicTimer){clearInterval(musicTimer);musicTimer=null}
+  if(audioCtx&&musicGain){const t=audioCtx.currentTime;musicGain.gain.cancelScheduledValues(t);musicGain.gain.setValueAtTime(Math.max(0.0001,musicGain.gain.value),t);musicGain.gain.linearRampToValueAtTime(0.0001,t+fade)}
+  musicNodes=[];
+}
+function applyMusicGain(){if(audioCtx&&musicGain&&musicRunning){const t=audioCtx.currentTime;musicGain.gain.cancelScheduledValues(t);musicGain.gain.linearRampToValueAtTime(targetMusicGain(),t+0.4)}}
+function playSound(name){if(muted||sfxVol<=0)return;initAudio();if(!audioCtx)return;duckMusic();switch(name){case'buy':playTone(520,'sine',0.12);setTimeout(()=>playTone(680,'sine',0.1),80);break;case'sell':playTone(380,'triangle',0.15);setTimeout(()=>playTone(280,'triangle',0.12),90);break;case'moon':playTone(600,'sine',0.15);setTimeout(()=>playTone(800,'sine',0.15),100);setTimeout(()=>playTone(1000,'sine',0.2),200);break;case'rug':playTone(200,'sawtooth',0.25);setTimeout(()=>playTone(120,'sawtooth',0.3),150);break;case'quest':playTone(660,'square',0.1);setTimeout(()=>playTone(880,'square',0.12),90);break;case'critical':playTone(150,'sawtooth',0.4);break;case'decision':playTone(440,'triangle',0.18);break;case'survive':playTone(523,'sine',0.2);setTimeout(()=>playTone(659,'sine',0.2),150);setTimeout(()=>playTone(784,'sine',0.3),300);break;case'rekt':playTone(180,'sawtooth',0.5);break;case'click':playTone(800,'sine',0.05,0.5);break}}
+function setMusicVol(v){musicVol=v/100;musicOn=musicVol>0;localStorage.setItem('tfcb_music',v);if(musicOn&&!muted){startMusic();applyMusicGain()}else{stopMusic(1.2)}}
 function setSfxVol(v){sfxVol=v/100;localStorage.setItem('tfcb_sfx',v)}
-function toggleMute(val){muted=val;localStorage.setItem('tfcb_mute',val?'1':'0')}
-function loadAudioSettings(){const m=localStorage.getItem('tfcb_music');if(m!==null){musicVol=m/100;document.getElementById('music-vol').value=m}const s=localStorage.getItem('tfcb_sfx');if(s!==null){sfxVol=s/100;document.getElementById('sfx-vol').value=s}const mu=localStorage.getItem('tfcb_mute');if(mu==='1'){muted=true;document.getElementById('mute-all').checked=true}}
+function toggleMute(val){muted=!!val;localStorage.setItem('tfcb_mute',muted?'1':'0');if(muted){stopMusic(0.8)}else{initAudio();if(musicOn&&state)startMusic();applyMusicGain()}syncSoundBtn()}
+function toggleSoundBtn(){toggleMute(!muted);if(!muted)playSound('click')}
+function syncSoundBtn(){const b=document.getElementById('sound-btn');if(b){b.textContent=muted?'🔇':'🔊';b.title=muted?'Sound aus':'Sound an'}const c=document.getElementById('mute-all');if(c)c.checked=muted}
+function loadAudioSettings(){
+  try{
+    /* legacy: mobile runs used to force a permanent mute flag - clear it once */
+    if(localStorage.getItem('tfcb_mutefix')!=='1'){localStorage.removeItem('tfcb_mute');localStorage.setItem('tfcb_mutefix','1')}
+    const m=localStorage.getItem('tfcb_music');if(m!==null){musicVol=m/100;musicOn=musicVol>0;const el=document.getElementById('music-vol');if(el)el.value=m}else{const el=document.getElementById('music-vol');if(el)el.value=30}
+    const s=localStorage.getItem('tfcb_sfx');if(s!==null){sfxVol=s/100;const el=document.getElementById('sfx-vol');if(el)el.value=s}
+    const mu=localStorage.getItem('tfcb_mute');if(mu==='1'){muted=true;const el=document.getElementById('mute-all');if(el)el.checked=true}
+  }catch(e){}
+  syncSoundBtn();
+}
 loadAudioSettings();
+/* unlock audio on the very first user gesture (browsers start suspended) */
+function unlockAudio(){initAudio();if(!muted&&musicOn&&state&&!musicRunning)startMusic()}
+['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,unlockAudio,{passive:true}));
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){if(musicRunning&&audioCtx)try{audioCtx.suspend()}catch(e){}}
+  else if(audioCtx&&!muted){try{audioCtx.resume()}catch(e){}}
+});
 function openSettings(){playSound('click');document.getElementById('settings-overlay').classList.remove('hidden')}
 function closeSettings(){playSound('click');document.getElementById('settings-overlay').classList.add('hidden')}
 
@@ -1470,7 +1562,7 @@ function startGame(){
     actuallyStartGame();
   }catch(e){ console.error(e); alert('Start error: '+e.message); }
 }
-function actuallyStartGame(){try{initAudio();if(isMobile()){ try{localStorage.setItem('tfcb_mute','1');muted=true;}catch(e){} } playSound('click');const name=(document.getElementById('player-name').value||'Degen').trim();const archKey=document.querySelector('#archetypes .selected').dataset.arch;const diff=document.querySelector('#diffs .selected').dataset.diff;const country=document.querySelector('#countries .selected').dataset.country;const avatar=document.querySelector('#avatars .selected').textContent;const ironman=document.getElementById('ironman').checked;const pmode=document.querySelector('#presale-mode .selected').dataset.pmode;const d=DIFF[diff];const a=ARCH[archKey];const cash=Math.round(a.cash*d.cash);const debt=a.debt;state={name,arch:archKey,diff,country,avatar,ironman,pmode,month:0,day:1,cash,debt,holdings:{},avg:{},prices:{},noise:{},risk:8,hunger:20,stress:15,health:100,sentiment:50,feeLevel:1,businesses:{},quests:[],questsDone:0,achievements:[],netHistory:[cash],lastSellMonth:0,btcHoldStart:-1,memeHeld:new Set(),presaleWins:0,usedPresales:[],paused:false,speed:1,dayProgress:0,_mode:{},_amt:{},_presales:[],memeBonus:a.memeBonus,feeMult:a.feeMult,riskMult:a.riskMult*d.risk,stressMult:a.stressMult*(COUNTRIES[country].stressMod||1),countryRiskMod:COUNTRIES[country].riskMod||1,airdropMod:COUNTRIES[country].airdropMod||1,decisionCooldown:0,storage:null,job:null,narrative:null,earlyDone:{},newsLog:[],jobIncome:0,l1Bonus:1,defiBonus:1,xp:0,farms:[],airOffers:[],bags:[],launchOffers:[],perps:[],_perpLev:10,airdropTotal:0,rugged:0,moons:0,liquidations:0,minigames:0,sqTickets:1,_bailouts:0,_realizedYear:0,snipes:0,farmCount:0,histDone:{},histSkip:{},histLast:{},_histShownThisMonth:false};initHistPool();COINS.forEach(c=>{state.prices[c.s]=getHistPrice(c.s,0)||(c.base||1);state.noise[c.s]=1;state.holdings[c.s]=0;state.avg[c.s]=0});generateQuests();refreshPresales();refreshAirdrops();refreshLaunches();updateXPBar();renderDegenOps();document.getElementById('start-screen').style.display='none';document.getElementById('game-screen').style.display='block';if(ironman){document.getElementById('btn-week').disabled=true;document.getElementById('btn-month').disabled=true;document.getElementById('btn-pause').disabled=true}initChart();updateHeader();updateSidePanels();renderMarket();startTimer();toast('Game started – stay solvent!','buy');
+function actuallyStartGame(){try{initAudio();playSound('click');setTimeout(()=>{if(!muted&&musicOn)startMusic()},400);const name=(document.getElementById('player-name').value||'Degen').trim();const archKey=document.querySelector('#archetypes .selected').dataset.arch;const diff=document.querySelector('#diffs .selected').dataset.diff;const country=document.querySelector('#countries .selected').dataset.country;const avatar=document.querySelector('#avatars .selected').textContent;const ironman=document.getElementById('ironman').checked;const pmode=document.querySelector('#presale-mode .selected').dataset.pmode;const d=DIFF[diff];const a=ARCH[archKey];const cash=Math.round(a.cash*d.cash);const debt=a.debt;state={name,arch:archKey,diff,country,avatar,ironman,pmode,month:0,day:1,cash,debt,holdings:{},avg:{},prices:{},noise:{},risk:8,hunger:20,stress:15,health:100,sentiment:50,feeLevel:1,businesses:{},quests:[],questsDone:0,achievements:[],netHistory:[cash],lastSellMonth:0,btcHoldStart:-1,memeHeld:new Set(),presaleWins:0,usedPresales:[],paused:false,speed:1,dayProgress:0,_mode:{},_amt:{},_presales:[],memeBonus:a.memeBonus,feeMult:a.feeMult,riskMult:a.riskMult*d.risk,stressMult:a.stressMult*(COUNTRIES[country].stressMod||1),countryRiskMod:COUNTRIES[country].riskMod||1,airdropMod:COUNTRIES[country].airdropMod||1,decisionCooldown:0,storage:null,job:null,narrative:null,earlyDone:{},newsLog:[],jobIncome:0,l1Bonus:1,defiBonus:1,xp:0,farms:[],airOffers:[],bags:[],launchOffers:[],perps:[],_perpLev:10,airdropTotal:0,rugged:0,moons:0,liquidations:0,minigames:0,sqTickets:1,_bailouts:0,_realizedYear:0,snipes:0,farmCount:0,histDone:{},histSkip:{},histLast:{},_histShownThisMonth:false};initHistPool();COINS.forEach(c=>{state.prices[c.s]=getHistPrice(c.s,0)||(c.base||1);state.noise[c.s]=1;state.holdings[c.s]=0;state.avg[c.s]=0});generateQuests();refreshPresales();refreshAirdrops();refreshLaunches();updateXPBar();renderDegenOps();document.getElementById('start-screen').style.display='none';document.getElementById('game-screen').style.display='block';if(ironman){document.getElementById('btn-week').disabled=true;document.getElementById('btn-month').disabled=true;document.getElementById('btn-pause').disabled=true}initChart();updateHeader();updateSidePanels();renderMarket();startTimer();toast('Game started – stay solvent!','buy');
 setTimeout(()=>{if(state&&state.month===0&&!state.earlyDone['storage']){const ed=EARLY_DECISIONS.find(e=>e.id==='storage');if(ed)showEarlyDecision(ed);}},800)}catch(e){console.error(e);alert('Start error: '+e.message)}}
 
 function startTimer(){clearInterval(timer);timer=setInterval(()=>{if(!state||state.paused)return;if(!document.getElementById('event-overlay').classList.contains('hidden'))return;if(!document.getElementById('presale-overlay').classList.contains('hidden'))return;if(!document.getElementById('decision-overlay').classList.contains('hidden'))return;if(!document.getElementById('settings-overlay').classList.contains('hidden'))return;const ms={1:14000,2:7000,3:3500}[state.speed]||14000;state.dayProgress+=100/(ms/100);if(state.dayProgress>=100){state.dayProgress=0;advanceDays(1)}const el=document.getElementById('day-progress');if(el)el.style.width=state.dayProgress+'%'},100)}
@@ -2801,7 +2893,7 @@ function countUp(el,target){
   requestAnimationFrame(step);
 }
 function getRank(win){if(!state)return{title:'Unknown',color:'#6b7394'};const net=netWorth();const months=state.month;const ach=state.achievements.length;if(!win){if(months<12)return{title:'Early Rekt',color:'#ef4444'};if(months<36)return{title:'Certified Rekt',color:'#ef4444'};return{title:'Late Game Rekt',color:'#f97316'}}if(net>1000000)return{title:'Final Boss Material',color:'#a855f7'};if(net>300000)return{title:'Top 3% Diamond Hands',color:'#22c55e'};if(net>100000)return{title:'Top 8% Survivor',color:'#22c55e'};if(net>30000)return{title:'Solid Survivor',color:'#38bdf8'};if(ach>=8)return{title:'Achievement Hunter',color:'#eab308'};return{title:'Made It',color:'#94a3b8'}}
-function endGame(win,reason=''){if(state&&state._gameEnded)return;if(state)state._gameEnded=true;if(state){state.paused=true;state._finalWin=!!win;state._finalNet=netWorth();state._finalXP=calculateXP();state._finalMonth=state.month;}clearInterval(timer);playSound(win?'survive':'rekt');if(state&&state.ironman&&win)unlockAch('ironman');if(state)checkAchievements();
+function endGame(win,reason=''){if(state&&state._gameEnded)return;try{stopMusic(3.5)}catch(e){}if(state)state._gameEnded=true;if(state){state.paused=true;state._finalWin=!!win;state._finalNet=netWorth();state._finalXP=calculateXP();state._finalMonth=state.month;}clearInterval(timer);playSound(win?'survive':'rekt');if(state&&state.ironman&&win)unlockAch('ironman');if(state)checkAchievements();
   const rank=getRank(win);
   if(!state._quit)saveRun({name:state.name,arch:state.arch,net:finalNet(),rank:rank.title,months:state.month,achs:state.achievements.length,date:new Date().toLocaleDateString()});
   document.getElementById('game-screen').style.display='none';document.getElementById('end-screen').classList.remove('hidden');
