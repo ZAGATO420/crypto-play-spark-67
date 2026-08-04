@@ -837,8 +837,16 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
 .perp-long{background:linear-gradient(135deg,#10b981,#34d399);color:#04140c;box-shadow:0 12px 30px -14px rgba(16,185,129,.85)}
 .perp-short{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;box-shadow:0 12px 30px -14px rgba(239,68,68,.85)}
 .perp-acts button:disabled{opacity:.35;box-shadow:none;cursor:not-allowed}
-.liq-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin:8px 0 10px}
-.liq-bar i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.liq-bar{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.07);margin:8px 0 6px}
+.liq-bar i{display:block;height:100%;border-radius:99px;transition:width .3s,background .3s}
+.liq-bar s{position:absolute;top:-3px;width:2px;height:13px;border-radius:2px;background:#e7ecf8;box-shadow:0 0 8px rgba(231,236,248,.8);transition:left .3s}
+.liq-bar.danger{animation:liqpulse 1s ease-in-out infinite}
+@keyframes liqpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 12px 2px rgba(239,68,68,.55)}}
+.liq-note{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:#8b95b5;margin-bottom:8px}
+.perp-spark{height:44px;margin:4px 0 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--v3-line);padding:2px}
+.perp-spark canvas{width:100%;height:100%;display:block}
+.perp-nw{height:120px;margin:6px 0 10px}
+.perp-nw canvas{width:100%;height:100%;display:block}
 .perp-close{display:flex;gap:8px}
 .perp-close button{
   flex:1;height:34px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);
