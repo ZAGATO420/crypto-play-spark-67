@@ -3419,9 +3419,16 @@ function updatePerpLive(){
     const e=document.getElementById('pp-'+i);
     if(e){e.style.color=pnl>=0?'#34d399':'#f87171';e.innerHTML=(pnl>=0?'+':'')+fmt(pnl)+'<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>'}
     const b=document.getElementById('plb-'+i);
-    const dist=perpLiqDist(p);
-    if(b){b.style.width=dist.toFixed(0)+'%';b.style.background=dist<25?'#ef4444':dist<55?'#f0b429':'#10b981'}
+    const risk=perpRisk(p);
+    if(b){b.style.width=risk.toFixed(0)+'%';b.style.background=riskCol(risk)}
+    const mk=document.getElementById('plm-'+i); if(mk)mk.style.left=risk.toFixed(0)+'%';
+    const wr=document.getElementById('plw-'+i); if(wr)wr.classList.toggle('danger',risk>85);
+    const rl=document.getElementById('prk-'+i); if(rl)rl.textContent=risk.toFixed(0)+'%';
+    const nt=document.getElementById('pln-'+i);
+    if(nt){const mv=perpMoveToLiq(p);nt.textContent='Liq at $'+priceStr(perpLiq(p.entry,p.dir,p.lev))+' · '+mv.toFixed(mv<1?2:1)+'% price move away'}
+    drawSpark('psp-'+i,p.hist);
   });
+  updatePerpNwChart();
 }
 
 /* ---------- MINIGAMES ---------- */
