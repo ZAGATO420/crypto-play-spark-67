@@ -3465,7 +3465,7 @@ function renderDegenOps(){
     (state.launchOffers||[]).forEach(o=>{
       const lab={rug:['MINT OPEN','bad'],honeypot:['NO SELL','bad'],slow:['MID','mid'],moon:['CLEAN','ok']}[o.report]||['',''];
       const rep=o.audited?'<span class="dg-chip '+lab[1]+'">'+lab[0]+'</span>':'<span class="dg-chip">UNAUDITED</span>';
-      const hype=Math.max(4,Math.min(100,Math.round((+o.hype||0)*10)));
+      const hype=Math.max(6,Math.min(100,Math.round(+o.hype||0)));
       h+='<div class="dg-row"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="dg-n">'+o.n+' '+rep+'</div><div class="dg-m">mcap '+fmt(o.mcap)+' \u2022 hype '+o.hype+'</div></div><div style="display:flex;gap:6px;flex-shrink:0">'+(o.audited?'':'<button class="dg-btn" onclick="auditLaunch(\''+o.id+'\')">AUDIT</button>')+'<button class="dg-btn go" onclick="snipeLaunch(\''+o.id+'\')">SNIPE</button></div></div><div class="dg-bar"><i style="width:'+hype+'%"></i></div></div>';
     });
   }
