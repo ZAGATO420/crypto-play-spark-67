@@ -33,7 +33,8 @@ Ziel: weniger Scrollen, klare Bereiche, große Tap-Flächen.
 
 ## Technische Notizen
 Alles in `public/game.html`:
-- `.start-card::before` entfällt; neue Ebene auf `#start-screen` mit `position:fixed`, radialer Rand-Feder-Maske und höherer Saturation; Karte ohne Clip.
+- `.start-card::before` (Ape-Wasserzeichen) entfällt; neuer freigestellter Affe wird per `imagegen` erzeugt, als `lovable-assets`-Pointer eingebunden und im `.logo-hero` als `<img class="title-ape">` rechts neben dem Titel positioniert (Flex-Zeile, `clamp()`-Höhe, Float-Keyframe, Glow via `drop-shadow`).
+- `.logo-hero::after` / `.howto::before` / `.leaderboard::before`-Backdrops entfallen; `#start-screen` bekommt statt des Affen zwei radiale Auren.
 - `header` behält `position:sticky`; neue Kompakt-Klasse über einen Scroll-Listener plus HUD-Schnellbuttons, die die bestehenden Essen/Therapy-Funktionen aufrufen.
 - Neue Media-Query bei 820 px: `main` einspaltig, Spalten als Panes mit `data-pane`, fixe `#mobile-tabs` schalten über eine kleine `setPane()`-Funktion; zusätzliches `padding-bottom` an `main`.
 - Keine Änderungen an Spiellogik, Kosten, Difficulty oder XP.
