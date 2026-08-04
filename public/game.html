@@ -427,6 +427,168 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 @keyframes shakeIt{0%,100%{transform:translate(0,0)}20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-5px,-2px)}80%{transform:translate(4px,2px)}}
 
 </style>
+<style>
+/* ============================================================
+   V3 SKIN — "Cyberpunk Terminal" (gold / violet on near-black)
+   Purely cosmetic layer. No game logic touched.
+   ============================================================ */
+:root{
+  --ape-bg:url("/__l5e/assets-v1/1bd688df-7edd-45a6-9977-6d0e3b31ed41/ape-bg.png");
+  --v3-line:rgba(255,255,255,.07);
+}
+
+/* --- Ape: dezenter Wasserzeichen-Hintergrund hinter dem Titel --- */
+.start-card::before{
+  content:'';position:absolute;left:50%;top:-40px;transform:translateX(-50%);
+  width:min(880px,112%);height:760px;pointer-events:none;
+  background:var(--ape-bg) no-repeat center top;background-size:contain;
+  opacity:.85;filter:brightness(2.1) saturate(1.25) contrast(1.05);
+  -webkit-mask-image:linear-gradient(#000 0%,rgba(0,0,0,.55) 52%,transparent 86%);
+  mask-image:linear-gradient(#000 0%,rgba(0,0,0,.55) 52%,transparent 86%);
+  animation:apeBreathe 14s ease-in-out infinite;
+}
+.start-card{overflow:hidden}
+@keyframes apeBreathe{0%,100%{opacity:.72}50%{opacity:.95}}
+/* Titel & Banner über dem Affen halten */
+.logo-hero,.howto,.form-grid,.start-btn,#howto-manual-btn,.leaderboard,.x-link{position:relative;z-index:1}
+#game-screen::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:var(--ape-bg) no-repeat center 22%;background-size:min(900px,90vw) auto;
+  opacity:.13;
+  -webkit-mask-image:radial-gradient(ellipse 52% 46% at 50% 34%,#000 30%,transparent 72%);
+  mask-image:radial-gradient(ellipse 52% 46% at 50% 34%,#000 30%,transparent 72%);
+}
+#game-screen > *{position:relative;z-index:1}
+
+/* --- Card becomes glass so the ape reads through --- */
+.start-card{
+  background:linear-gradient(168deg,rgba(9,12,24,.80),rgba(4,6,14,.92));
+  backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);
+  border:1px solid rgba(240,180,41,.16);border-radius:26px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.03),0 0 90px -20px rgba(139,92,246,.35),0 40px 100px -30px #000;
+}
+.logo-hero img{display:none}
+.logo-hero{margin-bottom:6px}
+.logo-title{
+  font-size:clamp(30px,5.4vw,50px);line-height:1;letter-spacing:-1.8px;font-weight:900;
+  text-transform:uppercase;
+}
+.logo-sub{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#6f7ba0}
+
+/* --- Section labels --- */
+.label{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;
+  color:#7e88ad;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:11px;
+}
+.label::before{content:'';width:5px;height:5px;border-radius:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+
+/* --- Option cards --- */
+.choice{
+  --ac:#8b5cf6;position:relative;overflow:hidden;
+  padding:15px 15px 14px;border-radius:16px;
+  background:linear-gradient(165deg,rgba(255,255,255,.035),rgba(255,255,255,0));
+  border:1px solid var(--v3-line);
+  transition:border-color .2s,box-shadow .25s,transform .18s,background .25s;
+}
+.choice:hover{
+  transform:translateY(-2px);background:linear-gradient(165deg,rgba(255,255,255,.06),rgba(255,255,255,0));
+  border-color:color-mix(in srgb,var(--ac) 55%,transparent);
+  box-shadow:0 0 26px -8px var(--ac);
+}
+.choice.selected{
+  border-color:var(--ac);
+  background:linear-gradient(165deg,color-mix(in srgb,var(--ac) 16%,transparent),rgba(4,6,14,.55));
+  box-shadow:0 0 34px -10px var(--ac),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.choice.selected::after{
+  content:'';position:absolute;top:11px;right:11px;width:7px;height:7px;border-radius:99px;
+  background:var(--ac);box-shadow:0 0 12px var(--ac);animation:acPulse 2s ease-in-out infinite;
+}
+@keyframes acPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+.choice .t{
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+  letter-spacing:.06em;text-transform:uppercase;color:#c9d2e6;
+}
+.choice.selected .t{color:var(--ac)}
+.choice .d{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7b86a6;margin-top:5px;letter-spacing:.01em}
+
+/* per-option accents */
+.choice[data-arch=degen]{--ac:#34d399}
+.choice[data-arch=trader]{--ac:#22d3ee}
+.choice[data-arch=influencer]{--ac:#a78bfa}
+.choice[data-arch=hodler]{--ac:#f0b429}
+.choice[data-diff=EASY]{--ac:#34d399}
+.choice[data-diff=NORMAL]{--ac:#a78bfa}
+.choice[data-diff=BOSS]{--ac:#ef4444}
+.choice[data-pmode]{--ac:#f0b429}
+.choice[data-country]{--ac:#8b5cf6}
+
+#archetypes{grid-template-columns:1fr 1fr;gap:10px}
+#countries{gap:10px}
+.diff-grid{gap:10px}
+@media(max-width:560px){#archetypes{grid-template-columns:1fr}}
+
+/* --- Inputs / avatars / ironman --- */
+input[type=text]{
+  background:rgba(255,255,255,.03);border:1px solid var(--v3-line);border-radius:14px;
+  font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.02em;padding:14px 16px;
+}
+input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,180,41,.14)}
+.avatar-btn{
+  width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.03);
+  border:1px solid var(--v3-line);font-size:21px;
+}
+.avatar-btn.selected{
+  background:linear-gradient(140deg,rgba(240,180,41,.22),rgba(139,92,246,.22));
+  border-color:var(--gold);color:#fff;box-shadow:0 0 26px -8px var(--gold)}
+.ironman-row{
+  border-radius:16px;padding:15px;background:linear-gradient(165deg,rgba(239,68,68,.10),rgba(4,6,14,.5));
+  border:1px solid rgba(239,68,68,.28);
+}
+.ironman-row input[type=checkbox]{width:18px;height:18px;accent-color:#ef4444}
+
+/* --- CTA --- */
+.start-btn{
+  position:relative;overflow:hidden;border-radius:16px;padding:19px;
+  font-size:16px;letter-spacing:.18em;
+  background:linear-gradient(100deg,var(--gold2),var(--gold) 42%,#a855f7 100%);
+  box-shadow:0 16px 50px -14px rgba(168,85,247,.6),0 0 0 1px rgba(255,255,255,.08);
+}
+.start-btn::after{
+  content:'';position:absolute;top:0;bottom:0;width:40%;left:-50%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);
+  animation:sheen 3.4s ease-in-out infinite;
+}
+@keyframes sheen{0%{left:-50%}55%,100%{left:130%}}
+#howto-manual-btn{
+  border-radius:14px!important;border:1px solid var(--v3-line)!important;
+  background:rgba(255,255,255,.025)!important;font-family:'JetBrains Mono',monospace;
+  font-size:11px!important;letter-spacing:.18em;text-transform:uppercase;
+}
+
+/* --- How to survive block --- */
+.howto{
+  border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.025);
+  border:1px solid var(--v3-line);font-size:12.5px;line-height:1.7;color:#8d97b5;
+}
+.howto b{color:#e7ecf8}
+
+/* --- Leaderboard --- */
+.leaderboard{border-radius:18px;background:rgba(255,255,255,.025);border:1px solid var(--v3-line);padding:15px}
+.leaderboard-title{font-family:'JetBrains Mono',monospace;letter-spacing:.22em;color:#7e88ad}
+
+/* --- In-game polish (same visual language) --- */
+.panel{border-radius:18px;background:linear-gradient(168deg,rgba(255,255,255,.035),rgba(6,9,18,.75));border:1px solid var(--v3-line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.panel:hover{border-color:rgba(240,180,41,.24);box-shadow:0 0 40px -18px rgba(240,180,41,.5)}
+.panel-title{font-family:'JetBrains Mono',monospace;letter-spacing:.2em;color:#7e88ad}
+.stat-pill{border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line)}
+.stat-pill .l{font-family:'JetBrains Mono',monospace;letter-spacing:.18em}
+.surv-item{border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line)}
+.tc-btn{border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
+.tc-btn.active{background:linear-gradient(100deg,var(--gold),#a855f7);color:#150c02;border-color:transparent}
+header{background:rgba(3,5,12,.82)}
+.news-ticker-inner,.sentiment{border-radius:14px;background:rgba(255,255,255,.028);border:1px solid var(--v3-line)}
+</style>
 </head>
 <body>
 <div id="critical-warning">⚠ CRITICAL STATUS</div>
