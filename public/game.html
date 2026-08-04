@@ -3434,6 +3434,7 @@ function processLaunches(){
 function perpSyms(){return ['BTC','ETH','SOL'].filter(s=>(state.prices[s]||0)>0)}
 function openPerp(sym,dir,marginArg,levArg){
   if(!state||state._gameEnded)return;
+  if(!((state.prices[sym]||0)>0)){toast(sym+' is not tradable yet','sell');return}
   const d=(typeof perpDraft==='function')?perpDraft(sym):null;
   const lev=Math.max(2,Math.min(50,Math.floor(+levArg||(d?d.lev:0)||state._perpLev||10)));
   const margin=Math.max(50,Math.floor(+marginArg||(d?d.m:0)||Math.floor(state.cash*0.12)));
@@ -3521,7 +3522,8 @@ function perpLiq(entry,dir,lev){const move=Math.min(0.99,0.92/Math.max(1,lev));r
 function perpLiqDist(p){
   const cur=state.prices[p.sym]||p.entry;const lq=perpLiq(p.entry,p.dir,p.lev);
   const span=Math.abs(p.entry-lq)||1;
-  return Math.max(0,Math.min(100,Math.abs(cur-lq)/span*100));
+  const left=(p.dir==='long'?(cur-lq):(lq-cur))/span*100;
+  return Math.max(0,Math.min(100,left));
 }
 /* Risk to liquidation: 0% at entry, 100% at the liquidation price. */
 function perpRisk(p){return Math.max(0,Math.min(100,100-perpLiqDist(p)))}
