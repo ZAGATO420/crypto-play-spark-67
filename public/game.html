@@ -3660,7 +3660,9 @@ function renderPerpDesk(){
   ps.forEach((p,i)=>drawSpark('psp-'+i,p.hist));
 }
 function updatePerpLive(){
-  if(!state||filter!=='PERPS')return;
+  if(!state)return;
+  if(checkPerpLiquidations())return;
+  if(filter!=='PERPS')return;
   perpSyms().forEach(s=>{const e=document.getElementById('price-perp-'+s);if(e)e.textContent='$'+priceStr(state.prices[s]||0)});
   (state.perps||[]).forEach((p,i)=>{
     const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
