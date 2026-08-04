@@ -1434,6 +1434,8 @@ function calculateXP(){
   const live = state.xp||0;
   const mult = getXPMultiplier();
   let bonus = months*10 + Math.log10(Math.max(1,nw))*100 + (state.achievements?.length||0)*80;
+  // Beating BOSS all the way to 2027 pays like a boss
+  if(state._finalWin && state.diff==='BOSS' && months>=84) bonus += 9000;
   bonus *= mult;
   if(state.storage==='ledger') bonus *= 1.1;
   if(state.job==='degen') bonus *= 1.15;
