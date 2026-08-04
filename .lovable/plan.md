@@ -1,43 +1,40 @@
-## Ziel
-Zwei fehlende Content-Dateien für den X-Account @CryptoBossFInal erstellen, die im Projekt erwähnt aber nie gespeichert wurden. Stil und Sprache wie die bestehende `x-assets/x-reply-library.md`: Posts auf Englisch, Regeln/Erklärungen auf Deutsch, keine KI-Floskeln.
+# V3 Polish: Terminal-Farben, Degen Ops & echtes Perp-Trading
 
-## Datei 1: `x-assets/x-30-day-calendar.md`
-Ein 30-Tage-Content-Kalender mit **30 fertigen Posts** (Tag 1–30), sofort kopierbar.
+## 1. Die Farbe der Reiter-Karten beruhigen
+Der Gold-zu-Violett-Verlauf auf dem aktiven Filter-Chip (ALL / TOP / MEME / HOLD) knallt allein im Terminal und passt nicht zum restlichen Karten-Look.
 
-Aufbau:
-- Kurze Einleitung: wie der Kalender benutzt wird (1 Post/Tag, Best-Posting-Zeiten EU+US).
-- 30 durchnummerierte Posts, je mit:
-  - **Tag** (Tag 1, Tag 2 …)
-  - **Format-Tag**: z.B. `[Hook]`, `[Thread]`, `[Meme-Konzept]`, `[Game-Screen]`, `[Quote-Tweet]`, `[Poll]`
-  - **Fertiger Post-Text** (Englisch, unter 280 Zeichen, Platzhalter wie `[zahl]` wo nötig)
-  - **Bild/Media-Hinweis** (was dazugehört: Screenshot, Trailer-Frame, Meme, OG-Bild)
-  - **Ziel**: warum dieser Post (Reach, Engagement, Follower, Profile-Klicks)
+Neuer aktiver Zustand statt Volltonverlauf:
+- dunkle Glas-Fläche wie die Coin-Karten, dünne Gold-Hairline, Gold-Text
+- ein 2px Gold-Balken unter dem aktiven Chip plus dezenter Glow
+- Verlauf bleibt nur dort, wo er wirkt: Start-CTA und Level-Up
 
-Mix über 30 Tage:
-- ~8 Game-Hook-Posts (gameplay-spannend, "play 2020-2026", Rekt-Stories)
-- ~6 Community/Engagement-Posts (Polls, "what was your biggest L", Fragen)
-- ~5 Meme/Humor-Posts (ohne Pitch)
-- ~5 Value/Crypto-Wissen-Posts (Historie, LUNA/FTX, Marktlehren)
-- ~4 Soft-Pitch/Build-Posts ("6 Monate solo an nem game gebaut")
-- ~2 Quote-Tweet- oder Trailer-Push-Posts
+Gleiche Logik für die Degen-Ops-Reiter, damit Terminal und Sidebar eine Sprache sprechen.
 
-Jeder Post respektiert die Anti-KI-Checkliste aus der Reply-Library.
+## 2. Degen Ops (Airdrops / Launchpad / Perps) polieren
+- Reiter werden zu kleinen Karten mit Icon, Titel und Live-Badge (z. B. Anzahl offener Farms / Bags / Positionen)
+- Zeilen werden zu Mini-Karten im Archetype-Stil: Hover-Lift, Hairline-Top, klare Hierarchie (Name gross, Meta klein, Aktion rechts)
+- Airdrops: Fortschrittsbalken bis zum Claim statt "claim in X mo" als Text
+- Launchpad: Audit-Ergebnis als farbiges Chip (CLEAN / MID / MINT OPEN / NO SELL), Hype als kleine Balkenanzeige
+- Side-Quest-Ticketbutton wird eine eigene Karte mit Ticket-Punkten (1/2) statt eines breiten Buttons
 
-## Datei 2: `x-assets/x-playbook.md`
-Die übergeordnete Strategie- und Regeldatei. Aufbau (Deutsch):
+## 3. Perp-Trading richtig ins Terminal
+Heute kann man nur Leverage schieben und LONG/SHORT drücken, die Margin (12 % Cash) wird automatisch gesetzt. Das wird ein echter Trading-Desk im Terminal:
 
-1. **Ziel & North-Star-Metriken** — Follower, Profile-Klicks, Reply-Impressions (nicht Likes als Hauptmetrik).
-2. **Account-Setup-Checkliste** — Bio, Pinned Post, Header/Banner, Link, DMs offen, Account-Tonfall.
-3. **Die 60/30/10 Content-Regel** — Pure / Soft Hook / Pitch, erklärt mit Beispielen.
-4. **Posting-Frequenz & Timing** — wie oft, welche Uhrzeiten (EU Morgen, US Open), Wochentage.
-5. **Reply-Strategie** — Bezug auf `x-reply-library.md`, Reply-Guying-Routine, Ziel-Accountgrößen, Timing-Regel (5–10 Min).
-6. **Tonalität & Anti-KI-Regeln** — die Checkliste aus der Reply-Library, erweitert für eigene Posts (keine Hashtags, keine Em-Dashes, Kleinschreibung ok).
-7. **Growth-Hebel** — Threads, Quote-Tweets, die "eigne Reply beantworten + Link"-Technik, Liste von 30–40 Ziel-Accounts aufbauen.
-8. **Game-Integration** — wie der Trailer, OG-Bild, Screenshots und Stats eingesetzt werden; wann der Link sicher gepostet werden kann (ab ~2k Follower).
-9. **30-Tage-Routinen** — Tagesstruktur (Morgen/Mittag/Abend), Wochencheck, was wöchentlich angepasst wird.
-10. **Was NICHT tun** — keine gekauften Follower, kein Follow-for-Follow, keine Link-Replies früh, keine Bot-Tools.
+- Neuer Terminal-Modus **⚡ PERPS** neben ALL / TOP / MEME / HOLD. Das Grid zeigt dann Perp-Karten im gleichen Look wie die Coin-Karten.
+- Pro Karte einstellbar:
+  - **Margin-Betrag**: Slider + Eingabefeld + Schnell-Chips 10 % / 25 % / 50 % / MAX
+  - **Leverage pro Position**: 2x – 50x (nicht mehr global)
+  - Live-Vorschau: Positionsgrösse, Entry, geschätzter Liquidationspreis, Fee
+  - LONG (grün) und SHORT (rot) bleiben farblich wie gewünscht, alles andere im CI
+- **Offene Positionen** als eigene Karten: Live-PnL in $ und %, Balken "Abstand zur Liquidation", Buttons CLOSE 50 % und CLOSE ALL
+- Degen Ops behält nur eine kompakte Perp-Übersicht mit Link "im Terminal öffnen"
 
-## Technische Details
-- Reine Markdown-Dateien unter `x-assets/`, kein Code-Impact, kein Deploy.
-- Beide Dateien ergänzen die bestehende `x-reply-library.md` und verweisen auf sie.
-- Keine externen Links, keine Secrets.
+Spielbalance bleibt unangetastet: Risiko-, Stress- und Liquidations-Formeln wie jetzt, Standard-Margin bleibt 12 % wenn nichts eingestellt wird, max. 3 offene Positionen.
+
+## Technische Notizen
+Alles in `public/game.html`:
+- CSS: `.tc-btn.active`, `.dg-tab`, `.dg-tab.active`, `.dg-row` -> neue Karten-Klassen; neue `.perp-card`, `.liq-bar`
+- `setFilter()` erweitern um Modus `PERPS`; `renderMarket()` verzweigt in `renderPerpDesk()`
+- `openPerp(sym, dir)` bekommt Parameter für Margin und Leverage; State pro Symbol in `state._perpDraft`
+- `closePerp(i, silent, fraction)` für Teil-Schliessung; Liquidationspreis als reine Anzeigefunktion aus vorhandener `perpPnl`-Logik abgeleitet
+- `renderDegenOps()` Perp-Tab auf Übersicht reduzieren
