@@ -47,4 +47,5 @@ Alles in `public/game.html`:
 - `.logo-hero::after` / `.howto::before` / `.leaderboard::before`-Backdrops entfallen; `#start-screen` bekommt statt des Affen zwei radiale Auren.
 - `header` behält `position:sticky`; neue Kompakt-Klasse über einen Scroll-Listener plus HUD-Schnellbuttons, die die bestehenden Essen/Therapy-Funktionen aufrufen.
 - Neue Media-Query bei 820 px: `main` einspaltig, Spalten als Panes mit `data-pane`, fixe `#mobile-tabs` schalten über eine kleine `setPane()`-Funktion; zusätzliches `padding-bottom` an `main`.
+- Musik: neuer Loop via ElevenLabs Music generiert, als `lovable-assets`-Pointer eingebunden, im bestehenden Musik-Bus als `<audio loop>` abgespielt; generative Fläche bleibt als Fallback.
 - Keine Änderungen an Spiellogik, Kosten, Difficulty oder XP.
