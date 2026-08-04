@@ -1508,10 +1508,11 @@ function nextMonth(){
     jobEffective = Math.round(jobEffective * (1 - c.tax*0.35));
   }
   let totalIncome = passive + jobEffective;
-  // Hard cap: total income can never exceed 70% of monthly cost - you must trade to survive
-  if(totalIncome > monthlyCost * 0.78){
-    const excess = totalIncome - monthlyCost * 0.78;
-    totalIncome = monthlyCost * 0.78 + excess * 0.15;
+  // Hard cap: passive + job income can never fully cover the bills - you must trade to survive
+  const incCap = {EASY:.86,NORMAL:.74,BOSS:.6}[state.diff] || .74;
+  if(totalIncome > monthlyCost * incCap){
+    const excess = totalIncome - monthlyCost * incCap;
+    totalIncome = monthlyCost * incCap + excess * 0.12;
     state.stress = Math.min(100, state.stress + 3);
   }
   state.cash += totalIncome;
@@ -1546,8 +1547,9 @@ function nextMonth(){
   state._lastTotalIncome = totalIncome;
 
   if(Math.random()<.06*state.airdropMod){const drop=Math.round(120+Math.random()*300);state.cash+=drop;toast('Airdrop +$'+drop,'buy')}
-  state.hunger=Math.min(100,state.hunger+8);
-  state.stress=Math.min(100,state.stress+(6+(state.risk>60?5:0))*state.stressMult);
+  const hsM=(d.hs)||1;
+  state.hunger=Math.min(100,state.hunger+8*hsM);
+  state.stress=Math.min(100,state.stress+(6+(state.risk>60?5:0))*state.stressMult*hsM);
   if(state.hunger>80||state.stress>80)state.health=Math.max(0,state.health-9);
   else if(state.hunger<35&&state.stress<35)state.health=Math.min(100,state.health+2);
   state.risk=Math.max(0,state.risk-1.5);
