@@ -18,7 +18,7 @@ export const U4Liq: React.FC<{ dur: number }> = ({ dur }) => {
     <AbsoluteFill style={{ transform: `translate(${shake}px, ${shake * 0.5}px)` }}>
       <WBg tint={C.red} />
       <div style={{ position: "absolute", left: 90, top: 90, width: 1180, height: 760 }}>
-        <Clip src="clips/liq.mp4" dur={dur} from={1.12} to={1.3} y={-40} />
+        <Clip src="clips/liq.webm" dur={dur} from={1.12} to={1.3} y={-40} />
       </div>
       <AbsoluteFill style={{ background: "linear-gradient(270deg, rgba(3,5,12,.92) 12%, transparent 46%)" }} />
 

@@ -12,7 +12,7 @@ export const U2Terminal: React.FC<{ dur: number }> = ({ dur }) => {
     <AbsoluteFill>
       <WBg tint={C.purple} />
       <div style={{ position: "absolute", right: 70, top: 120, width: 1140, height: 700, clipPath: `inset(0 0 ${rev}% 0)` }}>
-        <Clip src="clips/terminal.mp4" dur={dur} from={1.05} to={1.16} y={-24} />
+        <Clip src="clips/terminal.webm" dur={dur} from={1.05} to={1.16} y={-24} />
       </div>
       <AbsoluteFill style={{ background: `linear-gradient(90deg, ${C.bg} 26%, transparent 52%)` }} />
       <div style={{ position: "absolute", left: 90, top: 250, width: 720 }}>

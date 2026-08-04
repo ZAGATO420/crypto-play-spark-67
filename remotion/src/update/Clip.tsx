@@ -1,5 +1,5 @@
 import React from "react";
-import { OffthreadVideo, staticFile, useCurrentFrame, interpolate } from "remotion";
+import { Video, staticFile, useCurrentFrame, interpolate } from "remotion";
 import { C } from "../theme";
 
 export const Clip: React.FC<{
@@ -18,7 +18,7 @@ export const Clip: React.FC<{
   const ty = interpolate(f, [0, dur], [0, y], { extrapolateRight: "clamp" });
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: radius }}>
-      <OffthreadVideo
+      <Video
         src={staticFile(src)}
         startFrom={startFrom}
         muted

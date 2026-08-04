@@ -45,7 +45,7 @@ export const U3Perps: React.FC<{ dur: number }> = ({ dur }) => {
     <AbsoluteFill>
       <WBg tint={C.gold} />
       <div style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, opacity: interpolate(f, [0, 12], [0, 1], { extrapolateRight: "clamp" }) }}>
-        <Clip src="clips/perps.mp4" dur={dur} from={1.18} to={1.34} y={-40} x={-30} radius={0} />
+        <Clip src="clips/perps.webm" dur={dur} from={1.18} to={1.34} y={-40} x={-30} radius={0} />
       </div>
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(3,5,12,.55) 0%, rgba(3,5,12,.15) 40%, rgba(3,5,12,.9) 100%)" }} />
 

@@ -38,10 +38,10 @@ export const U5Ops: React.FC<{ dur: number }> = ({ dur }) => {
     <AbsoluteFill>
       <WBg tint={C.green} />
       <div style={{ position: "absolute", right: 60, top: 60, width: 900, height: 460, opacity: o }}>
-        <Clip src="clips/ops.mp4" dur={dur} from={1.2} to={1.34} y={-30} />
+        <Clip src="clips/ops.webm" dur={dur} from={1.2} to={1.34} y={-30} />
       </div>
       <div style={{ position: "absolute", right: 60, bottom: 60, width: 900, height: 440, opacity: o }}>
-        <Clip src="clips/market.mp4" dur={dur} from={1.16} to={1.3} y={30} />
+        <Clip src="clips/market.webm" dur={dur} from={1.16} to={1.3} y={30} />
       </div>
       <AbsoluteFill style={{ background: `linear-gradient(90deg, ${C.bg} 32%, transparent 58%)` }} />
       <div style={{ position: "absolute", left: 90, top: 210, width: 760 }}>
