@@ -2258,7 +2258,8 @@ function maybeHistorical(){
   );
   if(!pool.length)return false;
   const anchored=pool.filter(q=>q.w>=5);
-  const chance=anchored.length?0.92:0.55;
+  const catM=(DIFF[state.diff]&&DIFF[state.diff].cat)||1;
+  const chance=Math.min(.98,(anchored.length?0.92:0.55)*catM);
   if(Math.random()>chance)return false;
   let total=0;pool.forEach(q=>total+=q.w);
   let r=Math.random()*total,pick=pool[0];
