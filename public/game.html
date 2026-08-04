@@ -299,6 +299,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .end-card:before{content:'';position:absolute;inset:0;border-radius:26px;pointer-events:none;background:linear-gradient(180deg,rgba(240,180,41,.06),transparent 35%)}
 .end-card.rekt{border-color:rgba(239,68,68,.4);box-shadow:0 24px 80px rgba(0,0,0,.7),0 0 70px rgba(239,68,68,.14)}
 .end-card.rekt:before{background:linear-gradient(180deg,rgba(239,68,68,.07),transparent 35%)}
+.end-card.boss{border-color:rgba(240,180,41,.75);box-shadow:0 24px 90px rgba(0,0,0,.75),0 0 90px rgba(240,180,41,.22),inset 0 0 60px rgba(168,85,247,.12)}
+.end-card.boss:before{background:linear-gradient(180deg,rgba(240,180,41,.16),rgba(168,85,247,.08) 45%,transparent 70%)}
+.end-card.boss .end-title{background:linear-gradient(135deg,#f0b429,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
 .end-head{position:relative;z-index:1}
 .end-kicker{font-size:10px;letter-spacing:.22em;color:var(--gold);font-weight:800;margin-top:6px}
 .end-title{font-size:clamp(26px,7vw,38px);font-weight:900;margin:8px 0 2px;letter-spacing:-.01em;
@@ -837,8 +840,16 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
 .perp-long{background:linear-gradient(135deg,#10b981,#34d399);color:#04140c;box-shadow:0 12px 30px -14px rgba(16,185,129,.85)}
 .perp-short{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;box-shadow:0 12px 30px -14px rgba(239,68,68,.85)}
 .perp-acts button:disabled{opacity:.35;box-shadow:none;cursor:not-allowed}
-.liq-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin:8px 0 10px}
-.liq-bar i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.liq-bar{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.07);margin:8px 0 6px}
+.liq-bar i{display:block;height:100%;border-radius:99px;transition:width .3s,background .3s}
+.liq-bar s{position:absolute;top:-3px;width:2px;height:13px;border-radius:2px;background:#e7ecf8;box-shadow:0 0 8px rgba(231,236,248,.8);transition:left .3s}
+.liq-bar.danger{animation:liqpulse 1s ease-in-out infinite}
+@keyframes liqpulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}50%{box-shadow:0 0 12px 2px rgba(239,68,68,.55)}}
+.liq-note{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:#8b95b5;margin-bottom:8px}
+.perp-spark{height:44px;margin:4px 0 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--v3-line);padding:2px}
+.perp-spark canvas{width:100%;height:100%;display:block}
+.perp-nw{height:120px;margin:6px 0 10px}
+.perp-nw canvas{width:100%;height:100%;display:block}
 .perp-close{display:flex;gap:8px}
 .perp-close button{
   flex:1;height:34px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);
@@ -873,9 +884,9 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
         </div>
         <div class="label" style="margin-top:18px">Difficulty</div>
         <div class="diff-grid" id="diffs">
-          <button class="choice" data-diff="EASY"><div class="t">EASY</div><div class="d">×0.6 costs</div></button>
-          <button class="choice selected" data-diff="NORMAL"><div class="t">NORMAL</div><div class="d">×0.8</div></button>
-          <button class="choice" data-diff="BOSS"><div class="t">BOSS</div><div class="d">Full costs</div></button>
+          <button class="choice" data-diff="EASY"><div class="t">EASY</div><div class="d">Learning run • cheap life • 5% inflation</div></button>
+          <button class="choice selected" data-diff="NORMAL"><div class="t">NORMAL</div><div class="d">Real costs • 8% inflation • fair fees</div></button>
+          <button class="choice" data-diff="BOSS"><div class="t">BOSS</div><div class="d">Small stack • +30% costs • 10.5% inflation • brutal events • ×2.5 XP</div></button>
         </div>
         <div class="label" style="margin-top:18px">Presale Mode</div>
         <div class="diff-grid" id="presale-mode">
@@ -1275,14 +1286,20 @@ const HISTORICAL_WINS={
 };
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COUNTRIES={DE:{rent:1500,tax:.3,flag:'🇩🇪',riskMod:.85,stressMod:.9,airdropMod:1,name:'Germany'},USA:{rent:2000,tax:.25,flag:'🇺🇸',riskMod:1,stressMod:1.05,airdropMod:1.25,name:'USA'},CH:{rent:2000,tax:.18,flag:'🇨🇭',riskMod:.78,stressMod:.85,airdropMod:.9,name:'Switzerland'},SG:{rent:2200,tax:.15,flag:'🇸🇬',riskMod:.9,stressMod:1.15,airdropMod:1.1,name:'Singapore'},PT:{rent:1250,tax:.2,flag:'🇵🇹',riskMod:.95,stressMod:.8,airdropMod:1,name:'Portugal'},NG:{rent:800,tax:.1,flag:'🇳🇬',riskMod:1.22,stressMod:1.08,airdropMod:.85,name:'Nigeria'}};
-const DIFF={EASY:{cash:1.45,cost:.85,risk:.75,fee:.55,infl:.055},NORMAL:{cash:1.2,cost:1,risk:.9,fee:.8,infl:.075},BOSS:{cash:1.2,cost:1.04,risk:1.1,fee:.9,infl:.081}};
+const DIFF={
+  EASY:{cash:1.55,cost:.78,risk:.7,fee:.5,infl:.05,hs:.85,cat:.7,creep:0},
+  NORMAL:{cash:1.05,cost:1.06,risk:1,fee:.9,infl:.08,hs:1,cat:1,creep:.004},
+  BOSS:{cash:.8,cost:1.3,risk:1.32,fee:1.15,infl:.105,hs:1.28,cat:1.5,creep:.012}
+};
 /* Inflation: living costs compound every survived year, so a passive
    "click next month" run slowly bleeds out. */
-function inflMult(){ if(!state)return 1; const y=Math.floor((state.month||0)/12); return Math.pow(1+((DIFF[state.diff]&&DIFF[state.diff].infl)||.1), y) }
+function inflMult(){ if(!state)return 1; const d=DIFF[state.diff]||{}; const y=Math.floor((state.month||0)/12); return Math.pow(1+((d.infl)||.1)+ (d.creep||0)*y, y) }
+/* Bear windows: 2022 and 2025 squeeze harder on every difficulty. */
+function bearMult(){ if(!state)return 1; const m=state.month||0; const bear=(m>=24&&m<36)||(m>=60&&m<72); if(!bear)return 1; const d=DIFF[state.diff]||{}; return 1+0.12*((d.cat)||1) }
 /* Rookie ramp: cheap first year so you can build a stack, then the real
    cost of living kicks in and compounds with inflation. */
-function rampMult(){ if(!state)return 1; const m=state.month||0; return m<6?.5:m<12?.72:m<24?.85:m<36?.95:1 }
-function costMult(){ return rampMult()*inflMult() }
+function rampMult(){ if(!state)return 1; const m=state.month||0; return m<3?.62:m<8?.82:m<18?.94:1 }
+function costMult(){ return rampMult()*inflMult()*bearMult() }
 const ARCH={degen:{cash:5000,debt:0,memeBonus:1.2,feeMult:1,riskMult:1.15,stressMult:1.1},trader:{cash:10000,debt:0,memeBonus:1,feeMult:.5,riskMult:1,stressMult:1},influencer:{cash:9000,debt:12000,memeBonus:1.05,feeMult:1,riskMult:1.05,stressMult:1.05},hodler:{cash:8000,debt:0,memeBonus:1,feeMult:1,riskMult:.85,stressMult:.85}};
 
 const EARLY_DECISIONS=[
@@ -1321,7 +1338,7 @@ const NEWS_POOL=[
 {t:"Greed index spiking.",s:6}
 ];
 
-const ACHIEVEMENTS=[{id:'first_trade',name:'First Blood',desc:'Made your first trade',icon:'🩸'},{id:'survive_12',name:'One Year',desc:'Survived 12 months',icon:'📅'},{id:'survive_36',name:'Three Years',desc:'Survived 36 months',icon:'🗓️'},{id:'net_100k',name:'Six Figures',desc:'Reached $100k net worth',icon:'💰'},{id:'net_1m',name:'Millionaire',desc:'Reached $1M net worth',icon:'🏆'},{id:'diamond',name:'Diamond Hands',desc:'6 months without selling',icon:'💎'},{id:'meme_king',name:'Meme King',desc:'Held 5 different memes',icon:'🐸'},{id:'black_thursday',name:'Black Thursday Survivor',desc:'Survived March 2020',icon:'🦇'},{id:'ftx',name:'FTX Escape',desc:'Survived Nov 2022',icon:'🏦'},{id:'ironman',name:'Ironman',desc:'Finished an Ironman run',icon:'⚔️'},{id:'quest_5',name:'Quest Hunter',desc:'Completed 5 quests',icon:'🎯'},{id:'quest_15',name:'Quest Master',desc:'Completed 15 quests',icon:'🏅'},{id:'zero_risk',name:'Zen Mode',desc:'Risk under 5%',icon:'🧘'},{id:'presale_win',name:'Presale God',desc:'Won 3 presales',icon:'🚀'},{id:'full_health',name:'Peak Performance',desc:'Health high, hunger & stress low',icon:'💪'}];
+const ACHIEVEMENTS=[{id:'boss_slayer',name:'Final Boss Defeated',desc:'Survived a full BOSS run to 2027',icon:'👑'},{id:'first_trade',name:'First Blood',desc:'Made your first trade',icon:'🩸'},{id:'survive_12',name:'One Year',desc:'Survived 12 months',icon:'📅'},{id:'survive_36',name:'Three Years',desc:'Survived 36 months',icon:'🗓️'},{id:'net_100k',name:'Six Figures',desc:'Reached $100k net worth',icon:'💰'},{id:'net_1m',name:'Millionaire',desc:'Reached $1M net worth',icon:'🏆'},{id:'diamond',name:'Diamond Hands',desc:'6 months without selling',icon:'💎'},{id:'meme_king',name:'Meme King',desc:'Held 5 different memes',icon:'🐸'},{id:'black_thursday',name:'Black Thursday Survivor',desc:'Survived March 2020',icon:'🦇'},{id:'ftx',name:'FTX Escape',desc:'Survived Nov 2022',icon:'🏦'},{id:'ironman',name:'Ironman',desc:'Finished an Ironman run',icon:'⚔️'},{id:'quest_5',name:'Quest Hunter',desc:'Completed 5 quests',icon:'🎯'},{id:'quest_15',name:'Quest Master',desc:'Completed 15 quests',icon:'🏅'},{id:'zero_risk',name:'Zen Mode',desc:'Risk under 5%',icon:'🧘'},{id:'presale_win',name:'Presale God',desc:'Won 3 presales',icon:'🚀'},{id:'full_health',name:'Peak Performance',desc:'Health high, hunger & stress low',icon:'💪'}];
 const BUSINESS=[{id:'staking',title:'Staking Node',cost:1800,monthly:170,risk:-6,desc:'Passive staking income'},{id:'onlyfans',title:'Meme Page / OF',cost:1200,monthly:220,risk:-3,desc:'You shill your bags'},{id:'leverage',title:'Leverage ×2',cost:500,monthly:-180,risk:22,desc:'Realized PnL ×2.0 on sells'},{id:'bot',title:'Sniper Bot',cost:2500,monthly:120,risk:4,desc:'Better presale fills'},{id:'node',title:'Validator Node',cost:4000,monthly:280,risk:-10,desc:'Run a validator'},{id:'agency',title:'Shill Agency',cost:3000,monthly:280,risk:6,desc:'Become an influencer'}];
 const EVENTS={2:{txt:'💥 BLACK THURSDAY – COVID Crash',mult:.52,sent:-40,flavor:'The market just got destroyed. Most people never recovered.'},4:{txt:'⛏️ BTC Halving #3',mult:1.12,sent:15,flavor:'Supply shock incoming. The bulls are waking up.'},12:{txt:'🚀 Tesla buys $1.5B BTC',mult:1.22,sent:20,flavor:'Institutional FOMO just hit different.'},16:{txt:'🇨🇳 China Mining Ban',mult:.72,sent:-25,flavor:'Hashrate crashed. Weak hands are shaking.'},21:{txt:'📈 BTC ATH $69k',mult:1.08,sent:30,flavor:'Euphoria is real. Don\'t get reckless.'},28:{txt:'💀 LUNA / UST Collapse',mult:.62,sent:-45,flavor:'This is the one that broke people. Absolute carnage.'},33:{txt:'🏦 FTX COLLAPSE',mult:.68,sent:-50,flavor:'Contagion is spreading. Trust is dead.'},39:{txt:'🐸 PEPE launches',mult:1.35,sent:25,flavor:'Meme season just went vertical.'},46:{txt:'📈 BTC ETF Rumors',mult:1.15,sent:20,flavor:'TradFi is finally coming.'},51:{txt:'⛏️ BTC Halving #4',mult:1.18,sent:20,flavor:'Another supply cut. History rhymes.'},58:{txt:'🚀 BTC breaks $100k',mult:1.12,sent:35,flavor:'New era unlocked. Don\'t get complacent.'},62:{txt:'🇺🇸 Trump Pro-Crypto',mult:1.18,sent:28,flavor:'Politics just became bullish.'},70:{txt:'📉 Bear Trap -30%',mult:.70,sent:-30,flavor:'The final shakeout before the real run?'},78:{txt:'🚀 $TCFB Season',mult:1.28,sent:35,flavor:'Your bags are about to print. WAGMI.'}};
 const DECISIONS=[{title:"Private Sale Offer",desc:"A CT friend DMs you a private allocation for $800. Looks juicy but sketchy.",options:[{label:"Invest $800",cash:-800,risk:6,stress:4,chance:0.55,winCash:3200,winMsg:"It 4x'd. Nice."},{label:"Invest only $300",cash:-300,risk:3,stress:2,chance:0.55,winCash:1200,winMsg:"Small win."},{label:"Ignore it",cash:0,risk:0,stress:-2,msg:"You stayed safe."}]},{title:"Leverage Temptation",desc:"The market is pumping hard. Do you open a 5x long with $1,000?",options:[{label:"Go 5x Long",cash:-1000,risk:18,stress:12,chance:0.48,winCash:4500,winMsg:"You caught the move!"},{label:"Only 2x",cash:-600,risk:9,stress:6,chance:0.55,winCash:1800,winMsg:"Decent trade."},{label:"No leverage",cash:0,risk:-2,stress:-4,msg:"Smart. You kept your peace."}]},{title:"Panic in the Timeline",desc:"Fake news hits. Everything is bleeding -12%. Do you sell or hold?",options:[{label:"Panic Sell everything",act:'sellAll',risk:-8,stress:15,cash:0,msg:"You locked in the loss. Pain."},{label:"Sell 50%",act:'sellHalf',risk:-4,stress:8,cash:0,msg:"Partial exit. Mixed feelings."},{label:"Diamond Hands",risk:5,stress:10,cash:0,chance:0.6,winCash:0,winMsg:"It recovered. You were right."}]},{title:"Friend Needs a Bailout",desc:"Your friend got liquidated and asks for a $1,200 loan. He promises to pay back 2x.",options:[{label:"Lend $1,200",cash:-1200,risk:4,stress:6,chance:0.4,winCash:2400,winMsg:"He actually paid you back 2x."},{label:"Lend $400",cash:-400,risk:2,stress:3,chance:0.45,winCash:800,winMsg:"He paid half back."},{label:"Refuse",cash:0,stress:-3,msg:"Friendship is strained, but your bags are safe."}]},{title:"Airdrop Farming Opportunity",desc:"A new L2 is offering points. You need to bridge $2,000 and interact for 3 months.",options:[{label:"Go all in ($2,000)",cash:-2000,risk:7,stress:5,chance:0.5,winCash:5500,winMsg:"Fat airdrop hit."},{label:"Small farm ($700)",cash:-700,risk:3,stress:2,chance:0.55,winCash:1800,winMsg:"Decent drop."},{label:"Skip",cash:0,stress:-1,msg:"You saved the capital."}]},{title:"CT Shill Deal",desc:"Someone offers you $600 to shill a random coin on your timeline.",options:[{label:"Take the $600",cash:600,risk:8,stress:5,msg:"Easy money, but your rep took a hit."},{label:"Negotiate $900",cash:900,risk:12,stress:8,chance:0.4,winCash:0,winMsg:"They paid the higher amount."},{label:"Refuse",cash:0,stress:-3,msg:"You kept your integrity."}]}];
@@ -1420,6 +1437,8 @@ function calculateXP(){
   const live = state.xp||0;
   const mult = getXPMultiplier();
   let bonus = months*10 + Math.log10(Math.max(1,nw))*100 + (state.achievements?.length||0)*80;
+  // Beating BOSS all the way to 2027 pays like a boss
+  if(state._finalWin && state.diff==='BOSS' && months>=84) bonus += 9000;
   bonus *= mult;
   if(state.storage==='ledger') bonus *= 1.1;
   if(state.job==='degen') bonus *= 1.15;
@@ -1502,10 +1521,11 @@ function nextMonth(){
     jobEffective = Math.round(jobEffective * (1 - c.tax*0.35));
   }
   let totalIncome = passive + jobEffective;
-  // Hard cap: total income can never exceed 70% of monthly cost - you must trade to survive
-  if(totalIncome > monthlyCost * 0.78){
-    const excess = totalIncome - monthlyCost * 0.78;
-    totalIncome = monthlyCost * 0.78 + excess * 0.15;
+  // Hard cap: passive + job income can never fully cover the bills - you must trade to survive
+  const incCap = {EASY:.86,NORMAL:.74,BOSS:.6}[state.diff] || .74;
+  if(totalIncome > monthlyCost * incCap){
+    const excess = totalIncome - monthlyCost * incCap;
+    totalIncome = monthlyCost * incCap + excess * 0.12;
     state.stress = Math.min(100, state.stress + 3);
   }
   state.cash += totalIncome;
@@ -1540,8 +1560,9 @@ function nextMonth(){
   state._lastTotalIncome = totalIncome;
 
   if(Math.random()<.06*state.airdropMod){const drop=Math.round(120+Math.random()*300);state.cash+=drop;toast('Airdrop +$'+drop,'buy')}
-  state.hunger=Math.min(100,state.hunger+8);
-  state.stress=Math.min(100,state.stress+(6+(state.risk>60?5:0))*state.stressMult);
+  const hsM=(d.hs)||1;
+  state.hunger=Math.min(100,state.hunger+8*hsM);
+  state.stress=Math.min(100,state.stress+(6+(state.risk>60?5:0))*state.stressMult*hsM);
   if(state.hunger>80||state.stress>80)state.health=Math.max(0,state.health-9);
   else if(state.hunger<35&&state.stress<35)state.health=Math.min(100,state.health+2);
   state.risk=Math.max(0,state.risk-1.5);
@@ -2252,7 +2273,8 @@ function maybeHistorical(){
   );
   if(!pool.length)return false;
   const anchored=pool.filter(q=>q.w>=5);
-  const chance=anchored.length?0.92:0.55;
+  const catM=(DIFF[state.diff]&&DIFF[state.diff].cat)||1;
+  const chance=Math.min(.98,(anchored.length?0.92:0.55)*catM);
   if(Math.random()>chance)return false;
   let total=0;pool.forEach(q=>total+=q.w);
   let r=Math.random()*total,pick=pool[0];
@@ -2709,7 +2731,7 @@ function updateSidePanels(){if(!state)return;const c=COUNTRIES[state.country];co
     ${Object.keys(state.businesses).length?`<div class="cf-note" style="letter-spacing:.02em">${Object.keys(state.businesses).map(id=>{const b=BUSINESS.find(x=>x.id===id);return b?b.title:''}).join(' • ')}</div>`:''}`;
   let totalValue=0,totalCost=0;COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt>0){totalValue+=amt*state.prices[c.s];totalCost+=amt*(state.avg[c.s]||state.prices[c.s])}});const totalPnl=totalValue-totalCost;const pnlPercent=totalCost>0?(totalPnl/totalCost*100):0;const summaryEl=document.getElementById('portfolio-summary');if(summaryEl){if(totalValue>0){summaryEl.classList.remove('hidden');summaryEl.innerHTML=`<div><div style="font-size:11px;color:var(--muted)">Total Portfolio</div><div style="font-weight:700">${fmt(totalValue)}</div></div><div style="text-align:right"><div style="font-size:11px;color:var(--muted)">Total P&L</div><div style="font-weight:700;color:${totalPnl>=0?'#22c55e':'#ef4444'}">${totalPnl>=0?'+':''}${fmt(totalPnl)} (${pnlPercent>=0?'+':''}${pnlPercent.toFixed(1)}%)</div></div>`}else{summaryEl.classList.add('hidden')}}let htm='';COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt<=0)return;const val=amt*state.prices[c.s];const avg=state.avg[c.s]||0;const pnl=avg>0?((state.prices[c.s]-avg)/avg*100):0;htm+=`<div class="hold-item"><div><b>${c.s}</b><div style="font-size:10px;color:var(--muted)">${fmtAmt(amt)} • avg ${priceStr(avg)}</div></div><div style="text-align:right"><div>${fmt(val)}</div><div style="font-size:10px;color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div></div></div>`});document.getElementById('holdings-list').innerHTML=htm||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">No coins yet</div>';document.getElementById('quest-count').textContent=state.questsDone>0?'('+state.questsDone+' done)':'';document.getElementById('quests-list').innerHTML=state.quests.slice(-4).map(q=>`<div class="quest-item ${q.done?'done':''}">${q.done?'✅':'🎯'} ${q.txt}<div style="font-size:10px;color:var(--muted)">+$${q.reward}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">New quests incoming...</div>';document.getElementById('ach-count').textContent=state.achievements.length+'/'+ACHIEVEMENTS.length;document.getElementById('ach-list').innerHTML=ACHIEVEMENTS.map(a=>{const unlocked=state.achievements.includes(a.id);return`<div class="ach-item ${unlocked?'unlocked':''}" style="opacity:${unlocked?1:.4}"><span class="badge" style="background:${unlocked?'#102a1a':'#1a1f35'};color:${unlocked?'#00ff88':'#6b7394'}">${a.icon} ${a.name}</span><div style="font-size:10px;color:var(--muted)">${a.desc}</div></div>`}).join('');document.getElementById('business-list').innerHTML=BUSINESS.map(b=>{const owned=!!state.businesses[b.id];return`<div style="background:#12172c;border:1px solid ${owned?'#1e5a3a':'#1f274a'};border-radius:10px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${b.title}</b><span style="font-size:10px;color:${b.monthly>=0?'#22c55e':'#ef4444'}">${b.monthly>=0?'+':''}$${b.monthly}/mo</span></div><div style="font-size:10px;color:var(--muted);margin:4px 0">${b.desc}</div><button class="tc-btn" style="width:100%" ${owned||state.cash<b.cost?'disabled':''} onclick="buyBusiness('${b.id}')">${owned?'OWNED':'BUY $'+b.cost}</button></div>`}).join('');document.getElementById('presale-list').innerHTML=(state._presales||[]).map(p=>`<div class="presale-card"><div style="font-weight:700;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--muted);margin:4px 0">Hype ${p.hype}% • Scam Risk ${p.scam}%</div><button class="tc-btn" style="width:100%" onclick="investPresale('${p.id}',${p.cost})" ${state.cash<p.cost?'disabled':''}>Invest $${p.cost}</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px">No presales right now</div>'}
 function initChart(){const cv=document.getElementById('pnl-chart');const ctx=cv.getContext('2d');const g=ctx.createLinearGradient(0,0,0,190);g.addColorStop(0,'rgba(240,180,41,.34)');g.addColorStop(.55,'rgba(168,85,247,.14)');g.addColorStop(1,'rgba(168,85,247,0)');window._chartFill=g;chart=new Chart(ctx,{type:'line',data:{labels:[0],datasets:[{data:[netWorth()],borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.28,pointRadius:0,pointHoverRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},elements:{line:{capBezierPoints:true}}}});state.liveHistory=state.liveHistory||[netWorth()]}
-function sampleNW(){if(!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];state.liveHistory.push(netWorth());if(state.liveHistory.length>900)state.liveHistory.splice(0,state.liveHistory.length-900)}
+function sampleNW(){if(!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];state.liveHistory.push(netWorth());if(state.liveHistory.length>900)state.liveHistory.splice(0,state.liveHistory.length-900);try{samplePerpHist()}catch(e){}}
 function updateChart(){if(!chart||!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];const nw=netWorth();const h=state.liveHistory;const ref=h.length>1?h[h.length-2]:h[0];if(Math.abs(nw-ref)>Math.max(1,Math.abs(ref)*0.004)){h.push(nw);if(h.length>900)h.splice(0,h.length-900)}else{h[h.length-1]=nw}const data=state.liveHistory;chart.data.labels=data.map((_,i)=>i);chart.data.datasets[0].data=data;const up=data[data.length-1]>=data[0];chart.data.datasets[0].borderColor=up?'#f0b429':'#ef4444';chart.data.datasets[0].backgroundColor=up?(window._chartFill||'rgba(240,180,41,.2)'):'rgba(239,68,68,.16)';chart.update('none')}
 /* ===================== POPUP QUEUE =====================
    Every full-screen interruption goes through here so two windows can never
@@ -2783,9 +2805,12 @@ function endGame(win,reason=''){if(state&&state._gameEnded)return;if(state)state
   const rank=getRank(win);
   if(!state._quit)saveRun({name:state.name,arch:state.arch,net:finalNet(),rank:rank.title,months:state.month,achs:state.achievements.length,date:new Date().toLocaleDateString()});
   document.getElementById('game-screen').style.display='none';document.getElementById('end-screen').classList.remove('hidden');
-  const card=document.getElementById('end-card');card.className='end-card'+(win?'':' rekt');
-  document.getElementById('end-title').textContent=win?'YOU SURVIVED':'REKT';
-  document.getElementById('end-msg').textContent=win?'You reached 2027 with a positive balance.':(reason||'Game Over');
+  const bossWin=!!(win&&state&&state.diff==='BOSS'&&(state.month||0)>=84);
+  if(bossWin)unlockAch('boss_slayer');
+  if(state)state._bossWin=bossWin;
+  const card=document.getElementById('end-card');card.className='end-card'+(win?(bossWin?' boss':''):' rekt');
+  document.getElementById('end-title').textContent=bossWin?'FINAL BOSS DEFEATED':(win?'YOU SURVIVED':'REKT');
+  document.getElementById('end-msg').textContent=bossWin?'Full BOSS difficulty, seven years, still standing. Almost nobody does this.':(win?'You reached 2027 with a positive balance.':(reason||'Game Over'));
   const rankEl=document.getElementById('rank-badge');if(rankEl){rankEl.textContent=rank.title;rankEl.style.background=rank.color+'22';rankEl.style.color=rank.color;rankEl.style.border='1px solid '+rank.color}
   countUp(document.getElementById('end-net'), finalNet());
   try{
@@ -3201,9 +3226,9 @@ function openPerp(sym,dir,marginArg,levArg){
   if((state.perps||[]).length>=3){toast('Max 3 open positions','sell');return}
   state.cash-=margin;
   state.perps=state.perps||[];
-  state.perps.push({sym,dir,lev,margin,entry:state.prices[sym],m:state.month});
-  state.risk=Math.min(99,state.risk+lev*0.35*state.riskMult);
-  state.stress=Math.min(100,state.stress+4);
+  state.perps.push({sym,dir,lev,margin,entry:state.prices[sym],m:state.month,fund:0,hist:[0]});
+  state.risk=Math.min(99,state.risk+lev*0.5*state.riskMult);
+  state.stress=Math.min(100,state.stress+6);
   playSound('buy'); awardXP(40,lev+'x '+dir.toUpperCase()+' '+sym);
   toast('⚡ '+lev+'x '+dir.toUpperCase()+' '+sym+' • margin '+fmt(margin),'buy');
   updateHeader();updateSidePanels();if(typeof renderMarket==='function')renderMarket();
@@ -3211,7 +3236,7 @@ function openPerp(sym,dir,marginArg,levArg){
 function perpPnl(p){
   const cur=state.prices[p.sym]||p.entry;
   const chg=(cur-p.entry)/p.entry*(p.dir==='long'?1:-1);
-  return p.margin*chg*p.lev;
+  return p.margin*chg*p.lev-(p.fund||0);
 }
 function closePerp(i,silent,fraction){
   const p=(state.perps||[])[i]; if(!p)return;
@@ -3221,7 +3246,7 @@ function closePerp(i,silent,fraction){
   const pnl=pnlFull*fr;
   const ret=Math.max(0,p.margin*fr+pnl)*0.999;
   state.cash+=ret;
-  if(fr>=1){state.perps.splice(i,1)}else{p.margin=Math.round(p.margin*(1-fr))}
+  if(fr>=1){state.perps.splice(i,1)}else{p.margin=Math.round(p.margin*(1-fr));p.fund=Math.round((p.fund||0)*(1-fr))}
   if(!silent){
     toast((pnl>=0?'✅ ':'🩸 ')+'Closed '+(fr<1?Math.round(fr*100)+'% of ':'')+p.lev+'x '+p.sym+' '+(pnl>=0?'+':'')+fmt(pnl),pnl>=0?'buy':'sell');
     awardXP(pnl>0?70+Math.min(900,pnl/200):15,pnl>0?'PERP WIN':'PERP LOSS');
@@ -3233,11 +3258,14 @@ function processPerps(){
   state.perps=state.perps||[];
   for(let i=state.perps.length-1;i>=0;i--){
     const p=state.perps[i];
+    // monthly funding on the notional keeps permanent leverage expensive
+    p.fund=(p.fund||0)+Math.round(p.margin*p.lev*0.0038);
     const pnl=perpPnl(p);
     if(pnl<=-p.margin*0.92){
       state.perps.splice(i,1);
       state.liquidations=(state.liquidations||0)+1;
-      state.stress=Math.min(100,state.stress+12);
+      state.stress=Math.min(100,state.stress+18);
+      state.risk=Math.min(99,state.risk+5);
       addNews('LIQUIDATED: '+p.lev+'x '+p.dir+' '+p.sym+' • '+fmt(p.margin)+' gone');
       toast('💥 LIQUIDATED '+p.lev+'x '+p.sym,'sell');
       playSound('crash');
@@ -3258,6 +3286,20 @@ function perpDraft(sym){
   return state._perpDraft[sym];
 }
 function setPerpMargin(sym,v){const d=perpDraft(sym);const cap=Math.max(0,Math.floor(state.cash));d.m=Math.max(0,Math.min(cap,Math.floor(+v||0)));renderMarket()}
+/* Position size ($ notional) = margin x leverage. Setting the size keeps the
+   leverage and back-solves the margin, clamped by cash and 2x-50x. */
+function setPerpSize(sym,v){
+  const d=perpDraft(sym);const cap=Math.max(0,Math.floor(state.cash));
+  let size=Math.max(0,Math.floor(+v||0));
+  let m=Math.floor(size/Math.max(2,d.lev));
+  if(m>cap){ // not enough cash at this leverage -> raise leverage if possible
+    const need=Math.min(50,Math.ceil(size/Math.max(1,cap)));
+    d.lev=Math.max(2,Math.min(50,need));
+    m=Math.min(cap,Math.floor(size/d.lev));
+  }
+  d.m=Math.max(0,m);
+  renderMarket();
+}
 function setPerpPct(sym,p){setPerpMargin(sym,Math.floor((state.cash||0)*p));playSound('click')}
 function setPerpLevSym(sym,v){perpDraft(sym).lev=Math.max(2,Math.min(50,Math.floor(+v||2)));playSound('click');renderMarket()}
 function perpLiq(entry,dir,lev){const move=Math.min(0.99,0.92/Math.max(1,lev));return dir==='long'?entry*(1-move):entry*(1+move)}
@@ -3266,27 +3308,87 @@ function perpLiqDist(p){
   const span=Math.abs(p.entry-lq)||1;
   return Math.max(0,Math.min(100,Math.abs(cur-lq)/span*100));
 }
+/* Risk to liquidation: 0% at entry, 100% at the liquidation price. */
+function perpRisk(p){return Math.max(0,Math.min(100,100-perpLiqDist(p)))}
+/* How far (in %) the mark price still has to move before liquidation. */
+function perpMoveToLiq(p){
+  const cur=state.prices[p.sym]||p.entry;const lq=perpLiq(p.entry,p.dir,p.lev);
+  if(cur<=0)return 0;
+  return Math.max(0,Math.abs(cur-lq)/cur*100);
+}
+function riskCol(r){return r>70?'#ef4444':r>40?'#f0b429':'#10b981'}
+function drawSpark(id,arr){
+  const cv=document.getElementById(id); if(!cv)return;
+  const w=cv.clientWidth||220,h=cv.clientHeight||40,dpr=window.devicePixelRatio||1;
+  cv.width=w*dpr;cv.height=h*dpr;
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const d=(arr&&arr.length>1)?arr:[0,0];
+  const mn=Math.min.apply(null,d),mx=Math.max.apply(null,d);
+  const span=(mx-mn)||1;
+  const last=d[d.length-1];
+  const col=last>=0?'#34d399':'#f87171';
+  const y=v=>h-4-((v-mn)/span)*(h-8);
+  const x=i=>(i/(d.length-1))*w;
+  // zero line
+  if(mn<0&&mx>0){ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y(0));ctx.lineTo(w,y(0));ctx.stroke()}
+  ctx.beginPath();d.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v))});
+  ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.lineJoin='round';ctx.stroke();
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+  const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,last>=0?'rgba(52,211,153,.28)':'rgba(248,113,113,.28)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fill();
+}
+function samplePerpHist(){
+  if(!state||!state.perps)return;
+  state.perps.forEach(p=>{p.hist=p.hist||[0];p.hist.push(perpPnl(p));if(p.hist.length>140)p.hist.splice(0,p.hist.length-140)});
+}
+let perpNwChart=null;
+function ensurePerpNwChart(){
+  const cv=document.getElementById('perp-nw-chart'); if(!cv||typeof Chart==='undefined')return;
+  const data=(state&&state.liveHistory&&state.liveHistory.length?state.liveHistory:[netWorth()]);
+  if(perpNwChart){try{perpNwChart.destroy()}catch(e){}}
+  const ctx=cv.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,0,120);
+  g.addColorStop(0,'rgba(240,180,41,.32)');g.addColorStop(.6,'rgba(168,85,247,.12)');g.addColorStop(1,'rgba(168,85,247,0)');
+  perpNwChart=new Chart(ctx,{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data:data,borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.28,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+}
+function updatePerpNwChart(){
+  if(!perpNwChart||!state)return;
+  const data=state.liveHistory&&state.liveHistory.length?state.liveHistory:[netWorth()];
+  perpNwChart.data.labels=data.map((_,i)=>i);
+  perpNwChart.data.datasets[0].data=data;
+  const up=data[data.length-1]>=data[0];
+  perpNwChart.data.datasets[0].borderColor=up?'#f0b429':'#ef4444';
+  perpNwChart.update('none');
+}
 function renderPerpDesk(){
   const el=document.getElementById('market-list'); if(!el||!state)return;
   const ps=state.perps||[];
   let h='';
-  h+='<div class="perp-card" style="grid-column:1/-1"><div class="perp-lab">PERPETUALS DESK</div><div class="perp-hint">Set your own <b>margin</b> and <b>leverage</b> per trade. Positions auto-close after 6 months. Liquidation at <b>-92%</b> of margin is permanent. Max <b>3</b> open positions.</div></div>';
+  h+='<div class="perp-card" style="grid-column:1/-1"><div class="perp-lab">PERPETUALS DESK · NET WORTH</div>'+
+     '<div class="perp-nw"><canvas id="perp-nw-chart"></canvas></div>'+
+     '<div class="perp-hint">Set your own <b>margin</b> or <b>position size</b> per trade. Funding is charged monthly, positions auto-close after 6 months, liquidation at <b>-92%</b> of margin is permanent. Max <b>3</b> open positions.</div></div>';
   ps.forEach((p,i)=>{
     const cur=state.prices[p.sym]||p.entry;
     const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
     const lq=perpLiq(p.entry,p.dir,p.lev);
-    const dist=perpLiqDist(p);
+    const risk=perpRisk(p);
+    const move=perpMoveToLiq(p);
     const col=pnl>=0?'#34d399':'#f87171';
-    const bar=dist<25?'#ef4444':dist<55?'#f0b429':'#10b981';
+    const bar=riskCol(risk);
     h+='<div class="perp-card open">'+
       '<div class="coin-head"><div><span class="coin-sym">'+p.sym+'</span>'+
         '<span class="dg-chip '+(p.dir==='long'?'ok':'bad')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span>'+
-        '<div class="coin-hold">MARGIN '+fmt(p.margin)+' • ENTRY $'+priceStr(p.entry)+'</div></div>'+
+        '<div class="coin-hold">MARGIN '+fmt(p.margin)+' • SIZE '+fmt(p.margin*p.lev)+' • ENTRY $'+priceStr(p.entry)+(p.fund?' • FUNDING -'+fmt(p.fund):'')+'</div></div>'+
         '<span class="coin-price" id="pp-'+i+'" style="color:'+col+'">'+(pnl>=0?'+':'')+fmt(pnl)+'<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></span></div>'+
       '<div class="perp-preview"><div><div class="l">MARK</div><div class="v">$'+priceStr(cur)+'</div></div>'+
         '<div><div class="l">LIQ PRICE</div><div class="v" style="color:#f87171">$'+priceStr(lq)+'</div></div></div>'+
-      '<div class="perp-lab">DISTANCE TO LIQUIDATION · '+dist.toFixed(0)+'%</div>'+
-      '<div class="liq-bar"><i id="plb-'+i+'" style="width:'+dist.toFixed(0)+'%;background:'+bar+'"></i></div>'+
+      '<div class="perp-lab">RISK TO LIQ · <span id="prk-'+i+'">'+risk.toFixed(0)+'%</span></div>'+
+      '<div class="liq-bar'+(risk>85?' danger':'')+'" id="plw-'+i+'"><i id="plb-'+i+'" style="width:'+risk.toFixed(0)+'%;background:'+bar+'"></i><s id="plm-'+i+'" style="left:'+risk.toFixed(0)+'%"></s></div>'+
+      '<div class="liq-note" id="pln-'+i+'">Liq at $'+priceStr(lq)+' · '+move.toFixed(move<1?2:1)+'% price move away</div>'+
+      '<div class="perp-lab">POSITION PNL</div>'+
+      '<div class="perp-spark"><canvas id="psp-'+i+'"></canvas></div>'+
       '<div class="perp-close"><button onclick="closePerp('+i+',false,0.5)">CLOSE 50%</button><button onclick="closePerp('+i+')">CLOSE ALL</button></div>'+
     '</div>';
   });
@@ -3308,8 +3410,10 @@ function renderPerpDesk(){
       '<div class="margin-row"><input class="margin-in" type="number" min="0" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)"></div>'+
       '<div class="lev-chips">'+[['10%',0.1],['25%',0.25],['50%',0.5],['MAX',1]].map(q=>'<button class="lev-chip" onclick="setPerpPct(\''+s+'\','+q[1]+')">'+q[0]+'</button>').join('')+'</div>'+
       '<input type="range" min="0" max="'+Math.max(50,cap)+'" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)" style="width:100%;height:32px;accent-color:#a855f7">'+
+      '<div class="perp-lab" style="margin-top:6px">POSITION SIZE ($ NOTIONAL)</div>'+
+      '<div class="margin-row"><input class="margin-in" type="number" min="0" step="100" value="'+size+'" oninput="setPerpSize(\''+s+'\',this.value)"></div>'+
       '<div class="perp-preview">'+
-        '<div><div class="l">POSITION SIZE</div><div class="v" style="color:#f0b429">'+fmt(size)+'</div></div>'+
+        '<div><div class="l">COINS ('+s+')</div><div class="v" style="color:#f0b429">'+(price>0?fmtAmt(size/price):'—')+'</div></div>'+
         '<div><div class="l">FEE (ON CLOSE)</div><div class="v">'+fmt(Math.round(size*0.001))+'</div></div>'+
         '<div><div class="l">LIQ IF LONG</div><div class="v">$'+priceStr(perpLiq(price,'long',d.lev))+'</div></div>'+
         '<div><div class="l">LIQ IF SHORT</div><div class="v">$'+priceStr(perpLiq(price,'short',d.lev))+'</div></div>'+
@@ -3320,6 +3424,8 @@ function renderPerpDesk(){
     '</div>';
   });
   el.innerHTML=h;
+  ensurePerpNwChart();
+  ps.forEach((p,i)=>drawSpark('psp-'+i,p.hist));
 }
 function updatePerpLive(){
   if(!state||filter!=='PERPS')return;
@@ -3329,9 +3435,16 @@ function updatePerpLive(){
     const e=document.getElementById('pp-'+i);
     if(e){e.style.color=pnl>=0?'#34d399':'#f87171';e.innerHTML=(pnl>=0?'+':'')+fmt(pnl)+'<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>'}
     const b=document.getElementById('plb-'+i);
-    const dist=perpLiqDist(p);
-    if(b){b.style.width=dist.toFixed(0)+'%';b.style.background=dist<25?'#ef4444':dist<55?'#f0b429':'#10b981'}
+    const risk=perpRisk(p);
+    if(b){b.style.width=risk.toFixed(0)+'%';b.style.background=riskCol(risk)}
+    const mk=document.getElementById('plm-'+i); if(mk)mk.style.left=risk.toFixed(0)+'%';
+    const wr=document.getElementById('plw-'+i); if(wr)wr.classList.toggle('danger',risk>85);
+    const rl=document.getElementById('prk-'+i); if(rl)rl.textContent=risk.toFixed(0)+'%';
+    const nt=document.getElementById('pln-'+i);
+    if(nt){const mv=perpMoveToLiq(p);nt.textContent='Liq at $'+priceStr(perpLiq(p.entry,p.dir,p.lev))+' · '+mv.toFixed(mv<1?2:1)+'% price move away'}
+    drawSpark('psp-'+i,p.hist);
   });
+  updatePerpNwChart();
 }
 
 /* ---------- MINIGAMES ---------- */
@@ -3489,7 +3602,7 @@ function renderDegenOps(){
 const _origUSP=updateSidePanels;
 updateSidePanels=function(){const r=_origUSP.apply(this,arguments);try{renderDegenOps();updateXPBar();}catch(e){}return r};
 
-function shareScore(){const txt=`I just ${(state&&state._finalWin)?'survived':'got rekt in'} THE CRYPTO FINAL BOSS with ${fmt(finalNet())} (${getRank(!!(state&&state._finalWin)).title}) after ${state?state.month:0} months.\n\nMost of you wouldn’t last 12 months.\n\nWho’s next?\n🎮 thecryptofinalboss.app\n\n#Crypto #Degen #TCFB`;navigator.clipboard.writeText(txt).then(()=>toast('Score copied!','buy')).catch(()=>alert(txt))}
+function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO FINAL BOSS on BOSS difficulty. 84 months, ${fmt(finalNet())}, ${getRank(true).title}.\n\nMost of you wouldn’t last 12 months.\n\nWho’s next?\n🎮 thecryptofinalboss.app\n\n#Crypto #Degen #TCFB`:`I just ${(state&&state._finalWin)?'survived':'got rekt in'} THE CRYPTO FINAL BOSS with ${fmt(finalNet())} (${getRank(!!(state&&state._finalWin)).title}) after ${state?state.month:0} months.\n\nMost of you wouldn’t last 12 months.\n\nWho’s next?\n🎮 thecryptofinalboss.app\n\n#Crypto #Degen #TCFB`;navigator.clipboard.writeText(txt).then(()=>toast('Score copied!','buy')).catch(()=>alert(txt))}
 
 </script>
 <div id="tutorial-overlay" class="hidden"><div class="tut-card"><div class="tut-step active" data-step="0"><div class="tut-num">Step 1 / 3 &bull; The Basics</div><div class="tut-title">Trade or die trying</div><div class="tut-text">You start in January 2020 with a small stack and 84 months to survive. Pick a coin, set the amount with the slider, then <b>BUY</b>. Sell when it pumps.</div><ul class="tut-list"><li><span class="ic">&#128200;</span><span>Every open position raises your <b>RISK</b>. At 100% you get liquidated and lose the bag.</span></li><li><span class="ic">&#128176;</span><span>Never put everything into one coin &mdash; one rug can end the run.</span></li><li><span class="ic">&#9889;</span><span>Each month costs you rent, food and taxes. Doing nothing is also a way to die.</span></li></ul></div><div class="tut-step" data-step="1"><div class="tut-num">Step 2 / 3 &bull; Choices Matter</div><div class="tut-title">Your setup decides your fate</div><div class="tut-text">Before you start you choose a country, a job and where your coins live. These are not cosmetics &mdash; they follow you for 7 years.</div><ul class="tut-list"><li><span class="ic">&#128274;</span><span><b>Ledger</b> costs $120 once and protects you from wallet drains and exchange freezes. On an exchange, FTX eats 35% of your bag in Nov 2022.</span></li><li><span class="ic">&#128188;</span><span><b>Job</b> gives steady cash but less freedom. Full degen means zero income &mdash; your bills stay.</span></li><li><span class="ic">&#127758;</span><span>Your <b>country</b> sets rent and tax. Cheap living, high taxes &mdash; pick your poison.</span></li></ul></div><div class="tut-step" data-step="2"><div class="tut-num">Step 3 / 3 &bull; 2020 &rarr; 2027</div><div class="tut-title">Real history hits back</div><div class="tut-text">All prices are historical. Black Thursday, Luna, FTX, the halvings, the ETF &mdash; they all come, whether you are ready or not.</div><ul class="tut-list"><li><span class="ic">&#127869;</span><span><b>Hunger</b> and <b>Stress</b> climb every month. Over 85 and your run is over. Buy food, therapy, gym.</span></li><li><span class="ic">&#127919;</span><span>Airdrops, presales, snipes, perps and side quests pay well &mdash; and can wipe you out.</span></li><li><span class="ic">&#11088;</span><span>Months survived, profits and achievements give <b>XP</b>. Top 3 XP runs get a $TCFB airdrop.</span></li></ul></div><div class="tut-actions"><button class="tut-btn skip" onclick="closeTutorial(true)">Skip</button><button class="tut-btn next" id="tut-next" onclick="nextTutorial()">Next &rarr;</button></div><div style="text-align:center;margin-top:14px"><span id="tut-dots">●○○</span></div></div></div>
