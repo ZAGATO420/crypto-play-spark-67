@@ -3270,6 +3270,20 @@ function perpDraft(sym){
   return state._perpDraft[sym];
 }
 function setPerpMargin(sym,v){const d=perpDraft(sym);const cap=Math.max(0,Math.floor(state.cash));d.m=Math.max(0,Math.min(cap,Math.floor(+v||0)));renderMarket()}
+/* Position size ($ notional) = margin x leverage. Setting the size keeps the
+   leverage and back-solves the margin, clamped by cash and 2x-50x. */
+function setPerpSize(sym,v){
+  const d=perpDraft(sym);const cap=Math.max(0,Math.floor(state.cash));
+  let size=Math.max(0,Math.floor(+v||0));
+  let m=Math.floor(size/Math.max(2,d.lev));
+  if(m>cap){ // not enough cash at this leverage -> raise leverage if possible
+    const need=Math.min(50,Math.ceil(size/Math.max(1,cap)));
+    d.lev=Math.max(2,Math.min(50,need));
+    m=Math.min(cap,Math.floor(size/d.lev));
+  }
+  d.m=Math.max(0,m);
+  renderMarket();
+}
 function setPerpPct(sym,p){setPerpMargin(sym,Math.floor((state.cash||0)*p));playSound('click')}
 function setPerpLevSym(sym,v){perpDraft(sym).lev=Math.max(2,Math.min(50,Math.floor(+v||2)));playSound('click');renderMarket()}
 function perpLiq(entry,dir,lev){const move=Math.min(0.99,0.92/Math.max(1,lev));return dir==='long'?entry*(1-move):entry*(1+move)}
