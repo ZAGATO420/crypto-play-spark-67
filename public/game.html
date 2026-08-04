@@ -2802,9 +2802,12 @@ function endGame(win,reason=''){if(state&&state._gameEnded)return;if(state)state
   const rank=getRank(win);
   if(!state._quit)saveRun({name:state.name,arch:state.arch,net:finalNet(),rank:rank.title,months:state.month,achs:state.achievements.length,date:new Date().toLocaleDateString()});
   document.getElementById('game-screen').style.display='none';document.getElementById('end-screen').classList.remove('hidden');
-  const card=document.getElementById('end-card');card.className='end-card'+(win?'':' rekt');
-  document.getElementById('end-title').textContent=win?'YOU SURVIVED':'REKT';
-  document.getElementById('end-msg').textContent=win?'You reached 2027 with a positive balance.':(reason||'Game Over');
+  const bossWin=!!(win&&state&&state.diff==='BOSS'&&(state.month||0)>=84);
+  if(bossWin)unlockAch('boss_slayer');
+  if(state)state._bossWin=bossWin;
+  const card=document.getElementById('end-card');card.className='end-card'+(win?(bossWin?' boss':''):' rekt');
+  document.getElementById('end-title').textContent=bossWin?'FINAL BOSS DEFEATED':(win?'YOU SURVIVED':'REKT');
+  document.getElementById('end-msg').textContent=bossWin?'Full BOSS difficulty, seven years, still standing. Almost nobody does this.':(win?'You reached 2027 with a positive balance.':(reason||'Game Over'));
   const rankEl=document.getElementById('rank-badge');if(rankEl){rankEl.textContent=rank.title;rankEl.style.background=rank.color+'22';rankEl.style.color=rank.color;rankEl.style.border='1px solid '+rank.color}
   countUp(document.getElementById('end-net'), finalNet());
   try{
