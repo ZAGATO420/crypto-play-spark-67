@@ -442,16 +442,25 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 /* --- Ape: dezenter Wasserzeichen-Hintergrund hinter dem Titel --- */
 .start-card::before{
-  content:'';position:absolute;left:50%;top:-40px;transform:translateX(-50%);
-  width:min(880px,112%);height:760px;pointer-events:none;
+  content:'';position:absolute;left:50%;top:-56px;transform:translateX(-50%);
+  width:min(1000px,124%);height:820px;pointer-events:none;
   background:var(--ape-bg) no-repeat center top;background-size:contain;
-  opacity:.7;filter:brightness(1.95) saturate(1.25);
-  -webkit-mask-image:linear-gradient(#000 0%,rgba(0,0,0,.45) 42%,transparent 72%);
-  mask-image:linear-gradient(#000 0%,rgba(0,0,0,.45) 42%,transparent 72%);
+  opacity:1;filter:brightness(2.25) saturate(1.4) contrast(1.06)
+    drop-shadow(0 0 46px rgba(240,180,41,.42)) drop-shadow(0 0 110px rgba(139,92,246,.34));
+  -webkit-mask-image:linear-gradient(#000 0%,#000 46%,rgba(0,0,0,.55) 66%,transparent 88%);
+  mask-image:linear-gradient(#000 0%,#000 46%,rgba(0,0,0,.55) 66%,transparent 88%);
   animation:apeBreathe 14s ease-in-out infinite;
 }
+/* Lesbarkeit: lokaler Backdrop nur hinter den Textblöcken, nicht flächig */
+.logo-hero,.howto,.form-grid,.leaderboard{isolation:isolate}
+.logo-hero::after,.howto::before,.leaderboard::before{
+  content:'';position:absolute;inset:-14px -18px;z-index:-1;border-radius:20px;
+  background:radial-gradient(120% 120% at 50% 50%,rgba(4,6,14,.86),rgba(4,6,14,.42) 70%,transparent 100%);
+  backdrop-filter:blur(5px);
+}
+.logo-hero::after{inset:-10px -14px}
 .start-card{overflow:hidden}
-@keyframes apeBreathe{0%,100%{opacity:.6}50%{opacity:.8}}
+@keyframes apeBreathe{0%,100%{opacity:.92}50%{opacity:1}}
 /* Titel & Banner über dem Affen halten */
 .logo-hero,.howto,.form-grid,.start-btn,#howto-manual-btn,.leaderboard,.x-link{position:relative;z-index:1}
 #game-screen::before{
@@ -465,7 +474,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 /* --- Card becomes glass so the ape reads through --- */
 .start-card{
-  background:linear-gradient(168deg,rgba(9,12,24,.80),rgba(4,6,14,.92));
+  background:linear-gradient(168deg,rgba(9,12,24,.46),rgba(4,6,14,.80));
   backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);
   border:1px solid rgba(240,180,41,.16);border-radius:26px;
   box-shadow:0 0 0 1px rgba(255,255,255,.03),0 0 90px -20px rgba(139,92,246,.35),0 40px 100px -30px #000;
