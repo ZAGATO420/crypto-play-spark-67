@@ -3210,9 +3210,9 @@ function openPerp(sym,dir,marginArg,levArg){
   if((state.perps||[]).length>=3){toast('Max 3 open positions','sell');return}
   state.cash-=margin;
   state.perps=state.perps||[];
-  state.perps.push({sym,dir,lev,margin,entry:state.prices[sym],m:state.month});
-  state.risk=Math.min(99,state.risk+lev*0.35*state.riskMult);
-  state.stress=Math.min(100,state.stress+4);
+  state.perps.push({sym,dir,lev,margin,entry:state.prices[sym],m:state.month,fund:0,hist:[0]});
+  state.risk=Math.min(99,state.risk+lev*0.5*state.riskMult);
+  state.stress=Math.min(100,state.stress+6);
   playSound('buy'); awardXP(40,lev+'x '+dir.toUpperCase()+' '+sym);
   toast('⚡ '+lev+'x '+dir.toUpperCase()+' '+sym+' • margin '+fmt(margin),'buy');
   updateHeader();updateSidePanels();if(typeof renderMarket==='function')renderMarket();
@@ -3220,7 +3220,7 @@ function openPerp(sym,dir,marginArg,levArg){
 function perpPnl(p){
   const cur=state.prices[p.sym]||p.entry;
   const chg=(cur-p.entry)/p.entry*(p.dir==='long'?1:-1);
-  return p.margin*chg*p.lev;
+  return p.margin*chg*p.lev-(p.fund||0);
 }
 function closePerp(i,silent,fraction){
   const p=(state.perps||[])[i]; if(!p)return;
@@ -3242,11 +3242,14 @@ function processPerps(){
   state.perps=state.perps||[];
   for(let i=state.perps.length-1;i>=0;i--){
     const p=state.perps[i];
+    // monthly funding on the notional keeps permanent leverage expensive
+    p.fund=(p.fund||0)+Math.round(p.margin*p.lev*0.0038);
     const pnl=perpPnl(p);
     if(pnl<=-p.margin*0.92){
       state.perps.splice(i,1);
       state.liquidations=(state.liquidations||0)+1;
-      state.stress=Math.min(100,state.stress+12);
+      state.stress=Math.min(100,state.stress+18);
+      state.risk=Math.min(99,state.risk+5);
       addNews('LIQUIDATED: '+p.lev+'x '+p.dir+' '+p.sym+' • '+fmt(p.margin)+' gone');
       toast('💥 LIQUIDATED '+p.lev+'x '+p.sym,'sell');
       playSound('crash');
