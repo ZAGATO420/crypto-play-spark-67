@@ -586,7 +586,8 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,18
 .stat-pill .l{font-family:'JetBrains Mono',monospace;letter-spacing:.18em}
 .surv-item{border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line)}
 .tc-btn{border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
-.tc-btn.active{background:linear-gradient(100deg,var(--gold),#a855f7);color:#150c02;border-color:transparent}
+.tc-btn.active{position:relative;background:linear-gradient(168deg,rgba(240,180,41,.11),rgba(6,9,18,.85));border-color:rgba(240,180,41,.42);color:var(--gold2);box-shadow:0 0 22px -10px rgba(240,180,41,.6)}
+.tc-btn.active::after{content:'';position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:9px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
 header{background:rgba(3,5,12,.82)}
 .news-ticker-inner,.sentiment{border-radius:14px;background:rgba(255,255,255,.028);border:1px solid var(--v3-line)}
 
@@ -745,6 +746,107 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
   background:radial-gradient(ellipse 80% 70% at 50% 100%,rgba(240,180,41,.07),transparent 70%),rgba(4,7,15,.85);
   border:1px solid var(--v3-line);border-radius:16px;height:185px;
 }
+
+/* ---------- Degen Ops v3 ---------- */
+.dg-tabs{gap:7px;margin-bottom:11px}
+.dg-tab{
+  position:relative;flex:1;padding:9px 5px!important;border-radius:13px!important;
+  background:rgba(255,255,255,.03)!important;border:1px solid var(--v3-line)!important;
+  color:#7e88ad!important;font-family:'JetBrains Mono',monospace;font-size:9px!important;
+  letter-spacing:.12em;line-height:1.5;transition:all .18s;
+}
+.dg-tab:hover{border-color:rgba(240,180,41,.3)!important;color:#e7ecf8!important}
+.dg-tab .ic{display:block;font-size:14px;margin-bottom:3px;filter:saturate(1.1)}
+.dg-tab .bg{
+  position:absolute;top:5px;right:6px;min-width:15px;height:15px;border-radius:99px;
+  background:rgba(240,180,41,.16);border:1px solid rgba(240,180,41,.4);color:var(--gold2);
+  font-size:8.5px;line-height:13px;font-weight:800;letter-spacing:0;
+}
+.dg-tab.active{
+  background:linear-gradient(168deg,rgba(240,180,41,.11),rgba(6,9,18,.85))!important;
+  border-color:rgba(240,180,41,.42)!important;color:var(--gold2)!important;
+  box-shadow:0 0 22px -10px rgba(240,180,41,.6);
+}
+.dg-tab.active::after{content:'';position:absolute;left:14px;right:14px;bottom:3px;height:2px;border-radius:9px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.dg-row{
+  border-radius:14px!important;padding:10px 11px!important;margin-bottom:7px!important;
+  background:linear-gradient(168deg,rgba(255,255,255,.04),rgba(6,9,18,.8))!important;
+  border:1px solid var(--v3-line)!important;position:relative;overflow:hidden;
+  transition:transform .16s ease,border-color .16s ease;
+}
+.dg-row::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(100deg,transparent,rgba(240,180,41,.4),rgba(168,85,247,.35),transparent);opacity:.45}
+.dg-row:hover{transform:translateY(-2px);border-color:rgba(240,180,41,.3)!important}
+.dg-n{font-size:11.5px!important;font-weight:800;letter-spacing:.02em;color:#f2f5ff}
+.dg-m{font-family:'JetBrains Mono',monospace;font-size:9.5px!important;letter-spacing:.1em;color:#8b95b5!important}
+.dg-bar{height:4px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
+.dg-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),#a855f7)}
+.dg-chip{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;
+  padding:2px 7px;border-radius:99px;border:1px solid var(--v3-line);color:#8b95b5;margin-left:6px;
+}
+.dg-chip.ok{border-color:rgba(16,185,129,.45);color:#6ee7b7;background:rgba(16,185,129,.1)}
+.dg-chip.bad{border-color:rgba(239,68,68,.45);color:#fca5a5;background:rgba(239,68,68,.1)}
+.dg-chip.mid{border-color:rgba(240,180,41,.45);color:var(--gold2);background:rgba(240,180,41,.1)}
+.sq-card{
+  margin-top:10px;border-radius:14px;padding:11px 12px;display:flex;align-items:center;
+  justify-content:space-between;gap:9px;border:1px solid var(--v3-line);
+  background:linear-gradient(100deg,rgba(240,180,41,.08),rgba(168,85,247,.08));cursor:pointer;
+  transition:all .16s;width:100%;text-align:left;
+}
+.sq-card:hover{border-color:rgba(240,180,41,.4)}
+.sq-card:disabled{opacity:.42;cursor:not-allowed}
+.sq-dots{display:flex;gap:4px}
+.sq-dots i{width:8px;height:8px;border-radius:99px;background:rgba(255,255,255,.12)}
+.sq-dots i.on{background:var(--gold);box-shadow:0 0 9px var(--gold)}
+
+/* ---------- Perp desk ---------- */
+.perp-grid{display:grid;gap:12px}
+.perp-card{
+  position:relative;overflow:hidden;border-radius:18px;padding:14px;
+  background:linear-gradient(168deg,rgba(255,255,255,.045),rgba(6,9,18,.82));
+  border:1px solid var(--v3-line);
+}
+.perp-card::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(100deg,transparent,rgba(240,180,41,.5),rgba(168,85,247,.4),transparent);opacity:.55}
+.perp-card.open{border-color:rgba(240,180,41,.34);background:linear-gradient(168deg,rgba(240,180,41,.09),rgba(6,9,18,.85))}
+.perp-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.2em;color:#7e88ad;margin-bottom:5px}
+.lev-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.lev-chip{
+  padding:5px 10px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);
+  color:#8b95b5;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;cursor:pointer;transition:all .16s;
+}
+.lev-chip:hover{border-color:rgba(240,180,41,.4);color:#fff}
+.lev-chip.on{border-color:rgba(240,180,41,.5);color:var(--gold2);background:rgba(240,180,41,.11)}
+.margin-row{display:flex;gap:8px;align-items:center;margin:2px 0 7px}
+.margin-in{
+  flex:1;height:36px;border-radius:11px;background:rgba(4,7,15,.8);border:1px solid var(--v3-line);
+  color:var(--gold2);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:0 11px;
+}
+.margin-in:focus{outline:none;border-color:rgba(240,180,41,.45)}
+.perp-preview{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;border-radius:13px;overflow:hidden;
+  border:1px solid var(--v3-line);margin:9px 0 11px;
+}
+.perp-preview div{padding:8px 10px;background:rgba(255,255,255,.022)}
+.perp-preview .l{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:#7e88ad}
+.perp-preview .v{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#e7ecf8;margin-top:2px}
+.perp-acts{display:flex;gap:9px}
+.perp-acts button{
+  flex:1;height:40px;border-radius:13px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.16em;font-weight:800;border:none;cursor:pointer;
+}
+.perp-long{background:linear-gradient(135deg,#10b981,#34d399);color:#04140c;box-shadow:0 12px 30px -14px rgba(16,185,129,.85)}
+.perp-short{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;box-shadow:0 12px 30px -14px rgba(239,68,68,.85)}
+.perp-acts button:disabled{opacity:.35;box-shadow:none;cursor:not-allowed}
+.liq-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin:8px 0 10px}
+.liq-bar i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.perp-close{display:flex;gap:8px}
+.perp-close button{
+  flex:1;height:34px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);
+  color:#cbd5e1;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;cursor:pointer;
+}
+.perp-close button:hover{border-color:rgba(239,68,68,.45);color:#fca5a5}
+.perp-hint{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#8b95b5;line-height:1.7}
+.perp-hint b{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -909,6 +1011,7 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
           <button class="tc-btn" data-filter="TOP" onclick="setFilter('TOP')">TOP</button>
           <button class="tc-btn" data-filter="MEME" onclick="setFilter('MEME')">MEME</button>
           <button class="tc-btn" data-filter="HOLD" onclick="setFilter('HOLD')">HOLD</button>
+          <button class="tc-btn" data-filter="PERPS" onclick="setFilter('PERPS')">&#9889; PERPS</button>
         </div>
       </div>
       <div style="padding:10px;overflow-y:auto;flex:1">
@@ -2398,8 +2501,8 @@ function sell(sym){
 function onSliderInput(sym,value,price){const amt=Math.floor(+value);state._amt[sym]=amt;const coinsEst=price>0?amt/price:0;const el=document.getElementById('amt-'+sym);if(el)el.textContent='$'+amt.toLocaleString()+' → '+fmtAmt(coinsEst)+' '+sym}
 function setMode(sym,m){state._mode[sym]=m;state._amt[sym]=0;playSound('click');renderMarket()}
 function setFilter(f){filter=f;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));playSound('click');renderMarket()}
-function renderMarket(){if(!state)return;let list=COINS.filter(c=>state.month>=c.launch&&state.prices[c.s]>0);if(filter==='TOP')list=list.filter(c=>['BTC','ETH','SOL','ADA','LINK'].includes(c.s));if(filter==='MEME')list=list.filter(c=>c.tags.includes('MEME'));if(filter==='HOLD')list=list.filter(c=>(state.holdings[c.s]||0)>0);document.getElementById('market-list').innerHTML=list.map(c=>{const price=state.prices[c.s];const amtHeld=state.holdings[c.s]||0;const held=amtHeld>0;const mode=state._mode[c.s]||'buy';const maxBuy=Math.max(0,Math.floor(state.cash));const posVal=amtHeld*price;const maxSell=Math.max(0,Math.floor(posVal));const maxAmt=mode==='buy'?maxBuy:maxSell;let amt=state._amt[c.s]||0;if(amt>maxAmt)amt=maxAmt;state._amt[c.s]=amt;const coinsEst=price>0?amt/price:0;const accent=mode==='buy'?'#22c55e':'#ef4444';const avg=state.avg[c.s]||0;const pnl=held&&avg>0?((price-avg)/avg*100):0;return`<div class="coin-card ${held?'held':''}"><div class="coin-head"><div><span class="coin-sym">${c.s}</span>${c.tags.includes('MEME')?'<span class="coin-tag">MEME</span>':''}${held?`<div class="coin-hold">HOLDING ${fmtAmt(amtHeld)} • <span style="color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</span></div>`:''}</div><span class="coin-price" id="price-${c.s}">$${priceStr(price)}</span></div><div class="mode-btns"><button class="${mode==='buy'?'on-buy':''}" onclick="setMode('${c.s}','buy')">BUY $</button><button class="${mode==='sell'?'on-sell':''}" onclick="setMode('${c.s}','sell')">SELL $</button></div><div class="amt-row"><button class="step-btn" onclick="state._amt['${c.s}']=Math.max(0,(state._amt['${c.s}']||0)-Math.ceil(maxAmt*0.25));renderMarket()">-25%</button><input type="range" min="0" max="${Math.max(1,maxAmt)}" value="${amt}" step="1" oninput="onSliderInput('${c.s}',this.value,${price})" style="flex:1;height:36px;accent-color:${accent}"><button class="step-btn" onclick="state._amt['${c.s}']=Math.min(maxAmt,(state._amt['${c.s}']||0)+Math.ceil(maxAmt*0.25));renderMarket()">+25%</button></div><div class="amt-info" id="amt-${c.s}"><b>$${amt.toLocaleString()}</b> → ${fmtAmt(coinsEst)} ${c.s}</div><button class="exec-btn ${mode==='buy'?'exec-buy':'exec-sell'}" ${maxAmt<1?'disabled':''} onclick="${mode==='buy'?`buy('${c.s}')`:`sell('${c.s}')`}">EXECUTE ${mode.toUpperCase()}</button></div>`}).join('')}
-function updatePriceDisplays(){COINS.forEach(c=>{const el=document.getElementById('price-'+c.s);if(el)el.textContent='$'+priceStr(state.prices[c.s])})}
+function renderMarket(){if(!state)return;if(filter==='PERPS'){renderPerpDesk();return}let list=COINS.filter(c=>state.month>=c.launch&&state.prices[c.s]>0);if(filter==='TOP')list=list.filter(c=>['BTC','ETH','SOL','ADA','LINK'].includes(c.s));if(filter==='MEME')list=list.filter(c=>c.tags.includes('MEME'));if(filter==='HOLD')list=list.filter(c=>(state.holdings[c.s]||0)>0);document.getElementById('market-list').innerHTML=list.map(c=>{const price=state.prices[c.s];const amtHeld=state.holdings[c.s]||0;const held=amtHeld>0;const mode=state._mode[c.s]||'buy';const maxBuy=Math.max(0,Math.floor(state.cash));const posVal=amtHeld*price;const maxSell=Math.max(0,Math.floor(posVal));const maxAmt=mode==='buy'?maxBuy:maxSell;let amt=state._amt[c.s]||0;if(amt>maxAmt)amt=maxAmt;state._amt[c.s]=amt;const coinsEst=price>0?amt/price:0;const accent=mode==='buy'?'#22c55e':'#ef4444';const avg=state.avg[c.s]||0;const pnl=held&&avg>0?((price-avg)/avg*100):0;return`<div class="coin-card ${held?'held':''}"><div class="coin-head"><div><span class="coin-sym">${c.s}</span>${c.tags.includes('MEME')?'<span class="coin-tag">MEME</span>':''}${held?`<div class="coin-hold">HOLDING ${fmtAmt(amtHeld)} • <span style="color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</span></div>`:''}</div><span class="coin-price" id="price-${c.s}">$${priceStr(price)}</span></div><div class="mode-btns"><button class="${mode==='buy'?'on-buy':''}" onclick="setMode('${c.s}','buy')">BUY $</button><button class="${mode==='sell'?'on-sell':''}" onclick="setMode('${c.s}','sell')">SELL $</button></div><div class="amt-row"><button class="step-btn" onclick="state._amt['${c.s}']=Math.max(0,(state._amt['${c.s}']||0)-Math.ceil(maxAmt*0.25));renderMarket()">-25%</button><input type="range" min="0" max="${Math.max(1,maxAmt)}" value="${amt}" step="1" oninput="onSliderInput('${c.s}',this.value,${price})" style="flex:1;height:36px;accent-color:${accent}"><button class="step-btn" onclick="state._amt['${c.s}']=Math.min(maxAmt,(state._amt['${c.s}']||0)+Math.ceil(maxAmt*0.25));renderMarket()">+25%</button></div><div class="amt-info" id="amt-${c.s}"><b>$${amt.toLocaleString()}</b> → ${fmtAmt(coinsEst)} ${c.s}</div><button class="exec-btn ${mode==='buy'?'exec-buy':'exec-sell'}" ${maxAmt<1?'disabled':''} onclick="${mode==='buy'?`buy('${c.s}')`:`sell('${c.s}')`}">EXECUTE ${mode.toUpperCase()}</button></div>`}).join('')}
+function updatePriceDisplays(){COINS.forEach(c=>{const el=document.getElementById('price-'+c.s);if(el)el.textContent='$'+priceStr(state.prices[c.s])});try{updatePerpLive()}catch(e){}}
 
 function refreshPresales(){
   // Much stronger anti-repeat
@@ -3089,10 +3192,11 @@ function processLaunches(){
 
 /* ---------- PERPS / LEVERAGE ---------- */
 function perpSyms(){return ['BTC','ETH','SOL'].filter(s=>(state.prices[s]||0)>0)}
-function openPerp(sym,dir){
+function openPerp(sym,dir,marginArg,levArg){
   if(!state||state._gameEnded)return;
-  const lev=state._perpLev||10;
-  const margin=Math.max(50,Math.floor(state.cash*0.12));
+  const d=(typeof perpDraft==='function')?perpDraft(sym):null;
+  const lev=Math.max(2,Math.min(50,Math.floor(+levArg||(d?d.lev:0)||state._perpLev||10)));
+  const margin=Math.max(50,Math.floor(+marginArg||(d?d.m:0)||Math.floor(state.cash*0.12)));
   if(margin<50||state.cash<margin){toast('Not enough margin','sell');return}
   if((state.perps||[]).length>=3){toast('Max 3 open positions','sell');return}
   state.cash-=margin;
@@ -3102,24 +3206,27 @@ function openPerp(sym,dir){
   state.stress=Math.min(100,state.stress+4);
   playSound('buy'); awardXP(40,lev+'x '+dir.toUpperCase()+' '+sym);
   toast('⚡ '+lev+'x '+dir.toUpperCase()+' '+sym+' • margin '+fmt(margin),'buy');
-  updateHeader();updateSidePanels();
+  updateHeader();updateSidePanels();if(typeof renderMarket==='function')renderMarket();
 }
 function perpPnl(p){
   const cur=state.prices[p.sym]||p.entry;
   const chg=(cur-p.entry)/p.entry*(p.dir==='long'?1:-1);
   return p.margin*chg*p.lev;
 }
-function closePerp(i,silent){
+function closePerp(i,silent,fraction){
   const p=(state.perps||[])[i]; if(!p)return;
-  const pnl=perpPnl(p);
-  const ret=Math.max(0,p.margin+pnl)*0.999;
+  let fr=(typeof fraction==='number')?Math.max(0.05,Math.min(1,fraction)):1;
+  if(p.margin*fr<50)fr=1;
+  const pnlFull=perpPnl(p);
+  const pnl=pnlFull*fr;
+  const ret=Math.max(0,p.margin*fr+pnl)*0.999;
   state.cash+=ret;
-  state.perps.splice(i,1);
+  if(fr>=1){state.perps.splice(i,1)}else{p.margin=Math.round(p.margin*(1-fr))}
   if(!silent){
-    toast((pnl>=0?'✅ ':'🩸 ')+'Closed '+p.lev+'x '+p.sym+' '+(pnl>=0?'+':'')+fmt(pnl),pnl>=0?'buy':'sell');
+    toast((pnl>=0?'✅ ':'🩸 ')+'Closed '+(fr<1?Math.round(fr*100)+'% of ':'')+p.lev+'x '+p.sym+' '+(pnl>=0?'+':'')+fmt(pnl),pnl>=0?'buy':'sell');
     awardXP(pnl>0?70+Math.min(900,pnl/200):15,pnl>0?'PERP WIN':'PERP LOSS');
   }
-  updateHeader();updateSidePanels();
+  updateHeader();updateSidePanels();if(typeof renderMarket==='function')renderMarket();
 }
 function processPerps(){
   if(!state)return;
@@ -3142,6 +3249,90 @@ function processPerps(){
   }
 }
 function setPerpLev(v){state._perpLev=+v;const e=document.getElementById('perp-lev-label');if(e)e.textContent=v+'x';updateSidePanels()}
+
+/* ---------- PERP DESK (terminal) ---------- */
+function perpDraft(sym){
+  if(!state)return{m:0,lev:10};
+  state._perpDraft=state._perpDraft||{};
+  if(!state._perpDraft[sym])state._perpDraft[sym]={m:Math.max(50,Math.floor((state.cash||0)*0.12)),lev:state._perpLev||10};
+  return state._perpDraft[sym];
+}
+function setPerpMargin(sym,v){const d=perpDraft(sym);const cap=Math.max(0,Math.floor(state.cash));d.m=Math.max(0,Math.min(cap,Math.floor(+v||0)));renderMarket()}
+function setPerpPct(sym,p){setPerpMargin(sym,Math.floor((state.cash||0)*p));playSound('click')}
+function setPerpLevSym(sym,v){perpDraft(sym).lev=Math.max(2,Math.min(50,Math.floor(+v||2)));playSound('click');renderMarket()}
+function perpLiq(entry,dir,lev){const move=Math.min(0.99,0.92/Math.max(1,lev));return dir==='long'?entry*(1-move):entry*(1+move)}
+function perpLiqDist(p){
+  const cur=state.prices[p.sym]||p.entry;const lq=perpLiq(p.entry,p.dir,p.lev);
+  const span=Math.abs(p.entry-lq)||1;
+  return Math.max(0,Math.min(100,Math.abs(cur-lq)/span*100));
+}
+function renderPerpDesk(){
+  const el=document.getElementById('market-list'); if(!el||!state)return;
+  const ps=state.perps||[];
+  let h='';
+  h+='<div class="perp-card" style="grid-column:1/-1"><div class="perp-lab">PERPETUALS DESK</div><div class="perp-hint">Set your own <b>margin</b> and <b>leverage</b> per trade. Positions auto-close after 6 months. Liquidation at <b>-92%</b> of margin is permanent. Max <b>3</b> open positions.</div></div>';
+  ps.forEach((p,i)=>{
+    const cur=state.prices[p.sym]||p.entry;
+    const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
+    const lq=perpLiq(p.entry,p.dir,p.lev);
+    const dist=perpLiqDist(p);
+    const col=pnl>=0?'#34d399':'#f87171';
+    const bar=dist<25?'#ef4444':dist<55?'#f0b429':'#10b981';
+    h+='<div class="perp-card open">'+
+      '<div class="coin-head"><div><span class="coin-sym">'+p.sym+'</span>'+
+        '<span class="dg-chip '+(p.dir==='long'?'ok':'bad')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span>'+
+        '<div class="coin-hold">MARGIN '+fmt(p.margin)+' • ENTRY $'+priceStr(p.entry)+'</div></div>'+
+        '<span class="coin-price" id="pp-'+i+'" style="color:'+col+'">'+(pnl>=0?'+':'')+fmt(pnl)+'<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></span></div>'+
+      '<div class="perp-preview"><div><div class="l">MARK</div><div class="v">$'+priceStr(cur)+'</div></div>'+
+        '<div><div class="l">LIQ PRICE</div><div class="v" style="color:#f87171">$'+priceStr(lq)+'</div></div></div>'+
+      '<div class="perp-lab">DISTANCE TO LIQUIDATION · '+dist.toFixed(0)+'%</div>'+
+      '<div class="liq-bar"><i id="plb-'+i+'" style="width:'+dist.toFixed(0)+'%;background:'+bar+'"></i></div>'+
+      '<div class="perp-close"><button onclick="closePerp('+i+',false,0.5)">CLOSE 50%</button><button onclick="closePerp('+i+')">CLOSE ALL</button></div>'+
+    '</div>';
+  });
+  perpSyms().forEach(s=>{
+    const d=perpDraft(s);
+    const price=state.prices[s]||0;
+    const cap=Math.max(0,Math.floor(state.cash));
+    if(d.m>cap)d.m=cap;
+    const size=d.m*d.lev;
+    const full=ps.length>=3;
+    const bad=full||d.m<50||d.m>cap;
+    h+='<div class="perp-card">'+
+      '<div class="coin-head"><div><span class="coin-sym">'+s+'-PERP</span><span class="dg-chip mid">'+d.lev+'x</span></div>'+
+        '<span class="coin-price" id="price-perp-'+s+'">$'+priceStr(price)+'</span></div>'+
+      '<div class="perp-lab">LEVERAGE</div>'+
+      '<div class="lev-chips">'+[2,5,10,20,35,50].map(l=>'<button class="lev-chip'+(d.lev===l?' on':'')+'" onclick="setPerpLevSym(\''+s+'\','+l+')">'+l+'x</button>').join('')+'</div>'+
+      '<input type="range" min="2" max="50" step="1" value="'+d.lev+'" oninput="setPerpLevSym(\''+s+'\',this.value)" style="width:100%;height:32px;accent-color:#f0b429">'+
+      '<div class="perp-lab" style="margin-top:8px">MARGIN ($)</div>'+
+      '<div class="margin-row"><input class="margin-in" type="number" min="0" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)"></div>'+
+      '<div class="lev-chips">'+[['10%',0.1],['25%',0.25],['50%',0.5],['MAX',1]].map(q=>'<button class="lev-chip" onclick="setPerpPct(\''+s+'\','+q[1]+')">'+q[0]+'</button>').join('')+'</div>'+
+      '<input type="range" min="0" max="'+Math.max(50,cap)+'" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)" style="width:100%;height:32px;accent-color:#a855f7">'+
+      '<div class="perp-preview">'+
+        '<div><div class="l">POSITION SIZE</div><div class="v" style="color:#f0b429">'+fmt(size)+'</div></div>'+
+        '<div><div class="l">FEE (ON CLOSE)</div><div class="v">'+fmt(Math.round(size*0.001))+'</div></div>'+
+        '<div><div class="l">LIQ IF LONG</div><div class="v">$'+priceStr(perpLiq(price,'long',d.lev))+'</div></div>'+
+        '<div><div class="l">LIQ IF SHORT</div><div class="v">$'+priceStr(perpLiq(price,'short',d.lev))+'</div></div>'+
+      '</div>'+
+      '<div class="perp-acts"><button class="perp-long" '+(bad?'disabled':'')+' onclick="openPerp(\''+s+'\',\'long\','+d.m+','+d.lev+')">LONG '+d.lev+'x</button>'+
+        '<button class="perp-short" '+(bad?'disabled':'')+' onclick="openPerp(\''+s+'\',\'short\','+d.m+','+d.lev+')">SHORT '+d.lev+'x</button></div>'+
+      (full?'<div class="perp-lab" style="margin-top:8px;color:#f87171">MAX 3 OPEN POSITIONS</div>':(d.m<50?'<div class="perp-lab" style="margin-top:8px">MIN MARGIN $50</div>':''))+
+    '</div>';
+  });
+  el.innerHTML=h;
+}
+function updatePerpLive(){
+  if(!state||filter!=='PERPS')return;
+  perpSyms().forEach(s=>{const e=document.getElementById('price-perp-'+s);if(e)e.textContent='$'+priceStr(state.prices[s]||0)});
+  (state.perps||[]).forEach((p,i)=>{
+    const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
+    const e=document.getElementById('pp-'+i);
+    if(e){e.style.color=pnl>=0?'#34d399':'#f87171';e.innerHTML=(pnl>=0?'+':'')+fmt(pnl)+'<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>'}
+    const b=document.getElementById('plb-'+i);
+    const dist=perpLiqDist(p);
+    if(b){b.style.width=dist.toFixed(0)+'%';b.style.background=dist<25?'#ef4444':dist<55?'#f0b429':'#10b981'}
+  });
+}
 
 /* ---------- MINIGAMES ---------- */
 let _mini={};
@@ -3255,33 +3446,43 @@ let dgTab='air';
 function setDgTab(t){dgTab=t;playSound('click');renderDegenOps()}
 function renderDegenOps(){
   const el=document.getElementById('degen-ops'); if(!el||!state)return;
-  const tabs=[['air','🪂 AIRDROPS'],['launch','🚀 LAUNCHPAD'],['perp','⚡ PERPS']];
-  let h='<div class="dg-tabs">'+tabs.map(t=>'<button class="dg-tab'+(dgTab===t[0]?' active':'')+'" onclick="setDgTab(\''+t[0]+'\')">'+t[1]+'</button>').join('')+'</div>';
+  const cnt={air:(state.farms||[]).length,launch:(state.bags||[]).length,perp:(state.perps||[]).length};
+  const tabs=[['air','\ud83e\ude82','AIRDROPS'],['launch','\ud83d\ude80','LAUNCHPAD'],['perp','\u26a1','PERPS']];
+  let h='<div class="dg-tabs">'+tabs.map(t=>'<button class="dg-tab'+(dgTab===t[0]?' active':'')+'" onclick="setDgTab(\''+t[0]+'\')"><span class="ic">'+t[1]+'</span>'+t[2]+(cnt[t[0]]?'<span class="bg">'+cnt[t[0]]+'</span>':'')+'</button>').join('')+'</div>';
   if(dgTab==='air'){
-    (state.farms||[]).forEach(f=>{h+='<div class="dg-row"><div><div class="dg-n">🌱 '+f.n+'</div><div class="dg-m">gas '+fmt(f.spent)+' • claim in '+Math.max(0,f.due-state.month)+' mo</div></div><span class="dg-m">FARMING</span></div>'});
+    (state.farms||[]).forEach(f=>{
+      const left=Math.max(0,f.due-state.month);const total=Math.max(1,f.due-(f.start!==undefined?f.start:f.due-left-1));
+      const prog=Math.max(4,Math.min(100,Math.round((1-left/Math.max(1,total))*100)));
+      h+='<div class="dg-row"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="dg-n">\ud83c\udf31 '+f.n+'</div><div class="dg-m">gas '+fmt(f.spent)+' \u2022 '+(left>0?left+' mo to claim':'ready')+'</div></div><span class="dg-chip mid">FARMING</span></div><div class="dg-bar"><i style="width:'+prog+'%"></i></div></div>';
+    });
     if(!(state.airOffers||[]).length)h+='<div class="dg-empty">No campaigns this month</div>';
-    (state.airOffers||[]).forEach(o=>{h+='<div class="dg-row"><div><div class="dg-n">'+o.n+'</div><div class="dg-m">gas '+fmt(o.gas)+' • '+o.mat+' mo • up to '+o.mult[1]+'x</div></div><button class="dg-btn go" onclick="farmAirdrop(\''+o.id+'\')">FARM</button></div>'});
-    h+='<div class="dg-m" style="margin-top:6px">Sybil risk is real. Max 4 farms.</div>';
+    (state.airOffers||[]).forEach(o=>{h+='<div class="dg-row" style="display:flex;justify-content:space-between;align-items:center;gap:9px"><div><div class="dg-n">'+o.n+'</div><div class="dg-m">gas '+fmt(o.gas)+' \u2022 '+o.mat+' mo \u2022 up to '+o.mult[1]+'x</div></div><button class="dg-btn go" onclick="farmAirdrop(\''+o.id+'\')">FARM</button></div>'});
+    h+='<div class="dg-m" style="margin-top:7px">Sybil risk is real. Max 4 farms.</div>';
   }
   if(dgTab==='launch'){
-    (state.bags||[]).forEach(b=>{h+='<div class="dg-row"><div><div class="dg-n">'+b.n+'</div><div class="dg-m">in '+fmt(b.in)+' • resolves in '+Math.max(0,b.due-state.month)+' mo</div></div><span class="dg-m">HOLDING</span></div>'});
+    (state.bags||[]).forEach(b=>{h+='<div class="dg-row" style="display:flex;justify-content:space-between;align-items:center;gap:9px"><div><div class="dg-n">'+b.n+'</div><div class="dg-m">in '+fmt(b.in)+' \u2022 resolves in '+Math.max(0,b.due-state.month)+' mo</div></div><span class="dg-chip mid">HOLDING</span></div>'});
     if(!(state.launchOffers||[]).length)h+='<div class="dg-empty">No fresh launches</div>';
     (state.launchOffers||[]).forEach(o=>{
-      const rep=o.audited?'<span class="dg-m" style="color:'+(o.report==='moon'?'#00ff88':'#ff6b81')+'"> • '+({rug:'MINT OPEN',honeypot:'NO SELL',slow:'MID',moon:'CLEAN'})[o.report]+'</span>':'';
-      h+='<div class="dg-row"><div><div class="dg-n">'+o.n+rep+'</div><div class="dg-m">mcap '+fmt(o.mcap)+' • hype '+o.hype+'</div></div><div style="display:flex;gap:5px">'+(o.audited?'':'<button class="dg-btn" onclick="auditLaunch(\''+o.id+'\')">AUDIT</button>')+'<button class="dg-btn go" onclick="snipeLaunch(\''+o.id+'\')">SNIPE</button></div></div>';
+      const lab={rug:['MINT OPEN','bad'],honeypot:['NO SELL','bad'],slow:['MID','mid'],moon:['CLEAN','ok']}[o.report]||['',''];
+      const rep=o.audited?'<span class="dg-chip '+lab[1]+'">'+lab[0]+'</span>':'<span class="dg-chip">UNAUDITED</span>';
+      const hype=Math.max(6,Math.min(100,Math.round(+o.hype||0)));
+      h+='<div class="dg-row"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="dg-n">'+o.n+' '+rep+'</div><div class="dg-m">mcap '+fmt(o.mcap)+' \u2022 hype '+o.hype+'</div></div><div style="display:flex;gap:6px;flex-shrink:0">'+(o.audited?'':'<button class="dg-btn" onclick="auditLaunch(\''+o.id+'\')">AUDIT</button>')+'<button class="dg-btn go" onclick="snipeLaunch(\''+o.id+'\')">SNIPE</button></div></div><div class="dg-bar"><i style="width:'+hype+'%"></i></div></div>';
     });
   }
   if(dgTab==='perp'){
-    (state.perps||[]).forEach((p,i)=>{const pnl=perpPnl(p);h+='<div class="dg-row"><div><div class="dg-n">'+p.lev+'x '+p.dir.toUpperCase()+' '+p.sym+'</div><div class="dg-m">margin '+fmt(p.margin)+' • PnL <span style="color:'+(pnl>=0?'#00ff88':'#ff6b81')+'">'+(pnl>=0?'+':'')+fmt(pnl)+'</span></div></div><button class="dg-btn warn" onclick="closePerp('+i+')">CLOSE</button></div>'});
-    const lev=state._perpLev||10;
-    h+='<div style="margin:8px 0"><div class="dg-m">LEVERAGE <span id="perp-lev-label" style="color:#facc15;font-weight:900">'+lev+'x</span></div>'+
-        '<input type="range" min="2" max="50" step="1" value="'+lev+'" oninput="setPerpLev(this.value)" style="width:100%;height:30px;accent-color:#facc15"></div>';
-    perpSyms().forEach(s=>{h+='<div class="dg-row"><div class="dg-n">'+s+' <span class="dg-m">$'+priceStr(state.prices[s]||0)+'</span></div><div style="display:flex;gap:5px"><button class="dg-btn go" onclick="openPerp(\''+s+'\',\'long\')">LONG</button><button class="dg-btn warn" onclick="openPerp(\''+s+'\',\'short\')">SHORT</button></div></div>'});
-    h+='<div class="dg-m">12% of cash as margin. Liquidation is permanent.</div>';
+    const ps=state.perps||[];
+    if(!ps.length)h+='<div class="dg-empty">No open positions</div>';
+    ps.forEach((p,i)=>{
+      const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
+      const dist=(typeof perpLiqDist==='function')?perpLiqDist(p):100;
+      const col=pnl>=0?'#34d399':'#f87171';
+      h+='<div class="dg-row"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="dg-n">'+p.sym+' <span class="dg-chip '+(p.dir==='long'?'ok':'bad')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span></div><div class="dg-m">margin '+fmt(p.margin)+' \u2022 PnL <span style="color:'+col+'">'+(pnl>=0?'+':'')+fmt(pnl)+' ('+(pct>=0?'+':'')+pct.toFixed(1)+'%)</span></div></div><button class="dg-btn warn" onclick="closePerp('+i+')">CLOSE</button></div><div class="dg-bar"><i style="width:'+dist.toFixed(0)+'%;background:'+(dist<25?'#ef4444':dist<55?'#f0b429':'#10b981')+'"></i></div><div class="dg-m" style="margin-top:4px">liq distance '+dist.toFixed(0)+'%</div></div>';
+    });
+    h+='<button class="sq-card" onclick="setFilter(\'PERPS\')"><div><div class="dg-n">\u26a1 OPEN PERP DESK</div><div class="dg-m">margin + leverage im terminal</div></div><span class="dg-chip mid">TERMINAL</span></button>';
   }
   const _tk=(typeof sqTickets==='function'?sqTickets():0);
-  h+='<button class="dg-btn" style="width:100%;padding:9px;margin-top:9px;background:'+(_tk>0?'#1b1338':'#12121a')+';border-color:'+(_tk>0?'#7c3aed':'#2a2a38')+';opacity:'+(_tk>0?1:.5)+'" '+(_tk>0?'':'disabled')+' onclick="startMinigame(true)">🎰 SIDE QUEST • 🎫 '+_tk+'/2</button>';
-  h+='<div class="dg-m" style="text-align:center;margin-top:4px">1 ticket every 3 months. House edge is real.</div>';
+  h+='<button class="sq-card" '+(_tk>0?'':'disabled')+' onclick="startMinigame(true)"><div><div class="dg-n">\ud83c\udfb0 SIDE QUEST</div><div class="dg-m">1 ticket every 3 months</div></div><div class="sq-dots"><i class="'+(_tk>0?'on':'')+'"></i><i class="'+(_tk>1?'on':'')+'"></i></div></button>';
+  h+='<div class="dg-m" style="text-align:center;margin-top:5px">House edge is real.</div>';
   el.innerHTML=h;
 }
 
