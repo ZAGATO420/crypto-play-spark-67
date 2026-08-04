@@ -3434,6 +3434,7 @@ function processLaunches(){
 function perpSyms(){return ['BTC','ETH','SOL'].filter(s=>(state.prices[s]||0)>0)}
 function openPerp(sym,dir,marginArg,levArg){
   if(!state||state._gameEnded)return;
+  if(!((state.prices[sym]||0)>0)){toast(sym+' is not tradable yet','sell');return}
   const d=(typeof perpDraft==='function')?perpDraft(sym):null;
   const lev=Math.max(2,Math.min(50,Math.floor(+levArg||(d?d.lev:0)||state._perpLev||10)));
   const margin=Math.max(50,Math.floor(+marginArg||(d?d.m:0)||Math.floor(state.cash*0.12)));
@@ -3477,19 +3478,34 @@ function processPerps(){
     p.fund=(p.fund||0)+Math.round(p.margin*p.lev*0.0038);
     const pnl=perpPnl(p);
     if(pnl<=-p.margin*0.92){
-      state.perps.splice(i,1);
-      state.liquidations=(state.liquidations||0)+1;
-      state.stress=Math.min(100,state.stress+18);
-      state.risk=Math.min(99,state.risk+5);
-      addNews('LIQUIDATED: '+p.lev+'x '+p.dir+' '+p.sym+' • '+fmt(p.margin)+' gone');
-      toast('💥 LIQUIDATED '+p.lev+'x '+p.sym,'sell');
-      playSound('crash');
-      const g=document.getElementById('game-screen'); if(g){g.classList.add('shake');setTimeout(()=>g.classList.remove('shake'),520)}
-      awardXP(20,'LIQUIDATED');
+      liquidatePerp(i);
     }else if(p.m<=state.month-6){
       closePerp(i);
     }
   }
+}
+function liquidatePerp(i){
+  const p=(state.perps||[])[i]; if(!p)return;
+  state.perps.splice(i,1);
+  state.liquidations=(state.liquidations||0)+1;
+  state.stress=Math.min(100,state.stress+18);
+  state.risk=Math.min(99,state.risk+5);
+  addNews('LIQUIDATED: '+p.lev+'x '+p.dir+' '+p.sym+' • '+fmt(p.margin)+' gone');
+  toast('💥 LIQUIDATED '+p.lev+'x '+p.sym,'sell');
+  playSound('rekt');
+  const g=document.getElementById('game-screen'); if(g){g.classList.add('shake');setTimeout(()=>g.classList.remove('shake'),520)}
+  awardXP(20,'LIQUIDATED');
+}
+/* liquidation must hit the moment the mark price crosses, not only at month end */
+function checkPerpLiquidations(){
+  if(!state||!state.perps)return false;
+  let hit=false;
+  for(let i=state.perps.length-1;i>=0;i--){
+    const p=state.perps[i];
+    if(perpPnl(p)<=-p.margin*0.92){liquidatePerp(i);hit=true}
+  }
+  if(hit){updateHeader();updateSidePanels();if(typeof renderMarket==='function')renderMarket()}
+  return hit;
 }
 function setPerpLev(v){state._perpLev=+v;const e=document.getElementById('perp-lev-label');if(e)e.textContent=v+'x';updateSidePanels()}
 
@@ -3521,7 +3537,8 @@ function perpLiq(entry,dir,lev){const move=Math.min(0.99,0.92/Math.max(1,lev));r
 function perpLiqDist(p){
   const cur=state.prices[p.sym]||p.entry;const lq=perpLiq(p.entry,p.dir,p.lev);
   const span=Math.abs(p.entry-lq)||1;
-  return Math.max(0,Math.min(100,Math.abs(cur-lq)/span*100));
+  const left=(p.dir==='long'?(cur-lq):(lq-cur))/span*100;
+  return Math.max(0,Math.min(100,left));
 }
 /* Risk to liquidation: 0% at entry, 100% at the liquidation price. */
 function perpRisk(p){return Math.max(0,Math.min(100,100-perpLiqDist(p)))}
@@ -3643,7 +3660,9 @@ function renderPerpDesk(){
   ps.forEach((p,i)=>drawSpark('psp-'+i,p.hist));
 }
 function updatePerpLive(){
-  if(!state||filter!=='PERPS')return;
+  if(!state)return;
+  if(checkPerpLiquidations())return;
+  if(filter!=='PERPS')return;
   perpSyms().forEach(s=>{const e=document.getElementById('price-perp-'+s);if(e)e.textContent='$'+priceStr(state.prices[s]||0)});
   (state.perps||[]).forEach((p,i)=>{
     const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
