@@ -3350,23 +3350,29 @@ function renderPerpDesk(){
   const el=document.getElementById('market-list'); if(!el||!state)return;
   const ps=state.perps||[];
   let h='';
-  h+='<div class="perp-card" style="grid-column:1/-1"><div class="perp-lab">PERPETUALS DESK</div><div class="perp-hint">Set your own <b>margin</b> and <b>leverage</b> per trade. Positions auto-close after 6 months. Liquidation at <b>-92%</b> of margin is permanent. Max <b>3</b> open positions.</div></div>';
+  h+='<div class="perp-card" style="grid-column:1/-1"><div class="perp-lab">PERPETUALS DESK · NET WORTH</div>'+
+     '<div class="perp-nw"><canvas id="perp-nw-chart"></canvas></div>'+
+     '<div class="perp-hint">Set your own <b>margin</b> or <b>position size</b> per trade. Funding is charged monthly, positions auto-close after 6 months, liquidation at <b>-92%</b> of margin is permanent. Max <b>3</b> open positions.</div></div>';
   ps.forEach((p,i)=>{
     const cur=state.prices[p.sym]||p.entry;
     const pnl=perpPnl(p);const pct=p.margin?pnl/p.margin*100:0;
     const lq=perpLiq(p.entry,p.dir,p.lev);
-    const dist=perpLiqDist(p);
+    const risk=perpRisk(p);
+    const move=perpMoveToLiq(p);
     const col=pnl>=0?'#34d399':'#f87171';
-    const bar=dist<25?'#ef4444':dist<55?'#f0b429':'#10b981';
+    const bar=riskCol(risk);
     h+='<div class="perp-card open">'+
       '<div class="coin-head"><div><span class="coin-sym">'+p.sym+'</span>'+
         '<span class="dg-chip '+(p.dir==='long'?'ok':'bad')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span>'+
-        '<div class="coin-hold">MARGIN '+fmt(p.margin)+' • ENTRY $'+priceStr(p.entry)+'</div></div>'+
+        '<div class="coin-hold">MARGIN '+fmt(p.margin)+' • SIZE '+fmt(p.margin*p.lev)+' • ENTRY $'+priceStr(p.entry)+(p.fund?' • FUNDING -'+fmt(p.fund):'')+'</div></div>'+
         '<span class="coin-price" id="pp-'+i+'" style="color:'+col+'">'+(pnl>=0?'+':'')+fmt(pnl)+'<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></span></div>'+
       '<div class="perp-preview"><div><div class="l">MARK</div><div class="v">$'+priceStr(cur)+'</div></div>'+
         '<div><div class="l">LIQ PRICE</div><div class="v" style="color:#f87171">$'+priceStr(lq)+'</div></div></div>'+
-      '<div class="perp-lab">DISTANCE TO LIQUIDATION · '+dist.toFixed(0)+'%</div>'+
-      '<div class="liq-bar"><i id="plb-'+i+'" style="width:'+dist.toFixed(0)+'%;background:'+bar+'"></i></div>'+
+      '<div class="perp-lab">RISK TO LIQ · <span id="prk-'+i+'">'+risk.toFixed(0)+'%</span></div>'+
+      '<div class="liq-bar'+(risk>85?' danger':'')+'" id="plw-'+i+'"><i id="plb-'+i+'" style="width:'+risk.toFixed(0)+'%;background:'+bar+'"></i><s id="plm-'+i+'" style="left:'+risk.toFixed(0)+'%"></s></div>'+
+      '<div class="liq-note" id="pln-'+i+'">Liq at $'+priceStr(lq)+' · '+move.toFixed(move<1?2:1)+'% price move away</div>'+
+      '<div class="perp-lab">POSITION PNL</div>'+
+      '<div class="perp-spark"><canvas id="psp-'+i+'"></canvas></div>'+
       '<div class="perp-close"><button onclick="closePerp('+i+',false,0.5)">CLOSE 50%</button><button onclick="closePerp('+i+')">CLOSE ALL</button></div>'+
     '</div>';
   });
@@ -3388,8 +3394,10 @@ function renderPerpDesk(){
       '<div class="margin-row"><input class="margin-in" type="number" min="0" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)"></div>'+
       '<div class="lev-chips">'+[['10%',0.1],['25%',0.25],['50%',0.5],['MAX',1]].map(q=>'<button class="lev-chip" onclick="setPerpPct(\''+s+'\','+q[1]+')">'+q[0]+'</button>').join('')+'</div>'+
       '<input type="range" min="0" max="'+Math.max(50,cap)+'" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)" style="width:100%;height:32px;accent-color:#a855f7">'+
+      '<div class="perp-lab" style="margin-top:6px">POSITION SIZE ($ NOTIONAL)</div>'+
+      '<div class="margin-row"><input class="margin-in" type="number" min="0" step="100" value="'+size+'" oninput="setPerpSize(\''+s+'\',this.value)"></div>'+
       '<div class="perp-preview">'+
-        '<div><div class="l">POSITION SIZE</div><div class="v" style="color:#f0b429">'+fmt(size)+'</div></div>'+
+        '<div><div class="l">COINS ('+s+')</div><div class="v" style="color:#f0b429">'+(price>0?fmtAmt(size/price):'—')+'</div></div>'+
         '<div><div class="l">FEE (ON CLOSE)</div><div class="v">'+fmt(Math.round(size*0.001))+'</div></div>'+
         '<div><div class="l">LIQ IF LONG</div><div class="v">$'+priceStr(perpLiq(price,'long',d.lev))+'</div></div>'+
         '<div><div class="l">LIQ IF SHORT</div><div class="v">$'+priceStr(perpLiq(price,'short',d.lev))+'</div></div>'+
@@ -3400,6 +3408,8 @@ function renderPerpDesk(){
     '</div>';
   });
   el.innerHTML=h;
+  ensurePerpNwChart();
+  ps.forEach((p,i)=>drawSpark('psp-'+i,p.hist));
 }
 function updatePerpLive(){
   if(!state||filter!=='PERPS')return;
