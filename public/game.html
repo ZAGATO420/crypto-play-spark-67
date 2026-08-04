@@ -3230,7 +3230,7 @@ function closePerp(i,silent,fraction){
   const pnl=pnlFull*fr;
   const ret=Math.max(0,p.margin*fr+pnl)*0.999;
   state.cash+=ret;
-  if(fr>=1){state.perps.splice(i,1)}else{p.margin=Math.round(p.margin*(1-fr))}
+  if(fr>=1){state.perps.splice(i,1)}else{p.margin=Math.round(p.margin*(1-fr));p.fund=Math.round((p.fund||0)*(1-fr))}
   if(!silent){
     toast((pnl>=0?'✅ ':'🩸 ')+'Closed '+(fr<1?Math.round(fr*100)+'% of ':'')+p.lev+'x '+p.sym+' '+(pnl>=0?'+':'')+fmt(pnl),pnl>=0?'buy':'sell');
     awardXP(pnl>0?70+Math.min(900,pnl/200):15,pnl>0?'PERP WIN':'PERP LOSS');
