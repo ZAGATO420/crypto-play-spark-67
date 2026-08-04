@@ -3278,6 +3278,60 @@ function perpLiqDist(p){
   const span=Math.abs(p.entry-lq)||1;
   return Math.max(0,Math.min(100,Math.abs(cur-lq)/span*100));
 }
+/* Risk to liquidation: 0% at entry, 100% at the liquidation price. */
+function perpRisk(p){return Math.max(0,Math.min(100,100-perpLiqDist(p)))}
+/* How far (in %) the mark price still has to move before liquidation. */
+function perpMoveToLiq(p){
+  const cur=state.prices[p.sym]||p.entry;const lq=perpLiq(p.entry,p.dir,p.lev);
+  if(cur<=0)return 0;
+  return Math.max(0,Math.abs(cur-lq)/cur*100);
+}
+function riskCol(r){return r>70?'#ef4444':r>40?'#f0b429':'#10b981'}
+function drawSpark(id,arr){
+  const cv=document.getElementById(id); if(!cv)return;
+  const w=cv.clientWidth||220,h=cv.clientHeight||40,dpr=window.devicePixelRatio||1;
+  cv.width=w*dpr;cv.height=h*dpr;
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const d=(arr&&arr.length>1)?arr:[0,0];
+  const mn=Math.min.apply(null,d),mx=Math.max.apply(null,d);
+  const span=(mx-mn)||1;
+  const last=d[d.length-1];
+  const col=last>=0?'#34d399':'#f87171';
+  const y=v=>h-4-((v-mn)/span)*(h-8);
+  const x=i=>(i/(d.length-1))*w;
+  // zero line
+  if(mn<0&&mx>0){ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y(0));ctx.lineTo(w,y(0));ctx.stroke()}
+  ctx.beginPath();d.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v))});
+  ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.lineJoin='round';ctx.stroke();
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+  const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,last>=0?'rgba(52,211,153,.28)':'rgba(248,113,113,.28)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fill();
+}
+function samplePerpHist(){
+  if(!state||!state.perps)return;
+  state.perps.forEach(p=>{p.hist=p.hist||[0];p.hist.push(perpPnl(p));if(p.hist.length>140)p.hist.splice(0,p.hist.length-140)});
+}
+let perpNwChart=null;
+function ensurePerpNwChart(){
+  const cv=document.getElementById('perp-nw-chart'); if(!cv||typeof Chart==='undefined')return;
+  const data=(state&&state.liveHistory&&state.liveHistory.length?state.liveHistory:[netWorth()]);
+  if(perpNwChart){try{perpNwChart.destroy()}catch(e){}}
+  const ctx=cv.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,0,120);
+  g.addColorStop(0,'rgba(240,180,41,.32)');g.addColorStop(.6,'rgba(168,85,247,.12)');g.addColorStop(1,'rgba(168,85,247,0)');
+  perpNwChart=new Chart(ctx,{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data:data,borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.28,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+}
+function updatePerpNwChart(){
+  if(!perpNwChart||!state)return;
+  const data=state.liveHistory&&state.liveHistory.length?state.liveHistory:[netWorth()];
+  perpNwChart.data.labels=data.map((_,i)=>i);
+  perpNwChart.data.datasets[0].data=data;
+  const up=data[data.length-1]>=data[0];
+  perpNwChart.data.datasets[0].borderColor=up?'#f0b429':'#ef4444';
+  perpNwChart.update('none');
+}
 function renderPerpDesk(){
   const el=document.getElementById('market-list'); if(!el||!state)return;
   const ps=state.perps||[];
