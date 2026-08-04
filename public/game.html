@@ -3305,8 +3305,8 @@ function renderPerpDesk(){
       '<div class="lev-chips">'+[2,5,10,20,35,50].map(l=>'<button class="lev-chip'+(d.lev===l?' on':'')+'" onclick="setPerpLevSym(\''+s+'\','+l+')">'+l+'x</button>').join('')+'</div>'+
       '<input type="range" min="2" max="50" step="1" value="'+d.lev+'" oninput="setPerpLevSym(\''+s+'\',this.value)" style="width:100%;height:32px;accent-color:#f0b429">'+
       '<div class="perp-lab" style="margin-top:8px">MARGIN ($)</div>'+
-      '<div class="margin-row"><input class="margin-in" type="number" min="0" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)">'+
-        [['10%',0.1],['25%',0.25],['50%',0.5],['MAX',1]].map(q=>'<button class="lev-chip" onclick="setPerpPct(\''+s+'\','+q[1]+')">'+q[0]+'</button>').join('')+'</div>'+
+      '<div class="margin-row"><input class="margin-in" type="number" min="0" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)"></div>'+
+      '<div class="lev-chips">'+[['10%',0.1],['25%',0.25],['50%',0.5],['MAX',1]].map(q=>'<button class="lev-chip" onclick="setPerpPct(\''+s+'\','+q[1]+')">'+q[0]+'</button>').join('')+'</div>'+
       '<input type="range" min="0" max="'+Math.max(50,cap)+'" step="10" value="'+d.m+'" oninput="setPerpMargin(\''+s+'\',this.value)" style="width:100%;height:32px;accent-color:#a855f7">'+
       '<div class="perp-preview">'+
         '<div><div class="l">POSITION SIZE</div><div class="v" style="color:#f0b429">'+fmt(size)+'</div></div>'+
