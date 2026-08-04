@@ -3478,19 +3478,34 @@ function processPerps(){
     p.fund=(p.fund||0)+Math.round(p.margin*p.lev*0.0038);
     const pnl=perpPnl(p);
     if(pnl<=-p.margin*0.92){
-      state.perps.splice(i,1);
-      state.liquidations=(state.liquidations||0)+1;
-      state.stress=Math.min(100,state.stress+18);
-      state.risk=Math.min(99,state.risk+5);
-      addNews('LIQUIDATED: '+p.lev+'x '+p.dir+' '+p.sym+' • '+fmt(p.margin)+' gone');
-      toast('💥 LIQUIDATED '+p.lev+'x '+p.sym,'sell');
-      playSound('crash');
-      const g=document.getElementById('game-screen'); if(g){g.classList.add('shake');setTimeout(()=>g.classList.remove('shake'),520)}
-      awardXP(20,'LIQUIDATED');
+      liquidatePerp(i);
     }else if(p.m<=state.month-6){
       closePerp(i);
     }
   }
+}
+function liquidatePerp(i){
+  const p=(state.perps||[])[i]; if(!p)return;
+  state.perps.splice(i,1);
+  state.liquidations=(state.liquidations||0)+1;
+  state.stress=Math.min(100,state.stress+18);
+  state.risk=Math.min(99,state.risk+5);
+  addNews('LIQUIDATED: '+p.lev+'x '+p.dir+' '+p.sym+' • '+fmt(p.margin)+' gone');
+  toast('💥 LIQUIDATED '+p.lev+'x '+p.sym,'sell');
+  playSound('rekt');
+  const g=document.getElementById('game-screen'); if(g){g.classList.add('shake');setTimeout(()=>g.classList.remove('shake'),520)}
+  awardXP(20,'LIQUIDATED');
+}
+/* liquidation must hit the moment the mark price crosses, not only at month end */
+function checkPerpLiquidations(){
+  if(!state||!state.perps)return false;
+  let hit=false;
+  for(let i=state.perps.length-1;i>=0;i--){
+    const p=state.perps[i];
+    if(perpPnl(p)<=-p.margin*0.92){liquidatePerp(i);hit=true}
+  }
+  if(hit){updateHeader();updateSidePanels();if(typeof renderMarket==='function')renderMarket()}
+  return hit;
 }
 function setPerpLev(v){state._perpLev=+v;const e=document.getElementById('perp-lev-label');if(e)e.textContent=v+'x';updateSidePanels()}
 
