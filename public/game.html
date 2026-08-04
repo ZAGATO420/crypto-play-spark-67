@@ -621,6 +621,130 @@ header{background:rgba(3,5,12,.82)}
 .tut-btn.next{background:linear-gradient(100deg,var(--gold),#a855f7);color:#150c02;font-weight:800;border:none;box-shadow:0 10px 30px -12px rgba(168,85,247,.8)}
 .tut-btn.skip{background:rgba(255,255,255,.025);border:1px solid var(--v3-line);color:#7e88ad;flex:0 0 34%}
 #tut-dots{font-size:11px;letter-spacing:5px;color:#6b7597}
+
+/* ===================== V3 TERMINAL ===================== */
+.term-head{
+  padding:14px 14px 12px!important;border-bottom:1px solid var(--v3-line)!important;
+  background:linear-gradient(180deg,rgba(240,180,41,.06),transparent);
+  flex-wrap:wrap;gap:10px;
+}
+.term-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px!important;letter-spacing:.24em!important;
+  color:#e7ecf8;display:flex;align-items:center;gap:9px;
+}
+.term-title::before{
+  content:'';width:7px;height:7px;border-radius:99px;background:var(--gold);
+  box-shadow:0 0 12px var(--gold);animation:tpulse 2.2s ease-in-out infinite;
+}
+@keyframes tpulse{0%,100%{opacity:1}50%{opacity:.35}}
+.market-grid{gap:12px;padding:2px 4px 2px 2px}
+
+.coin-card{
+  position:relative;overflow:hidden;border-radius:18px;padding:14px;
+  background:linear-gradient(168deg,rgba(255,255,255,.045),rgba(6,9,18,.82));
+  border:1px solid var(--v3-line);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.coin-card::before{
+  content:'';position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(100deg,transparent,rgba(240,180,41,.55),rgba(168,85,247,.45),transparent);
+  opacity:.5;transition:opacity .2s;
+}
+.coin-card:hover{
+  transform:translateY(-3px);border-color:rgba(240,180,41,.3);
+  box-shadow:0 22px 48px -26px #000,0 0 44px -22px rgba(240,180,41,.55);
+}
+.coin-card:hover::before{opacity:1}
+.coin-card.held{
+  border-color:rgba(240,180,41,.34);
+  background:linear-gradient(168deg,rgba(240,180,41,.09),rgba(6,9,18,.85));
+}
+.coin-head{margin-bottom:10px}
+.coin-sym{font-size:14px!important;font-weight:900;letter-spacing:.04em;color:#f2f5ff}
+.coin-price{font-size:12.5px!important;color:#e7ecf8!important;letter-spacing:.02em}
+.coin-tag{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;margin-left:6px;
+  padding:2px 6px;border-radius:99px;border:1px solid rgba(168,85,247,.35);
+  color:#c4a2f7;background:rgba(168,85,247,.1);vertical-align:middle;
+}
+.coin-hold{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;
+  color:#c8b06a;margin-top:3px;
+}
+/* segmented buy/sell switch – colors stay red/green */
+.mode-btns{
+  gap:0;margin:0 0 11px;padding:3px;border-radius:13px;
+  background:rgba(255,255,255,.03);border:1px solid var(--v3-line);
+}
+.mode-btns button{
+  height:30px;border:none!important;background:transparent!important;border-radius:10px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:#7e88ad;
+  transition:all .18s;
+}
+.mode-btns button.on-buy{background:linear-gradient(135deg,#10b981,#34d399)!important;color:#04140c!important;box-shadow:0 6px 18px -8px rgba(16,185,129,.9)}
+.mode-btns button.on-sell{background:linear-gradient(135deg,#ef4444,#f87171)!important;color:#fff!important;box-shadow:0 6px 18px -8px rgba(239,68,68,.9)}
+.amt-row{display:flex;gap:8px;align-items:center;margin:2px 0 4px}
+.step-btn{
+  padding:0 11px;height:34px;border-radius:11px;background:rgba(255,255,255,.03);
+  border:1px solid var(--v3-line);color:#cbd5e1;font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;letter-spacing:.06em;cursor:pointer;transition:all .16s;
+}
+.step-btn:hover{border-color:rgba(240,180,41,.4);color:#fff;background:rgba(240,180,41,.08)}
+.amt-info{
+  font-size:11px!important;letter-spacing:.1em;color:#8b95b5!important;margin-bottom:11px!important;
+}
+.amt-info b{color:var(--gold);font-weight:700}
+.exec-btn{
+  height:40px;border-radius:13px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+}
+.exec-buy{box-shadow:0 12px 30px -14px rgba(16,185,129,.85)}
+.exec-sell{box-shadow:0 12px 30px -14px rgba(239,68,68,.85)}
+input[type=range]{background:rgba(255,255,255,.06)}
+input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px rgba(240,180,41,.45)}
+
+/* ---------- Cashflow / cost board ---------- */
+.cf-top{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px}
+.cf-tile{
+  border-radius:14px;padding:10px 11px;background:rgba(255,255,255,.03);
+  border:1px solid var(--v3-line);
+}
+.cf-tile .l{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;color:#7e88ad}
+.cf-tile .v{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;margin-top:3px}
+.cf-net{
+  grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(100deg,rgba(240,180,41,.1),rgba(168,85,247,.1));
+  border-color:rgba(240,180,41,.26);
+}
+.cf-net .v{font-size:19px}
+.cf-rows{display:grid;gap:1px;border-radius:14px;overflow:hidden;border:1px solid var(--v3-line)}
+.cf-row{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:8px 11px;background:rgba(255,255,255,.022);font-size:11.5px;
+}
+.cf-row span:first-child{color:#7e88ad;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em}
+.cf-row span:last-child{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11.5px}
+.cf-note{
+  margin-top:8px;font-size:10px;line-height:1.6;color:#8b95b5;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;
+}
+.cf-note b{color:var(--gold)}
+
+/* ---------- Portfolio / holdings / quests ---------- */
+.portfolio-summary{
+  border-radius:14px!important;padding:11px 12px!important;
+  background:linear-gradient(100deg,rgba(240,180,41,.08),rgba(168,85,247,.08))!important;
+  border:1px solid rgba(240,180,41,.2)!important;
+}
+.hold-item,.quest-item,.ach-item,.presale-card{
+  border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--v3-line);
+}
+.hold-item:hover,.presale-card:hover{border-color:rgba(240,180,41,.28)}
+.quest-item.done{border-color:rgba(240,180,41,.3);background:linear-gradient(100deg,rgba(240,180,41,.09),transparent)}
+.chart-box{
+  background:radial-gradient(ellipse 80% 70% at 50% 100%,rgba(240,180,41,.07),transparent 70%),rgba(4,7,15,.85);
+  border:1px solid var(--v3-line);border-radius:16px;height:185px;
+}
 </style>
 </head>
 <body>
@@ -778,8 +902,8 @@ header{background:rgba(3,5,12,.82)}
     </div>
 
     <div class="panel" style="padding:0;overflow:hidden;display:flex;flex-direction:column">
-      <div style="padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-        <span style="font-weight:900;font-size:12px;letter-spacing:.08em">TERMINAL</span>
+      <div class="term-head" style="display:flex;justify-content:space-between;align-items:center">
+        <span class="term-title">TERMINAL</span>
         <div style="display:flex;gap:6px">
           <button class="tc-btn active" data-filter="ALL" onclick="setFilter('ALL')">ALL</button>
           <button class="tc-btn" data-filter="TOP" onclick="setFilter('TOP')">TOP</button>
@@ -1232,7 +1356,7 @@ function togglePause(){if(!state||state.ironman)return;state.paused=!state.pause
 function setSpeed(s){if(!state)return;state.speed=s;document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',+b.dataset.speed===s));playSound('click')}
 function advanceWeek(){if(state&&!state.ironman){playSound('click');advanceDays(7)}}
 function advanceMonth(){if(state&&!state.ironman){playSound('click');advanceDays(30)}}
-function advanceDays(n){if(!state||state._gameEnded)return;for(let i=0;i<n;i++){state.day++;COINS.forEach(c=>{if(state.month<c.launch)return;state.noise[c.s]*=1+(Math.random()-.5)*.012*c.vol*state.countryRiskMod;state.noise[c.s]=Math.max(.85,Math.min(1.18,state.noise[c.s]))});state.hunger=Math.min(100,state.hunger+.25);if(state.day>30){state.day=1;nextMonth();if(!state||state._gameEnded)return}}applyPrices();if(checkGameOver())return;updateHeader();updatePriceDisplays();updateCriticalWarning()}
+function advanceDays(n){if(!state||state._gameEnded)return;for(let i=0;i<n;i++){state.day++;COINS.forEach(c=>{if(state.month<c.launch)return;state.noise[c.s]*=1+(Math.random()-.5)*.012*c.vol*state.countryRiskMod;state.noise[c.s]=Math.max(.85,Math.min(1.18,state.noise[c.s]))});state.hunger=Math.min(100,state.hunger+.25);applyPrices();sampleNW();if(state.day>30){state.day=1;nextMonth();if(!state||state._gameEnded)return}}applyPrices();if(checkGameOver())return;updateHeader();updatePriceDisplays();updateCriticalWarning()}
 function applyPrices(){COINS.forEach(c=>{if(state.month<c.launch){state.prices[c.s]=0;return}const base=getHistPrice(c.s,state.month)||(c.base||1);let n=state.noise[c.s]||1;
   // Narrative bias
   if(state.narrative==='l1'&&c.tags.includes('L1'))n*=(state.l1Bonus||1.12);
@@ -2274,7 +2398,7 @@ function sell(sym){
 function onSliderInput(sym,value,price){const amt=Math.floor(+value);state._amt[sym]=amt;const coinsEst=price>0?amt/price:0;const el=document.getElementById('amt-'+sym);if(el)el.textContent='$'+amt.toLocaleString()+' → '+fmtAmt(coinsEst)+' '+sym}
 function setMode(sym,m){state._mode[sym]=m;state._amt[sym]=0;playSound('click');renderMarket()}
 function setFilter(f){filter=f;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));playSound('click');renderMarket()}
-function renderMarket(){if(!state)return;let list=COINS.filter(c=>state.month>=c.launch&&state.prices[c.s]>0);if(filter==='TOP')list=list.filter(c=>['BTC','ETH','SOL','ADA','LINK'].includes(c.s));if(filter==='MEME')list=list.filter(c=>c.tags.includes('MEME'));if(filter==='HOLD')list=list.filter(c=>(state.holdings[c.s]||0)>0);document.getElementById('market-list').innerHTML=list.map(c=>{const price=state.prices[c.s];const held=(state.holdings[c.s]||0)>0;const mode=state._mode[c.s]||'buy';const maxBuy=Math.max(0,Math.floor(state.cash));const posVal=(state.holdings[c.s]||0)*price;const maxSell=Math.max(0,Math.floor(posVal));const maxAmt=mode==='buy'?maxBuy:maxSell;let amt=state._amt[c.s]||0;if(amt>maxAmt)amt=maxAmt;state._amt[c.s]=amt;const coinsEst=price>0?amt/price:0;const accent=mode==='buy'?'#22c55e':'#ef4444';return`<div class="coin-card ${held?'held':''}"><div class="coin-head"><span class="coin-sym">${c.s}${c.tags.includes('MEME')?' <span style="font-size:9px;color:#ff8fd6">M</span>':''}</span><span class="coin-price" id="price-${c.s}">$${priceStr(price)}</span></div><div class="mode-btns"><button class="${mode==='buy'?'on-buy':''}" onclick="setMode('${c.s}','buy')">BUY $</button><button class="${mode==='sell'?'on-sell':''}" onclick="setMode('${c.s}','sell')">SELL $</button></div><div style="display:flex;gap:6px;align-items:center;margin:6px 0"><button onclick="state._amt['${c.s}']=Math.max(0,(state._amt['${c.s}']||0)-Math.ceil(maxAmt*0.25));renderMarket()" style="padding:8px 12px;border-radius:8px;background:#0a0e1a;border:1px solid var(--border);color:#fff;font-size:12px;cursor:pointer">-25%</button><input type="range" min="0" max="${Math.max(1,maxAmt)}" value="${amt}" step="1" oninput="onSliderInput('${c.s}',this.value,${price})" style="flex:1;height:36px;accent-color:${accent}"><button onclick="state._amt['${c.s}']=Math.min(maxAmt,(state._amt['${c.s}']||0)+Math.ceil(maxAmt*0.25));renderMarket()" style="padding:8px 12px;border-radius:8px;background:#0a0e1a;border:1px solid var(--border);color:#fff;font-size:12px;cursor:pointer">+25%</button></div><div class="amt-info" id="amt-${c.s}">$${amt.toLocaleString()} → ${fmtAmt(coinsEst)} ${c.s}</div><button class="exec-btn ${mode==='buy'?'exec-buy':'exec-sell'}" ${maxAmt<1?'disabled':''} onclick="${mode==='buy'?`buy('${c.s}')`:`sell('${c.s}')`}">EXECUTE ${mode.toUpperCase()}</button></div>`}).join('')}
+function renderMarket(){if(!state)return;let list=COINS.filter(c=>state.month>=c.launch&&state.prices[c.s]>0);if(filter==='TOP')list=list.filter(c=>['BTC','ETH','SOL','ADA','LINK'].includes(c.s));if(filter==='MEME')list=list.filter(c=>c.tags.includes('MEME'));if(filter==='HOLD')list=list.filter(c=>(state.holdings[c.s]||0)>0);document.getElementById('market-list').innerHTML=list.map(c=>{const price=state.prices[c.s];const amtHeld=state.holdings[c.s]||0;const held=amtHeld>0;const mode=state._mode[c.s]||'buy';const maxBuy=Math.max(0,Math.floor(state.cash));const posVal=amtHeld*price;const maxSell=Math.max(0,Math.floor(posVal));const maxAmt=mode==='buy'?maxBuy:maxSell;let amt=state._amt[c.s]||0;if(amt>maxAmt)amt=maxAmt;state._amt[c.s]=amt;const coinsEst=price>0?amt/price:0;const accent=mode==='buy'?'#22c55e':'#ef4444';const avg=state.avg[c.s]||0;const pnl=held&&avg>0?((price-avg)/avg*100):0;return`<div class="coin-card ${held?'held':''}"><div class="coin-head"><div><span class="coin-sym">${c.s}</span>${c.tags.includes('MEME')?'<span class="coin-tag">MEME</span>':''}${held?`<div class="coin-hold">HOLDING ${fmtAmt(amtHeld)} • <span style="color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</span></div>`:''}</div><span class="coin-price" id="price-${c.s}">$${priceStr(price)}</span></div><div class="mode-btns"><button class="${mode==='buy'?'on-buy':''}" onclick="setMode('${c.s}','buy')">BUY $</button><button class="${mode==='sell'?'on-sell':''}" onclick="setMode('${c.s}','sell')">SELL $</button></div><div class="amt-row"><button class="step-btn" onclick="state._amt['${c.s}']=Math.max(0,(state._amt['${c.s}']||0)-Math.ceil(maxAmt*0.25));renderMarket()">-25%</button><input type="range" min="0" max="${Math.max(1,maxAmt)}" value="${amt}" step="1" oninput="onSliderInput('${c.s}',this.value,${price})" style="flex:1;height:36px;accent-color:${accent}"><button class="step-btn" onclick="state._amt['${c.s}']=Math.min(maxAmt,(state._amt['${c.s}']||0)+Math.ceil(maxAmt*0.25));renderMarket()">+25%</button></div><div class="amt-info" id="amt-${c.s}"><b>$${amt.toLocaleString()}</b> → ${fmtAmt(coinsEst)} ${c.s}</div><button class="exec-btn ${mode==='buy'?'exec-buy':'exec-sell'}" ${maxAmt<1?'disabled':''} onclick="${mode==='buy'?`buy('${c.s}')`:`sell('${c.s}')`}">EXECUTE ${mode.toUpperCase()}</button></div>`}).join('')}
 function updatePriceDisplays(){COINS.forEach(c=>{const el=document.getElementById('price-'+c.s);if(el)el.textContent='$'+priceStr(state.prices[c.s])})}
 
 function refreshPresales(){
@@ -2462,23 +2586,28 @@ function updateHeader(){if(!state)return;document.getElementById('hdr-name').tex
 function updateSidePanels(){if(!state)return;const c=COUNTRIES[state.country];const d=DIFF[state.diff];const infl=costMult();const rent=Math.round(c.rent*d.cost*infl);const food=Math.round(400*d.cost*infl);let passive=0;Object.keys(state.businesses).forEach(id=>{const b=BUSINESS.find(x=>x.id===id);if(b)passive+=b.monthly});
   try{['food','therapy','gym'].forEach(t=>{const el=document.getElementById('price-'+t);if(el)el.textContent=fmt(itemPrice(t))})}catch(e){}
   document.getElementById('cost-list').innerHTML=`
-    ${state.month<24?`<div style="font-size:10px;color:#22d3ee;margin-bottom:5px;font-weight:700">🌱 Rookie discount active – costs rise in ${Math.max(1,(state.month<6?6:state.month<12?12:24)-state.month)} mo</div>`:''}${inflMult()>1.001?`<div style="font-size:10px;color:var(--gold);margin-bottom:5px;font-weight:700">🔥 Inflation +${Math.round((inflMult()-1)*100)}% since 2020</div>`:''}
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Rent</span><span>-${fmt(rent)}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Food</span><span>-${fmt(food)}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Tax (on profit)</span><span>${(c.tax*100).toFixed(0)}%</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Job Income</span><span style="color:#22d3ee">${state.jobIncome? '+'+fmt(Math.round(state._lastJob||0)): '$0'}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Realized gains (taxable)</span><span style="color:var(--gold)">${fmt(Math.round(state._realizedYear||0))}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Bailouts left</span><span style="color:${3-(state._bailouts||0)>0?'#facc15':'#ef4444'}">${Math.max(0,3-(state._bailouts||0))}/3</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0;border-top:1px solid #1e2646;padding-top:6px"><span style="color:var(--muted)">Business Income</span><span style="color:${passive>=0?'#22c55e':'#ef4444'}">${passive>=0?'+':''}${fmt(passive)}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Total Income</span><span style="color:#facc15">${fmt(Math.round(state._lastTotalIncome||0))}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0"><span style="color:var(--muted)">Monthly Cost</span><span style="color:#ef4444">-${fmt(Math.round(rent+food))}</span></div>
-    <div style="display:flex;justify-content:space-between;margin:3px 0;font-weight:700;border-top:1px solid #1e2646;padding-top:4px"><span>Net Cashflow</span><span style="color:${(state._lastTotalIncome||0)-(rent+food)<0?'#ef4444':'#22c55e'}">${fmt(Math.round((state._lastTotalIncome||0)-(rent+food)))}/mo</span></div>
-    ${passive<0?`<div style="font-size:10px;color:#f87171;margin-top:2px">⚠️ Leverage costs you ${fmt(Math.abs(passive))}/mo - capped!</div>`:''}
-    ${(state._lastTotalIncome||0) > (rent+food)*0.65 ? `<div style="font-size:9px;color:#fbbf24;margin-top:3px">⚖️ Income capped at 78% of costs - you must trade to survive!</div>` : ''}
-    ${Object.keys(state.businesses).length?`<div style="font-size:10px;color:var(--muted);margin-top:4px">${Object.keys(state.businesses).map(id=>{const b=BUSINESS.find(x=>x.id===id);return b?b.title:''}).join(' • ')}</div>`:''}`;
+    <div class="cf-top">
+      <div class="cf-tile"><div class="l">INCOME / MO</div><div class="v" style="color:#22c55e">${fmt(Math.round(state._lastTotalIncome||0))}</div></div>
+      <div class="cf-tile"><div class="l">COSTS / MO</div><div class="v" style="color:#ef4444">-${fmt(Math.round(rent+food))}</div></div>
+      <div class="cf-tile cf-net"><div><div class="l">NET CASHFLOW</div><div class="v" style="color:${(state._lastTotalIncome||0)-(rent+food)<0?'#ef4444':'#22c55e'}">${fmt(Math.round((state._lastTotalIncome||0)-(rent+food)))}<span style="font-size:10px;color:#7e88ad">/mo</span></div></div><div style="text-align:right"><div class="l">BAILOUTS</div><div class="v" style="color:${3-(state._bailouts||0)>0?'var(--gold)':'#ef4444'}">${Math.max(0,3-(state._bailouts||0))}/3</div></div></div>
+    </div>
+    <div class="cf-rows">
+      <div class="cf-row"><span>RENT</span><span style="color:#ef4444">-${fmt(rent)}</span></div>
+      <div class="cf-row"><span>FOOD</span><span style="color:#ef4444">-${fmt(food)}</span></div>
+      <div class="cf-row"><span>JOB</span><span style="color:#22d3ee">${state.jobIncome?'+'+fmt(Math.round(state._lastJob||0)):'$0'}</span></div>
+      <div class="cf-row"><span>BUSINESS</span><span style="color:${passive>=0?'#22c55e':'#ef4444'}">${passive>=0?'+':''}${fmt(passive)}</span></div>
+      <div class="cf-row"><span>TAX RATE</span><span style="color:var(--gold)">${(c.tax*100).toFixed(0)}%</span></div>
+      <div class="cf-row"><span>TAXABLE GAINS</span><span style="color:var(--gold)">${fmt(Math.round(state._realizedYear||0))}</span></div>
+    </div>
+    ${state.month<24?`<div class="cf-note">\u{1F331} Rookie discount active – costs rise in <b>${Math.max(1,(state.month<6?6:state.month<12?12:24)-state.month)} mo</b></div>`:''}
+    ${inflMult()>1.001?`<div class="cf-note">\u{1F525} Inflation <b>+${Math.round((inflMult()-1)*100)}%</b> since 2020</div>`:''}
+    ${passive<0?`<div class="cf-note" style="color:#f87171">\u26A0\uFE0F Leverage costs you <b>${fmt(Math.abs(passive))}</b>/mo – capped</div>`:''}
+    ${(state._lastTotalIncome||0) > (rent+food)*0.65?`<div class="cf-note">\u2696\uFE0F Income is capped – <b>you must trade to survive</b></div>`:''}
+    ${Object.keys(state.businesses).length?`<div class="cf-note" style="letter-spacing:.02em">${Object.keys(state.businesses).map(id=>{const b=BUSINESS.find(x=>x.id===id);return b?b.title:''}).join(' • ')}</div>`:''}`;
   let totalValue=0,totalCost=0;COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt>0){totalValue+=amt*state.prices[c.s];totalCost+=amt*(state.avg[c.s]||state.prices[c.s])}});const totalPnl=totalValue-totalCost;const pnlPercent=totalCost>0?(totalPnl/totalCost*100):0;const summaryEl=document.getElementById('portfolio-summary');if(summaryEl){if(totalValue>0){summaryEl.classList.remove('hidden');summaryEl.innerHTML=`<div><div style="font-size:11px;color:var(--muted)">Total Portfolio</div><div style="font-weight:700">${fmt(totalValue)}</div></div><div style="text-align:right"><div style="font-size:11px;color:var(--muted)">Total P&L</div><div style="font-weight:700;color:${totalPnl>=0?'#22c55e':'#ef4444'}">${totalPnl>=0?'+':''}${fmt(totalPnl)} (${pnlPercent>=0?'+':''}${pnlPercent.toFixed(1)}%)</div></div>`}else{summaryEl.classList.add('hidden')}}let htm='';COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt<=0)return;const val=amt*state.prices[c.s];const avg=state.avg[c.s]||0;const pnl=avg>0?((state.prices[c.s]-avg)/avg*100):0;htm+=`<div class="hold-item"><div><b>${c.s}</b><div style="font-size:10px;color:var(--muted)">${fmtAmt(amt)} • avg ${priceStr(avg)}</div></div><div style="text-align:right"><div>${fmt(val)}</div><div style="font-size:10px;color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div></div></div>`});document.getElementById('holdings-list').innerHTML=htm||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">No coins yet</div>';document.getElementById('quest-count').textContent=state.questsDone>0?'('+state.questsDone+' done)':'';document.getElementById('quests-list').innerHTML=state.quests.slice(-4).map(q=>`<div class="quest-item ${q.done?'done':''}">${q.done?'✅':'🎯'} ${q.txt}<div style="font-size:10px;color:var(--muted)">+$${q.reward}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">New quests incoming...</div>';document.getElementById('ach-count').textContent=state.achievements.length+'/'+ACHIEVEMENTS.length;document.getElementById('ach-list').innerHTML=ACHIEVEMENTS.map(a=>{const unlocked=state.achievements.includes(a.id);return`<div class="ach-item ${unlocked?'unlocked':''}" style="opacity:${unlocked?1:.4}"><span class="badge" style="background:${unlocked?'#102a1a':'#1a1f35'};color:${unlocked?'#00ff88':'#6b7394'}">${a.icon} ${a.name}</span><div style="font-size:10px;color:var(--muted)">${a.desc}</div></div>`}).join('');document.getElementById('business-list').innerHTML=BUSINESS.map(b=>{const owned=!!state.businesses[b.id];return`<div style="background:#12172c;border:1px solid ${owned?'#1e5a3a':'#1f274a'};border-radius:10px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${b.title}</b><span style="font-size:10px;color:${b.monthly>=0?'#22c55e':'#ef4444'}">${b.monthly>=0?'+':''}$${b.monthly}/mo</span></div><div style="font-size:10px;color:var(--muted);margin:4px 0">${b.desc}</div><button class="tc-btn" style="width:100%" ${owned||state.cash<b.cost?'disabled':''} onclick="buyBusiness('${b.id}')">${owned?'OWNED':'BUY $'+b.cost}</button></div>`}).join('');document.getElementById('presale-list').innerHTML=(state._presales||[]).map(p=>`<div class="presale-card"><div style="font-weight:700;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--muted);margin:4px 0">Hype ${p.hype}% • Scam Risk ${p.scam}%</div><button class="tc-btn" style="width:100%" onclick="investPresale('${p.id}',${p.cost})" ${state.cash<p.cost?'disabled':''}>Invest $${p.cost}</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px">No presales right now</div>'}
-function initChart(){const ctx=document.getElementById('pnl-chart').getContext('2d');chart=new Chart(ctx,{type:'line',data:{labels:['Start'],datasets:[{data:[state.cash],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.15)',fill:true,tension:.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}})}
-function updateChart(){if(!chart||!state)return;chart.data.labels=state.netHistory.map((_,i)=>i);chart.data.datasets[0].data=state.netHistory;const last=state.netHistory[state.netHistory.length-1],first=state.netHistory[0];chart.data.datasets[0].borderColor=last>=first?'#22c55e':'#ef4444';chart.data.datasets[0].backgroundColor=last>=first?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)';chart.update('none')}
+function initChart(){const cv=document.getElementById('pnl-chart');const ctx=cv.getContext('2d');const g=ctx.createLinearGradient(0,0,0,190);g.addColorStop(0,'rgba(240,180,41,.34)');g.addColorStop(.55,'rgba(168,85,247,.14)');g.addColorStop(1,'rgba(168,85,247,0)');window._chartFill=g;chart=new Chart(ctx,{type:'line',data:{labels:[0],datasets:[{data:[netWorth()],borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.28,pointRadius:0,pointHoverRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},elements:{line:{capBezierPoints:true}}}});state.liveHistory=state.liveHistory||[netWorth()]}
+function sampleNW(){if(!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];state.liveHistory.push(netWorth());if(state.liveHistory.length>900)state.liveHistory.splice(0,state.liveHistory.length-900)}
+function updateChart(){if(!chart||!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];const nw=netWorth();const h=state.liveHistory;const ref=h.length>1?h[h.length-2]:h[0];if(Math.abs(nw-ref)>Math.max(1,Math.abs(ref)*0.004)){h.push(nw);if(h.length>900)h.splice(0,h.length-900)}else{h[h.length-1]=nw}const data=state.liveHistory;chart.data.labels=data.map((_,i)=>i);chart.data.datasets[0].data=data;const up=data[data.length-1]>=data[0];chart.data.datasets[0].borderColor=up?'#f0b429':'#ef4444';chart.data.datasets[0].backgroundColor=up?(window._chartFill||'rgba(240,180,41,.2)'):'rgba(239,68,68,.16)';chart.update('none')}
 /* ===================== POPUP QUEUE =====================
    Every full-screen interruption goes through here so two windows can never
    be visible at the same time. Higher prio jumps ahead; ties keep insertion
