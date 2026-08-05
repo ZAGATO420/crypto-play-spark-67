@@ -1401,7 +1401,102 @@ function closeSettings(){playSound('click');document.getElementById('settings-ov
 /* ===================== DATA ===================== */
 const HIST={BTC:[7200,9600,6400,8600,9500,9100,11300,11600,10800,13800,19700,28900,37100,45100,58900,54900,37400,35800,43800,47100,48100,61300,56900,46200,38400,38700,45500,38500,31700,20000,23300,20200,19400,20400,17100,16500,23100,24600,28400,29200,28000,30400,29200,26900,26900,34500,37700,42200,42500,51700,71300,64300,67500,64900,64600,58900,63300,69900,96400,97000,102000,98000,85000,90000,105000,108000,115000,112000,108000,95000,88000,82000,75000,68000,62000,58000,62000,55000,50000,54000,48000,52000,46000,40000],ETH:[130,220,135,185,215,230,345,430,360,385,510,740,1310,1515,1915,2770,2640,2270,3000,3430,3580,4290,4630,3680,2690,2790,3400,2820,1810,1070,1680,1630,1580,1530,1290,1200,1580,1700,1790,1900,1830,1930,1820,1640,1600,1800,2050,2280,2350,3320,3510,3160,3780,3510,3440,2680,2460,2530,3430,3340,3400,2700,2500,2800,3900,3800,4400,3500,3200,2800,2600,2400,2100,1900,1700,1500,1600,1400,1300,1350,1200,1300,1100,1000],SOL:[0,0,.6,.7,.55,.8,1.1,2.8,3.5,1.8,2.1,1.5,4.5,9.5,14,40,32,28,35,40,145,200,195,170,90,90,100,95,40,32,35,32,31,33,13,10,11,12,21,23,22,20,24,23,20,32,59,100,95,110,180,140,165,135,140,145,140,175,240,190,200,180,160,150,180,170,200,180,160,140,130,110,95,85,75,70,65,55,50,48,42,40,35,30],DOGE:[.002,.0025,.0018,.0022,.0025,.0023,.003,.0032,.0027,.0026,.0035,.0045,.01,.05,.06,.3,.5,.25,.2,.28,.27,.25,.21,.17,.14,.12,.14,.13,.08,.06,.07,.06,.06,.06,.08,.07,.08,.08,.07,.08,.07,.06,.06,.06,.06,.07,.08,.09,.08,.1,.16,.14,.15,.13,.12,.11,.11,.12,.35,.32,.3,.22,.18,.16,.2,.22,.26,.24,.22,.18,.16,.14,.12,.11,.1,.09,.09,.08,.07,.07,.06,.06,.05,.04],SHIB:Array(7).fill(0).concat([1e-8,2e-8,5e-8,1e-7,3e-7,1e-6,1e-5,2e-5,3e-5,1.5e-5,1e-5,8e-6,7e-6,8e-6,3e-5,5e-5,3e-5,2e-5,2e-5,2e-5,1.5e-5,1e-5,8e-6,1e-5,1e-5,9e-6,8e-6,8e-6,8e-6,9e-6,1e-5,1e-5,1.2e-5,1e-5,9e-6,8e-6,8e-6,9e-6,1.5e-5,2e-5,2.5e-5,2e-5,3e-5,4e-5,3e-5,3e-5,2.5e-5,2e-5,1.8e-5,2e-5,3e-5,2.5e-5,2e-5,1.8e-5,1.5e-5,1.4e-5,1.3e-5,1.5e-5,1.4e-5,1.3e-5,1.2e-5,1.1e-5,1e-5,9e-6,8e-6,8e-6,7e-6,7e-6,6e-6,6e-6,5e-6,5e-6,5e-6,4e-6,4e-6,4e-6,3e-6]),PEPE:Array(39).fill(0).concat([4e-7,1e-6,1.5e-6,1e-6,1.2e-6,2e-6,1.5e-6,1.2e-6,1e-6,1.5e-6,2e-6,3e-6,8e-6,1e-5,1.2e-5,1e-5,9e-6,8e-6,1e-5,1.2e-5,1.5e-5,1.4e-5,1.2e-5,1e-5,9e-6,8e-6,7e-6,7e-6,6e-6,6e-6,5e-6,5e-6,4.5e-6,4e-6,4e-6,3.5e-6,3e-6,3e-6,2.5e-6,2e-6,2e-6,1.8e-6,1.5e-6,1.5e-6,1.2e-6]),WIF:Array(46).fill(0).concat([.15,.4,1.2,2.5,3,2.2,1.5,1.8,1.2,1.5,2,2.5,1.8,1.2,.9,.7,1,.8,.7,.5,.45,.6,.4,.35,.3,.35,.28,.25,.22,.2,.18,.15,.14,.12,.11,.1,.09,.08]),BONK:Array(35).fill(0).concat([2e-7,5e-7,1e-6,2e-6,1.5e-6,1.2e-6,1e-6,9e-7,1.2e-6,2e-6,3e-6,4e-6,1.5e-5,2.5e-5,2e-5,1.8e-5,2.2e-5,3e-5,3.5e-5,3e-5,2.5e-5,2e-5,1.5e-5,1.3e-5,1.1e-5,1e-5,9e-6,8e-6,7e-6,7e-6,6e-6,6e-6,5e-6,5e-6,4e-6,4e-6,3.5e-6,3e-6,3e-6,2.5e-6,2e-6,2e-6,1.8e-6,1.5e-6,1.5e-6,1.2e-6,1e-6,1e-6,9e-7])};
 
-const COINS=[{s:'BTC',n:'Bitcoin',tags:['L1'],launch:0,vol:1.1},{s:'ETH',n:'Ethereum',tags:['L1'],launch:0,vol:1.2},{s:'SOL',n:'Solana',tags:['L1'],launch:2,vol:2},{s:'DOGE',n:'Dogecoin',tags:['MEME'],launch:0,vol:3},{s:'ADA',n:'Cardano',tags:['L1'],launch:0,vol:1.8,base:.03},{s:'DOT',n:'Polkadot',tags:['L1'],launch:7,vol:1.9,base:3},{s:'LINK',n:'Chainlink',tags:['DEFI'],launch:0,vol:1.8,base:2},{s:'AVAX',n:'Avalanche',tags:['L1'],launch:8,vol:2,base:3},{s:'MATIC',n:'Polygon',tags:['L2'],launch:0,vol:2.1,base:.02},{s:'SHIB',n:'Shiba Inu',tags:['MEME'],launch:7,vol:3.5},{s:'PEPE',n:'Pepe',tags:['MEME'],launch:39,vol:3.8},{s:'WIF',n:'dogwifhat',tags:['MEME'],launch:46,vol:3.5},{s:'BONK',n:'Bonk',tags:['MEME'],launch:35,vol:3.6},{s:'UNI',n:'Uniswap',tags:['DEFI'],launch:8,vol:1.9,base:4},{s:'AAVE',n:'Aave',tags:['DEFI'],launch:9,vol:2,base:30},{s:'TAO',n:'Bittensor',tags:['AI'],launch:14,vol:2.3,base:40},{s:'ARB',n:'Arbitrum',tags:['L2'],launch:38,vol:2.4,base:1.3},{s:'OP',n:'Optimism',tags:['L2'],launch:28,vol:2.4,base:1.45},{s:'SUI',n:'Sui',tags:['L1'],launch:40,vol:2.5,base:1.39},{s:'APT',n:'Aptos',tags:['L1'],launch:33,vol:2.6,base:8.38},{s:'SEI',n:'Sei',tags:['L1'],launch:43,vol:2.6,base:0.26},{s:'TIA',n:'Celestia',tags:['L1'],launch:45,vol:2.7,base:2.15}];
+/* ---- Real monthly closes for the remaining majors ----------------------------
+   These coins previously had no history at all and were priced by a synthetic
+   sine curve, so e.g. ADA never left the 3-30 cent range although it really
+   traded above $3 in 2021. Values are monthly closes (2020-01 .. 2026-12);
+   leading zeros mark the months before the coin existed. */
+Object.assign(HIST,{
+ ADA:[0.038,0.047,0.032,0.041,0.062,0.083,0.135,0.107,0.084,0.100,0.163,0.181,
+      0.365,1.20,1.19,1.35,1.65,1.40,1.31,2.75,2.11,1.98,1.60,1.31,
+      1.09,0.94,1.16,0.78,0.55,0.46,0.51,0.45,0.43,0.40,0.31,0.25,
+      0.35,0.39,0.36,0.38,0.37,0.28,0.31,0.26,0.25,0.31,0.38,0.60,
+      0.53,0.78,0.65,0.45,0.45,0.39,0.36,0.34,0.35,0.35,0.99,0.89,
+      0.77,0.63,0.67,0.71,0.75,0.55,0.83,0.83,0.79,0.62,0.42,0.40,
+      0.45,0.42,0.38,0.40,0.36,0.34,0.31,0.30,0.28,0.26,0.25,0.24],
+ LINK:[2.0,3.6,2.1,2.9,4.3,4.7,8.1,14.4,10.3,11.4,13.0,11.3,
+      24.5,31.5,28.5,37.0,34.0,19.0,22.0,29.0,25.0,29.5,25.0,21.0,
+      15.5,15.5,15.0,12.0,7.6,6.6,8.4,7.3,7.6,7.7,6.8,5.6,
+      6.6,7.4,7.2,7.0,6.2,6.0,7.4,6.1,7.6,11.4,14.6,15.2,
+      18.5,19.5,18.2,13.5,16.5,14.5,13.0,11.0,11.4,11.2,17.0,22.0,
+      19.0,14.0,13.5,13.5,15.5,13.0,17.5,22.0,21.5,15.5,13.0,12.0,
+      13.0,12.0,11.0,11.5,10.5,10.0,9.5,9.0,8.5,8.0,7.5,7.0],
+ MATIC:[0.014,0.021,0.012,0.017,0.019,0.017,0.021,0.019,0.018,0.017,0.017,0.018,
+      0.023,0.058,0.44,0.79,1.60,1.05,1.02,1.42,1.20,1.60,1.90,2.55,
+      1.55,1.55,1.70,1.20,0.55,0.46,0.90,0.80,0.78,0.90,0.85,0.76,
+      1.10,1.35,1.10,0.95,0.87,0.68,0.70,0.55,0.53,0.60,0.83,0.97,
+      0.90,1.00,1.00,0.68,0.71,0.58,0.53,0.44,0.40,0.36,0.55,0.50,
+      0.40,0.28,0.24,0.22,0.23,0.18,0.24,0.26,0.25,0.17,0.14,0.13,
+      0.14,0.13,0.12,0.12,0.11,0.10,0.10,0.09,0.09,0.08,0.08,0.07],
+ DOT:Array(7).fill(0).concat([5.4,4.5,4.1,5.3,9.3,
+      17.0,33.0,37.0,33.5,22.0,15.5,17.0,28.5,32.0,42.0,36.0,26.5,
+      18.5,17.5,19.0,14.5,9.3,7.0,7.6,7.0,6.4,6.3,5.5,4.4,
+      6.1,7.0,6.2,5.9,5.3,5.1,5.4,4.4,4.1,5.0,5.6,8.2,
+      7.7,8.4,9.9,6.7,7.2,6.0,5.7,4.8,4.3,4.2,8.4,7.2,
+      5.8,4.4,4.3,4.2,4.5,3.4,4.0,4.0,4.1,2.9,2.4,2.2,
+      2.4,2.2,2.0,2.1,1.9,1.8,1.7,1.6,1.5,1.4,1.3,1.25]),
+ AVAX:Array(8).fill(0).concat([4.0,3.6,3.4,3.6,
+      8.5,26.0,30.0,32.0,13.0,11.0,13.5,55.0,68.0,64.0,85.0,110.0,
+      78.0,80.0,93.0,58.0,23.0,17.0,23.0,18.5,17.0,17.5,13.0,11.0,
+      20.0,16.5,16.5,16.0,14.0,12.0,12.5,10.0,9.5,12.0,20.5,39.0,
+      34.0,39.0,52.0,32.0,35.0,27.0,24.0,22.0,26.0,25.0,44.0,38.0,
+      26.0,21.0,19.0,21.0,23.0,17.5,24.0,24.0,29.0,17.0,14.0,13.0,
+      14.0,13.0,12.0,12.5,11.0,10.5,10.0,9.5,9.0,8.5,8.0,7.5]),
+ UNI:Array(8).fill(0).concat([4.8,2.9,3.4,5.2,
+      19.0,26.0,29.0,38.0,26.0,21.0,17.5,28.5,24.5,25.0,19.0,17.0,
+      12.5,10.0,10.5,6.9,5.3,5.0,8.0,6.5,6.6,6.5,5.7,5.2,
+      6.5,6.8,5.9,5.3,5.2,5.5,6.2,4.6,4.3,5.0,6.0,7.3,
+      7.4,11.0,12.0,7.5,9.0,10.0,7.7,6.5,7.5,7.7,13.5,15.0,
+      12.0,7.5,6.5,5.4,6.3,7.0,10.0,9.0,8.0,6.0,5.0,4.5,
+      5.0,4.5,4.2,4.4,4.0,3.8,3.5,3.3,3.1,2.9,2.7,2.5]),
+ AAVE:Array(9).fill(0).concat([42,72,85,
+      320,470,400,410,530,300,320,400,290,300,240,230,
+      150,155,165,120,100,72,95,95,80,80,60,55,
+      90,88,78,72,65,68,80,60,60,80,95,110,
+      92,110,120,90,95,90,100,110,155,150,190,270,
+      260,190,170,155,215,255,300,300,265,180,140,130,
+      140,130,120,125,115,110,105,100,95,90,85,80]),
+ TAO:Array(36).fill(0).concat([30,60,85,90,70,55,60,45,55,70,110,290,
+      300,600,650,480,380,290,310,300,420,550,600,450,
+      400,300,240,290,380,300,400,350,340,280,250,230,
+      250,230,210,215,200,190,180,170,160,150,145,140]),
+ APT:Array(33).fill(0).concat([8.40,5.00,3.40,
+      12.5,11.0,11.5,10.5,8.8,7.3,7.3,6.4,5.4,6.6,8.4,9.3,
+      9.6,11.5,13.0,9.0,9.4,7.0,6.4,6.2,7.9,9.0,12.0,9.0,
+      7.0,5.5,5.2,5.4,5.0,4.3,4.7,4.4,4.1,3.0,2.5,2.3,
+      2.5,2.3,2.1,2.2,2.0,1.9,1.8,1.7,1.6,1.5,1.45,1.4]),
+ ARB:Array(38).fill(0).concat([1.20,1.15,1.05,1.05,1.15,0.95,0.85,1.05,1.20,1.60,
+      1.90,2.00,1.85,1.20,1.15,0.85,0.70,0.55,0.60,0.60,0.90,0.80,
+      0.55,0.42,0.36,0.31,0.38,0.30,0.42,0.48,0.45,0.32,0.26,0.24,
+      0.26,0.24,0.22,0.23,0.21,0.20,0.19,0.18,0.17,0.16,0.15,0.14]),
+ OP:Array(28).fill(0).concat([0.90,0.55,1.30,1.60,1.00,0.90,0.85,0.95,
+      1.75,2.60,2.35,2.30,2.30,1.40,1.60,1.35,1.30,1.55,1.80,2.20,
+      3.60,3.90,4.20,2.60,2.90,2.30,1.90,1.60,1.75,1.70,2.10,1.90,
+      1.10,0.85,0.75,0.65,0.75,0.60,0.75,0.80,0.75,0.50,0.40,0.36,
+      0.38,0.36,0.33,0.34,0.31,0.29,0.28,0.26,0.25,0.23,0.22,0.21]),
+ SUI:Array(40).fill(0).concat([1.10,0.95,0.75,0.55,0.45,0.50,0.65,0.85,
+      1.35,1.75,1.75,1.30,1.05,0.85,0.75,0.85,1.55,1.90,3.50,4.50,
+      3.20,2.50,2.30,3.50,3.80,2.70,3.60,3.40,3.30,2.20,1.60,1.45,
+      1.55,1.45,1.35,1.40,1.25,1.20,1.10,1.05,1.00,0.95,0.90,0.85]),
+ SEI:Array(43).fill(0).concat([0.13,0.12,0.13,0.18,0.55,
+      0.60,0.85,0.90,0.55,0.55,0.40,0.36,0.32,0.44,0.42,0.55,0.42,
+      0.28,0.20,0.18,0.18,0.24,0.19,0.32,0.30,0.28,0.18,0.14,0.13,
+      0.14,0.13,0.12,0.125,0.11,0.105,0.10,0.095,0.09,0.085,0.08,0.075]),
+ TIA:Array(45).fill(0).concat([2.50,8.00,11.50,
+      19.0,14.0,15.5,10.0,10.5,8.0,6.5,6.0,5.5,5.0,6.0,5.5,
+      3.20,2.60,2.40,2.00,2.10,1.50,1.90,1.80,1.70,1.20,1.00,0.90,
+      0.95,0.90,0.85,0.87,0.80,0.75,0.70,0.65,0.60,0.55,0.52,0.50])
+});
+/* Corrections to existing series where the value was not the real monthly close. */
+HIST.BTC[0]=9350;   HIST.BTC[1]=8600;   HIST.BTC[12]=33100; HIST.BTC[18]=41500;
+HIST.BTC[20]=43800; HIST.BTC[61]=84400; HIST.BTC[63]=94200; HIST.BTC[67]=108200;
+HIST.BTC[68]=114000;HIST.BTC[69]=110000;HIST.BTC[70]=90000; HIST.BTC[71]=87000;
+HIST.ETH[0]=180; HIST.ETH[3]=216; HIST.ETH[4]=245; HIST.ETH[10]=616;
+[3300,2200,1800,1800,2500,2500,3700,4400,4150,3800,2900,3000].forEach((v,i)=>HIST.ETH[60+i]=v);
+[235,145,125,150,155,150,185,205,205,180,135,130].forEach((v,i)=>HIST.SOL[60+i]=v);
+/* every series must cover all 84 months, otherwise the synthetic fallback kicks in */
+
+const COINS=[{s:'BTC',n:'Bitcoin',tags:['L1'],launch:0,vol:1.1},{s:'ETH',n:'Ethereum',tags:['L1'],launch:0,vol:1.2},{s:'SOL',n:'Solana',tags:['L1'],launch:2,vol:2},{s:'DOGE',n:'Dogecoin',tags:['MEME'],launch:0,vol:3},{s:'ADA',n:'Cardano',tags:['L1'],launch:0,vol:1.8,base:.03},{s:'DOT',n:'Polkadot',tags:['L1'],launch:7,vol:1.9,base:3},{s:'LINK',n:'Chainlink',tags:['DEFI'],launch:0,vol:1.8,base:2},{s:'AVAX',n:'Avalanche',tags:['L1'],launch:8,vol:2,base:3},{s:'MATIC',n:'Polygon',tags:['L2'],launch:0,vol:2.1,base:.02},{s:'SHIB',n:'Shiba Inu',tags:['MEME'],launch:7,vol:3.5},{s:'PEPE',n:'Pepe',tags:['MEME'],launch:39,vol:3.8},{s:'WIF',n:'dogwifhat',tags:['MEME'],launch:46,vol:3.5},{s:'BONK',n:'Bonk',tags:['MEME'],launch:35,vol:3.6},{s:'UNI',n:'Uniswap',tags:['DEFI'],launch:8,vol:1.9,base:4},{s:'AAVE',n:'Aave',tags:['DEFI'],launch:9,vol:2,base:30},{s:'TAO',n:'Bittensor',tags:['AI'],launch:36,vol:2.3,base:40},{s:'ARB',n:'Arbitrum',tags:['L2'],launch:38,vol:2.4,base:1.3},{s:'OP',n:'Optimism',tags:['L2'],launch:28,vol:2.4,base:1.45},{s:'SUI',n:'Sui',tags:['L1'],launch:40,vol:2.5,base:1.39},{s:'APT',n:'Aptos',tags:['L1'],launch:33,vol:2.6,base:8.38},{s:'SEI',n:'Sei',tags:['L1'],launch:43,vol:2.6,base:0.26},{s:'TIA',n:'Celestia',tags:['L1'],launch:45,vol:2.7,base:2.15}];
 
 const PRESALE_NAMES=['YFI Fair Launch','SushiSwap Migration','Uniswap V3 LP','Axie Infinity Land','DeFi Pulse Index','Mirror Protocol','Alpha Finance','BarnBridge','Cream Finance','Harvest Finance','Polygon Ecosystem','Avalanche Rush','Solana Serum','Raydium IDO','StepN Sneaker','ApeCoin Launch','Otherside Land','BAYC Mutant','Azuki Elementals','Moonbirds Nest','Lido stETH','Rocket Pool','Frax Eth','GMX Genesis','Gains Network','Arbitrum Odyssey','Optimism Quests','zkSync Era','Starknet Alpha','Scroll Canvas','PEPE Fair Launch','WOJAK Coin','Turbo TOShi','Mog Coin','Brett on Base','WIF Solana','BONK Community','POPCAT Memecoin','MEW Cat','PNUT Squirrel','AI16Z Agent','Virtuals Protocol','Zerebro','Goatseus Maximus','Fartcoin','Hyperliquid Points','Jupiter LFG','Tensor Trade','Drift Protocol','Kamino Finance','Blur Airdrop','LooksRare','X2Y2','Treasure DAO','Magic Eden','Pendle V2','Ethena USDe','EigenLayer Restake','Wormhole Airdrop','Jito SOL','Marginfi Points','Sanctum Infinity','Tensorian NFT','Cloudflare Workers','Render Network','Akash Compute','Helium Mobile','Nosana GPU','io.net Cluster','Grass Airdrop','HiveMapper','Dimenison','Zeta Markets','Phoenix DEX','OpenBook','Meteora DLMM','Orca Whirlpool','Raydium CLMM','Squid Game Token','AnubisDAO','Luna Yield','Thodex Exchange','Meerkat Finance','Uranium Finance','Evolved Apes NFT','Frosties NFT','Big Daddy Ape Club','Balloon Doge','Snowdog DAO','DeFi100','Compounder Finance','Yfdexf Finance','SharkTron'];
 const HISTORICAL_WINS={
@@ -1644,14 +1739,21 @@ function getHistPrice(sym,month){if(month>83)month=83;const arr=HIST[sym];if(arr
 function portValue(){let v=0;COINS.forEach(c=>v+=(state.holdings[c.s]||0)*(state.prices[c.s]||0));return v}
 function finalNet(){return (state&&state._gameEnded&&typeof state._finalNet==='number')?state._finalNet:netWorth()}
 function finalXP(){return (state&&state._gameEnded&&typeof state._finalXP==='number')?state._finalXP:calculateXP()}
-function netWorth(){ let v=state?state.cash:0; if(state){ Object.keys(state.holdings).forEach(s=>{ const amt=state.holdings[s]||0; const price=state.prices[s]||0; v+=amt*price; }); } return v; }
+/* Net worth must include open perp equity (margin + unrealised PnL). Without it,
+   opening a position looked like an instant loss of the whole margin and the
+   bankruptcy check below could end a solvent run. */
+function netWorth(){ let v=state?state.cash:0; if(state){ Object.keys(state.holdings).forEach(s=>{ const amt=state.holdings[s]||0; const price=state.prices[s]||0; v+=amt*price; });
+  (state.perps||[]).forEach(p=>{ const eq=(p.margin||0)+perpPnl(p); if(isFinite(eq)) v+=Math.max(0,eq); }); } return v; }
 function calculateXP(){
   if(!state) return 0;
   const months = state.month||0;
   const nw = netWorth();
   const live = state.xp||0;
   const mult = getXPMultiplier();
-  let bonus = months*10 + Math.log10(Math.max(1,nw))*100 + (state.achievements?.length||0)*80;
+  /* XP is a record of what you achieved, so it must never fall. The net-worth
+     part uses your peak net worth, otherwise a drawdown deleted XP and levels. */
+  state._nwPeak = Math.max(state._nwPeak||0, nw);
+  let bonus = months*10 + Math.log10(Math.max(1,state._nwPeak))*100 + (state.achievements?.length||0)*80;
   // Beating BOSS all the way to 2027 pays like a boss
   if(state._finalWin && state.diff==='BOSS' && months>=84) bonus += 9000;
   bonus *= mult;
@@ -2729,7 +2831,9 @@ function sell(sym){
   awardXP(profit>0?Math.min(900,40+Math.round(profit/150)):15,profit>0?'PROFIT +'+fmt(profit):'SELL '+sym);
   const levText = hasLeverage ? ' (×2.0 LEVERAGE)' : '';
   let taxInfo = '';
-  if(taxPaid>0){ taxInfo = ' | Tax -$'+Math.round(taxPaid)+' ('+COUNTRIES[state.country].flag+' '+(COUNTRIES[state.country].tax*100).toFixed(0)+'%)'; }
+  /* Only 35% of the country rate is withheld on the trade, the rest lands in the
+     year-end bill – so show the effective rate, not the headline rate. */
+  if(taxPaid>0){ taxInfo = ' | Tax -$'+Math.round(taxPaid)+' ('+COUNTRIES[state.country].flag+' '+(COUNTRIES[state.country].tax*35).toFixed(1)+'% now, rest year-end)'; }
   toast('-'+fmtAmt(amount)+' '+sym+' for $'+Math.round(net)+levText+taxInfo,'sell');
   state._amt[sym]=0;
   updateHeader();updateSidePanels();renderMarket();updateCriticalWarning();
