@@ -1821,7 +1821,25 @@ function nextMonth(){
   const d=DIFF[state.diff];
   const infl=costMult();
   const monthlyCost=Math.round((c.rent+400+[80,50,30,15][Math.min(3,state.feeLevel||0)])*d.cost*infl);
-  state.cash-=monthlyCost;
+  /* Rent used to be deducted blindly. If you were a few dollars short with no
+     bags left, cash went negative and the bankruptcy check killed the run in
+     month 2 – game over for missing $10 of rent. Now the shortfall is raised
+     from your bags first and whatever is left becomes debt (which still spirals
+     into a loss if you never pay it back). */
+  if(state.cash<monthlyCost){
+    const short=monthlyCost-state.cash;
+    if(portValue()>0)emergencyRaise(short+50);
+  }
+  if(state.cash<monthlyCost){
+    const unpaid=Math.round(monthlyCost-state.cash);
+    state.cash=0;
+    state.debt=(state.debt||0)+unpaid;
+    state.stress=Math.min(100,state.stress+6);
+    toast('🏚️ Could not pay the bills – '+fmt(unpaid)+' added to your debt','sell');
+    addNews('Missed payment: '+fmt(unpaid)+' financed on credit');
+  } else {
+    state.cash-=monthlyCost;
+  }
   state._monthlyCost=monthlyCost;
 
   let passive=0;
