@@ -4704,6 +4704,13 @@ header{background:rgba(9,12,26,.88)}
   const src=c=>'https://flagcdn.com/w40/'+(ISO[c]||'un')+'.png';
   window.flagImg=function(c,sm){return '<img class="flagi'+(sm?' sm':'')+'" src="'+src(c)+'" alt="'+c+'" loading="lazy">'};
   function fixStart(){
+    /* archetype cards already carry a sticker icon — drop the emoji, which
+       falls back to a tofu box on Windows */
+    document.querySelectorAll('#archetypes .choice').forEach(b=>{
+      const t=b.querySelector('.t');if(!t||t.dataset.deemoji)return;
+      t.dataset.deemoji='1';
+      t.textContent=t.textContent.replace(/[\u200d\uFE0F\u2190-\u2BFF\uD800-\uDFFF]/g,'').trim();
+    });
     document.querySelectorAll('#countries .choice[data-country]').forEach(b=>{
       const t=b.querySelector('.t');if(!t||t.dataset.flagged)return;
       t.dataset.flagged='1';
