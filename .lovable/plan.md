@@ -1,48 +1,70 @@
-# V4 Optik: Bright Retro-Revival statt Unterwelt
+# Viraler X-Post: V5 Update (text only)
 
-## 1. Kunstrichtung neu: "Crypto Revival 2020–26"
-Weg von Totenkopf/Wappen-Look (zu düster, erinnert an andere Spiele), hin zu einem hellen, humorvollen Retro-Arcade-Stil:
+## Ziel
+Ein kurzer, viraler X-Post für @CryptoBossFInal, der das neue Update komplett vorstellt — nicht nur Mobile. Der User fügt eigene Screenshots hinzu, also kein Bild von uns.
 
-- Grundstimmung: Gold + Violett bleiben CI, dazu wärmere Akzente (Sand, Türkis, Coral) und mehr Licht in den Panels
-- Bildsprache: Sticker-/Cartoon-Illustrationen mit dicker Kontur und Glanzlicht (wie die Airdrop/Launchpad/Perps-Icons rechts im Mockup, die dir gefallen) — dieser Stil wird zum Standard für **alle** Grafiken
-- Motive statt Schädel: Trophäen-Coin, Rakete, Diamanthand, Papierhand, Wal, Affe mit Krone, Gold-Pokal, Boss-Krone
-- Der BTC-Sensemann kommt rein, aber als **einzelnes humorvolles Motiv** (Archetyp-Avatar "Reaper" bzw. Liquidations-Maskottchen), nicht als Grundton des Spiels
+## Rahmenbedingungen (aus x-playbook.md)
+- Tonalität: trocken, kleingeschrieben, kurz, degen, self-deprecation
+- Max. 280 Zeichen
+- Keine Hashtags
+- Keine Em-Dashes (—)
+- Max. 1 Emoji, nur wenn es die Punchline trägt
+- Kein LinkedIn-Sprech, keine Phrasen wie "this is huge", "game-changer"
+- Kein Link im Post (unter 2k Follower; Link bleibt in Bio)
 
-## 2. Season Status ohne Totenköpfe
-- Tier-Badges als bunte Sticker-Medaillen: Exit Liquidity (Papierhand) → Paper Hands → Degen (Affe) → Whale (Wal) → Legend (Diamant-Krone) → Final Boss (goldene Boss-Krone)
-- Rahmen heller, Glas statt Grabstein, XP-Leiste in Violett mit Gold-Glanzkante
-- Rank-Zeile bleibt, Look wird freundlich statt heraldisch
+## Features, die der Post abdecken soll
+1. Mobile: no-scroll, docked bottom nav, "NEXT MONTH"
+2. DEX-style market + Trade Modal (Buy/Sell, % chips, live fees/tax/PNL preview)
+3. Cash Ledger: jede Buchung mit Label und Monat
+4. Endscreen/Bankruptcy Watchdog: Rekt zeigt sofort Endscreen
+5. Sticky HUD: oberer Statusbereich bleibt beim Scrollen sichtbar
+6. Single-Screen Desktop: 3-Spalten-Layout
+7. Perps/Leverage System mit Live-Liquidation
+8. Season Status + Daily Missions + XP-System
+9. Bright Retro-Revival Optik (Sticker-Style, Gold/Violett)
+10. Real historical prices 2020–2026
+11. Global Leaderboard
 
-## 3. Neue Avatare & Archetypen
-- Die 6 Emoji-Avatare werden zu 6 gezeichneten Portraits im gleichen Sticker-Stil (Coder, Affe, Astronautin, Frosch, Bot, Diamant) + ein 7. Motiv: **BTC Reaper** (augenzwinkernd, Sense mit BTC-Symbol)
-- Archetyp-Karten bekommen je ein kleines Illustrations-Icon statt reinem Text
+## Vorschlag: Struktur
+Einen kurzen Hook, dann eine kompakte Feature-Liste in natürlicher Sprache (keine Doppelpunkt-Aufzählung), dann Call-to-Action über Bio.
 
-## 4. Zeitsteuerung sichtbar machen
-Die 1x / 2x / 3x-Buttons, "▶▶ WEEK" und der Tages-Fortschrittsbalken existieren, gehen aber optisch unter bzw. fehlen im V4-Entwurf.
+## Draft-Optionen
 
-- Eigene **Time Control**-Leiste in der Action-Bar unten: Pause · WEEK · MONTH · Speed-Chips 1x/2x/3x
-- Speed-Chips als klar erkennbare Segment-Umschalter mit Gold-Aktivzustand
-- Fortschrittsbalken wird eine sichtbare, beschriftete Leiste ("Day 12 / 30") direkt unter der Datumsanzeige, plus dünner Monatsring im HUD
-- Ironman: Week/Month/Pause deaktiviert und sichtbar als "IRONMAN — no skip" gekennzeichnet
+**Option A — Degen-Hook:**
+```
+trading on the toilet just got an upgrade.
 
-## 5. Alles andere angleichen
-Damit nicht Startscreen und Spiel wie zwei Spiele wirken:
+no scroll mobile. dex market. full cash ledger. live perp liquidations. sticky hud. daily missions. real 2020-2026 prices.
 
-- **Startscreen**: gleiche Panel-Sprache, gleiche Radien/Hairlines, illustrierte Archetyp- und Avatar-Karten, hellerer Hintergrund mit Aura-Verlauf
-- **How-to / Tutorial (3 Schritte)**: als illustrierte Karten mit je einem Sticker-Motiv, kurzer Text, Fortschrittspunkte
-- **Leaderboard** (Start + Global): Podium-Optik für Top 3 mit Medaillen-Stickern, kompakte Tabellenzeilen darunter, Tier-Badge pro Eintrag
-- **Endscreen**: gleiche Badge-Familie, Boss-Karte mit goldener Krone statt Totenkopf
-- **Toasts, Overlays, Popups**: einheitliche Radien, Farben, Icon-Set
-- Emoji-Rauschen reduzieren: Icons nur wo sie Bedeutung tragen, Zahlen in Tabular-Ziffern
+still got rekt in 14 months.
 
-## 6. Layout bleibt Single-Screen
-Struktur wie im genehmigten V4-Konzept (HUD oben, Season/Player/Missions links, Chart + Markt/Perps Mitte, Ops/Shop/Quests/Stats als Tabs rechts, Action-Bar unten), nur eben in der neuen, helleren Bildsprache — und mit der Time-Control-Leiste unten.
+link in bio if you're smarter than me.
+```
 
-## Technische Notizen
-Alles in `public/game.html`:
-- Neue Grafiken via `imagegen` (transparente PNGs, Sticker-Stil, ein Prompt-Rezept für Konsistenz), eingebunden als `lovable-assets`-Pointer; alte Wappen/Skull-Assets entfallen
-- CSS-Tokens aufhellen (`--panel`, `--border`, neue Akzent-Variablen); eine Badge-Klasse `.tcfb-badge` für Season/Leaderboard/Endscreen/Achievements
-- Startscreen-Markup: `#archetypes`, `#avatars` bekommen `<img>`-Icons; `.avatar-btn` auf Bild-Layout umgestellt
-- Neue `.timebar` in der Action-Bar; bestehende `setSpeed()`, `advanceWeek()`, `advanceMonth()`, `#day-progress` unverändert weiterverwendet, nur neu gerendert (`renderTimeBar()`)
-- Leaderboard-Renderer (`start-leaderboard` + globale Liste) auf Podium-Markup umgestellt
-- Keine Änderungen an Preisdaten, Kosten, Difficulty, Perp-Formeln, XP- oder Scoring-Logik
+**Option B — Feature-List trocken:**
+```
+update is live.
+
+mobile no-scroll. trade modal with live pnl. cash ledger logs every coin. perps liquidate in real time. season status, daily missions, global leaderboard.
+
+and yes, the endscreen finally shows up when you die.
+
+bio.
+```
+
+**Option C — Kurz + provokant:**
+```
+new build dropped.
+
+no-scroll mobile. dex ui. ledger. live liqs. sticky hud. missions. real prices. global leaderboard.
+
+difficulty still eats most players.
+
+bio if you think you survive.
+```
+
+## Empfohlene Wahl
+Option A — deckt alle Bereiche ab, bleibt unter 280 Zeichen, passt zur etablierten Stimme und funktioniert mit mehreren Screenshots (Mobile, DEX, Ledger, Endscreen).
+
+## Deliverable
+Fertiger Post-Text, den der User direkt kopieren und mit eigenen Screenshots posten kann.
