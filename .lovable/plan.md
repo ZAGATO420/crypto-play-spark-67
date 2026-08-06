@@ -1,67 +1,48 @@
-# V4 Visueller Sprung: Single-Screen Layout, Season Status & Daily Missions
+# V4 Optik: Bright Retro-Revival statt Unterwelt
 
-## 1. Season Status Karte (wie im Screenshot)
-Neue Karte oben links im Interface, genau im Stil des hochgeladenen Bildes:
+## 1. Kunstrichtung neu: "Crypto Revival 2020–26"
+Weg von Totenkopf/Wappen-Look (zu düster, erinnert an andere Spiele), hin zu einem hellen, humorvollen Retro-Arcade-Stil:
 
-- Gold-gerahmte Karte, Titel "SEASON STATUS" in Gold, dunkler Grund
-- Links ein **Wappen-Badge** (Schild mit Totenkopf, Lorbeerkranz, Violett/Gold) — je Tier eine andere Farbgebung
-- Rechts: "DEGEN TIER" klein, darunter der Tier-Name groß in Violett (z. B. LEGEND), darunter "RANK #42"
-- Darunter violette XP-Leiste mit "8,450 / 10,000 XP"
-- Tier leitet sich aus dem bestehenden Level ab (keine neue Balance): Exit Liquidity → Paper Hands → Degen → Whale → Legend → Final Boss. Rank kommt aus dem globalen Leaderboard-Score (Live-Abfrage), solange kein Rang bekannt ist steht "UNRANKED".
-- Badges werden als saubere PNG-Grafiken erzeugt (Gold/Violett CI) und als CDN-Assets eingebunden.
+- Grundstimmung: Gold + Violett bleiben CI, dazu wärmere Akzente (Sand, Türkis, Coral) und mehr Licht in den Panels
+- Bildsprache: Sticker-/Cartoon-Illustrationen mit dicker Kontur und Glanzlicht (wie die Airdrop/Launchpad/Perps-Icons rechts im Mockup, die dir gefallen) — dieser Stil wird zum Standard für **alle** Grafiken
+- Motive statt Schädel: Trophäen-Coin, Rakete, Diamanthand, Papierhand, Wal, Affe mit Krone, Gold-Pokal, Boss-Krone
+- Der BTC-Sensemann kommt rein, aber als **einzelnes humorvolles Motiv** (Archetyp-Avatar "Reaper" bzw. Liquidations-Maskottchen), nicht als Grundton des Spiels
 
-## 2. Spieler-Identität sichtbar
-Aktuell steht der Name nur klein im Header.
+## 2. Season Status ohne Totenköpfe
+- Tier-Badges als bunte Sticker-Medaillen: Exit Liquidity (Papierhand) → Paper Hands → Degen (Affe) → Whale (Wal) → Legend (Diamant-Krone) → Final Boss (goldene Boss-Krone)
+- Rahmen heller, Glas statt Grabstein, XP-Leiste in Violett mit Gold-Glanzkante
+- Rank-Zeile bleibt, Look wird freundlich statt heraldisch
 
-- Neue **Player-Karte**: Avatar groß im Ring, Spielername fett, darunter Archetyp · Land · Difficulty als kleine Chips
-- Ironman und Presale-Modus als eigene Mini-Badges
-- Sitzt direkt über/neben dem Season Status, damit "wer bin ich" sofort klar ist
+## 3. Neue Avatare & Archetypen
+- Die 6 Emoji-Avatare werden zu 6 gezeichneten Portraits im gleichen Sticker-Stil (Coder, Affe, Astronautin, Frosch, Bot, Diamant) + ein 7. Motiv: **BTC Reaper** (augenzwinkernd, Sense mit BTC-Symbol)
+- Archetyp-Karten bekommen je ein kleines Illustrations-Icon statt reinem Text
 
-## 3. Daily Missions
-Neues Panel "DAILY MISSIONS" mit 3 rotierenden Aufgaben pro Spielmonat:
+## 4. Zeitsteuerung sichtbar machen
+Die 1x / 2x / 3x-Buttons, "▶▶ WEEK" und der Tages-Fortschrittsbalken existieren, gehen aber optisch unter bzw. fehlen im V4-Entwurf.
 
-- Beispiele: "Kauf 2 verschiedene Coins", "Realisiere +5 % Gewinn", "Überlebe den Monat ohne Stress > 70", "Öffne eine Perp-Position und schließe sie im Plus", "Claim einen Airdrop", "Halte Hunger unter 30 %"
-- Jede Mission: Icon, Text, Fortschrittsbalken, XP-Belohnung
-- Erfüllt = Häkchen, grüner Glow, XP-Popup wie bisher
-- Belohnung nur XP (kein Cash), damit die Wirtschaft unangetastet bleibt
-- Nicht erfüllte Missionen verfallen beim Monatswechsel und werden neu gezogen; abgeschlossene Missionen zählen in eine "Mission Streak" Anzeige
+- Eigene **Time Control**-Leiste in der Action-Bar unten: Pause · WEEK · MONTH · Speed-Chips 1x/2x/3x
+- Speed-Chips als klar erkennbare Segment-Umschalter mit Gold-Aktivzustand
+- Fortschrittsbalken wird eine sichtbare, beschriftete Leiste ("Day 12 / 30") direkt unter der Datumsanzeige, plus dünner Monatsring im HUD
+- Ironman: Week/Month/Pause deaktiviert und sichtbar als "IRONMAN — no skip" gekennzeichnet
 
-## 4. Single-Screen Layout ohne Scrollen (Desktop)
-Das Spiel füllt exakt den Viewport, nichts scrollt mehr weg:
+## 5. Alles andere angleichen
+Damit nicht Startscreen und Spiel wie zwei Spiele wirken:
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ HUD: Avatar+Name · Cash/Net/Portfolio · Hunger/Stress/HP · ⚙ │
-├───────────────┬──────────────────────────┬───────────────────┤
-│ SEASON STATUS │  CHART + P&L             │ Tabs:             │
-│ PLAYER CARD   │  ─────────────────────── │ OPS · SHOP ·      │
-│ DAILY MISSIONS│  MARKET / PERPS Grid     │ QUESTS · STATS    │
-│ (Spalte 1)    │  (Hauptbühne, scrollbar) │ (Spalte 3)        │
-├───────────────┴──────────────────────────┴───────────────────┤
-│ News-Ticker · Sentiment · [⏩ NEXT MONTH]                     │
-└──────────────────────────────────────────────────────────────┘
-```
+- **Startscreen**: gleiche Panel-Sprache, gleiche Radien/Hairlines, illustrierte Archetyp- und Avatar-Karten, hellerer Hintergrund mit Aura-Verlauf
+- **How-to / Tutorial (3 Schritte)**: als illustrierte Karten mit je einem Sticker-Motiv, kurzer Text, Fortschrittspunkte
+- **Leaderboard** (Start + Global): Podium-Optik für Top 3 mit Medaillen-Stickern, kompakte Tabellenzeilen darunter, Tier-Badge pro Eintrag
+- **Endscreen**: gleiche Badge-Familie, Boss-Karte mit goldener Krone statt Totenkopf
+- **Toasts, Overlays, Popups**: einheitliche Radien, Farben, Icon-Set
+- Emoji-Rauschen reduzieren: Icons nur wo sie Bedeutung tragen, Zahlen in Tabular-Ziffern
 
-- `body` bekommt feste Höhe (`100dvh`, kein Body-Scroll); nur die Mittelbühne und die Tab-Inhalte scrollen intern mit dünnen, dezenten Scrollbars
-- Rechte Spalte wird zu Tabs, damit Ops/Shop/Quests/Achievements nicht mehr untereinander stapeln
-- Der Chart wird flacher, das Coin-Grid dichter (kompakte Zeilen statt großer Karten), Portfolio als Sub-Tab
-- Fallback: unter 1100 px Breite bzw. unter 720 px Höhe greift wieder das heutige scrollbare Layout; Mobile bleibt unverändert bei den unteren Tabs
-
-## 5. Optisch aufräumen (ruhiger, professioneller)
-Damit es nicht "erschlägt":
-
-- Einheitliche Panel-Sprache: gleiche Radien, gleiche Hairline, gleiche Titelzeile (Icon + Text in Gold, Zähler rechts) für alle Panels
-- Nur **eine** Akzentfarbe pro Zustand: Gold = Navigation/Titel, Violett = XP/Season, Grün/Rot ausschließlich für Kurse und Long/Short
-- Zahlen in Tabular-Ziffern, konsistente Ausrichtung, weniger Emoji-Rauschen: Icons nur noch dort wo sie Bedeutung tragen
-- Coin-Zeilen kompakt: Symbol · Preis · 1M-Änderung · Sparkline · Buy/Sell — statt aktuell großer Kacheln
-- Etwas mehr Grafik-Wärme: dezente Verlaufskanten an Panels, Badge-Grafiken (Season, Tier, Achievements), sanfte Hover-Lifts
+## 6. Layout bleibt Single-Screen
+Struktur wie im genehmigten V4-Konzept (HUD oben, Season/Player/Missions links, Chart + Markt/Perps Mitte, Ops/Shop/Quests/Stats als Tabs rechts, Action-Bar unten), nur eben in der neuen, helleren Bildsprache — und mit der Time-Control-Leiste unten.
 
 ## Technische Notizen
 Alles in `public/game.html`:
-- Neue CSS-Grid-Shell `#game-screen.single-screen` mit `grid-template-rows: auto 1fr auto`, `min-height:0` auf allen Scroll-Containern; Media-Query-Guard `@media (min-width:1101px) and (min-height:721px)`
-- Neue Panels `#season-status`, `#player-card`, `#daily-missions` in Spalte 1; `renderSeason()`, `renderPlayerCard()`, `renderMissions()` in den bestehenden `renderAll()`-Zyklus
-- Missionen: `MISSION_POOL` mit `check(state)`-Prädikaten, `state.missions` (3 Einträge + `done`-Flag + Streak), Ziehung in `advanceMonth()`, XP über bestehende `addXP()`
-- Rang: bestehende Leaderboard-API (`/api/public/leaderboard`) für Rangposition; Ergebnis gecacht, Fehler = "UNRANKED"
-- Tier-Badges via `imagegen` erzeugt und als `lovable-assets`-Pointer eingebunden
-- Rechte Spalte: `setSidebarTab()` analog zur bestehenden Mobile-`setPane()`-Logik
-- Keine Änderungen an Preisdaten, Kosten, Difficulty, Perp-Formeln oder Scoring
+- Neue Grafiken via `imagegen` (transparente PNGs, Sticker-Stil, ein Prompt-Rezept für Konsistenz), eingebunden als `lovable-assets`-Pointer; alte Wappen/Skull-Assets entfallen
+- CSS-Tokens aufhellen (`--panel`, `--border`, neue Akzent-Variablen); eine Badge-Klasse `.tcfb-badge` für Season/Leaderboard/Endscreen/Achievements
+- Startscreen-Markup: `#archetypes`, `#avatars` bekommen `<img>`-Icons; `.avatar-btn` auf Bild-Layout umgestellt
+- Neue `.timebar` in der Action-Bar; bestehende `setSpeed()`, `advanceWeek()`, `advanceMonth()`, `#day-progress` unverändert weiterverwendet, nur neu gerendert (`renderTimeBar()`)
+- Leaderboard-Renderer (`start-leaderboard` + globale Liste) auf Podium-Markup umgestellt
+- Keine Änderungen an Preisdaten, Kosten, Difficulty, Perp-Formeln, XP- oder Scoring-Logik
