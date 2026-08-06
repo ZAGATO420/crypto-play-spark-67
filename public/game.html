@@ -4162,6 +4162,9 @@ header{background:rgba(9,12,26,.88)}
     grid-template-columns:322px minmax(0,1fr) 344px;gap:12px;max-width:1720px;
   }
   body.v4-live main>div,body.v4-live main>.panel{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  body.v4-live main>div>.panel,body.v4-live main>div>#v4-side-tabs{flex:0 0 auto}
+  body.v4-live main>div:nth-child(2){display:flex;flex-direction:column;gap:12px;overflow:hidden}
+  body.v4-live main>div:nth-child(2)>.panel:last-child{flex:1 1 auto;min-height:0;overflow:hidden}
   body.v4-live main>div::-webkit-scrollbar,body.v4-live main>.panel::-webkit-scrollbar{width:6px}
   body.v4-live main>div::-webkit-scrollbar-thumb,body.v4-live main>.panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:9px}
   body.v4-live #v4-side-tabs{display:flex}
@@ -4295,6 +4298,15 @@ header{background:rgba(9,12,26,.88)}
     mis.innerHTML='<div class="panel-title"><span><img class="v4-panel-ic stk" src="'+IMG.quest+'" alt=""> DAILY MISSIONS</span>'+
       '<span id="v4-mis-count" style="color:#2dd4bf"></span></div><div id="v4-missions"></div>';
 
+    /* chart moves to the top of the middle column, exchange-desk style */
+    const chartPanel=Array.from(main.querySelectorAll('.panel')).find(p=>((p.querySelector('.panel-title')||{}).textContent||'').indexOf('CHART')>-1);
+    const term=main.children[1];
+    if(chartPanel&&term){
+      const mid=document.createElement('div');
+      mid.style.cssText='display:flex;flex-direction:column;gap:12px;min-width:0';
+      main.insertBefore(mid,term);
+      mid.appendChild(chartPanel);mid.appendChild(term);
+    }
     col.insertBefore(mis,col.firstChild);
     col.insertBefore(player,col.firstChild);
     col.insertBefore(season,col.firstChild);
