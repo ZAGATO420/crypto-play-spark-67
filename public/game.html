@@ -3620,6 +3620,8 @@ function liquidatePerp(i){
   playSound('rekt');
   const g=document.getElementById('game-screen'); if(g){g.classList.add('shake');setTimeout(()=>g.classList.remove('shake'),520)}
   awardXP(20,'LIQUIDATED');
+  /* a liquidation can end the run – settle it right here instead of waiting */
+  try{ if(typeof checkGameOver==='function') checkGameOver(); }catch(e){}
 }
 /* liquidation must hit the moment the mark price crosses, not only at month end */
 function checkPerpLiquidations(){
