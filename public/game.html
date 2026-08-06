@@ -4263,6 +4263,7 @@ header{background:rgba(9,12,26,.88)}
     const main=document.querySelector('main');if(!main||main.dataset.v4)return;
     main.dataset.v4='1';
     const col=main.children[0];
+    const rightCol=main.children[2];
     const season=document.createElement('div');
     season.className='panel season-card';season.dataset.pane='port';
     season.innerHTML=
@@ -4312,7 +4313,7 @@ header{background:rgba(9,12,26,.88)}
     col.insertBefore(season,col.firstChild);
 
     /* right column -> tabbed on desktop */
-    const right=main.children[2];
+    const right=rightCol;
     if(right){
       const map=[['PRESALE','launch','LAUNCHPAD',IMG.launch],['DEGEN OPS','ops','DEGEN OPS',IMG.airdrop],
                  ['BUSINESS','biz','BUSINESS',IMG.perps],['SURVIVAL','shop','SHOP',IMG.shop],
