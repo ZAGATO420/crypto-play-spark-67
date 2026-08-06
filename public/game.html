@@ -4026,6 +4026,561 @@ function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO 
 
 </script>
 
+<style id="v4-skin">
+/* ============================================================
+   V4 SKIN — "Crypto Revival" : brighter panels, sticker art,
+   single-screen desktop layout. Cosmetic + additive only.
+   ============================================================ */
+:root{
+  --bg:#080b18;--panel:#111730;--border:#232c4d;
+  --v3-line:rgba(255,255,255,.10);
+  --sand:#f5d6a0;--coral:#ff7a59;--teal:#2dd4bf;
+  --v4-glass:linear-gradient(168deg,rgba(255,255,255,.07),rgba(15,20,40,.72));
+}
+body{
+  background-image:
+    radial-gradient(ellipse 70% 45% at 12% -10%,rgba(240,180,41,.13),transparent 70%),
+    radial-gradient(ellipse 70% 50% at 88% 4%,rgba(139,92,246,.18),transparent 72%),
+    radial-gradient(ellipse 60% 45% at 50% 108%,rgba(45,212,191,.08),transparent 70%);
+}
+.panel{background:var(--v4-glass);border-color:var(--v3-line)}
+.stat-pill,.surv-item,.cf-tile,.hold-item,.quest-item,.ach-item,.presale-card,.coin-card,.perp-card{
+  background:linear-gradient(168deg,rgba(255,255,255,.065),rgba(15,20,40,.72))
+}
+header{background:rgba(9,12,26,.88)}
+#game-screen::before{display:none}
+
+/* ---------- sticker helpers ---------- */
+.stk{display:block;image-rendering:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.v4-panel-ic{width:20px;height:20px;margin-right:2px;vertical-align:-5px}
+.panel-title{align-items:center;gap:8px}
+
+/* ---------- season status ---------- */
+.season-card{position:relative;overflow:hidden}
+.season-card::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 20% 0%,rgba(240,180,41,.14),transparent 70%)}
+.season-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;position:relative}
+.season-badge{width:76px;height:76px;flex-shrink:0;animation:badgeFloat 5s ease-in-out infinite}
+@keyframes badgeFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2deg)}}
+.season-tier-l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;color:#8d97ba}
+.season-tier{font-size:19px;font-weight:900;letter-spacing:-.4px;line-height:1.1;
+  background:linear-gradient(100deg,#ffd76a,#fff 45%,#c4a4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.season-rank{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:4px 10px;border-radius:99px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;letter-spacing:.12em;color:#ffd76a;
+  background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.3)}
+.season-xp{margin-top:13px}
+.season-xp-top{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#8d97ba}
+.season-xp-track{height:11px;margin-top:6px;border-radius:99px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09);overflow:hidden;position:relative}
+.season-xp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#8b5cf6,#a78bfa 60%,#ffd76a);
+  box-shadow:0 0 18px rgba(167,139,250,.6),inset 0 1px 0 rgba(255,255,255,.5);transition:width .5s cubic-bezier(.16,1,.3,1)}
+.season-tiers{display:flex;justify-content:space-between;gap:4px;margin-top:11px}
+.season-tiers img{width:26px;height:26px;opacity:.32;transition:all .25s;filter:grayscale(.7)}
+.season-tiers img.on{opacity:1;filter:none;transform:scale(1.14) translateY(-2px)}
+
+/* ---------- player card ---------- */
+.player-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:13px;align-items:center}
+.player-av{width:66px;height:66px;border-radius:20px;padding:5px;flex-shrink:0;
+  background:linear-gradient(150deg,rgba(240,180,41,.24),rgba(139,92,246,.24));border:1px solid rgba(255,255,255,.13)}
+.player-name{font-size:16px;font-weight:900;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.pchip{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;padding:3px 8px;border-radius:99px;
+  border:1px solid var(--v3-line);background:rgba(255,255,255,.05);color:#a9b3d1}
+.pchip.gold{border-color:rgba(240,180,41,.35);color:#ffd76a;background:rgba(240,180,41,.1)}
+.pchip.vio{border-color:rgba(167,139,250,.35);color:#c4b5fd;background:rgba(139,92,246,.12)}
+.pchip.red{border-color:rgba(239,68,68,.4);color:#fca5a5;background:rgba(239,68,68,.1)}
+
+/* ---------- daily missions ---------- */
+.mis-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding:10px 11px;border-radius:14px;margin-bottom:7px;border:1px solid var(--v3-line);
+  background:linear-gradient(168deg,rgba(255,255,255,.05),rgba(15,20,40,.7));transition:all .2s}
+.mis-item img{width:28px;height:28px}
+.mis-t{font-size:12px;font-weight:700;color:#eef1fb}
+.mis-bar{height:5px;border-radius:99px;background:rgba(255,255,255,.08);margin-top:6px;overflow:hidden}
+.mis-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),#ffd76a);transition:width .4s}
+.mis-xp{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;color:#ffd76a;letter-spacing:.06em}
+.mis-item.done{border-color:rgba(45,212,191,.45);background:linear-gradient(100deg,rgba(45,212,191,.14),rgba(15,20,40,.6))}
+.mis-item.done .mis-xp{color:var(--teal)}
+
+/* ---------- start screen: illustrated choices ---------- */
+.choice{display:flex;gap:10px;align-items:flex-start}
+.choice .arch-ic{width:38px;height:38px;flex-shrink:0}
+.choice .ctxt{min-width:0}
+.avatar-grid{gap:10px}
+.avatar-btn{width:58px;height:58px;border-radius:18px;padding:4px;position:relative;overflow:hidden}
+.avatar-btn img{width:100%;height:100%;object-fit:contain}
+.avatar-btn .av-em{position:absolute;opacity:0;pointer-events:none;font-size:1px}
+.avatar-btn.selected{box-shadow:0 0 26px -6px var(--gold),inset 0 0 0 1px rgba(255,255,255,.15)}
+
+/* ---------- leaderboard podium ---------- */
+.podium{display:grid;grid-template-columns:1fr 1.16fr 1fr;gap:8px;align-items:end;margin:4px 0 12px}
+.pod{border-radius:16px;padding:11px 8px 12px;text-align:center;border:1px solid var(--v3-line);
+  background:linear-gradient(168deg,rgba(255,255,255,.07),rgba(15,20,40,.72))}
+.pod img{width:44px;height:44px;margin:0 auto 5px}
+.pod .pn{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pod .pv{font-family:'JetBrains Mono',monospace;font-size:11px;color:#ffd76a;font-weight:800;margin-top:2px}
+.pod .pr{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:#8d97ba}
+.pod.p1{border-color:rgba(240,180,41,.5);box-shadow:0 0 30px -12px rgba(240,180,41,.8);padding-top:15px}
+.pod.p1 img{width:56px;height:56px}
+.pod.p2{border-color:rgba(196,181,253,.35)}
+.pod.p3{border-color:rgba(255,122,89,.35)}
+
+/* ---------- bottom action bar (desktop) ---------- */
+#v4-bar{display:none}
+.v4-next{padding:0 22px;height:44px;border-radius:14px;font-family:'JetBrains Mono',monospace;
+  font-weight:800;font-size:12px;letter-spacing:.16em;color:#fff;
+  background:linear-gradient(100deg,#7c3aed,#a78bfa 55%,#22d3ee);
+  box-shadow:0 12px 30px -12px rgba(124,58,237,.9);white-space:nowrap}
+.v4-next:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.v4-seg{display:flex;gap:0;padding:3px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--v3-line)}
+.v4-seg button{height:28px;padding:0 12px;border-radius:9px;background:transparent;color:#8d97ba;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:800;letter-spacing:.1em}
+.v4-seg button.active{background:linear-gradient(100deg,rgba(240,180,41,.9),rgba(255,215,106,.9));color:#1a1204;
+  box-shadow:0 6px 16px -8px rgba(240,180,41,.9)}
+.v4-day{min-width:190px}
+.v4-day-top{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:#8d97ba}
+.v4-day-track{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px}
+.v4-day-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#a78bfa)}
+#mobile-next{background:linear-gradient(100deg,#7c3aed,#a78bfa 55%,#22d3ee)!important;color:#fff!important}
+
+/* ---------- side tabs (desktop right column) ---------- */
+#v4-side-tabs{display:none;gap:6px;margin-bottom:2px}
+#v4-side-tabs button{flex:1;padding:9px 4px;border-radius:13px;border:1px solid var(--v3-line);
+  background:rgba(255,255,255,.05);color:#8d97ba;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em}
+#v4-side-tabs button img{width:22px;height:22px;display:block;margin:0 auto 3px}
+#v4-side-tabs button.active{border-color:rgba(240,180,41,.45);color:#ffd76a;background:linear-gradient(168deg,rgba(240,180,41,.14),rgba(15,20,40,.8))}
+
+/* ---------- DESKTOP: single screen, no page scroll ---------- */
+@media(min-width:1151px){
+  body.v4-live{overflow:hidden}
+  body.v4-live #game-screen{display:flex!important;flex-direction:column;height:100vh;overflow:hidden}
+  body.v4-live header{position:relative;flex:0 0 auto}
+  body.v4-live .time-controls{display:none}
+  body.v4-live .news-ticker,body.v4-live .sentiment-wrap{margin-top:6px;flex:0 0 auto}
+  body.v4-live main{
+    flex:1 1 auto;min-height:0;overflow:hidden;padding:10px 16px 8px;
+    grid-template-columns:322px minmax(0,1fr) 344px;gap:12px;max-width:1720px;
+  }
+  body.v4-live main>div,body.v4-live main>.panel{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  body.v4-live main>div::-webkit-scrollbar,body.v4-live main>.panel::-webkit-scrollbar{width:6px}
+  body.v4-live main>div::-webkit-scrollbar-thumb,body.v4-live main>.panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:9px}
+  body.v4-live #v4-side-tabs{display:flex}
+  body.v4-live main>div:last-child .panel[data-side]{display:none}
+  body.v4-live main>div:last-child .panel[data-side].on{display:block}
+  body.v4-live #v4-bar{
+    display:flex;flex:0 0 auto;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:9px 16px;border-top:1px solid var(--v3-line);background:rgba(9,12,26,.94);
+    backdrop-filter:blur(18px)
+  }
+  body.v4-live .chart-box{height:210px}
+}
+@media(max-width:1150px){
+  #v4-bar{display:none!important}
+}
+</style>
+<script>
+/* =====================================================================
+   V4 "CRYPTO REVIVAL" LAYER — season status, player card, daily missions,
+   time-control bar, sticker art, podium leaderboard, modern chart.
+   Purely additive: no game formulas, prices, costs or XP values changed.
+   ===================================================================== */
+(function(){
+  const A='/__l5e/assets-v1/';
+  const IMG={
+    coder:A+'ec0f1aee-f57c-4597-b025-6448d316a26c/av-coder.png',
+    ape:A+'14e29530-c7a9-42ae-be61-99f40d6a3b2d/av-ape.png',
+    astro:A+'dcc2885e-aaf1-4503-89f8-06904071f555/av-astro.png',
+    frog:A+'d93aac0c-2858-45c1-abf3-a719bc54429c/av-frog.png',
+    bot:A+'a89e5645-8f13-4ad7-b7bd-4f5f3563bc5c/av-bot.png',
+    diamond:A+'23f3e721-e775-4cfc-bab6-82351fccdc36/av-diamond.png',
+    reaper:A+'a7f18473-2850-46a3-a211-a144b7ee1e0b/av-reaper.png',
+    whale:A+'79fcb071-c9db-4e42-9ee0-84cc7edd25bd/av-whale.png',
+    airdrop:A+'0c9beaf5-b471-44ea-9097-e9e9a864c8a6/ic-airdrop.png',
+    launch:A+'abab7ae6-f795-4fbe-b11e-31d689e902ce/ic-launch.png',
+    perps:A+'cb3f1889-6389-4c90-9dcb-ed2da42e9198/ic-perps.png',
+    quest:A+'6c51b0cd-7479-48e6-8148-67ef7cc6033f/ic-quest.png',
+    shop:A+'9f673d0c-49f0-4e8e-9700-92edaaa7d0e6/ic-shop.png',
+    trophy:A+'5fb19dd7-7b08-4453-af1f-414f0c83559f/ic-trophy.png',
+    t1:A+'6ad33d65-6435-4655-a0d5-b34348457ff6/tier-1.png',
+    t2:A+'eca5dd3e-85db-4535-a2ec-7efadc21c5e5/tier-2.png',
+    t3:A+'639cdfc8-4a6e-4d0b-91b4-4e092372795d/tier-3.png',
+    t4:A+'7564c658-0ec9-44c8-8505-ae4c906277d3/tier-4.png',
+    t5:A+'ffdf7106-ed8b-4feb-9d2a-635255d93d4d/tier-5.png',
+    t6:A+'468ab598-2686-4e61-a8f4-57db475be471/tier-6.png'
+  };
+  window.TCFB_IMG=IMG;
+  const TIERS=[
+    {img:IMG.t1,n:'Exit Liquidity'},{img:IMG.t2,n:'Paper Hands'},{img:IMG.t3,n:'Degen'},
+    {img:IMG.t4,n:'Whale'},{img:IMG.t5,n:'Legend'},{img:IMG.t6,n:'Final Boss'}
+  ];
+  function tierIdx(lvl){return lvl>=15?5:lvl>=12?4:lvl>=9?3:lvl>=5?2:lvl>=2?1:0}
+  const AVATARS=[
+    {em:'\u{1F9D1}\u200D\u{1F4BB}',img:IMG.coder,t:'Coder'},
+    {em:'\u{1F98D}',img:IMG.ape,t:'Ape'},
+    {em:'\u{1F469}\u200D\u{1F680}',img:IMG.astro,t:'Astronaut'},
+    {em:'\u{1F438}',img:IMG.frog,t:'Frog'},
+    {em:'\u{1F916}',img:IMG.bot,t:'Bot'},
+    {em:'\u{1F48E}',img:IMG.diamond,t:'Diamond'},
+    {em:'\u{1F480}',img:IMG.reaper,t:'BTC Reaper'},
+    {em:'\u{1F40B}',img:IMG.whale,t:'Whale'}
+  ];
+  function avImg(em){const a=AVATARS.find(a=>a.em===em);return a?a.img:IMG.coder}
+  window.TCFB_avImg=avImg;
+  const ARCH_IC={degen:IMG.ape,trader:IMG.perps,influencer:IMG.launch,hodler:IMG.diamond};
+  const $=id=>document.getElementById(id);
+  const money=v=>(typeof fmt==='function'?fmt(v):'$'+Math.round(v).toLocaleString());
+
+  /* ---------------- start screen: illustrated choices ---------------- */
+  function dressStartScreen(){
+    document.querySelectorAll('#archetypes .choice').forEach(b=>{
+      if(b.querySelector('.arch-ic'))return;
+      const ic=ARCH_IC[b.dataset.arch];if(!ic)return;
+      const inner=document.createElement('div');inner.className='ctxt';
+      while(b.firstChild)inner.appendChild(b.firstChild);
+      const im=document.createElement('img');im.className='arch-ic stk';im.src=ic;im.alt='';
+      b.appendChild(im);b.appendChild(inner);
+    });
+    const wrap=$('avatars');
+    if(wrap&&!wrap.dataset.v4){
+      const selEm=(wrap.querySelector('.selected')||{}).textContent||AVATARS[0].em;
+      wrap.dataset.v4='1';
+      wrap.innerHTML=AVATARS.map(a=>
+        '<button class="avatar-btn'+(a.em===selEm.trim()?' selected':'')+'" title="'+a.t+'">'+
+        '<img class="stk" src="'+a.img+'" alt="'+a.t+'"><span class="av-em">'+a.em+'</span></button>').join('');
+      wrap.querySelectorAll('.avatar-btn').forEach(b=>b.addEventListener('click',()=>{
+        wrap.querySelectorAll('.avatar-btn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+      }));
+    }
+  }
+
+  /* ---------------- V4 panels injected into the layout ---------------- */
+  function buildPanels(){
+    const main=document.querySelector('main');if(!main||main.dataset.v4)return;
+    main.dataset.v4='1';
+    const col=main.children[0];
+    const season=document.createElement('div');
+    season.className='panel season-card';season.dataset.pane='port';
+    season.innerHTML=
+      '<div class="panel-title"><span>SEASON STATUS</span><span id="v4-lvl" style="color:#ffd76a">LVL 1</span></div>'+
+      '<div class="season-top">'+
+        '<img id="v4-tier-img" class="season-badge stk" src="'+IMG.t1+'" alt="Tier badge">'+
+        '<div style="min-width:0">'+
+          '<div class="season-tier-l">DEGEN TIER</div>'+
+          '<div class="season-tier" id="v4-tier-name">EXIT LIQUIDITY</div>'+
+          '<div class="season-rank" id="v4-rank">RANK #—</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="season-xp">'+
+        '<div class="season-xp-top"><span id="v4-xp-title">EXIT LIQUIDITY</span><span id="v4-xp-num">0 / 400 XP</span></div>'+
+        '<div class="season-xp-track"><div class="season-xp-fill" id="v4-xp-fill" style="width:0%"></div></div>'+
+      '</div>'+
+      '<div class="season-tiers" id="v4-tier-row">'+TIERS.map(t=>'<img class="stk" src="'+t.img+'" alt="'+t.n+'" title="'+t.n+'">').join('')+'</div>';
+
+    const player=document.createElement('div');
+    player.className='panel';player.dataset.pane='port';
+    player.innerHTML=
+      '<div class="panel-title"><span>PLAYER</span><span id="v4-day-chip" style="color:#8d97ba">DAY 1 / 30</span></div>'+
+      '<div class="player-card">'+
+        '<img id="v4-player-av" class="player-av stk" src="'+IMG.coder+'" alt="Avatar">'+
+        '<div style="min-width:0">'+
+          '<div class="player-name" id="v4-player-name">Player</div>'+
+          '<div class="player-chips" id="v4-player-chips"></div>'+
+        '</div>'+
+      '</div>';
+
+    const mis=document.createElement('div');
+    mis.className='panel';mis.dataset.pane='port';
+    mis.innerHTML='<div class="panel-title"><span><img class="v4-panel-ic stk" src="'+IMG.quest+'" alt=""> DAILY MISSIONS</span>'+
+      '<span id="v4-mis-count" style="color:#2dd4bf"></span></div><div id="v4-missions"></div>';
+
+    col.insertBefore(mis,col.firstChild);
+    col.insertBefore(player,col.firstChild);
+    col.insertBefore(season,col.firstChild);
+
+    /* right column -> tabbed on desktop */
+    const right=main.children[2];
+    if(right){
+      const map=[['PRESALE','launch','LAUNCHPAD',IMG.launch],['DEGEN OPS','ops','DEGEN OPS',IMG.airdrop],
+                 ['BUSINESS','biz','BUSINESS',IMG.perps],['SURVIVAL','shop','SHOP',IMG.shop],
+                 ['ACHIEVEMENT','ach','TROPHIES',IMG.trophy]];
+      const tabs=document.createElement('div');tabs.id='v4-side-tabs';
+      Array.from(right.querySelectorAll('.panel')).forEach(p=>{
+        const txt=((p.querySelector('.panel-title')||{}).textContent||'').toUpperCase();
+        const hit=map.find(m=>txt.indexOf(m[0])>-1);
+        if(hit)p.dataset.side=hit[1];
+      });
+      tabs.innerHTML=map.map((m,i)=>'<button data-side-tab="'+m[1]+'" class="'+(i===0?'active':'')+'">'+
+        '<img class="stk" src="'+m[3]+'" alt="">'+m[2]+'</button>').join('');
+      right.insertBefore(tabs,right.firstChild);
+      tabs.addEventListener('click',e=>{
+        const b=e.target.closest('[data-side-tab]');if(!b)return;
+        window.v4SetSide(b.dataset.sideTab);
+        try{playSound('click')}catch(e){}
+      });
+      window.v4SetSide=function(key){
+        document.querySelectorAll('#v4-side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.sideTab===key));
+        right.querySelectorAll('.panel[data-side]').forEach(p=>p.classList.toggle('on',p.dataset.side===key));
+      };
+      window.v4SetSide('launch');
+    }
+
+    /* bottom action bar */
+    if(!$('v4-bar')){
+      const bar=document.createElement('div');bar.id='v4-bar';
+      bar.innerHTML=
+        '<span id="v4-date" style="font-family:\'JetBrains Mono\',monospace;font-weight:800;font-size:12px;letter-spacing:.14em;color:#ffd76a;padding:6px 12px;border-radius:11px;background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.28)">JAN 2020</span>'+
+        '<div class="v4-day"><div class="v4-day-top"><span id="v4-day-l">DAY 1 / 30</span><span id="v4-month-l">MONTH 1 / 84</span></div>'+
+        '<div class="v4-day-track"><i id="v4-day-fill" style="width:0%"></i></div></div>'+
+        '<button class="tc-btn" id="v4-pause" onclick="togglePause();v4SyncBar()">\u23F8 PAUSE</button>'+
+        '<button class="tc-btn" id="v4-week" onclick="advanceWeek()">\u25B6\u25B6 WEEK</button>'+
+        '<div style="display:flex;align-items:center;gap:8px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.18em;color:#8d97ba">SPEED</span>'+
+        '<div class="v4-seg" id="v4-speed"><button data-speed="1" onclick="setSpeed(1)">1x</button><button data-speed="2" onclick="setSpeed(2)">2x</button><button data-speed="3" onclick="setSpeed(3)">3x</button></div></div>'+
+        '<span id="v4-ironman" class="pchip red hidden">IRONMAN \u2014 NO SKIP</span>'+
+        '<div style="flex:1"></div>'+
+        '<button class="v4-next" onclick="advanceMonth()">\u23E9 NEXT MONTH</button>';
+      const gs=$('game-screen');if(gs)gs.appendChild(bar);
+    }
+  }
+
+  /* ---------------- daily missions ---------------- */
+  const MPOOL=[
+    {id:'trade',ic:IMG.perps,t:'Execute 3 trades',goal:3,xp:240},
+    {id:'trade5',ic:IMG.perps,t:'Execute 5 trades',goal:5,xp:400,k:'trade'},
+    {id:'shop',ic:IMG.shop,t:'Take care of yourself twice',goal:2,xp:200,k:'shop'},
+    {id:'xp',ic:IMG.quest,t:'Earn 600 XP this month',goal:600,xp:260,k:'xp'},
+    {id:'xpbig',ic:IMG.quest,t:'Earn 1,200 XP this month',goal:1200,xp:480,k:'xp'},
+    {id:'buy',ic:IMG.airdrop,t:'Open 2 new positions',goal:2,xp:220,k:'buy'},
+    {id:'sell',ic:IMG.launch,t:'Realise 2 sells',goal:2,xp:220,k:'sell'}
+  ];
+  function rollMissions(){
+    const pool=MPOOL.slice();const out=[];
+    while(out.length<3&&pool.length){
+      const m=pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+      if(out.some(o=>(o.k||o.id)===(m.k||m.id)))continue;
+      out.push({id:m.id,k:m.k||m.id,ic:m.ic,t:m.t,goal:m.goal,xp:m.xp,p:0,done:false});
+    }
+    return out;
+  }
+  function ensureMissions(){
+    if(!window.state)return null;
+    if(!state._v4mis||state._v4misMonth!==state.month){state._v4mis=rollMissions();state._v4misMonth=state.month}
+    return state._v4mis;
+  }
+  window.missionTick=function(kind,n){
+    const ms=ensureMissions();if(!ms)return;
+    let changed=false;
+    ms.forEach(m=>{
+      if(m.done||m.k!==kind)return;
+      m.p=Math.min(m.goal,m.p+(n||1));changed=true;
+      if(m.p>=m.goal){
+        m.done=true;
+        try{awardXP(m.xp,'MISSION')}catch(e){}
+        try{toast('\u2705 MISSION DONE \u2014 '+m.t,'buy')}catch(e){}
+      }
+    });
+    if(changed)renderMissions();
+  };
+  function renderMissions(){
+    const el=$('v4-missions');if(!el)return;
+    const ms=ensureMissions();if(!ms)return;
+    el.innerHTML=ms.map(m=>
+      '<div class="mis-item'+(m.done?' done':'')+'"><img class="stk" src="'+m.ic+'" alt="">'+
+      '<div style="min-width:0"><div class="mis-t">'+m.t+'</div>'+
+      '<div class="mis-bar"><i style="width:'+Math.round(m.p/m.goal*100)+'%"></i></div></div>'+
+      '<div class="mis-xp">'+(m.done?'\u2713':'+'+m.xp)+'</div></div>').join('');
+    const c=$('v4-mis-count');if(c)c.textContent=ms.filter(m=>m.done).length+'/'+ms.length;
+  }
+  window.renderMissions=renderMissions;
+
+  /* ---------------- season / player rendering ---------------- */
+  function myScore(){
+    if(!window.state)return 0;
+    const net=(typeof netWorth==='function')?netWorth():0;
+    const ach=(state.achievements?Object.keys(state.achievements).length:0);
+    return net+(state.xp||0)*10+(state.month||0)*500+ach*250;
+  }
+  function projectedRank(){
+    try{
+      const cache=window.globalLeaderboardCache;
+      if(!cache||!cache.length)return null;
+      const mine=myScore();
+      let better=0;
+      cache.forEach(p=>{
+        const s=Number(p.netWorth||0)+Number(p.xp||0)*10+Number(p.months||0)*500;
+        if(s>mine)better++;
+      });
+      return better+1;
+    }catch(e){return null}
+  }
+  function renderSeason(){
+    if(!window.state||!$('v4-tier-img'))return;
+    const xp=state.xp||0;
+    const lvl=(typeof xpLevel==='function')?xpLevel(xp):0;
+    const ti=tierIdx(lvl),t=TIERS[ti];
+    $('v4-tier-img').src=t.img;
+    $('v4-tier-name').textContent=t.n.toUpperCase();
+    $('v4-lvl').textContent='LVL '+(lvl+1);
+    const cur=XP_LEVELS[lvl],nxt=XP_LEVELS[lvl+1];
+    const pct=nxt?Math.min(100,((xp-cur.xp)/(nxt.xp-cur.xp))*100):100;
+    $('v4-xp-fill').style.width=pct+'%';
+    $('v4-xp-title').textContent=cur.t.toUpperCase();
+    $('v4-xp-num').textContent=xp.toLocaleString()+(nxt?' / '+nxt.xp.toLocaleString():'')+' XP';
+    const r=projectedRank();
+    $('v4-rank').textContent=r?('RANK #'+r):'UNRANKED \u2014 FINISH YOUR RUN';
+    document.querySelectorAll('#v4-tier-row img').forEach((im,i)=>im.classList.toggle('on',i<=ti));
+  }
+  function renderPlayer(){
+    if(!window.state||!$('v4-player-name'))return;
+    $('v4-player-name').textContent=state.name||'Player';
+    $('v4-player-av').src=avImg((state.avatar||'').trim());
+    const c=(window.COUNTRIES&&COUNTRIES[state.country])||{flag:''};
+    const chips=[
+      ['gold',(c.flag||'')+' '+state.country],
+      ['vio',(state.arch||'').toUpperCase()],
+      [state.diff==='BOSS'?'red':'',state.diff]
+    ];
+    if(state.ironman)chips.push(['red','\u2694 IRONMAN']);
+    if(state.storage)chips.push(['',''+state.storage.toUpperCase()]);
+    $('v4-player-chips').innerHTML=chips.map(x=>'<span class="pchip '+x[0]+'">'+x[1]+'</span>').join('');
+    const dc=$('v4-day-chip');if(dc)dc.textContent='DAY '+(state.day||1)+' / 30';
+  }
+  window.v4SyncBar=function(){
+    if(!window.state)return;
+    const set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+    set('v4-day-l','DAY '+(state.day||1)+' / 30');
+    set('v4-month-l','MONTH '+((state.month||0)+1)+' / 84');
+    try{set('v4-date',dateStr().toUpperCase())}catch(e){}
+    const p=$('v4-pause');if(p)p.textContent=state.paused?'\u25B6 RESUME':'\u23F8 PAUSE';
+    document.querySelectorAll('#v4-speed [data-speed]').forEach(b=>b.classList.toggle('active',+b.dataset.speed===state.speed));
+    const im=$('v4-ironman'),wk=$('v4-week');
+    if(state.ironman){
+      if(im)im.classList.remove('hidden');
+      if(wk)wk.disabled=true;if(p)p.disabled=true;
+      const nx=document.querySelector('.v4-next');if(nx)nx.disabled=true;
+    }
+  };
+  function refreshV4(){renderSeason();renderPlayer();renderMissions();window.v4SyncBar()}
+  window.refreshV4=refreshV4;
+
+  /* ---------------- hooks (wrappers, original logic untouched) -------- */
+  function wrap(name,after){
+    const o=window[name];if(typeof o!=='function')return;
+    window[name]=function(){const r=o.apply(this,arguments);try{after.apply(this,arguments)}catch(e){}return r};
+  }
+  function install(){
+    wrap('updateHeader',refreshV4);
+    wrap('updateSidePanels',refreshV4);
+    wrap('updateXPBar',renderSeason);
+    wrap('buy',function(){missionTick('trade');missionTick('buy')});
+    wrap('sell',function(){missionTick('trade');missionTick('sell')});
+    wrap('buyItem',function(){missionTick('shop')});
+    wrap('awardXP',function(base){missionTick('xp',Math.max(1,Math.round(base||0)))});
+    wrap('actuallyStartGame',function(){
+      document.body.classList.add('v4-live');
+      buildPanels();refreshV4();
+      try{if(typeof updateSidePanels==='function')updateSidePanels()}catch(e){}
+    });
+    wrap('quitGame',function(){document.body.classList.remove('v4-live')});
+    wrap('setSpeed',function(){window.v4SyncBar()});
+    wrap('renderGlobalLeaderboard',function(){});
+  }
+
+  /* ---------------- modern exchange-style chart ---------------- */
+  window.initChart=function(){
+    const cv=$('pnl-chart');if(!cv||!window.Chart)return;
+    const ctx=cv.getContext('2d');
+    const g=ctx.createLinearGradient(0,0,0,220);
+    g.addColorStop(0,'rgba(240,180,41,.38)');g.addColorStop(.5,'rgba(168,85,247,.16)');g.addColorStop(1,'rgba(168,85,247,0)');
+    window._chartFill=g;
+    if(window.chart&&window.chart.destroy)try{chart.destroy()}catch(e){}
+    chart=new Chart(ctx,{
+      type:'line',
+      data:{labels:[0],datasets:[{data:[netWorth()],borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.22,pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:'#ffd76a'}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,animation:false,
+        interaction:{mode:'index',intersect:false},
+        layout:{padding:{top:8,right:2,bottom:0,left:2}},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            enabled:true,displayColors:false,backgroundColor:'rgba(9,12,26,.95)',
+            borderColor:'rgba(240,180,41,.35)',borderWidth:1,padding:9,cornerRadius:10,
+            titleFont:{family:"'JetBrains Mono',monospace",size:9},
+            bodyFont:{family:"'JetBrains Mono',monospace",size:12,weight:'700'},
+            callbacks:{title:()=>'NET WORTH',label:c=>'$'+Math.round(c.parsed.y).toLocaleString()}
+          }
+        },
+        scales:{
+          x:{display:false},
+          y:{
+            position:'right',grid:{color:'rgba(255,255,255,.05)',drawTicks:false},
+            border:{display:false},
+            ticks:{
+              color:'#7e88ad',maxTicksLimit:5,padding:6,
+              font:{family:"'JetBrains Mono',monospace",size:9},
+              callback:v=>v>=1e6?'$'+(v/1e6).toFixed(1)+'m':v>=1e3?'$'+Math.round(v/1e3)+'k':'$'+Math.round(v)
+            }
+          }
+        }
+      }
+    });
+    state.liveHistory=state.liveHistory||[netWorth()];
+  };
+
+  /* ---------------- podium leaderboards ---------------- */
+  const FLAG={DE:'\u{1F1E9}\u{1F1EA}',USA:'\u{1F1FA}\u{1F1F8}',CH:'\u{1F1E8}\u{1F1ED}',SG:'\u{1F1F8}\u{1F1EC}',PT:'\u{1F1F5}\u{1F1F9}',NG:'\u{1F1F3}\u{1F1EC}'};
+  function esc(s){return (typeof escapeHtml==='function')?escapeHtml(String(s==null?'':s)):String(s==null?'':s)}
+  function tierFromLevel(l){return TIERS[tierIdx(Math.max(0,(+l||1)-1))]}
+  window.renderGlobalLeaderboard=function(listId){
+    const list=$(listId);if(!list)return;
+    const cache=window.globalLeaderboardCache;
+    if(!cache||!cache.length){
+      list.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">No scores yet. Be the first! \u{1F680}</div>';
+      return;
+    }
+    const top=cache.slice(0,3),rest=cache.slice(3,20);
+    const order=[1,0,2];
+    const pod=top.length?'<div class="podium">'+order.map(i=>{
+      const p=top[i];if(!p)return '<div></div>';
+      const t=tierFromLevel(p.level);
+      return '<div class="pod p'+(i+1)+'"><img class="stk" src="'+t.img+'" alt="'+t.n+'">'+
+        '<div class="pr">#'+(i+1)+'</div>'+
+        '<div class="pn">'+(FLAG[p.country]||'\u{1F3F3}\uFE0F')+' '+esc(p.name||'Anon')+'</div>'+
+        '<div class="pv">$'+Number(p.netWorth||0).toLocaleString()+'</div>'+
+        '<div class="pr">'+Number(p.xp||0).toLocaleString()+' XP</div></div>';
+    }).join('')+'</div>':'';
+    const rows=rest.map((p,i)=>{
+      const t=tierFromLevel(p.level);
+      return '<div class="global-lb-row"><div class="global-lb-left">'+
+        '<div class="global-lb-rank">#'+(i+4)+'</div>'+
+        '<img class="stk" src="'+t.img+'" alt="" style="width:26px;height:26px">'+
+        '<div><div class="global-lb-name">'+(FLAG[p.country]||'\u{1F3F3}\uFE0F')+' '+esc(p.name||'Anon')+'</div>'+
+        '<div class="global-lb-meta">'+esc(p.difficulty||'BOSS')+' \u2022 '+esc(p.months||0)+' mo \u2022 '+t.n+'</div></div></div>'+
+        '<div class="global-lb-right"><div class="global-lb-score">$'+Number(p.netWorth||0).toLocaleString()+
+        '<div style="font-size:10px;color:#a78bfa">'+Number(p.xp||0).toLocaleString()+' XP</div></div></div></div>';
+    }).join('');
+    list.innerHTML=pod+rows;
+  };
+
+  /* ---------------- boot ---------------- */
+  function boot(){
+    dressStartScreen();
+    install();
+    if(window.state){document.body.classList.add('v4-live');buildPanels();refreshV4()}
+    /* mirror the day progress into the bottom bar */
+    setInterval(function(){
+      if(!window.state)return;
+      const src=$('day-progress'),dst=$('v4-day-fill');
+      if(src&&dst)dst.style.width=src.style.width||'0%';
+      window.v4SyncBar();
+    },250);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+</script>
+
 </body>
 </html>
 
