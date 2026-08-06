@@ -4676,6 +4676,65 @@ header{background:rgba(9,12,26,.88)}
   border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04)}
 .v5-cluster,#v4-bar .v4-seg,#v4-bar .v4-next,#v4-bar .tc-btn{flex:0 0 auto}
 #v4-bar .v4-seg{overflow:visible}
+/* ---- option cards: only archetypes are icon+text rows ---- */
+.choice{display:block!important}
+#archetypes .choice{display:flex!important;gap:10px;align-items:flex-start}
+.choice .ctxt{min-width:0;flex:1}
+.choice .t,.choice .d{display:block;white-space:normal;overflow-wrap:anywhere}
+.choice .t{line-height:1.25}
+.choice .d{line-height:1.4}
+.diff-grid .choice,.country-grid .choice{min-width:0}
+@media(max-width:560px){
+  .diff-grid{grid-template-columns:1fr!important}
+  .country-grid{grid-template-columns:1fr!important}
+  #archetypes{grid-template-columns:1fr!important}
+  .choice{padding:13px 13px 12px}
+  .choice .d{font-size:10.5px}
+}
+/* ---- real flag images (Windows has no emoji flags) ---- */
+.flagi{width:22px;height:16px;border-radius:3px;object-fit:cover;vertical-align:-3px;margin-right:7px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.flagi.sm{width:17px;height:12px;vertical-align:-2px;margin-right:5px}
+</style>
+<script>
+/* Windows/Linux Chrome ships no emoji flag glyphs — swap every flag emoji for
+   a real image, and keep plain country codes in text-only contexts. */
+(function(){
+  const ISO={DE:'de',USA:'us',CH:'ch',SG:'sg',PT:'pt',NG:'ng'};
+  const src=c=>'https://flagcdn.com/w40/'+(ISO[c]||'un')+'.png';
+  window.flagImg=function(c,sm){return '<img class="flagi'+(sm?' sm':'')+'" src="'+src(c)+'" alt="'+c+'" loading="lazy">'};
+  function fixStart(){
+    /* archetype cards already carry a sticker icon — drop the emoji, which
+       falls back to a tofu box on Windows */
+    document.querySelectorAll('#archetypes .choice').forEach(b=>{
+      const t=b.querySelector('.t');if(!t||t.dataset.deemoji)return;
+      t.dataset.deemoji='1';
+      t.textContent=t.textContent.replace(/[\u200d\uFE0F\u2190-\u2BFF\uD800-\uDFFF]/g,'').trim();
+    });
+    document.querySelectorAll('#countries .choice[data-country]').forEach(b=>{
+      const t=b.querySelector('.t');if(!t||t.dataset.flagged)return;
+      t.dataset.flagged='1';
+      t.innerHTML=window.flagImg(b.dataset.country)+t.textContent.replace(/[\uD800-\uDFFF\uFE0F]/g,'').trim();
+    });
+  }
+  function boot(){
+    fixStart();
+    if(typeof COUNTRIES!=='undefined')Object.keys(COUNTRIES).forEach(k=>{COUNTRIES[k].flag=k==='USA'?'US':k});
+    const uh=window.updateHeader;
+    if(typeof uh==='function')window.updateHeader=function(){
+      const r=uh.apply(this,arguments);
+      try{
+        const m=document.getElementById('hdr-meta');
+        if(m&&typeof state!=='undefined'&&state)m.innerHTML=window.flagImg(state.country,1)+m.textContent.replace(/^\s*(US|DE|CH|SG|PT|NG)\s*/,'');
+      }catch(e){}
+      return r;
+    };
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  setTimeout(fixStart,400);setTimeout(fixStart,1200);
+})();
+</script>
+<style id="v5-skin-tail">
 .v5-cluster .tc-btn{height:32px;padding:0 12px;border-radius:10px;font-size:10px}
 .v5-pnl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums}
 </style>
