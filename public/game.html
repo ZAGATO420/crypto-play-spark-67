@@ -4228,6 +4228,7 @@ header{background:rgba(9,12,26,.88)}
   window.TCFB_avImg=avImg;
   const ARCH_IC={degen:IMG.ape,trader:IMG.perps,influencer:IMG.launch,hodler:IMG.diamond};
   const $=id=>document.getElementById(id);
+  const _S=()=>(typeof state!=='undefined'&&state)?state:null;
   const money=v=>(typeof fmt==='function'?fmt(v):'$'+Math.round(v).toLocaleString());
 
   /* ---------------- start screen: illustrated choices ---------------- */
@@ -4363,7 +4364,7 @@ header{background:rgba(9,12,26,.88)}
     return out;
   }
   function ensureMissions(){
-    if(!window.state)return null;
+    if(!_S())return null;
     if(!state._v4mis||state._v4misMonth!==state.month){state._v4mis=rollMissions();state._v4misMonth=state.month}
     return state._v4mis;
   }
@@ -4395,14 +4396,14 @@ header{background:rgba(9,12,26,.88)}
 
   /* ---------------- season / player rendering ---------------- */
   function myScore(){
-    if(!window.state)return 0;
+    if(!_S())return 0;
     const net=(typeof netWorth==='function')?netWorth():0;
     const ach=(state.achievements?Object.keys(state.achievements).length:0);
     return net+(state.xp||0)*10+(state.month||0)*500+ach*250;
   }
   function projectedRank(){
     try{
-      const cache=window.globalLeaderboardCache;
+      const cache=(typeof globalLeaderboardCache!=='undefined'?globalLeaderboardCache:null);
       if(!cache||!cache.length)return null;
       const mine=myScore();
       let better=0;
@@ -4414,7 +4415,7 @@ header{background:rgba(9,12,26,.88)}
     }catch(e){return null}
   }
   function renderSeason(){
-    if(!window.state||!$('v4-tier-img'))return;
+    if(!_S()||!$('v4-tier-img'))return;
     const xp=state.xp||0;
     const lvl=(typeof xpLevel==='function')?xpLevel(xp):0;
     const ti=tierIdx(lvl),t=TIERS[ti];
@@ -4431,10 +4432,10 @@ header{background:rgba(9,12,26,.88)}
     document.querySelectorAll('#v4-tier-row img').forEach((im,i)=>im.classList.toggle('on',i<=ti));
   }
   function renderPlayer(){
-    if(!window.state||!$('v4-player-name'))return;
+    if(!_S()||!$('v4-player-name'))return;
     $('v4-player-name').textContent=state.name||'Player';
     $('v4-player-av').src=avImg((state.avatar||'').trim());
-    const c=(window.COUNTRIES&&COUNTRIES[state.country])||{flag:''};
+    const c=((typeof COUNTRIES!=='undefined'&&COUNTRIES[state.country]))||{flag:''};
     const chips=[
       ['gold',(c.flag||'')+' '+state.country],
       ['vio',(state.arch||'').toUpperCase()],
@@ -4446,7 +4447,7 @@ header{background:rgba(9,12,26,.88)}
     const dc=$('v4-day-chip');if(dc)dc.textContent='DAY '+(state.day||1)+' / 30';
   }
   window.v4SyncBar=function(){
-    if(!window.state)return;
+    if(!_S())return;
     const set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
     set('v4-day-l','DAY '+(state.day||1)+' / 30');
     set('v4-month-l','MONTH '+((state.month||0)+1)+' / 84');
@@ -4493,7 +4494,7 @@ header{background:rgba(9,12,26,.88)}
     const g=ctx.createLinearGradient(0,0,0,220);
     g.addColorStop(0,'rgba(240,180,41,.38)');g.addColorStop(.5,'rgba(168,85,247,.16)');g.addColorStop(1,'rgba(168,85,247,0)');
     window._chartFill=g;
-    if(window.chart&&window.chart.destroy)try{chart.destroy()}catch(e){}
+    if(typeof chart!=='undefined'&&chart&&chart.destroy)try{chart.destroy()}catch(e){}
     chart=new Chart(ctx,{
       type:'line',
       data:{labels:[0],datasets:[{data:[netWorth()],borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.22,pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:'#ffd76a'}]},
@@ -4534,7 +4535,7 @@ header{background:rgba(9,12,26,.88)}
   function tierFromLevel(l){return TIERS[tierIdx(Math.max(0,(+l||1)-1))]}
   window.renderGlobalLeaderboard=function(listId){
     const list=$(listId);if(!list)return;
-    const cache=window.globalLeaderboardCache;
+    const cache=(typeof globalLeaderboardCache!=='undefined'?globalLeaderboardCache:null);
     if(!cache||!cache.length){
       list.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">No scores yet. Be the first! \u{1F680}</div>';
       return;
@@ -4567,10 +4568,10 @@ header{background:rgba(9,12,26,.88)}
   function boot(){
     dressStartScreen();
     install();
-    if(window.state){document.body.classList.add('v4-live');buildPanels();refreshV4()}
+    if(_S()){document.body.classList.add('v4-live');buildPanels();refreshV4()}
     /* mirror the day progress into the bottom bar */
     setInterval(function(){
-      if(!window.state)return;
+      if(!_S())return;
       const src=$('day-progress'),dst=$('v4-day-fill');
       if(src&&dst)dst.style.width=src.style.width||'0%';
       window.v4SyncBar();
