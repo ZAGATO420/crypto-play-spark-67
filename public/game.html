@@ -1399,7 +1399,7 @@ function openSettings(){playSound('click');document.getElementById('settings-ove
 function closeSettings(){playSound('click');document.getElementById('settings-overlay').classList.add('hidden')}
 
 /* ===================== DATA ===================== */
-const HIST={BTC:[7200,9600,6400,8600,9500,9100,11300,11600,10800,13800,19700,28900,37100,45100,58900,54900,37400,35800,43800,47100,48100,61300,56900,46200,38400,38700,45500,38500,31700,20000,23300,20200,19400,20400,17100,16500,23100,24600,28400,29200,28000,30400,29200,26900,26900,34500,37700,42200,42500,51700,71300,64300,67500,64900,64600,58900,63300,69900,96400,97000,102000,98000,85000,90000,105000,108000,115000,112000,108000,95000,88000,82000,75000,68000,62000,58000,62000,55000,50000,54000,48000,52000,46000,40000],ETH:[130,220,135,185,215,230,345,430,360,385,510,740,1310,1515,1915,2770,2640,2270,3000,3430,3580,4290,4630,3680,2690,2790,3400,2820,1810,1070,1680,1630,1580,1530,1290,1200,1580,1700,1790,1900,1830,1930,1820,1640,1600,1800,2050,2280,2350,3320,3510,3160,3780,3510,3440,2680,2460,2530,3430,3340,3400,2700,2500,2800,3900,3800,4400,3500,3200,2800,2600,2400,2100,1900,1700,1500,1600,1400,1300,1350,1200,1300,1100,1000],SOL:[0,0,.6,.7,.55,.8,1.1,2.8,3.5,1.8,2.1,1.5,4.5,9.5,14,40,32,28,35,40,145,200,195,170,90,90,100,95,40,32,35,32,31,33,13,10,11,12,21,23,22,20,24,23,20,32,59,100,95,110,180,140,165,135,140,145,140,175,240,190,200,180,160,150,180,170,200,180,160,140,130,110,95,85,75,70,65,55,50,48,42,40,35,30],DOGE:[.002,.0025,.0018,.0022,.0025,.0023,.003,.0032,.0027,.0026,.0035,.0045,.01,.05,.06,.3,.5,.25,.2,.28,.27,.25,.21,.17,.14,.12,.14,.13,.08,.06,.07,.06,.06,.06,.08,.07,.08,.08,.07,.08,.07,.06,.06,.06,.06,.07,.08,.09,.08,.1,.16,.14,.15,.13,.12,.11,.11,.12,.35,.32,.3,.22,.18,.16,.2,.22,.26,.24,.22,.18,.16,.14,.12,.11,.1,.09,.09,.08,.07,.07,.06,.06,.05,.04],SHIB:Array(7).fill(0).concat([1e-8,2e-8,5e-8,1e-7,3e-7,1e-6,1e-5,2e-5,3e-5,1.5e-5,1e-5,8e-6,7e-6,8e-6,3e-5,5e-5,3e-5,2e-5,2e-5,2e-5,1.5e-5,1e-5,8e-6,1e-5,1e-5,9e-6,8e-6,8e-6,8e-6,9e-6,1e-5,1e-5,1.2e-5,1e-5,9e-6,8e-6,8e-6,9e-6,1.5e-5,2e-5,2.5e-5,2e-5,3e-5,4e-5,3e-5,3e-5,2.5e-5,2e-5,1.8e-5,2e-5,3e-5,2.5e-5,2e-5,1.8e-5,1.5e-5,1.4e-5,1.3e-5,1.5e-5,1.4e-5,1.3e-5,1.2e-5,1.1e-5,1e-5,9e-6,8e-6,8e-6,7e-6,7e-6,6e-6,6e-6,5e-6,5e-6,5e-6,4e-6,4e-6,4e-6,3e-6]),PEPE:Array(39).fill(0).concat([4e-7,1e-6,1.5e-6,1e-6,1.2e-6,2e-6,1.5e-6,1.2e-6,1e-6,1.5e-6,2e-6,3e-6,8e-6,1e-5,1.2e-5,1e-5,9e-6,8e-6,1e-5,1.2e-5,1.5e-5,1.4e-5,1.2e-5,1e-5,9e-6,8e-6,7e-6,7e-6,6e-6,6e-6,5e-6,5e-6,4.5e-6,4e-6,4e-6,3.5e-6,3e-6,3e-6,2.5e-6,2e-6,2e-6,1.8e-6,1.5e-6,1.5e-6,1.2e-6]),WIF:Array(46).fill(0).concat([.15,.4,1.2,2.5,3,2.2,1.5,1.8,1.2,1.5,2,2.5,1.8,1.2,.9,.7,1,.8,.7,.5,.45,.6,.4,.35,.3,.35,.28,.25,.22,.2,.18,.15,.14,.12,.11,.1,.09,.08]),BONK:Array(35).fill(0).concat([2e-7,5e-7,1e-6,2e-6,1.5e-6,1.2e-6,1e-6,9e-7,1.2e-6,2e-6,3e-6,4e-6,1.5e-5,2.5e-5,2e-5,1.8e-5,2.2e-5,3e-5,3.5e-5,3e-5,2.5e-5,2e-5,1.5e-5,1.3e-5,1.1e-5,1e-5,9e-6,8e-6,7e-6,7e-6,6e-6,6e-6,5e-6,5e-6,4e-6,4e-6,3.5e-6,3e-6,3e-6,2.5e-6,2e-6,2e-6,1.8e-6,1.5e-6,1.5e-6,1.2e-6,1e-6,1e-6,9e-7])};
+const HIST={BTC:[7200,9600,6400,8600,9500,9100,11300,11600,10800,13800,19700,28900,37100,45100,58900,54900,37400,35800,43800,47100,48100,61300,56900,46200,38400,38700,45500,38500,31700,20000,23300,20200,19400,20400,17100,16500,23100,24600,28400,29200,28000,30400,29200,26900,26900,34500,37700,42200,42500,61200,71300,60600,67500,62700,64600,58900,63300,70200,96400,93500,102400,84400,82500,94200,104600,107100,115700,108800,114000,110000,86000,87000,85000,75000,68000,72000,78000,82000,88000,95000,105000,113000,125000,138000],ETH:[130,220,135,185,215,230,345,430,360,385,510,740,1310,1420,1920,2770,2630,2270,2530,3430,3000,4290,4630,3680,2690,2790,3280,2820,1810,1070,1680,1630,1580,1580,1290,1200,1580,1610,1830,1900,1870,1930,1860,1650,1670,1810,2050,2280,2280,3390,3640,3010,3760,3440,3230,2510,2600,2510,3700,3350,2520,2220,1820,1790,2530,2490,3700,4390,4150,3800,2900,3000,2950,2400,2100,2250,2500,2650,2800,2900,3200,3500,3900,4300],SOL:[0,0,.6,.7,.55,.8,1.6,3.2,3.5,2.3,1.9,1.5,4.5,13.5,19,30,35,32,33,110,145,200,195,170,90,96,102,88,42,33,39,32,33,29,13,9.6,24,22,20,22,20,15,24,19,19,32,59,101,96,128,187,132,166,146,166,131,155,169,237,190,215,140,125,148,155,150,183,204,195,175,125,132,128,95,78,84,90,84,79,73,88,96,108,122],DOGE:[.002,.0025,.0018,.0022,.0025,.0023,.003,.0032,.0027,.0026,.0035,.0045,.01,.05,.06,.3,.32,.25,.2,.28,.24,.26,.21,.17,.14,.12,.14,.13,.08,.067,.069,.06,.06,.126,.1,.07,.086,.081,.075,.079,.072,.067,.075,.062,.06,.068,.08,.09,.08,.12,.2,.14,.16,.12,.11,.096,.11,.16,.42,.32,.33,.2,.17,.18,.19,.16,.2,.21,.24,.17,.14,.15,.14,.11,.09,.1,.11,.1,.095,.09,.11,.13,.15,.18],SHIB:Array(7).fill(0).concat([5e-10,5.4e-10,6.2e-10,7.5e-10,7.7e-10,9.8e-10,3.5e-08,1e-06,3.4e-05,8.5e-06,6.7e-06,1.3e-05,2.6e-05,4.4e-05,8.4e-05,5.7e-05,3.3e-05,2.4e-05,2.2e-05,1.7e-05,1.5e-05,1.4e-05,1.1e-05,1.1e-05,1.3e-05,1.2e-05,1.1e-05,9.9e-06,7.6e-06,8.9e-06,9.3e-06,8.2e-06,8.3e-06,8.7e-06,7.6e-06,7.9e-06,8.5e-06,7.6e-06,7.9e-06,9.4e-06,9.5e-06,9.9e-06,1.8e-05,2.9e-05,2.5e-05,2.2e-05,1.6e-05,1.6e-05,1.6e-05,1.4e-05,1.4e-05,1.9e-05,2.3e-05,1.8e-05,1.6e-05,1.2e-05,1.3e-05,1.5e-05,1.3e-05,1.3e-05,1.2e-05,9.5e-06,9.3e-06,9.1e-06,7.6e-06,7.5e-06,7.3e-06,6.1e-06,6e-06,6.4e-06,5.9e-06,6.4e-06,6.8e-06,7e-06,8.5e-06,1e-05,1.1e-05]),PEPE:Array(39).fill(0).concat([4e-07,7.6e-07,1.4e-06,1.4e-06,1.2e-06,1.1e-06,1.1e-06,1.2e-06,1.4e-06,1.1e-06,2.8e-06,7.7e-06,1e-05,1.2e-05,9.6e-06,1e-05,8.7e-06,8.2e-06,8.5e-06,1.2e-05,1.9e-05,1.3e-05,8.9e-06,6.8e-06,9.3e-06,1.1e-05,1e-05,1.1e-05,8.7e-06,7.7e-06,7.5e-06,6.1e-06,5.3e-06,5.3e-06,4.5e-06,4.2e-06,4.2e-06,4e-06,4.1e-06,4.6e-06,4.4e-06,5e-06,6.4e-06,6.7e-06,8e-06]),WIF:Array(46).fill(0).concat([.15,.318,.581,1.3,3.18,2.62,2.37,2.33,1.96,1.83,1.84,1.54,2.21,3.39,2.32,1.66,1.27,1.29,1.47,1.48,1.25,1.11,1.06,.812,.696,.636,.529,.485,.471,.384,.404,.449,.419,.442,.55,.576,.681,.8]),BONK:Array(35).fill(0).concat([2e-07,3.2e-07,3.3e-07,3.5e-07,4.3e-07,4.4e-07,4.8e-07,6.3e-07,6.9e-07,8.1e-07,1.1e-06,3.8e-06,1.4e-05,2.6e-05,2.7e-05,2.9e-05,3e-05,2.5e-05,2.3e-05,2.4e-05,2e-05,1.9e-05,1.9e-05,2.6e-05,3.9e-05,2.8e-05,2e-05,1.5e-05,1.8e-05,1.8e-05,1.8e-05,1.9e-05,1.5e-05,1.4e-05,1.3e-05,1.1e-05,9.7e-06,9.5e-06,8e-06,7.4e-06,7.4e-06,7e-06,7.3e-06,8.2e-06,7.8e-06,8.9e-06,1.1e-05,1.2e-05,1.4e-05]),ADA:[.033,.032,.031,.039,.059,.083,.1,.144,.154,.149,.173,.186,.291,.624,1.23,1.22,1.46,1.6,1.99,2.98,2.48,1.88,1.67,1.35,.94,.969,.909,.78,.805,.514,.454,.481,.462,.348,.314,.257,.329,.346,.328,.288,.303,.287,.256,.274,.263,.235,.401,.614,.546,.637,.664,.537,.52,.449,.391,.408,.378,.329,1.04,.897,.941,.858,.692,.672,.781,.783,.744,.717,.61,.489,.469,.42,.358,.358,.314,.264,.3,.298,.285,.324,.362,.389,.498,.55],DOT:Array(7).fill(0).concat([2.9,3.2,4.14,6.21,8.65,17.6,25.7,34.8,32.3,26.7,20.7,32.3,44.9,38.5,39.5,32.1,24.5,19.8,16.1,12.3,11.3,9.2,7.06,7.41,6.86,6.03,5.88,5.07,4.14,6.25,5.92,5.34,5.74,5.43,4.9,5.08,4.62,4.03,4.18,5.83,7.83,8.36,9.27,9.91,9.11,7.3,5.66,5.81,5.19,4.49,4.61,5.47,6.33,7.23,5.42,3.97,4.4,4.23,3.73,3.88,3.35,2.84,2.92,2.6,2.27,2.42,2.13,1.85,1.89,1.87,1.84,2.12,2.1,2.28,2.89,3.15,3.6]),LINK:[1.8,1.83,2.12,2.57,3.37,4.88,8.34,15.5,13.4,9.72,10.4,12.2,22.3,26.3,33.9,32,33,37.1,30.9,28.2,28.5,24.2,21.2,20.1,14.5,12.1,10.9,8.28,6.93,6.25,6.12,6.63,7.74,6.56,6.18,6.25,6.17,6.21,6.7,6.05,6.1,6.57,6.26,6.67,7.57,7.21,10.4,15.9,14.4,16.1,19.1,15.5,14.2,13.8,11.7,11.2,11.3,9.59,14.6,23.3,24.9,18.1,13.8,12.9,13.8,15.3,14.3,13.2,12.7,11.1,11.2,11.6,9.55,9.36,9.48,8.11,8.65,9.49,8.81,9.41,11.4,11.8,13.9,16],AVAX:Array(8).fill(0).concat([3.9,3.57,3.62,3.08,11.8,25.9,48,40.9,36.8,27.8,45.8,79.4,94.7,128,125,103,86.5,66.2,42.6,31.1,23.8,15.3,16.1,17.6,16.3,14.5,13.4,10.5,13.8,14.8,13.4,13.8,14.8,13.4,12.7,12.5,10.4,9.9,20.9,37.2,34.7,45.5,50.5,42,35.7,25.7,25.8,26.3,22.8,22.9,31.6,37.1,29.9,25.2,18.1,20.4,23.2,21.8,23.9,21.3,16.1,15.9,15.7,13.3,13,12.1,9.65,9,9.95,9.43,10.5,11.6,12.1,14.9,18.1,20]),MATIC:[.016,.017,.021,.023,.024,.031,.038,.042,.037,.029,.021,.019,.031,.103,.413,.822,1.5,2.07,1.45,.94,1.27,1.54,1.82,2.59,2.15,1.48,1.22,.909,.627,.518,.598,.643,.83,.8,.721,.778,1.12,.946,.954,.855,.721,.728,.672,.584,.608,.56,.688,1.01,.793,.832,1.04,.911,.757,.751,.667,.565,.571,.507,.471,.522,.456,.316,.261,.243,.217,.235,.222,.198,.209,.188,.163,.167,.151,.128,.128,.111,.108,.125,.126,.123,.159,.178,.195,.24],UNI:Array(8).fill(0).concat([4,4.27,5.05,5,16.7,24.3,29.8,33.6,40.2,40.3,29.8,23.3,22.5,24.6,21.2,15.3,14.8,12.7,9.26,7.64,6.59,4.79,5.51,6.62,6.7,6.25,6.07,4.97,5.92,6.19,5.45,5.5,5.74,5.06,4.95,4.98,4.25,4.16,5.73,6.67,7.43,9.59,10.5,10.2,10.2,8.57,8.24,8.07,6.71,6.46,10.1,13.3,11.9,8.94,5.7,5.72,5.79,6.3,7.98,7.88,6.64,6.64,6.65,5.69,5.5,5.41,4.56,4.5,4.86,4.49,4.88,5.26,5.49,6.72,8.16,9]),AAVE:Array(9).fill(0).concat([44,65.5,83.7,274,354,384,459,579,614,451,349,292,275,269,220,148,132,99.6,85.2,76.2,57.4,65.1,76.9,76.5,71.7,69.8,57.3,79,81.4,70.8,70.4,72.5,63,62.4,63.6,54.9,54.5,80.3,100,99.1,123,129,117,109,85.7,98,114,113,129,166,181,249,217,162,188,221,218,249,235,190,189,189,161,160,153,125,120,130,121,131,142,146,177,212,230]),TAO:Array(36).fill(0).concat([60,57.4,48,48.1,45,37.6,45.3,50.8,51,61.4,134,263,410,507,564,504,417,310,355,375,358,411,452,451,411,339,254,307,340,333,391,348,282,291,273,235,237,218,184,186,190,178,201,205,215,270,305,340]),ARB:Array(38).fill(0).concat([1.3,1.26,1.21,1.03,1.05,1,.853,.87,1.21,1.5,1.95,2.07,1.97,1.65,1.28,.893,.869,.78,.633,.616,.737,.799,.72,.511,.329,.344,.33,.315,.36,.334,.282,.291,.273,.235,.248,.224,.186,.186,.192,.183,.209,.216,.226,.284,.323,.36]),OP:Array(28).fill(0).concat([.85,.979,.999,1.05,1.27,1.28,1.33,1.59,2.37,1.96,1.86,1.48,1.23,1.16,1.13,1.14,1.32,1.28,2.07,3.81,3.34,3.49,4.13,3.02,2.32,2.01,1.7,1.51,1.51,1.27,1.51,2.01,1.18,.816,.635,.562,.529,.609,.587,.528,.53,.453,.415,.424,.371,.331,.329,.273,.28,.317,.301,.309,.388,.408,.465,.55]),SUI:Array(40).fill(0).concat([1.2,.982,.816,.752,.58,.483,.604,.633,1.06,1.41,1.56,1.25,1.11,.826,1.01,1.35,1.51,1.84,2.99,4.07,3.49,3.05,2.23,2.68,3.5,3.34,3.5,3.37,2.71,2.39,2.29,1.84,1.75,1.71,1.4,1.27,1.43,1.35,1.41,1.59,1.66,1.93,2.4,2.6]),APT:Array(33).fill(0).concat([8.4,7.48,7.61,12.5,10.7,10.9,10.5,8.98,9.15,8.47,6.92,6.76,6.24,6.92,9.17,9.36,10.6,14.3,12.1,9.07,8.17,7.73,6.52,6.59,6.22,6.91,9.2,7.26,4.98,4.09,4.25,3.95,4.5,4.76,3.93,3.9,3.63,3.05,3.08,3,2.49,2.48,2.27,2.14,2.41,2.5,2.35,2.95,3.38,3.53,4.3]),SEI:Array(43).fill(0).concat([.16,.141,.126,.283,.535,.484,.67,.778,.615,.534,.389,.361,.367,.313,.291,.389,.436,.34,.259,.165,.179,.212,.203,.214,.211,.174,.161,.161,.135,.127,.126,.105,.098,.111,.106,.112,.127,.131,.151,.186,.2]),TIA:Array(45).fill(0).concat([2.2,5.06,11.3,13.2,16.3,18.5,12.9,10.8,8.23,6.69,6.52,5.78,4.7,4.9,4.62,3.01,2.34,1.64,1.55,1.76,1.84,1.79,1.75,1.54,1.31,1.34,1.23,1.03,1.03,.91,.752,.866,.891,.856,.986,1.12,1.2,1.53,1.7])};
 
 /* ---- Real monthly closes for the remaining majors ----------------------------
    These coins previously had no history at all and were priced by a synthetic
@@ -1594,6 +1594,211 @@ const HISTORICAL_WINS={
   'Yfdexf Finance':false,
   'SharkTron':false
 };
+/* ---- V7: era-datierte Presales / ICOs (from/to = Spielmonat, 0 = Jan 2020) ---- */
+const PRESALES=[
+  {n:'Aave LEND Migration',f:0,t:3,r:1,m:5,q:'2020 · DeFi Summer Vorspiel'},
+  {n:'Nexus Mutual Cover',f:0,t:4,r:1,m:3,q:'2020 · DeFi Insurance'},
+  {n:'Kava CoinList Sale',f:0,t:2,r:1,m:2,q:'Jan 2020 · IEO'},
+  {n:'bZx Flash Loan Pool',f:1,t:2,r:0,q:'Feb 2020 · Flash-Loan-Exploit'},
+  {n:'Ren Darknode Bond',f:1,t:4,r:1,m:2,q:'2020 · Node Bonds'},
+  {n:'Solana CoinList Sale',f:2,t:4,r:1,m:15,q:'Mar 2020 · $0.22 Public Sale'},
+  {n:'Hegic Options Launch',f:3,t:5,r:0,q:'Apr 2020 · Contract-Bug'},
+  {n:'Kusama Parachain Bid',f:4,t:6,r:1,m:2,q:'2020 · Polkadot-Canary'},
+  {n:'Compound COMP Farm',f:5,t:6,r:1,m:4,q:'Jun 2020 · Yield-Farming-Start'},
+  {n:'Balancer BAL Launch',f:5,t:7,r:1,m:3,q:'Jun 2020 · AMM-Boom'},
+  {n:'Ampleforth Geyser',f:5,t:7,r:0,q:'Jul 2020 · Rebase-Kollaps'},
+  {n:'YFI Fair Launch',f:6,t:8,r:1,m:12,q:'Jul 2020 · 0 Pre-Mine'},
+  {n:'Curve DAO Launch',f:7,t:8,r:1,m:2,q:'Aug 2020 · CRV'},
+  {n:'SushiSwap Migration',f:7,t:9,r:1,m:3,q:'Aug 2020 · Vampire Attack'},
+  {n:'Serum Solana IDO',f:7,t:8,r:1,m:5,q:'Aug 2020 · Solana DEX'},
+  {n:'Cream Finance',f:7,t:9,r:0,q:'2020 · später mehrfach gehackt'},
+  {n:'Yfdexf Finance',f:6,t:7,r:0,q:'Sep 2020 · Exit-Scam'},
+  {n:'Uniswap UNI Airdrop',f:8,t:9,r:1,m:6,q:'Sep 2020 · 400 UNI'},
+  {n:'Harvest Finance',f:8,t:10,r:0,q:'Okt 2020 · $24M Exploit'},
+  {n:'Flamingo Finance',f:8,t:9,r:0,q:'2020 · NEO-Farm-Dump'},
+  {n:'Filecoin Mainnet Sale',f:9,t:10,r:1,m:2,q:'Okt 2020 · Mainnet'},
+  {n:'Aave V2 Migration',f:10,t:11,r:1,m:3,q:'Dez 2020'},
+  {n:'Sushi Onsen Pools',f:10,t:12,r:1,m:2,q:'2020/21 · Onsen'},
+  {n:'Polkadot Parachain Wave',f:10,t:13,r:1,m:3,q:'2021 · Parachain-Hype'},
+  {n:'Compounder Finance',f:11,t:12,r:0,q:'Dez 2020 · Rugpull'},
+  {n:'SharkTron',f:11,t:12,r:0,q:'2020 · Tron-Ponzi'},
+  {n:'BadgerDAO Bootstrap',f:11,t:13,r:1,m:2.5,q:'Dez 2020 · BTC on ETH'},
+  {n:'Mirror Protocol',f:12,t:14,r:0,q:'2021 · stirbt mit Terra 2022'},
+  {n:'Alpha Finance',f:12,t:14,r:0,q:'Feb 2021 · $37M Exploit'},
+  {n:'BarnBridge',f:12,t:14,r:0,q:'2021 · Abriss + SEC'},
+  {n:'DeFi Pulse Index',f:13,t:16,r:1,m:2,q:'2021 · Index-Token'},
+  {n:'Raydium IDO',f:13,t:15,r:1,m:6,q:'Feb 2021 · AcceleRaytor'},
+  {n:'Meerkat Finance',f:14,t:15,r:0,q:'Mar 2021 · BSC-Rug $31M'},
+  {n:'Axie Infinity Land',f:14,t:20,r:1,m:8,q:'2021 · Play-to-Earn'},
+  {n:'Polygon Ecosystem',f:14,t:17,r:1,m:4,q:'2021 · MATIC 100x'},
+  {n:'Thodex Exchange',f:15,t:16,r:0,q:'Apr 2021 · CEO flieht'},
+  {n:'Uranium Finance',f:15,t:17,r:0,q:'Apr 2021 · $50M Exploit'},
+  {n:'Uniswap V3 LP',f:16,t:18,r:1,m:2.5,q:'Mai 2021 · Concentrated LP'},
+  {n:'PancakeBunny',f:16,t:17,r:0,q:'Mai 2021 · Flash-Loan-Dump'},
+  {n:'Balloon Doge',f:16,t:18,r:0,q:'2021 · Meme-Rug'},
+  {n:'DeFi100',f:16,t:16,r:0,q:'Mai 2021 · "we scammed you"'},
+  {n:'Iron Finance TITAN',f:17,t:18,r:0,q:'Jun 2021 · Bank Run'},
+  {n:'Lido stETH',f:18,t:21,r:1,m:2.5,q:'2021 · Liquid Staking'},
+  {n:'Luna Yield',f:19,t:19,r:0,q:'Aug 2021 · Solana-Rug'},
+  {n:'BAYC Mutant Mint',f:19,t:20,r:1,m:6,q:'Aug 2021 · MAYC'},
+  {n:'Olympus DAO Bond',f:19,t:22,r:0,q:'2021 · (3,3) endet in -99%'},
+  {n:'Avalanche Rush',f:19,t:21,r:1,m:3,q:'Aug 2021 · Liquidity Mining'},
+  {n:'Squid Game Token',f:21,t:22,r:0,q:'Nov 2021 · Honeypot'},
+  {n:'AnubisDAO',f:21,t:21,r:0,q:'Okt 2021 · 13.500 ETH weg'},
+  {n:'Evolved Apes NFT',f:21,t:21,r:0,q:'Okt 2021 · Dev verschwindet'},
+  {n:'Rocket Pool',f:21,t:23,r:1,m:2,q:'2021 · dezentrales Staking'},
+  {n:'Sandbox LAND Sale',f:22,t:23,r:1,m:3,q:'Nov 2021 · Metaverse-Peak'},
+  {n:'Decentraland Estate',f:22,t:23,r:1,m:2,q:'Nov 2021 · Metaverse'},
+  {n:'Snowdog DAO',f:22,t:22,r:0,q:'Nov 2021 · 8-Tage-Rug'},
+  {n:'Wonderland TIME',f:22,t:23,r:0,q:'2021/22 · Treasurer war Ex-Häftling'},
+  {n:'Gala Games Node',f:22,t:23,r:0,q:'2022 · -95%'},
+  {n:'LooksRare',f:24,t:25,r:1,m:1.8,q:'Jan 2022 · Vampir-Airdrop'},
+  {n:'Treasure DAO',f:24,t:26,r:1,m:2,q:'2022 · Arbitrum-Gaming'},
+  {n:'Anchor 20% Yield',f:24,t:28,r:0,q:'2022 · UST-Todesspirale'},
+  {n:'Celsius Yield Program',f:24,t:29,r:0,q:'Jun 2022 · Withdrawals gestoppt'},
+  {n:'Voyager Interest',f:24,t:29,r:0,q:'Jul 2022 · insolvent'},
+  {n:'FTX Serum Staking',f:24,t:34,r:0,q:'Nov 2022 · FTX-Kollaps'},
+  {n:'Big Daddy Ape Club',f:24,t:25,r:0,q:'Jan 2022 · Solana-Rug'},
+  {n:'ApeCoin Launch',f:26,t:27,r:1,m:3,q:'Mar 2022 · APE-Airdrop'},
+  {n:'Frosties NFT',f:26,t:26,r:0,q:'Jan 2022 · Dev verhaftet'},
+  {n:'X2Y2 Airdrop',f:26,t:27,r:0,q:'2022 · NFT-Marktplatz-Dump'},
+  {n:'Terra LFG UST',f:26,t:28,r:0,q:'Mai 2022 · $60B in 72h'},
+  {n:'Otherside Land',f:27,t:28,r:1,m:1.8,q:'Apr 2022 · Gas-War-Mint'},
+  {n:'Moonbirds Nest',f:27,t:28,r:1,m:2,q:'Apr 2022 · Nesting'},
+  {n:'StepN Sneaker',f:27,t:29,r:1,m:5,q:'2022 · Move-to-Earn'},
+  {n:'Magic Eden Launchpad',f:28,t:30,r:1,m:2,q:'2022 · Solana-NFTs'},
+  {n:'Arbitrum Odyssey',f:29,t:31,r:0,q:'Jun 2022 · pausiert'},
+  {n:'Nirvana ANA',f:30,t:30,r:0,q:'Jul 2022 · Flash-Loan-Rug'},
+  {n:'GMX Genesis',f:30,t:33,r:1,m:4,q:'2022 · Perp-DEX'},
+  {n:'Optimism Quests',f:30,t:32,r:1,m:2,q:'2022 · OP-Airdrop'},
+  {n:'Illuvium Land Sale',f:30,t:31,r:0,q:'2022 · Bear-Market-Mint'},
+  {n:'Frax Eth',f:30,t:33,r:1,m:2,q:'2022 · frxETH'},
+  {n:'Aptos Airdrop',f:33,t:34,r:1,m:3,q:'Okt 2022 · 150 APT'},
+  {n:'Gains Network',f:33,t:35,r:1,m:3,q:'2022 · gTrade'},
+  {n:'Blur Airdrop',f:34,t:36,r:1,m:3,q:'2023 · Season 1'},
+  {n:'BONK Community',f:35,t:37,r:1,m:10,q:'Dez 2022 · Solana-Rettung'},
+  {n:'Orca Whirlpool',f:36,t:40,r:1,m:1.8,q:'2023 · Solana-LP'},
+  {n:'Raydium CLMM',f:36,t:42,r:1,m:2,q:'2023 · CLMM'},
+  {n:'OpenBook',f:36,t:40,r:1,m:1.5,q:'2023 · Serum-Fork'},
+  {n:'Arbitrum ARB Claim',f:38,t:39,r:1,m:2,q:'Mar 2023 · Airdrop'},
+  {n:'zkSync Era',f:38,t:42,r:1,m:2,q:'2023 · Alpha-Mainnet'},
+  {n:'Starknet Alpha',f:38,t:44,r:1,m:2,q:'2023 · STRK'},
+  {n:'PEPE Fair Launch',f:39,t:40,r:1,m:20,q:'Apr 2023 · Meme-Season'},
+  {n:'WOJAK Coin',f:39,t:40,r:1,m:4,q:'2023 · Meme'},
+  {n:'Turbo TOShi',f:40,t:41,r:1,m:5,q:'Mai 2023 · AI-Meme'},
+  {n:'Pendle V2',f:40,t:44,r:1,m:5,q:'2023 · Yield-Trading'},
+  {n:'EigenLayer Restake',f:40,t:51,r:1,m:2.5,q:'2023/24 · Restaking-Punkte'},
+  {n:'Multichain Bridge',f:41,t:42,r:0,q:'Jul 2023 · $130M weg'},
+  {n:'Azuki Elementals',f:41,t:42,r:0,q:'Jun 2023 · Community-Fiasko'},
+  {n:'Curve Exploit Pools',f:42,t:43,r:0,q:'Jul 2023 · Reentrancy'},
+  {n:'Mog Coin',f:42,t:44,r:1,m:8,q:'2023 · Meme'},
+  {n:'Friend.tech Keys',f:43,t:44,r:0,q:'Aug 2023 · Hype verpufft'},
+  {n:'Tensor Trade',f:44,t:47,r:1,m:3,q:'2023 · Solana-NFT-DEX'},
+  {n:'Brett on Base',f:45,t:47,r:1,m:10,q:'2024 · Base-Meme'},
+  {n:'Scroll Canvas',f:45,t:50,r:1,m:1.8,q:'2023/24 · zkEVM'},
+  {n:'Phoenix DEX',f:45,t:50,r:1,m:1.5,q:'2023 · Solana-Orderbook'},
+  {n:'Tensorian NFT',f:45,t:47,r:1,m:2,q:'2023 · Mint'},
+  {n:'Jito SOL',f:46,t:47,r:1,m:4,q:'Dez 2023 · JTO-Airdrop'},
+  {n:'Marginfi Points',f:46,t:50,r:0,q:'2024 · Punkte ohne Drop'},
+  {n:'Kamino Finance',f:47,t:51,r:1,m:2.5,q:'2024 · KMNO'},
+  {n:'Drift Protocol',f:47,t:52,r:1,m:2,q:'2024 · DRIFT'},
+  {n:'Zeta Markets',f:47,t:50,r:1,m:1.8,q:'2024 · ZEX'},
+  {n:'Meteora DLMM',f:47,t:52,r:1,m:2,q:'2024 · LP-Farming'},
+  {n:'Blast Deposit',f:47,t:48,r:1,m:2,q:'Nov 2023 · Points'},
+  {n:'WIF Solana',f:47,t:49,r:1,m:10,q:'Dez 2023 · dogwifhat'},
+  {n:'Jupiter LFG',f:48,t:49,r:1,m:4,q:'Jan 2024 · JUP'},
+  {n:'Akash Compute',f:48,t:52,r:1,m:3,q:'2024 · DePIN'},
+  {n:'Render Network',f:48,t:51,r:1,m:2.5,q:'2024 · GPU'},
+  {n:'Helium Mobile',f:48,t:52,r:1,m:2,q:'2024 · DePIN'},
+  {n:'HiveMapper',f:48,t:52,r:0,q:'2024 · Dashcam-Farming flach'},
+  {n:'Aerodrome Base LP',f:49,t:54,r:1,m:3,q:'2024 · Base-DEX'},
+  {n:'Degen Base Airdrop',f:49,t:51,r:1,m:3,q:'2024 · Farcaster'},
+  {n:'Ethena USDe',f:49,t:51,r:1,m:3,q:'2024 · Sats-Kampagne'},
+  {n:'Book of Meme BOME',f:50,t:50,r:1,m:5,q:'Mar 2024 · 24h-Launch'},
+  {n:'Slerf Presale',f:50,t:50,r:0,q:'Mar 2024 · LP versehentlich verbrannt'},
+  {n:'Wormhole Airdrop',f:50,t:51,r:1,m:2,q:'Apr 2024 · W'},
+  {n:'POPCAT Memecoin',f:50,t:53,r:1,m:12,q:'2024 · Solana-Meme'},
+  {n:'Nosana GPU',f:50,t:54,r:1,m:2,q:'2024 · DePIN'},
+  {n:'Pump.fun Sniping Wave',f:50,t:60,r:0,q:'2024 · 98% ruggen'},
+  {n:'MEW Cat',f:51,t:53,r:1,m:4,q:'2024 · cat in a dogs world'},
+  {n:'Renzo Restake',f:51,t:53,r:0,q:'Apr 2024 · Depeg'},
+  {n:'Hyperliquid Points',f:52,t:58,r:1,m:6,q:'2024 · HYPE-Airdrop'},
+  {n:'Eigen Airdrop',f:52,t:56,r:1,m:1.5,q:'2024 · nicht handelbar'},
+  {n:'Grass Airdrop',f:52,t:58,r:1,m:3,q:'2024 · Bandwidth-Farming'},
+  {n:'io.net Cluster',f:53,t:55,r:0,q:'Jun 2024 · Dump nach Listing'},
+  {n:'Friend.tech V2',f:56,t:57,r:0,q:'2024 · Abschied'},
+  {n:'Goatseus Maximus',f:57,t:58,r:1,m:10,q:'Okt 2024 · AI-Meme'},
+  {n:'Virtuals Protocol',f:57,t:60,r:1,m:8,q:'2024 · AI-Agents'},
+  {n:'PNUT Squirrel',f:58,t:59,r:1,m:8,q:'Nov 2024 · Peanut'},
+  {n:'Zerebro',f:58,t:59,r:1,m:5,q:'2024 · AI-Agent'},
+  {n:'Fartcoin',f:58,t:59,r:1,m:15,q:'Nov 2024 · absolute cinema'},
+  {n:'AI16Z Agent',f:59,t:60,r:1,m:6,q:'Jan 2025 · ai16z DAO'},
+  {n:'MOVE Movement',f:59,t:60,r:0,q:'2025 · Market-Maker-Skandal'},
+  {n:'TRUMP Meme Launch',f:60,t:60,r:0,q:'Jan 2025 · -85% nach Peak'},
+  {n:'MELANIA Token',f:60,t:60,r:0,q:'Jan 2025 · sofortiger Dump'},
+  {n:'Solayer sSOL',f:60,t:63,r:1,m:2,q:'2025 · Restaking auf Solana'},
+  {n:'Sanctum Infinity',f:60,t:63,r:1,m:1.8,q:'2025 · LST-Pool'},
+  {n:'Ethena Sats S3',f:60,t:64,r:1,m:1.8,q:'2025 · Season 3'},
+  {n:'Farcaster Frames Cast',f:60,t:64,r:0,q:'2025 · Aufmerksamkeit weg'},
+  {n:'HYPE Staking Round',f:60,t:65,r:1,m:2.5,q:'2025 · Hyperliquid'},
+  {n:'LIBRA Argentina',f:61,t:61,r:0,q:'Feb 2025 · Insider-Rug'},
+  {n:'Berachain Airdrop',f:61,t:62,r:1,m:2,q:'Feb 2025 · BERA'},
+  {n:'Story Protocol IP',f:61,t:63,r:1,m:2,q:'2025 · IP-Chain'},
+  {n:'Kaito AI',f:61,t:63,r:1,m:2,q:'2025 · Yapper-Points'},
+  {n:'Sonic S Airdrop',f:61,t:65,r:1,m:2,q:'2025 · Fantom-Rebrand'},
+  {n:'Jupiter DAO Round',f:62,t:66,r:1,m:1.6,q:'2025 · JUP'},
+  {n:'Mantle Rewards',f:62,t:66,r:1,m:1.5,q:'2025 · L2-Rewards'},
+  {n:'Backpack Points',f:63,t:68,r:1,m:2,q:'2025 · Exchange-Punkte'},
+  {n:'Pump.fun ICO',f:66,t:67,r:0,q:'Jul 2025 · unter Sale-Preis'},
+  {n:'World Liberty WLFI',f:66,t:68,r:0,q:'2025 · Politik-Token'},
+  {n:'Monad Testnet Drop',f:66,t:69,r:1,m:2,q:'2025 · MON'},
+  {n:'Aster DEX Points',f:68,t:70,r:1,m:2.5,q:'2025 · Perp-DEX-Season'},
+  {n:'MegaETH Sale',f:68,t:70,r:1,m:2,q:'2025 · Public Sale'},
+  {n:'Plasma XPL Sale',f:68,t:70,r:1,m:2,q:'2025 · Stablecoin-Chain'},
+  {n:'Linea Airdrop',f:68,t:69,r:0,q:'2025 · Dump am Tag 1'},
+  {n:'Solana Firedancer Drop',f:72,t:75,r:1,m:2.5,q:'2026 · Client-Upgrade'},
+  {n:'ETH L2 Consolidation',f:72,t:76,r:1,m:2,q:'2026 · Rollup-Fusion'},
+  {n:'AI Agent Swarm ICO',f:72,t:74,r:0,q:'2026 · Hype ohne Produkt'},
+  {n:'Base Native Token Drop',f:73,t:76,r:1,m:3,q:'2026 · Coinbase-L2'},
+  {n:'Restaking Winter Vault',f:73,t:75,r:0,q:'2026 · Yield trocknet aus'},
+  {n:'Bitcoin L2 BitVM Sale',f:74,t:77,r:1,m:2,q:'2026 · BTC-Rollup'},
+  {n:'RWA Treasury Vault',f:75,t:79,r:1,m:1.8,q:'2026 · Tokenized Bonds'},
+  {n:'DePIN Robotics Sale',f:76,t:80,r:1,m:2.5,q:'2026 · Robotik-DePIN'},
+  {n:'Perp DEX Season Points',f:77,t:81,r:1,m:2.5,q:'2026 · Season 4'},
+  {n:'Quantum FUD Token',f:78,t:80,r:0,q:'2026 · Angst-Narrativ'},
+  {n:'Meme Supercycle Round',f:79,t:83,r:1,m:4,q:'Q4 2026 · Supercycle'},
+  {n:'Zero-Knowledge ID Sale',f:79,t:83,r:1,m:2,q:'2026 · ZK-Identity'},
+  {n:'Solana ETF Basket',f:80,t:83,r:1,m:2,q:'2026 · ETF-Flows'},
+  {n:'$TCFB Community Round',f:80,t:82,r:1,m:5,q:'Okt 2026 · pump.fun'},
+  {n:'Neobank Chain ICO',f:81,t:83,r:0,q:'2026 · Regulierung killt es'}
+];
+/* ---- V7: era-datierte Launchpad-Snipes ---- */
+const LAUNCHES=[
+  {n:'$SAFEMOON2',f:0,t:14,type:'rug'},{n:'$UNIFAIR',f:0,t:12},{n:'$YAMV1',f:6,t:10,type:'rug'},
+  {n:'$SUSHIFORK',f:7,t:14,type:'slow'},{n:'$PICKLE',f:8,t:14},{n:'$HOTDOG',f:8,t:12,type:'rug'},
+  {n:'$KIMCHI',f:8,t:13,type:'rug'},{n:'$MEME2020',f:9,t:14},{n:'$BASEDMONEY',f:10,t:16,type:'rug'},
+  {n:'$ELONMOON',f:12,t:24,type:'rug'},{n:'$BABYDOGE',f:16,t:26,type:'slow'},{n:'$SAFEPUMP',f:14,t:24,type:'rug'},
+  {n:'$MOONSHOT',f:14,t:24},{n:'$CUMROCKET',f:16,t:22,type:'slow'},{n:'$PIGFINANCE',f:16,t:22,type:'rug'},
+  {n:'$SQUIDGAME',f:21,t:23,type:'honeypot'},{n:'$SHIBAMOON',f:18,t:26,type:'rug'},{n:'$FLOKIV1',f:18,t:28,type:'moon'},
+  {n:'$METACITY',f:22,t:30,type:'rug'},{n:'$P2ELAND',f:22,t:32,type:'slow'},
+  {n:'$BEARMARKET',f:24,t:36,type:'slow'},{n:'$COPIUM',f:26,t:38},{n:'$CAPITULATE',f:28,t:38,type:'rug'},
+  {n:'$LUNC2',f:28,t:32,type:'rug'},{n:'$3ACREDIT',f:29,t:34,type:'rug'},{n:'$FTXDEBT',f:34,t:40,type:'rug'},
+  {n:'$PEPE2',f:39,t:44,type:'rug'},{n:'$WOJAKINU',f:39,t:45},{n:'$TURBO',f:40,t:46,type:'moon'},
+  {n:'$BALD',f:42,t:44,type:'rug'},{n:'$BASEDAF',f:42,t:48},{n:'$BRETTCLONE',f:45,t:52,type:'slow'},
+  {n:'$JEETS',f:40,t:52},{n:'$LARP',f:41,t:52},{n:'$NGMI',f:41,t:53},
+  {n:'$BONKINU',f:35,t:42,type:'rug'},{n:'$MOONCAT',f:36,t:48},{n:'$WAGMI',f:36,t:50},
+  {n:'$SLERF',f:50,t:52,type:'rug'},{n:'$BOMECLONE',f:50,t:54,type:'rug'},{n:'$MICHI',f:50,t:56,type:'moon'},
+  {n:'$POPCAT',f:50,t:55,type:'moon'},{n:'$RETARDIO',f:51,t:58},{n:'$GIGACHAD',f:51,t:58},
+  {n:'$MOGGED',f:52,t:60},{n:'$SNIPEME',f:50,t:62,type:'rug'},{n:'$CHUD',f:52,t:60},
+  {n:'$FARTCOIN',f:58,t:62,type:'moon'},{n:'$PNUTCLONE',f:58,t:62,type:'rug'},
+  {n:'$AGENTSWARM',f:59,t:68},{n:'$GOATCLONE',f:57,t:62,type:'rug'},{n:'$AIWAIFU',f:59,t:70},
+  {n:'$TRUMPCLONE',f:60,t:64,type:'rug'},{n:'$LIBRACLONE',f:61,t:66,type:'honeypot'},
+  {n:'$BOOMER',f:60,t:72},{n:'$ZOOMER',f:60,t:72},{n:'$COOKING',f:62,t:74},
+  {n:'$RUGPROOF',f:64,t:76,type:'honeypot'},{n:'$LIQUIDITY',f:64,t:78,type:'slow'},
+  {n:'$QUANTUMFUD',f:72,t:80,type:'rug'},{n:'$ROBODEPIN',f:72,t:82},{n:'$SUPERCYCLE',f:74,t:83,type:'moon'},
+  {n:'$ETFSZN',f:76,t:83},{n:'$BOSSMODE',f:78,t:83},{n:'$FINALPUMP',f:78,t:83,type:'slow'},
+  {n:'$TCFB',f:80,t:83,type:'moon'}
+];
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COUNTRIES={DE:{rent:1500,tax:.3,flag:'🇩🇪',riskMod:.85,stressMod:.9,airdropMod:1,name:'Germany'},USA:{rent:2000,tax:.25,flag:'🇺🇸',riskMod:1,stressMod:1.05,airdropMod:1.25,name:'USA'},CH:{rent:2000,tax:.18,flag:'🇨🇭',riskMod:.78,stressMod:.85,airdropMod:.9,name:'Switzerland'},SG:{rent:2200,tax:.15,flag:'🇸🇬',riskMod:.9,stressMod:1.15,airdropMod:1.1,name:'Singapore'},PT:{rent:1250,tax:.2,flag:'🇵🇹',riskMod:.95,stressMod:.8,airdropMod:1,name:'Portugal'},NG:{rent:800,tax:.1,flag:'🇳🇬',riskMod:1.22,stressMod:1.08,airdropMod:.85,name:'Nigeria'}};
 const DIFF={
@@ -2867,35 +3072,38 @@ function renderMarket(){if(!state)return;if(filter==='PERPS'){renderPerpDesk();r
 function updatePriceDisplays(){COINS.forEach(c=>{const el=document.getElementById('price-'+c.s);if(el)el.textContent='$'+priceStr(state.prices[c.s])});try{updatePerpLive()}catch(e){}}
 
 function refreshPresales(){
-  // Much stronger anti-repeat
-  let pool = PRESALE_NAMES.filter(n => !state.usedPresales.includes(n));
-  if(pool.length < 8){
-    // Keep last 25 used, free the rest
-    state.usedPresales = state.usedPresales.slice(-25);
-    pool = PRESALE_NAMES.filter(n => !state.usedPresales.includes(n));
-  }
-  // Prefer historical names when in historical mode
-  if(state.pmode === 'historical'){
-    const histPool = pool.filter(n => HISTORICAL_WINS.hasOwnProperty(n));
-    if(histPool.length >= 3) pool = histPool;
-  }
-  // Fisher-Yates shuffle
-  for(let i=pool.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [pool[i],pool[j]]=[pool[j],pool[i]];
-  }
+  const m = state.month;
+  const seen = state.pSeen = state.pSeen || {};
+  state.usedPresales = state.usedPresales || [];
+  const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a };
+  // Stufe 1: nie gezeigt + im Zeitfenster · 2: Zeitfenster mit ältestem Recycling · 3: Nachbar-Ära
+  const era = PRESALES.filter(p => m >= p.f && m <= p.t);
+  const near = PRESALES.filter(p => !(m >= p.f && m <= p.t) && m >= p.f-8 && m <= p.t+8);
+  const fresh = shuffle(era.filter(p => seen[p.n] === undefined));
+  const recycled = era.filter(p => seen[p.n] !== undefined && m - seen[p.n] >= 18).sort((a,b)=>seen[a.n]-seen[b.n]);
+  const nearFresh = shuffle(near.filter(p => seen[p.n] === undefined));
+  const nearOld = near.filter(p => seen[p.n] !== undefined && m - seen[p.n] >= 24).sort((a,b)=>seen[a.n]-seen[b.n]);
+  const byAge = arr => arr.slice().sort((a,b)=>(seen[a.n]===undefined?-1:seen[a.n])-(seen[b.n]===undefined?-1:seen[b.n]));
+  // Letzte Stufe: Ära-Einträge trotz Cooldown (ältester zuerst), damit nie ein leeres Board entsteht
+  const pool = fresh.concat(recycled, nearFresh, nearOld, byAge(era), byAge(near));
   state._presales = [];
   const taken = new Set();
-  for(const name of pool){
-    if(taken.has(name)) continue;
-    taken.add(name);
-    state.usedPresales.push(name);
+  for(const p of pool){
+    if(taken.has(p.n)) continue;
+    taken.add(p.n);
+    seen[p.n] = m;
+    state.usedPresales.push(p.n);
+    const early = m < 12 ? .55 : m < 36 ? .8 : m < 60 ? 1 : 1.3;
     state._presales.push({
       id: Math.random().toString(36).slice(2,9),
-      name,
-      hype: 25 + Math.floor(Math.random()*70),
-      scam: 10 + Math.floor(Math.random()*55),
-      cost: [300,450,600,800,1000,1200,1500][Math.floor(Math.random()*7)]
+      name: p.n,
+      note: p.q || '',
+      real: !!p.r,
+      mult: p.m || 0,
+      inEra: (m >= p.f && m <= p.t),
+      hype: p.r ? 45 + Math.floor(Math.random()*50) : 30 + Math.floor(Math.random()*60),
+      scam: p.r ? 8 + Math.floor(Math.random()*35) : 25 + Math.floor(Math.random()*55),
+      cost: Math.max(200, Math.round([300,450,600,800,1000,1200,1500][Math.floor(Math.random()*7)] * early))
     });
     if(state._presales.length >= 3) break;
   }
@@ -2914,8 +3122,8 @@ function investPresale(id,cost){
   updateSidePanels();updateHeader();playSound('click');
 
   let win = false;
-  if(state.pmode === 'historical' && HISTORICAL_WINS.hasOwnProperty(p.name)){
-    win = HISTORICAL_WINS[p.name];
+  if(state.pmode === 'historical' && typeof p.real === 'boolean'){
+    win = p.real;
   } else {
     let winChance = ((100 - p.scam) / 100) * 0.45 + 0.13;
     if(state.arch === 'influencer') winChance += 0.06;
@@ -2927,7 +3135,8 @@ function investPresale(id,cost){
 
   setTimeout(()=>{
     if(win){
-      const mult = (state.pmode==='historical') ? (1.3 + Math.random()*0.8) : (1.5 + Math.random()*1.6);
+      const histMult = (p.mult || 2) * (0.75 + Math.random()*0.5);
+      const mult = (state.pmode==='historical') ? Math.max(1.15, Math.min(24, histMult)) : (1.5 + Math.random()*1.6);
       const gain = Math.round(cost * mult);
       state.cash += gain;
       state.presaleWins = (state.presaleWins||0) + 1;
@@ -3069,7 +3278,7 @@ function updateSidePanels(){if(!state)return;const c=COUNTRIES[state.country];co
     ${passive<0?`<div class="cf-note" style="color:#f87171">\u26A0\uFE0F Leverage costs you <b>${fmt(Math.abs(passive))}</b>/mo – capped</div>`:''}
     ${(state._lastTotalIncome||0) > (rent+food)*0.65?`<div class="cf-note">\u2696\uFE0F Income is capped – <b>you must trade to survive</b></div>`:''}
     ${Object.keys(state.businesses).length?`<div class="cf-note" style="letter-spacing:.02em">${Object.keys(state.businesses).map(id=>{const b=BUSINESS.find(x=>x.id===id);return b?b.title:''}).join(' • ')}</div>`:''}`;
-  let totalValue=0,totalCost=0;COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt>0){totalValue+=amt*state.prices[c.s];totalCost+=amt*(state.avg[c.s]||state.prices[c.s])}});const totalPnl=totalValue-totalCost;const pnlPercent=totalCost>0?(totalPnl/totalCost*100):0;const summaryEl=document.getElementById('portfolio-summary');if(summaryEl){if(totalValue>0){summaryEl.classList.remove('hidden');summaryEl.innerHTML=`<div><div style="font-size:11px;color:var(--muted)">Total Portfolio</div><div style="font-weight:700">${fmt(totalValue)}</div></div><div style="text-align:right"><div style="font-size:11px;color:var(--muted)">Total P&L</div><div style="font-weight:700;color:${totalPnl>=0?'#22c55e':'#ef4444'}">${totalPnl>=0?'+':''}${fmt(totalPnl)} (${pnlPercent>=0?'+':''}${pnlPercent.toFixed(1)}%)</div></div>`}else{summaryEl.classList.add('hidden')}}let htm='';COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt<=0)return;const val=amt*state.prices[c.s];const avg=state.avg[c.s]||0;const pnl=avg>0?((state.prices[c.s]-avg)/avg*100):0;htm+=`<div class="hold-item"><div><b>${c.s}</b><div style="font-size:10px;color:var(--muted)">${fmtAmt(amt)} • avg ${priceStr(avg)}</div></div><div style="text-align:right"><div>${fmt(val)}</div><div style="font-size:10px;color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div></div></div>`});document.getElementById('holdings-list').innerHTML=htm||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">No coins yet</div>';document.getElementById('quest-count').textContent=state.questsDone>0?'('+state.questsDone+' done)':'';document.getElementById('quests-list').innerHTML=state.quests.slice(-4).map(q=>`<div class="quest-item ${q.done?'done':''}">${q.done?'✅':'🎯'} ${q.txt}<div style="font-size:10px;color:var(--muted)">+$${q.reward}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">New quests incoming...</div>';document.getElementById('ach-count').textContent=state.achievements.length+'/'+ACHIEVEMENTS.length;document.getElementById('ach-list').innerHTML=ACHIEVEMENTS.map(a=>{const unlocked=state.achievements.includes(a.id);return`<div class="ach-item ${unlocked?'unlocked':''}" style="opacity:${unlocked?1:.4}"><span class="badge" style="background:${unlocked?'#102a1a':'#1a1f35'};color:${unlocked?'#00ff88':'#6b7394'}">${a.icon} ${a.name}</span><div style="font-size:10px;color:var(--muted)">${a.desc}</div></div>`}).join('');document.getElementById('business-list').innerHTML=BUSINESS.map(b=>{const owned=!!state.businesses[b.id];return`<div style="background:#12172c;border:1px solid ${owned?'#1e5a3a':'#1f274a'};border-radius:10px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${b.title}</b><span style="font-size:10px;color:${b.monthly>=0?'#22c55e':'#ef4444'}">${b.monthly>=0?'+':''}$${b.monthly}/mo</span></div><div style="font-size:10px;color:var(--muted);margin:4px 0">${b.desc}</div><button class="tc-btn" style="width:100%" ${owned||state.cash<b.cost?'disabled':''} onclick="buyBusiness('${b.id}')">${owned?'OWNED':'BUY $'+b.cost}</button></div>`}).join('');document.getElementById('presale-list').innerHTML=(state._presales||[]).map(p=>`<div class="presale-card"><div style="font-weight:700;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--muted);margin:4px 0">Hype ${p.hype}% • Scam Risk ${p.scam}%</div><button class="tc-btn" style="width:100%" onclick="investPresale('${p.id}',${p.cost})" ${state.cash<p.cost?'disabled':''}>Invest $${p.cost}</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px">No presales right now</div>'}
+  let totalValue=0,totalCost=0;COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt>0){totalValue+=amt*state.prices[c.s];totalCost+=amt*(state.avg[c.s]||state.prices[c.s])}});const totalPnl=totalValue-totalCost;const pnlPercent=totalCost>0?(totalPnl/totalCost*100):0;const summaryEl=document.getElementById('portfolio-summary');if(summaryEl){if(totalValue>0){summaryEl.classList.remove('hidden');summaryEl.innerHTML=`<div><div style="font-size:11px;color:var(--muted)">Total Portfolio</div><div style="font-weight:700">${fmt(totalValue)}</div></div><div style="text-align:right"><div style="font-size:11px;color:var(--muted)">Total P&L</div><div style="font-weight:700;color:${totalPnl>=0?'#22c55e':'#ef4444'}">${totalPnl>=0?'+':''}${fmt(totalPnl)} (${pnlPercent>=0?'+':''}${pnlPercent.toFixed(1)}%)</div></div>`}else{summaryEl.classList.add('hidden')}}let htm='';COINS.forEach(c=>{const amt=state.holdings[c.s]||0;if(amt<=0)return;const val=amt*state.prices[c.s];const avg=state.avg[c.s]||0;const pnl=avg>0?((state.prices[c.s]-avg)/avg*100):0;htm+=`<div class="hold-item"><div><b>${c.s}</b><div style="font-size:10px;color:var(--muted)">${fmtAmt(amt)} • avg ${priceStr(avg)}</div></div><div style="text-align:right"><div>${fmt(val)}</div><div style="font-size:10px;color:${pnl>=0?'#22c55e':'#ef4444'}">${pnl>=0?'+':''}${pnl.toFixed(1)}%</div></div></div>`});document.getElementById('holdings-list').innerHTML=htm||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">No coins yet</div>';document.getElementById('quest-count').textContent=state.questsDone>0?'('+state.questsDone+' done)':'';document.getElementById('quests-list').innerHTML=state.quests.slice(-4).map(q=>`<div class="quest-item ${q.done?'done':''}">${q.done?'✅':'🎯'} ${q.txt}<div style="font-size:10px;color:var(--muted)">+$${q.reward}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12px">New quests incoming...</div>';document.getElementById('ach-count').textContent=state.achievements.length+'/'+ACHIEVEMENTS.length;document.getElementById('ach-list').innerHTML=ACHIEVEMENTS.map(a=>{const unlocked=state.achievements.includes(a.id);return`<div class="ach-item ${unlocked?'unlocked':''}" style="opacity:${unlocked?1:.4}"><span class="badge" style="background:${unlocked?'#102a1a':'#1a1f35'};color:${unlocked?'#00ff88':'#6b7394'}">${a.icon} ${a.name}</span><div style="font-size:10px;color:var(--muted)">${a.desc}</div></div>`}).join('');document.getElementById('business-list').innerHTML=BUSINESS.map(b=>{const owned=!!state.businesses[b.id];return`<div style="background:#12172c;border:1px solid ${owned?'#1e5a3a':'#1f274a'};border-radius:10px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${b.title}</b><span style="font-size:10px;color:${b.monthly>=0?'#22c55e':'#ef4444'}">${b.monthly>=0?'+':''}$${b.monthly}/mo</span></div><div style="font-size:10px;color:var(--muted);margin:4px 0">${b.desc}</div><button class="tc-btn" style="width:100%" ${owned||state.cash<b.cost?'disabled':''} onclick="buyBusiness('${b.id}')">${owned?'OWNED':'BUY $'+b.cost}</button></div>`}).join('');document.getElementById('presale-list').innerHTML=(state._presales||[]).map(p=>`<div class="presale-card"><div style="font-weight:700;font-size:13px">${p.name}</div>${p.note?`<div style="font-size:10px;color:#f0b429;margin:2px 0 0">${p.note}</div>`:''}<div style="font-size:11px;color:var(--muted);margin:4px 0">Hype ${p.hype}% • Scam Risk ${p.scam}%</div><button class="tc-btn" style="width:100%" onclick="investPresale('${p.id}',${p.cost})" ${state.cash<p.cost?'disabled':''}>Invest $${p.cost}</button></div>`).join('')||'<div style="color:var(--muted);font-size:12px">No presales right now</div>'}
 function initChart(){const cv=document.getElementById('pnl-chart');const ctx=cv.getContext('2d');const g=ctx.createLinearGradient(0,0,0,190);g.addColorStop(0,'rgba(240,180,41,.34)');g.addColorStop(.55,'rgba(168,85,247,.14)');g.addColorStop(1,'rgba(168,85,247,0)');window._chartFill=g;chart=new Chart(ctx,{type:'line',data:{labels:[0],datasets:[{data:[netWorth()],borderColor:'#f0b429',borderWidth:2,backgroundColor:g,fill:true,tension:.28,pointRadius:0,pointHoverRadius:0}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},elements:{line:{capBezierPoints:true}}}});state.liveHistory=state.liveHistory||[netWorth()]}
 function sampleNW(){if(!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];state.liveHistory.push(netWorth());if(state.liveHistory.length>900)state.liveHistory.splice(0,state.liveHistory.length-900);try{samplePerpHist()}catch(e){}}
 function updateChart(){if(!chart||!state)return;if(!state.liveHistory||!state.liveHistory.length)state.liveHistory=[netWorth()];const nw=netWorth();const h=state.liveHistory;const ref=h.length>1?h[h.length-2]:h[0];if(Math.abs(nw-ref)>Math.max(1,Math.abs(ref)*0.004)){h.push(nw);if(h.length>900)h.splice(0,h.length-900)}else{h[h.length-1]=nw}const data=state.liveHistory;chart.data.labels=data.map((_,i)=>i);chart.data.datasets[0].data=data;const up=data[data.length-1]>=data[0];chart.data.datasets[0].borderColor=up?'#f0b429':'#ef4444';chart.data.datasets[0].backgroundColor=up?(window._chartFill||'rgba(240,180,41,.2)'):'rgba(239,68,68,.16)';chart.update('none')}
@@ -3485,12 +3694,30 @@ const LAUNCH_NAMES=['$WIF','$BONKINU','$MOONCAT','$RETARDIO','$GIGACHAD','$PEPE2
 function refreshLaunches(){
   if(!state)return;
   state.launchOffers=[];
-  const names=[...LAUNCH_NAMES].sort(()=>Math.random()-.5).slice(0,3);
-  names.forEach((n,i)=>{
-    const r=Math.random();
-    const type=r<0.30?'rug':r<0.42?'honeypot':r<0.72?'slow':'moon';
+  const m=state.month;
+  const seen=state.lSeen=state.lSeen||{};
+  const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const inEra=LAUNCHES.filter(l=>m>=l.f&&m<=l.t);
+  const near=LAUNCHES.filter(l=>!(m>=l.f&&m<=l.t)&&m>=l.f-8&&m<=l.t+8);
+  const pool=shuffle(inEra.filter(l=>seen[l.n]===undefined))
+    .concat(inEra.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=12).sort((a,b)=>seen[a.n]-seen[b.n]))
+    .concat(shuffle(near.filter(l=>seen[l.n]===undefined)))
+    .concat(near.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=18).sort((a,b)=>seen[a.n]-seen[b.n]))
+    .concat(inEra.slice().sort((a,b)=>(seen[a.n]||0)-(seen[b.n]||0)))
+    .concat(near.slice().sort((a,b)=>(seen[a.n]||0)-(seen[b.n]||0)));
+  // Rug-Rate + Mcap nach Ära: 2021 grosse Caps, 2024+ pump.fun-Mikro-Caps mit mehr Rugs
+  const era = m<12?{cap:[15000,60000],rug:.30}:m<24?{cap:[40000,400000],rug:.34}:m<36?{cap:[10000,80000],rug:.34}:
+              m<48?{cap:[15000,150000],rug:.36}:m<60?{cap:[4000,60000],rug:.46}:m<72?{cap:[4000,50000],rug:.44}:{cap:[6000,90000],rug:.36};
+  pool.slice(0,3).forEach((l,i)=>{
+    seen[l.n]=m;
+    let type=l.type;
+    if(!type||state.pmode!=='historical'){
+      const r=Math.random();
+      type=r<era.rug?'rug':r<era.rug+.12?'honeypot':r<era.rug+.42?'slow':'moon';
+      if(l.type&&Math.random()<.6) type=l.type;
+    }
     state.launchOffers.push({
-      id:'lo'+state.month+'_'+i,n:n,mcap:Math.round(8000+Math.random()*90000),
+      id:'lo'+m+'_'+i,n:l.n,mcap:Math.round(era.cap[0]+Math.random()*(era.cap[1]-era.cap[0])),
       type,audited:false,hype:Math.round(20+Math.random()*80)
     });
   });
