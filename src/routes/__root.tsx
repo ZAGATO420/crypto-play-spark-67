@@ -13,6 +13,29 @@ import appCss from "../styles.css?url";
 import titleApeAsset from "@/assets/title-ape.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+const BASE_URL = "https://thecryptofinalboss.app";
+const LOGO_URL = BASE_URL + titleApeAsset.url;
+
+const WEBSITE_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "The Crypto Final Boss",
+  url: `${BASE_URL}/`,
+  publisher: {
+    "@type": "Organization",
+    name: "The Crypto Final Boss",
+  },
+});
+
+const ORGANIZATION_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "The Crypto Final Boss",
+  url: BASE_URL,
+  logo: LOGO_URL,
+  sameAs: ["https://x.com/TCFB_game"],
+});
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -98,6 +121,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        dangerouslySetInnerHTML: { __html: WEBSITE_LD },
+      },
+      {
+        type: "application/ld+json",
+        dangerouslySetInnerHTML: { __html: ORGANIZATION_LD },
+      },
     ],
   }),
   shellComponent: RootShell,

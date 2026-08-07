@@ -47,6 +47,12 @@ export const Route = createFileRoute("/")({
       { name: "twitter:image", content: OG_IMAGE },
     ],
     links: [{ rel: "canonical", href: "https://thecryptofinalboss.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        dangerouslySetInnerHTML: { __html: SOFTWARE_APP_LD },
+      },
+    ],
   }),
   component: Index,
 });
