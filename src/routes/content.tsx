@@ -64,12 +64,6 @@ export const Route = createFileRoute("/content")({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
     ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        dangerouslySetInnerHTML: { __html: COLLECTION_LD },
-      },
-    ],
   }),
   component: ContentCenter,
 });
