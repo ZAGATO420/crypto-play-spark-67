@@ -3083,7 +3083,9 @@ function refreshPresales(){
   const recycled = era.filter(p => seen[p.n] !== undefined && m - seen[p.n] >= 18).sort((a,b)=>seen[a.n]-seen[b.n]);
   const nearFresh = shuffle(near.filter(p => seen[p.n] === undefined));
   const nearOld = near.filter(p => seen[p.n] !== undefined && m - seen[p.n] >= 24).sort((a,b)=>seen[a.n]-seen[b.n]);
-  const pool = fresh.concat(recycled, nearFresh, nearOld);
+  const byAge = arr => arr.slice().sort((a,b)=>(seen[a.n]===undefined?-1:seen[a.n])-(seen[b.n]===undefined?-1:seen[b.n]));
+  // Letzte Stufe: Ära-Einträge trotz Cooldown (ältester zuerst), damit nie ein leeres Board entsteht
+  const pool = fresh.concat(recycled, nearFresh, nearOld, byAge(era), byAge(near));
   state._presales = [];
   const taken = new Set();
   for(const p of pool){
