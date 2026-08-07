@@ -3702,7 +3702,9 @@ function refreshLaunches(){
   const pool=shuffle(inEra.filter(l=>seen[l.n]===undefined))
     .concat(inEra.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=12).sort((a,b)=>seen[a.n]-seen[b.n]))
     .concat(shuffle(near.filter(l=>seen[l.n]===undefined)))
-    .concat(near.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=18).sort((a,b)=>seen[a.n]-seen[b.n]));
+    .concat(near.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=18).sort((a,b)=>seen[a.n]-seen[b.n]))
+    .concat(inEra.slice().sort((a,b)=>(seen[a.n]||0)-(seen[b.n]||0)))
+    .concat(near.slice().sort((a,b)=>(seen[a.n]||0)-(seen[b.n]||0)));
   // Rug-Rate + Mcap nach Ära: 2021 grosse Caps, 2024+ pump.fun-Mikro-Caps mit mehr Rugs
   const era = m<12?{cap:[15000,60000],rug:.30}:m<24?{cap:[40000,400000],rug:.34}:m<36?{cap:[10000,80000],rug:.34}:
               m<48?{cap:[15000,150000],rug:.36}:m<60?{cap:[4000,60000],rug:.46}:m<72?{cap:[4000,50000],rug:.44}:{cap:[6000,90000],rug:.36};
