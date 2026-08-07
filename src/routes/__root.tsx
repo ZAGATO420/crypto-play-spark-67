@@ -114,6 +114,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "The Crypto Final Boss is LIVE // The game is harder than the market itself // Survive 2020 → 2026." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785607211579-social-image.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785607211579-social-image.webp" },
+      { "script:ld+json": JSON.parse(WEBSITE_LD) } as any,
+      { "script:ld+json": JSON.parse(ORGANIZATION_LD) } as any,
     ],
     links: [
       {
@@ -150,9 +152,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <script type="text/plain">TEST ROOT SCRIPT</script>
-      <script type="application/ld+json">{WEBSITE_LD}</script>
-      <script type="application/ld+json">{ORGANIZATION_LD}</script>
     </QueryClientProvider>
   );
 }

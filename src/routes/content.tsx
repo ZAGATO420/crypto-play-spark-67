@@ -63,6 +63,7 @@ export const Route = createFileRoute("/content")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
+      { "script:ld+json": JSON.parse(COLLECTION_LD) } as any,
     ],
   }),
   component: ContentCenter,
@@ -131,7 +132,6 @@ function ContentCenter() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <script type="application/ld+json">{COLLECTION_LD}</script>
       <header className="border-b border-border/60 bg-card/40 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
           <div>

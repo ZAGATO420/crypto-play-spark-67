@@ -45,6 +45,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:title", content: TITLE },
       { name: "twitter:description", content: DESCRIPTION },
       { name: "twitter:image", content: OG_IMAGE },
+      { "script:ld+json": JSON.parse(SOFTWARE_APP_LD) } as any,
     ],
     links: [{ rel: "canonical", href: "https://thecryptofinalboss.app/" }],
   }),
@@ -56,17 +57,11 @@ export const Route = createFileRoute("/")({
 // portable to any host while this route supplies SSR metadata.
 function Index() {
   return (
-    <>
-      <iframe
-        src="/game.html"
-        title="The Crypto Final Boss"
-        className="fixed inset-0 h-full w-full border-0"
-        allow="autoplay; clipboard-write"
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: SOFTWARE_APP_LD }}
-      />
-    </>
+    <iframe
+      src="/game.html"
+      title="The Crypto Final Boss"
+      className="fixed inset-0 h-full w-full border-0"
+      allow="autoplay; clipboard-write"
+    />
   );
 }
