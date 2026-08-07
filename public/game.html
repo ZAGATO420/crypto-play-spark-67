@@ -3693,18 +3693,19 @@ function refreshLaunches(){
   if(!state)return;
   state.launchOffers=[];
   const m=state.month;
-  const used=state.usedLaunches=state.usedLaunches||[];
-  const unused=LAUNCHES.filter(l=>!used.includes(l.n));
-  let pool=unused.filter(l=>m>=l.f&&m<=l.t);
-  if(pool.length<3) pool=pool.concat(unused.filter(l=>pool.indexOf(l)<0&&m>=l.f-8&&m<=l.t+8));
-  if(pool.length<3) pool=pool.concat(unused.filter(l=>pool.indexOf(l)<0));
-  pool=pool.slice();
-  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+  const seen=state.lSeen=state.lSeen||{};
+  const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const inEra=LAUNCHES.filter(l=>m>=l.f&&m<=l.t);
+  const near=LAUNCHES.filter(l=>!(m>=l.f&&m<=l.t)&&m>=l.f-8&&m<=l.t+8);
+  const pool=shuffle(inEra.filter(l=>seen[l.n]===undefined))
+    .concat(inEra.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=12).sort((a,b)=>seen[a.n]-seen[b.n]))
+    .concat(shuffle(near.filter(l=>seen[l.n]===undefined)))
+    .concat(near.filter(l=>seen[l.n]!==undefined&&m-seen[l.n]>=18).sort((a,b)=>seen[a.n]-seen[b.n]));
   // Rug-Rate + Mcap nach Ära: 2021 grosse Caps, 2024+ pump.fun-Mikro-Caps mit mehr Rugs
   const era = m<12?{cap:[15000,60000],rug:.30}:m<24?{cap:[40000,400000],rug:.34}:m<36?{cap:[10000,80000],rug:.34}:
               m<48?{cap:[15000,150000],rug:.36}:m<60?{cap:[4000,60000],rug:.46}:m<72?{cap:[4000,50000],rug:.44}:{cap:[6000,90000],rug:.36};
   pool.slice(0,3).forEach((l,i)=>{
-    used.push(l.n);
+    seen[l.n]=m;
     let type=l.type;
     if(!type||state.pmode!=='historical'){
       const r=Math.random();
