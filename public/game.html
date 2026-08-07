@@ -5513,6 +5513,17 @@ main .cf-rows.v6-fold{display:none}
     el.innerHTML=h;
   };
 
+  /* PERPS mode must always reach the popup desk, however it was switched */
+  (function(){
+    const orig=window.renderMarket;
+    window.renderMarket=function(){
+      let f='ALL';
+      try{const b=document.querySelector('[data-filter].active');f=b?b.dataset.filter:(typeof filter!=='undefined'?filter:'ALL')}catch(e){}
+      if(f==='PERPS'){try{return window.renderPerpDesk()}catch(e){return}}
+      return orig&&orig.apply(this,arguments);
+    };
+  })();
+
   /* ---------------- panel detail popups ---------------- */
   function plainModal(title,meta,html){
     M={kind:'info',sym:'',idx:-1,mode:'buy',amt:0};
