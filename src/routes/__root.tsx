@@ -10,7 +10,31 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import titleApeAsset from "@/assets/title-ape.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+
+const BASE_URL = "https://thecryptofinalboss.app";
+const LOGO_URL = BASE_URL + titleApeAsset.url;
+
+const WEBSITE_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "The Crypto Final Boss",
+  url: `${BASE_URL}/`,
+  publisher: {
+    "@type": "Organization",
+    name: "The Crypto Final Boss",
+  },
+});
+
+const ORGANIZATION_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "The Crypto Final Boss",
+  url: BASE_URL,
+  logo: LOGO_URL,
+  sameAs: ["https://x.com/TCFB_game"],
+});
 
 function NotFoundComponent() {
   return (
@@ -90,6 +114,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "The Crypto Final Boss is LIVE // The game is harder than the market itself // Survive 2020 → 2026." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785607211579-social-image.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785607211579-social-image.webp" },
+      { "script:ld+json": JSON.parse(WEBSITE_LD) } as any,
+      { "script:ld+json": JSON.parse(ORGANIZATION_LD) } as any,
     ],
     links: [
       {
