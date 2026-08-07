@@ -7,6 +7,29 @@ const DESCRIPTION =
 // Own branded 1200x630 card. The previous value was an auto-generated preview
 // screenshot, which is why shared links showed platform branding.
 const OG_IMAGE = "https://thecryptofinalboss.app" + ogAsset.url;
+const BASE_URL = "https://thecryptofinalboss.app";
+
+const SOFTWARE_APP_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "The Crypto Final Boss",
+  applicationCategory: "GameApplication",
+  operatingSystem: "Any",
+  url: `${BASE_URL}/`,
+  image: OG_IMAGE,
+  description: DESCRIPTION,
+  author: {
+    "@type": "Organization",
+    name: "The Crypto Final Boss",
+    url: BASE_URL,
+  },
+  genre: "Simulation",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({

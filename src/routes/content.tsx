@@ -13,6 +13,39 @@ import {
   type Item,
 } from "@/lib/content-parse";
 
+const BASE_URL = "https://thecryptofinalboss.app";
+
+const COLLECTION_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "TCFB Content Center",
+  url: `${BASE_URL}/content`,
+  description:
+    "Durchsuchbare Zentrale für die TCFB X-Strategie: Replies, 30-Tage-Post-Kalender und Growth-Playbook.",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "The Crypto Final Boss",
+    url: `${BASE_URL}/`,
+  },
+  hasPart: [
+    {
+      "@type": "WebPage",
+      name: "Reply-Bibliothek",
+      description: "Sammlung durchsuchbarer X-Replies für das TCFB Game.",
+    },
+    {
+      "@type": "WebPage",
+      name: "30-Tage-Kalender",
+      description: "30 Tage Content-Ideen für den TCFB X-Account.",
+    },
+    {
+      "@type": "WebPage",
+      name: "Playbook",
+      description: "Growth-Playbook für die TCFB Community.",
+    },
+  ],
+});
+
 export const Route = createFileRoute("/content")({
   head: () => ({
     meta: [

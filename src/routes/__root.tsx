@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import titleApeAsset from "@/assets/title-ape.png.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
