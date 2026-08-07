@@ -150,6 +150,14 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: WEBSITE_LD }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: ORGANIZATION_LD }}
+      />
     </QueryClientProvider>
   );
 }

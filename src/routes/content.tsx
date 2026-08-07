@@ -131,6 +131,10 @@ function ContentCenter() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: COLLECTION_LD }}
+      />
       <header className="border-b border-border/60 bg-card/40 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5">
           <div>
