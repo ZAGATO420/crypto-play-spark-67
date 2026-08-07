@@ -5070,6 +5070,520 @@ header{background:rgba(9,12,26,.88)}
 })();
 </script>
 
+<style id="v6-skin">
+/* ---------- V6: popup trading desk + scroll-free panels ---------- */
+#v6m{position:fixed;inset:0;z-index:520;display:none;align-items:center;justify-content:center;padding:14px;
+  background:rgba(3,5,12,.78);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+#v6m.on{display:flex}
+.v6c{width:min(460px,100%);max-height:88vh;display:flex;flex-direction:column;border-radius:22px;
+  border:1px solid rgba(255,255,255,.13);background:linear-gradient(168deg,rgba(26,32,60,.98),rgba(9,12,24,.99));
+  box-shadow:0 34px 90px rgba(0,0,0,.72);overflow:hidden}
+.v6c::before{content:'';display:block;height:1px;background:linear-gradient(100deg,transparent,rgba(240,180,41,.55),rgba(168,85,247,.45),transparent)}
+.v6head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;padding:16px 16px 10px}
+.v6head .t{font-weight:900;font-size:16px;color:#f2f4ff;line-height:1.15}
+.v6head .m{font:700 9px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8d97ba;margin-top:3px}
+.v6x{width:32px;height:32px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#cbd3ec;font-size:15px;cursor:pointer}
+.v6body{padding:0 16px 16px;overflow:auto;overscroll-behavior:contain}
+.v6l{font:700 9px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8d97ba;margin:14px 0 6px;display:flex;justify-content:space-between;gap:8px}
+.v6l b{color:#ffd76a;font-weight:800}
+.v6price{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:#f2f4ff}
+.v6tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.v6tabs button{height:42px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+  color:#98a2c4;font:800 12px 'JetBrains Mono',monospace;letter-spacing:.16em;cursor:pointer}
+.v6tabs button.b.on{border-color:rgba(34,197,94,.55);color:#4ade80;background:rgba(34,197,94,.13)}
+.v6tabs button.s.on{border-color:rgba(239,68,68,.55);color:#f87171;background:rgba(239,68,68,.13)}
+.v6in{display:flex;align-items:center;gap:8px;padding:0 12px;height:48px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045)}
+.v6in span{font:800 15px 'JetBrains Mono',monospace;color:#8d97ba}
+.v6in input{flex:1;min-width:0;background:none;border:0;outline:none;color:#f2f4ff;
+  font:800 19px 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.v6in input::-webkit-outer-spin-button,.v6in input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.v6chips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.v6chips button{height:34px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);
+  color:#98a2c4;font:800 10px 'JetBrains Mono',monospace;letter-spacing:.1em;cursor:pointer}
+.v6chips button:hover{border-color:rgba(240,180,41,.5);color:#ffd76a}
+.v6chips button.on{border-color:rgba(240,180,41,.55);color:#ffd76a;background:rgba(240,180,41,.12)}
+.v6chips.six{grid-template-columns:repeat(6,1fr)}
+.v6rng{-webkit-appearance:none;appearance:none;width:100%;height:34px;margin-top:8px;background:none;
+  touch-action:none;cursor:pointer}
+.v6rng::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08)}
+.v6rng::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-9px;border-radius:50%;
+  background:linear-gradient(150deg,#ffd76a,#f0b429);border:2px solid #0a0e1a;box-shadow:0 4px 16px rgba(240,180,41,.5)}
+.v6rng::-moz-range-track{height:8px;border-radius:99px;background:rgba(255,255,255,.09)}
+.v6rng::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#f0b429;border:2px solid #0a0e1a}
+.v6rng.g::-webkit-slider-thumb{background:linear-gradient(150deg,#4ade80,#22c55e);box-shadow:0 4px 16px rgba(34,197,94,.45)}
+.v6rng.r::-webkit-slider-thumb{background:linear-gradient(150deg,#f87171,#ef4444);box-shadow:0 4px 16px rgba(239,68,68,.45)}
+.v6rng.p::-webkit-slider-thumb{background:linear-gradient(150deg,#c084fc,#a855f7);box-shadow:0 4px 16px rgba(168,85,247,.45)}
+.v6grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;border-radius:14px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.07);margin-top:12px}
+.v6grid>div{padding:9px 11px;background:rgba(10,14,26,.92)}
+.v6grid .l{font:700 8px 'JetBrains Mono',monospace;letter-spacing:.18em;color:#7e88ad}
+.v6grid .v{font:800 12.5px 'JetBrains Mono',monospace;color:#e7ecf8;margin-top:3px;font-variant-numeric:tabular-nums}
+.v6sum{margin-top:12px;border-radius:14px;padding:11px 12px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035)}
+.v6row{display:flex;justify-content:space-between;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:#98a2c4;padding:4px 0}
+.v6row b{color:#eef1fb;font-weight:800}
+.v6acts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.v6go{width:100%;height:50px;border-radius:15px;border:0;cursor:pointer;color:#04140a;
+  font:900 13px 'JetBrains Mono',monospace;letter-spacing:.14em}
+.v6go.b{background:linear-gradient(100deg,#22c55e,#4ade80)}
+.v6go.s{background:linear-gradient(100deg,#ef4444,#f87171);color:#180708}
+.v6go.gold{background:linear-gradient(100deg,#f0b429,#ffd76a);color:#160e02}
+.v6go:disabled{opacity:.4;cursor:not-allowed}
+.v6ghost{width:100%;height:42px;margin-top:9px;border-radius:13px;cursor:pointer;
+  border:1px solid rgba(240,180,41,.4);background:rgba(240,180,41,.09);color:#ffd76a;
+  font:800 11px 'JetBrains Mono',monospace;letter-spacing:.14em}
+.v6warn{margin-top:10px;font:700 10px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#f87171}
+.v6spark{height:96px;margin-top:8px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);padding:3px}
+.v6spark canvas{width:100%;height:100%;display:block}
+.v6list{margin-top:10px;max-height:52vh;overflow:auto}
+/* --- perp tiles + compact positions in the terminal --- */
+.v6tile{position:relative;display:flex;flex-direction:column;gap:3px;padding:11px 11px 12px;border-radius:15px;cursor:pointer;
+  border:1px solid rgba(240,180,41,.26);background:linear-gradient(165deg,rgba(240,180,41,.08),rgba(6,9,18,.85));
+  text-align:left;color:#e7ecf8;transition:transform .15s,border-color .2s,box-shadow .2s}
+.v6tile:hover{transform:translateY(-2px);border-color:rgba(240,180,41,.55);box-shadow:0 14px 34px -18px rgba(240,180,41,.7)}
+.v6tile .s{font:900 13px 'JetBrains Mono',monospace;letter-spacing:.06em}
+.v6tile .p{font:800 15px 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;color:#f2f4ff}
+.v6tile .c{font:700 9.5px 'JetBrains Mono',monospace;letter-spacing:.1em}
+.v6tile .c.up{color:#34d399}.v6tile .c.dn{color:#f87171}.v6tile .c.flat{color:#8d97ba}
+.v6tile .lv{position:absolute;top:8px;right:9px;font:800 8px 'JetBrains Mono',monospace;letter-spacing:.14em;
+  color:#ffd76a;background:rgba(240,180,41,.14);border:1px solid rgba(240,180,41,.3);border-radius:7px;padding:2px 6px}
+.v6pos{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;
+  padding:11px 12px;border-radius:15px;cursor:pointer;border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(165deg,rgba(255,255,255,.045),rgba(6,9,18,.8));color:#e7ecf8;text-align:left}
+.v6pos:hover{border-color:rgba(240,180,41,.4)}
+.v6pos .hd{font:900 12px 'JetBrains Mono',monospace;letter-spacing:.06em;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.v6pos .mt{font:700 8.5px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7e88ad;margin-top:3px}
+.v6pos .pn{font:900 14px 'JetBrains Mono',monospace;text-align:right;font-variant-numeric:tabular-nums}
+.v6pos .full{grid-column:1/-1}
+.v6pos .cls{display:flex;gap:7px;grid-column:1/-1}
+.v6pos .cls button{flex:1;height:32px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);color:#cbd3ec;font:800 9.5px 'JetBrains Mono',monospace;letter-spacing:.12em}
+.v6pos .cls button:hover{border-color:rgba(239,68,68,.5);color:#f87171}
+.v6dir{font:800 8.5px 'JetBrains Mono',monospace;letter-spacing:.14em;padding:2px 7px;border-radius:7px}
+.v6dir.l{color:#4ade80;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35)}
+.v6dir.s{color:#f87171;background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.35)}
+/* --- scroll-free panels --- */
+body.v4-live main>div:last-child .panel,
+body.v4-live main>div:nth-child(2)>.panel:first-child{overflow:hidden!important}
+body.v4-live main>div:last-child{overflow:hidden!important}
+#v5-book .bk-row:nth-of-type(n+6){display:none}
+.v6more{width:100%;height:34px;margin-top:9px;border-radius:11px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#98a2c4;
+  font:800 9.5px 'JetBrains Mono',monospace;letter-spacing:.14em}
+.v6more:hover{border-color:rgba(240,180,41,.45);color:#ffd76a}
+main .cf-rows.v6-fold{display:none}
+@media(max-width:820px){
+  #v6m{padding:0;align-items:flex-end}
+  .v6c{width:100%;max-height:92vh;border-radius:22px 22px 0 0}
+  .v6chips button,.v6tabs button{min-height:44px}
+  .v6rng{height:44px}
+}
+</style>
+<script>
+/* =====================================================================
+   V6 LAYER — every trade lives in a popup, sliders drag smoothly,
+   side panels never scroll. No prices, fees or formulas were changed.
+   ===================================================================== */
+(function(){
+  const $=id=>document.getElementById(id);
+  const S=()=>(typeof state!=='undefined'&&state)?state:null;
+  const money=v=>(typeof fmt==='function'?fmt(v):'$'+Math.round(v).toLocaleString());
+  const psx=v=>(typeof priceStr==='function'?priceStr(v):(+v).toFixed(2));
+  const amtx=v=>(typeof fmtAmt==='function'?fmtAmt(v):(+v).toFixed(4));
+  let M={kind:null,sym:null,idx:-1,mode:'buy',amt:0};
+  let lock=0;                     /* >0 while the user drags or types    */
+  const locked=()=>lock>0;
+  function hold(el){
+    el.addEventListener('pointerdown',()=>{lock++});
+    el.addEventListener('focus',()=>{lock++});
+    const rel=()=>{lock=Math.max(0,lock-1)};
+    el.addEventListener('pointerup',rel);el.addEventListener('pointercancel',rel);
+    el.addEventListener('blur',rel);
+  }
+
+  /* ---------------- shell ---------------- */
+  function shell(){
+    let m=$('v6m');
+    if(!m){
+      m=document.createElement('div');m.id='v6m';
+      m.innerHTML='<div class="v6c"><div class="v6head" id="v6-head"></div><div class="v6body" id="v6-body"></div></div>';
+      m.addEventListener('click',e=>{if(e.target===m)close()});
+      document.body.appendChild(m);
+      document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    }
+    return m;
+  }
+  function head(title,meta){
+    $('v6-head').innerHTML='<span class="dxb" style="--c:'+col(M.sym||'')+';width:38px;height:38px;border-radius:13px;font-size:11px">'+
+      String(M.sym||'').slice(0,3)+'</span><div style="min-width:0"><div class="t">'+title+'</div><div class="m">'+meta+'</div></div>'+
+      '<button class="v6x" onclick="v6Close()">\u2715</button>';
+  }
+  function col(s){
+    const C={BTC:'#f7931a',ETH:'#8f9bff',SOL:'#14f195'};
+    if(C[s])return C[s];let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return 'hsl('+h+' 70% 62%)';
+  }
+  function close(){M={kind:null,sym:null,idx:-1,mode:'buy',amt:0};lock=0;const m=$('v6m');if(m)m.classList.remove('on');}
+  window.v6Close=close;
+
+  /* ---------------- spot trade popup ---------------- */
+  function feeRate(){const s=S();return .01*DIFF[s.diff].fee*s.feeMult}
+  function maxAmt(){
+    const s=S();if(!s||!M.sym)return 0;
+    return M.mode==='buy'?Math.max(0,Math.floor(s.cash/(1+feeRate())))
+                         :Math.max(0,Math.floor((s.holdings[M.sym]||0)*(s.prices[M.sym]||0)));
+  }
+  window.v6Trade=function(sym){
+    const s=S();if(!s)return;
+    M={kind:'spot',sym:sym,idx:-1,mode:(s.holdings[sym]||0)>0?(s._mode&&s._mode[sym]==='sell'?'sell':'buy'):'buy',amt:0};
+    shell().classList.add('on');try{playSound('click')}catch(e){}
+    buildSpot();
+  };
+  window.dxOpen=window.v6Trade;
+  window.dxClose=close;
+  window.v6Mode=function(mo){M.mode=mo;M.amt=0;try{playSound('click')}catch(e){}buildSpot()};
+  window.v6Pct=function(p){M.amt=Math.floor(maxAmt()*p);try{playSound('click')}catch(e){}sync();patchSpot()};
+  function setAmt(v,src){
+    M.amt=Math.max(0,Math.min(maxAmt(),Math.round(+v||0)));
+    sync(src);patchSpot();
+  }
+  function sync(src){
+    const n=$('v6-amt'),r=$('v6-rng');
+    if(n&&src!=='num'&&document.activeElement!==n)n.value=M.amt;
+    if(r&&src!=='rng')r.value=M.amt;
+  }
+  function buildSpot(){
+    const s=S();if(!s||M.kind!=='spot')return;
+    const c=(typeof COINS!=='undefined'?COINS.find(x=>x.s===M.sym):null)||{s:M.sym,n:M.sym,tags:[]};
+    head(c.n,M.sym+(c.tags&&c.tags.length?' \u00b7 '+c.tags.join(' / '):''));
+    const perp=['BTC','ETH','SOL'].indexOf(M.sym)>-1;
+    $('v6-body').innerHTML=
+      '<div class="v6price" id="v6-price">$'+psx(s.prices[M.sym]||0)+'</div>'+
+      '<div id="v6-pos"></div>'+
+      '<div class="v6tabs"><button class="b'+(M.mode==='buy'?' on':'')+'" onclick="v6Mode(\'buy\')">BUY</button>'+
+        '<button class="s'+(M.mode==='sell'?' on':'')+'" onclick="v6Mode(\'sell\')">SELL</button></div>'+
+      '<div class="v6l"><span id="v6-lbl"></span></div>'+
+      '<div class="v6in"><span>$</span><input id="v6-amt" type="number" inputmode="decimal" min="0" step="any" value="0"></div>'+
+      '<input id="v6-rng" class="v6rng '+(M.mode==='buy'?'g':'r')+'" type="range" min="0" max="1" step="any" value="0">'+
+      '<div class="v6chips"><button onclick="v6Pct(.25)">25%</button><button onclick="v6Pct(.5)">50%</button>'+
+        '<button onclick="v6Pct(.75)">75%</button><button onclick="v6Pct(1)">MAX</button></div>'+
+      '<div class="v6sum" id="v6-sum"></div>'+
+      '<button class="v6go '+(M.mode==='buy'?'b':'s')+'" id="v6-go" onclick="v6Exec()"></button>'+
+      (perp?'<button class="v6ghost" onclick="v6Perp(\''+M.sym+'\')">\u26a1 TRADE '+M.sym+' PERPS (LEVERAGE)</button>':'');
+    const n=$('v6-amt'),r=$('v6-rng');
+    n.addEventListener('input',e=>setAmt(e.target.value,'num'));
+    r.addEventListener('input',e=>setAmt(e.target.value,'rng'));
+    hold(n);hold(r);
+    patchSpot();
+  }
+  function patchSpot(){
+    const s=S();if(!s||M.kind!=='spot')return;
+    const price=s.prices[M.sym]||0,max=maxAmt();
+    if(M.amt>max)M.amt=max;
+    const r=$('v6-rng');if(r){r.max=Math.max(1,max);if(!locked())r.value=M.amt}
+    const n=$('v6-amt');if(n&&document.activeElement!==n)n.value=M.amt;
+    const p=$('v6-price');if(p)p.textContent='$'+psx(price);
+    const held=s.holdings[M.sym]||0,avg=s.avg[M.sym]||0,posVal=held*price;
+    const ph=$('v6-pos');
+    if(ph)ph.innerHTML=held>0?'<div class="v6row" style="margin-top:6px"><span>YOUR POSITION</span><b>'+amtx(held)+' \u00b7 '+money(posVal)+
+      (avg>0?' <span class="'+(price>=avg?'up':'dn')+'">'+(price>=avg?'+':'')+(((price-avg)/avg)*100).toFixed(1)+'%</span>':'')+'</b></div>':'';
+    const lb=$('v6-lbl');
+    if(lb)lb.textContent=M.mode==='buy'?('SPEND \u00b7 CASH '+money(s.cash)):('SELL VALUE \u00b7 POSITION '+money(posVal));
+    const fee=feeRate(),coins=price>0?M.amt/price:0;
+    let rows;
+    if(M.mode==='buy'){
+      rows='<div class="v6row"><span>You get</span><b>'+amtx(coins)+' '+M.sym+'</b></div>'+
+        '<div class="v6row"><span>Trading fee</span><b>-'+money(M.amt*fee)+'</b></div>'+
+        '<div class="v6row"><span>Total cost</span><b>'+money(M.amt*(1+fee))+'</b></div>'+
+        '<div class="v6row"><span>Cash after</span><b>'+money(Math.max(0,s.cash-M.amt*(1+fee)))+'</b></div>';
+    }else{
+      const net=M.amt*(1-fee);
+      const basis=price>0?(M.amt/price)*(avg||price):0;
+      const profit=net-basis;
+      const taxRate=((COUNTRIES[s.country]&&COUNTRIES[s.country].tax)||0.2)*0.35;
+      const tax=profit>0?profit*taxRate:0;
+      rows='<div class="v6row"><span>You sell</span><b>'+amtx(coins)+' '+M.sym+'</b></div>'+
+        '<div class="v6row"><span>Avg entry</span><b>$'+psx(avg||0)+'</b></div>'+
+        '<div class="v6row"><span>Realised P&amp;L</span><b class="'+(profit>=0?'up':'dn')+'">'+(profit>=0?'+':'')+money(profit)+'</b></div>'+
+        '<div class="v6row"><span>Fee + tax now</span><b>-'+money(M.amt*fee+tax)+'</b></div>'+
+        '<div class="v6row"><span>You receive</span><b>'+money(Math.max(0,net-tax))+'</b></div>';
+    }
+    const sm=$('v6-sum');if(sm)sm.innerHTML=rows;
+    const go=$('v6-go');
+    if(go){go.disabled=M.amt<1;go.textContent=(M.mode==='buy'?'BUY ':'SELL ')+M.sym}
+  }
+  window.v6Exec=function(){
+    const s=S();if(!s||M.kind!=='spot')return;
+    const sym=M.sym,mode=M.mode,amt=M.amt;
+    if(amt<1)return;
+    s._amt=s._amt||{};s._mode=s._mode||{};
+    s._amt[sym]=amt;s._mode[sym]=mode;
+    if(mode==='buy')buy(sym);else sell(sym);
+    if(!S()||state._gameEnded){close();return}
+    if(mode==='sell'&&(state.holdings[sym]||0)<=0){close();return}
+    M.amt=0;buildSpot();
+  };
+
+  /* ---------------- perp popup ---------------- */
+  window.v6Perp=function(sym){
+    const s=S();if(!s)return;
+    if(!((s.prices[sym]||0)>0)){try{toast(sym+' is not tradable yet','sell')}catch(e){}return}
+    M={kind:'perp',sym:sym,idx:-1,mode:'buy',amt:0};
+    shell().classList.add('on');try{playSound('click')}catch(e){}
+    buildPerp();
+  };
+  window.dxPerp=function(){if(M.sym)v6Perp(M.sym)};
+  function draft(){return perpDraft(M.sym)}
+  function capCash(){const s=S();return Math.max(0,Math.floor(s.cash))}
+  window.v6Lev=function(l){draft().lev=Math.max(2,Math.min(50,Math.round(+l||2)));try{playSound('click')}catch(e){}patchPerp('lev')};
+  window.v6Margin=function(v,src){
+    const d=draft();d.m=Math.max(0,Math.min(capCash(),Math.round(+v||0)));patchPerp(src);
+  };
+  window.v6Size=function(v){
+    const d=draft(),cap=capCash();
+    let size=Math.max(0,Math.round(+v||0));
+    let m=Math.floor(size/Math.max(2,d.lev));
+    if(m>cap){const need=Math.min(50,Math.ceil(size/Math.max(1,cap)));d.lev=Math.max(2,Math.min(50,need));m=Math.min(cap,Math.floor(size/d.lev))}
+    d.m=Math.max(0,m);patchPerp('size');
+  };
+  window.v6MarginPct=function(p){const d=draft();d.m=Math.floor(capCash()*p);try{playSound('click')}catch(e){}patchPerp()};
+  window.v6Open=function(dir){
+    const d=draft(),sym=M.sym;
+    openPerp(sym,dir,d.m,d.lev);
+    close();
+  };
+  function buildPerp(){
+    const s=S();if(!s||M.kind!=='perp')return;
+    const d=draft();
+    head(M.sym+'-PERP','PERPETUAL \u00b7 MARGIN \u00b7 LEVERAGE');
+    $('v6-body').innerHTML=
+      '<div class="v6price" id="v6-price">$'+psx(s.prices[M.sym]||0)+'</div>'+
+      '<div class="v6l"><span>LEVERAGE</span><b id="v6-levv">'+d.lev+'x</b></div>'+
+      '<div class="v6chips six" id="v6-levchips">'+[2,5,10,20,35,50].map(l=>'<button data-lev="'+l+'" onclick="v6Lev('+l+')">'+l+'x</button>').join('')+'</div>'+
+      '<input id="v6-levr" class="v6rng" type="range" min="2" max="50" step="1" value="'+d.lev+'">'+
+      '<div class="v6l"><span>MARGIN ($)</span><b id="v6-capv"></b></div>'+
+      '<div class="v6in"><span>$</span><input id="v6-mi" type="number" inputmode="decimal" min="0" step="any" value="'+d.m+'"></div>'+
+      '<input id="v6-mr" class="v6rng p" type="range" min="0" step="any" value="'+d.m+'">'+
+      '<div class="v6chips"><button onclick="v6MarginPct(.1)">10%</button><button onclick="v6MarginPct(.25)">25%</button>'+
+        '<button onclick="v6MarginPct(.5)">50%</button><button onclick="v6MarginPct(1)">MAX</button></div>'+
+      '<div class="v6l"><span>POSITION SIZE ($ NOTIONAL)</span></div>'+
+      '<div class="v6in"><span>$</span><input id="v6-si" type="number" inputmode="decimal" min="0" step="any" value="'+(d.m*d.lev)+'"></div>'+
+      '<div class="v6grid">'+
+        '<div><div class="l">COINS ('+M.sym+')</div><div class="v" id="v6-pc">\u2014</div></div>'+
+        '<div><div class="l">FEE (ON CLOSE)</div><div class="v" id="v6-pf">\u2014</div></div>'+
+        '<div><div class="l">LIQ IF LONG</div><div class="v" id="v6-pl">\u2014</div></div>'+
+        '<div><div class="l">LIQ IF SHORT</div><div class="v" id="v6-ps">\u2014</div></div>'+
+      '</div>'+
+      '<div class="v6acts"><button class="v6go b" id="v6-long" onclick="v6Open(\'long\')">LONG</button>'+
+        '<button class="v6go s" id="v6-short" onclick="v6Open(\'short\')">SHORT</button></div>'+
+      '<div class="v6warn" id="v6-warn" style="display:none"></div>';
+    const lr=$('v6-levr'),mi=$('v6-mi'),mr=$('v6-mr'),si=$('v6-si');
+    lr.addEventListener('input',e=>{draft().lev=Math.max(2,Math.min(50,Math.round(+e.target.value||2)));patchPerp('lev')});
+    mi.addEventListener('input',e=>v6Margin(e.target.value,'mi'));
+    mr.addEventListener('input',e=>v6Margin(e.target.value,'mr'));
+    si.addEventListener('input',e=>v6Size(e.target.value));
+    [lr,mi,mr,si].forEach(hold);
+    patchPerp();
+  }
+  function patchPerp(src){
+    const s=S();if(!s||M.kind!=='perp')return;
+    const d=draft(),cap=capCash(),price=s.prices[M.sym]||0;
+    if(d.m>cap)d.m=cap;
+    const size=d.m*d.lev;
+    const p=$('v6-price');if(p)p.textContent='$'+psx(price);
+    const lv=$('v6-levv');if(lv)lv.textContent=d.lev+'x';
+    const lr=$('v6-levr');if(lr&&src!=='lev'&&!locked())lr.value=d.lev;
+    if(lr&&src==='lev'&&document.activeElement!==lr&&!locked())lr.value=d.lev;
+    const chips=$('v6-levchips');
+    if(chips)Array.from(chips.children).forEach(b=>b.classList.toggle('on',+b.dataset.lev===d.lev));
+    const cv=$('v6-capv');if(cv)cv.textContent='CASH '+money(s.cash);
+    const mi=$('v6-mi');if(mi&&src!=='mi'&&document.activeElement!==mi)mi.value=d.m;
+    const mr=$('v6-mr');if(mr){mr.max=Math.max(50,cap);if(src!=='mr'&&!locked())mr.value=d.m}
+    const si=$('v6-si');if(si&&src!=='size'&&document.activeElement!==si)si.value=size;
+    const pc=$('v6-pc');if(pc)pc.textContent=price>0?amtx(size/price):'\u2014';
+    const pf=$('v6-pf');if(pf)pf.textContent=money(Math.round(size*0.001));
+    const pl=$('v6-pl');if(pl)pl.textContent='$'+psx(perpLiq(price,'long',d.lev));
+    const ps=$('v6-ps');if(ps)ps.textContent='$'+psx(perpLiq(price,'short',d.lev));
+    const full=(s.perps||[]).length>=3,bad=full||d.m<50||d.m>cap;
+    const L=$('v6-long'),H=$('v6-short');
+    if(L)L.disabled=bad;if(H)H.disabled=bad;
+    if(L)L.textContent='LONG '+d.lev+'x';if(H)H.textContent='SHORT '+d.lev+'x';
+    const w=$('v6-warn');
+    if(w){
+      const msg=full?'MAX 3 OPEN POSITIONS':(d.m<50?'MIN MARGIN $50':(d.m>cap?'NOT ENOUGH CASH':''));
+      w.textContent=msg;w.style.display=msg?'block':'none';
+    }
+  }
+
+  /* ---------------- open position popup ---------------- */
+  window.v6Pos=function(i){
+    const s=S();if(!s||!(s.perps||[])[i])return;
+    const p=s.perps[i];
+    M={kind:'pos',sym:p.sym,idx:i,mode:'buy',amt:0};
+    shell().classList.add('on');try{playSound('click')}catch(e){}
+    buildPos();
+  };
+  window.v6ClosePos=function(fr){
+    const i=M.idx;close();
+    closePerp(i,false,fr);
+  };
+  function buildPos(){
+    const s=S();const p=(s.perps||[])[M.idx];if(!p){close();return}
+    head(p.lev+'x '+p.dir.toUpperCase()+' '+p.sym,'OPEN POSITION \u00b7 MONTH '+(p.m+1));
+    $('v6-body').innerHTML=
+      '<div class="v6price" id="v6-pnl">\u2014</div>'+
+      '<div class="v6grid">'+
+        '<div><div class="l">MARGIN</div><div class="v">'+money(p.margin)+'</div></div>'+
+        '<div><div class="l">SIZE</div><div class="v">'+money(p.margin*p.lev)+'</div></div>'+
+        '<div><div class="l">ENTRY</div><div class="v">$'+psx(p.entry)+'</div></div>'+
+        '<div><div class="l">MARK</div><div class="v" id="v6-mark">\u2014</div></div>'+
+        '<div><div class="l">LIQ PRICE</div><div class="v" id="v6-liq" style="color:#f87171">\u2014</div></div>'+
+        '<div><div class="l">FUNDING PAID</div><div class="v">-'+money(p.fund||0)+'</div></div>'+
+      '</div>'+
+      '<div class="v6l"><span>RISK TO LIQ</span><b id="v6-riskv">\u2014</b></div>'+
+      '<div class="liq-bar" id="v6-riskw"><i id="v6-riskb" style="width:0%"></i><s id="v6-riskm" style="left:0%"></s></div>'+
+      '<div class="v6row" id="v6-liqnote"></div>'+
+      '<div class="v6l"><span>POSITION P&amp;L</span></div>'+
+      '<div class="v6spark"><canvas id="v6-spark"></canvas></div>'+
+      '<div class="v6acts"><button class="v6go gold" onclick="v6ClosePos(0.5)">CLOSE 50%</button>'+
+        '<button class="v6go s" onclick="v6ClosePos(1)">CLOSE ALL</button></div>';
+    patchPos();
+  }
+  function patchPos(){
+    const s=S();if(!s||M.kind!=='pos')return;
+    const p=(s.perps||[])[M.idx];if(!p){close();return}
+    const pnl=perpPnl(p),pct=p.margin?pnl/p.margin*100:0;
+    const e=$('v6-pnl');
+    if(e){e.style.color=pnl>=0?'#34d399':'#f87171';
+      e.innerHTML=(pnl>=0?'+':'')+money(pnl)+' <span style="font-size:14px;opacity:.85">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>'}
+    const mk=$('v6-mark');if(mk)mk.textContent='$'+psx(s.prices[p.sym]||p.entry);
+    const lq=perpLiq(p.entry,p.dir,p.lev);
+    const lqe=$('v6-liq');if(lqe)lqe.textContent='$'+psx(lq);
+    const risk=perpRisk(p),move=perpMoveToLiq(p);
+    const rb=$('v6-riskb');if(rb){rb.style.width=risk.toFixed(0)+'%';rb.style.background=riskCol(risk)}
+    const rm=$('v6-riskm');if(rm)rm.style.left=risk.toFixed(0)+'%';
+    const rw=$('v6-riskw');if(rw)rw.classList.toggle('danger',risk>85);
+    const rv=$('v6-riskv');if(rv)rv.textContent=risk.toFixed(0)+'%';
+    const nt=$('v6-liqnote');
+    if(nt)nt.innerHTML='<span>Liq at $'+psx(lq)+'</span><b>'+move.toFixed(move<1?2:1)+'% price move away</b>';
+    try{drawSpark('v6-spark',p.hist)}catch(e2){}
+  }
+
+  /* ---------------- terminal: perp tiles + compact positions ------- */
+  window.renderPerpDesk=function(){
+    const el=$('market-list');const s=S();if(!el||!s)return;
+    el.classList.add('dexgrid');
+    const ps=s.perps||[];
+    let h='';
+    ps.forEach((p,i)=>{
+      const pnl=perpPnl(p),pct=p.margin?pnl/p.margin*100:0;
+      const risk=perpRisk(p),lq=perpLiq(p.entry,p.dir,p.lev),move=perpMoveToLiq(p);
+      h+='<div class="v6pos" onclick="v6Pos('+i+')">'+
+        '<div style="min-width:0"><div class="hd">'+p.sym+
+          '<span class="v6dir '+(p.dir==='long'?'l':'s')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span></div>'+
+          '<div class="mt">MARGIN '+money(p.margin)+' \u00b7 SIZE '+money(p.margin*p.lev)+' \u00b7 ENTRY $'+psx(p.entry)+'</div></div>'+
+        '<div class="pn" id="pp-'+i+'" style="color:'+(pnl>=0?'#34d399':'#f87171')+'">'+(pnl>=0?'+':'')+money(pnl)+
+          '<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></div>'+
+        '<div class="full"><div class="liq-bar'+(risk>85?' danger':'')+'" id="plw-'+i+'" style="margin:2px 0 4px">'+
+          '<i id="plb-'+i+'" style="width:'+risk.toFixed(0)+'%;background:'+riskCol(risk)+'"></i>'+
+          '<s id="plm-'+i+'" style="left:'+risk.toFixed(0)+'%"></s></div>'+
+          '<div class="mt"><span id="prk-'+i+'">'+risk.toFixed(0)+'%</span> RISK \u00b7 <span id="pln-'+i+'">Liq at $'+psx(lq)+' \u00b7 '+move.toFixed(move<1?2:1)+'% price move away</span></div></div>'+
+        '<div class="cls" onclick="event.stopPropagation()">'+
+          '<button onclick="closePerp('+i+',false,0.5)">CLOSE 50%</button>'+
+          '<button onclick="closePerp('+i+')">CLOSE ALL</button></div>'+
+      '</div>';
+    });
+    perpSyms().forEach(sym=>{
+      const price=s.prices[sym]||0;
+      const d=perpDraft(sym);
+      let chg=0;
+      try{const prev=(typeof getHistPrice==='function')?getHistPrice(sym,s.month-1):0;chg=prev>0?((price-prev)/prev*100):0}catch(e){}
+      const cc=chg>0.05?'up':chg<-0.05?'dn':'flat';
+      h+='<button class="v6tile" onclick="v6Perp(\''+sym+'\')" title="'+sym+' perpetual — tap to set margin &amp; leverage">'+
+        '<span class="lv">'+d.lev+'x</span>'+
+        '<span class="s">'+sym+'-PERP</span>'+
+        '<span class="p" id="price-perp-'+sym+'">$'+psx(price)+'</span>'+
+        '<span class="c '+cc+'">'+(chg>=0?'+':'')+chg.toFixed(1)+'% MO</span>'+
+        '<span class="c" style="color:#ffd76a">\u26a1 LEVERAGE</span>'+
+      '</button>';
+    });
+    h+='<div class="v6pos" style="cursor:default;grid-template-columns:1fr"><div class="mt" style="margin:0;line-height:1.6">'+
+       'Tap a perp to set <b style="color:#ffd76a">margin</b> and <b style="color:#ffd76a">position size</b>. Funding is charged monthly, '+
+       'positions auto-close after 6 months, liquidation at -92% of margin is permanent. Max 3 open positions.</div></div>';
+    el.innerHTML=h;
+  };
+
+  /* ---------------- panel detail popups ---------------- */
+  function plainModal(title,meta,html){
+    M={kind:'info',sym:'',idx:-1,mode:'buy',amt:0};
+    shell().classList.add('on');
+    $('v6-head').innerHTML='<span class="dxb" style="--c:#f0b429;width:38px;height:38px;border-radius:13px;font-size:11px">'+
+      title.slice(0,3)+'</span><div style="min-width:0"><div class="t">'+title+'</div><div class="m">'+meta+'</div></div>'+
+      '<button class="v6x" onclick="v6Close()">\u2715</button>';
+    $('v6-body').innerHTML=html;
+  }
+  window.v6Ledger=function(){
+    const src=$('v5-book');
+    plainModal('CASH LEDGER','EVERY DOLLAR BOOKED','<div class="v6list">'+(src?src.innerHTML:'')+'</div>');
+    const l=$('v6m').querySelector('.v6list');
+    if(l)l.querySelectorAll('.bk-row').forEach(r=>r.style.display='flex');
+  };
+  window.v6Cash=function(){
+    const rows=document.querySelector('main .cf-rows');
+    plainModal('CASHFLOW','ALL MONTHLY POSTS','<div class="v6list">'+(rows?rows.outerHTML.replace('v6-fold',''):'')+'</div>');
+  };
+  window.v6Pnl=function(){
+    const s=S();if(!s)return;
+    let unreal=0,invested=0,posVal=0;
+    try{COINS.forEach(c=>{const hd=s.holdings[c.s]||0,a=s.avg[c.s]||0,pr=s.prices[c.s]||0;
+      if(hd>0){posVal+=hd*pr;if(a>0){invested+=hd*a;unreal+=hd*(pr-a)}}})}catch(e){}
+    let perpPnlSum=0;try{(s.perps||[]).forEach(p=>perpPnlSum+=perpPnl(p))}catch(e){}
+    const rows=[
+      ['Portfolio value',money(posVal)],
+      ['Cost basis',money(invested)],
+      ['Unrealised P&L',(unreal>=0?'+':'')+money(unreal)],
+      ['Realised this year',money(s._realizedYear||0)],
+      ['Open perp P&L',(perpPnlSum>=0?'+':'')+money(perpPnlSum)],
+      ['Cash',money(s.cash)],
+      ['Net worth',money(typeof netWorth==='function'?netWorth():0)]
+    ];
+    plainModal('P&L DETAIL','LIVE BOOK \u00b7 MONTH '+((s.month||0)+1),
+      '<div class="v6sum">'+rows.map(r=>'<div class="v6row"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')+'</div>');
+  };
+
+  /* ---------------- compact panels ---------------- */
+  function compact(){
+    const book=$('v5-book');
+    if(book&&book.parentNode&&!$('v6-book-more')){
+      const b=document.createElement('button');
+      b.id='v6-book-more';b.className='v6more';b.textContent='ALL ENTRIES';
+      b.onclick=window.v6Ledger;book.parentNode.appendChild(b);
+    }
+    const rows=document.querySelector('main .cf-rows');
+    if(rows&&!rows.classList.contains('v6-fold')){
+      rows.classList.add('v6-fold');
+      const b=document.createElement('button');
+      b.className='v6more';b.textContent='ALL POSTS';b.onclick=window.v6Cash;
+      rows.parentNode.insertBefore(b,rows.nextSibling);
+    }
+    const head=$('v5-pnl-head');
+    if(head&&!head.dataset.v6){head.dataset.v6='1';head.style.cursor='pointer';head.title='Open P&L detail';head.onclick=window.v6Pnl}
+  }
+
+  /* ---------------- live refresh (never during a drag) ---------------- */
+  setInterval(function(){
+    const s=S();if(!s||s._gameEnded)return;
+    const m=$('v6m');if(!m||!m.classList.contains('on'))return;
+    if(locked())return;
+    if(M.kind==='spot')patchSpot();
+    else if(M.kind==='perp')patchPerp();
+    else if(M.kind==='pos')patchPos();
+  },700);
+  setInterval(compact,900);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',compact);else compact();
+})();
+</script>
+
 </body>
 </html>
 
