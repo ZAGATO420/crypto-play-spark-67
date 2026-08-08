@@ -1962,7 +1962,7 @@ function resumeGame(){
     document.getElementById('start-screen').style.display='none';
     document.getElementById('game-screen').style.display='block';
     initChart();
-    if(state.netHistory){ state.netHistory.forEach((v,i)=>{ if(i>0){ chart.data.labels.push(i); chart.data.datasets[0].data.push(v); }}); }
+    if(state.netHistory&&typeof chart!=='undefined'&&chart){ state.netHistory.forEach((v,i)=>{ if(i>0){ chart.data.labels.push(i); chart.data.datasets[0].data.push(v); }}); }
     updateHeader();updateSidePanels();renderMarket();startTimer();
     toast('Resumed!','buy');
   }catch(e){ alert('Resume failed: '+e.message); }
