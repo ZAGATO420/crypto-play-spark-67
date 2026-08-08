@@ -57,8 +57,12 @@ input{font-family:inherit}
 }
 #critical-warning.show{display:block;animation:criticalPulse 1.1s infinite}
 @keyframes criticalPulse{0%,100%{opacity:1}50%{opacity:.75}}
-body.critical-pulse{animation:bodyPulse 1.2s infinite}
-@keyframes bodyPulse{0%,100%{box-shadow:inset 0 0 0 0 transparent}50%{box-shadow:inset 0 0 100px rgba(239,68,68,.15)}}
+/* Danger tint runs on a composited overlay (opacity only) instead of an
+   animated inset box-shadow on <body>, which repainted the whole viewport
+   every frame on mobile. */
+body.critical-pulse::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
+  box-shadow:inset 0 0 100px rgba(239,68,68,.15);animation:bodyPulse 1.2s infinite;will-change:opacity}
+@keyframes bodyPulse{0%,100%{opacity:0}50%{opacity:1}}
 
 /* START */
 #start-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 16px;position:relative;overflow:hidden}
@@ -413,6 +417,14 @@ header.compact .xp-wrap{margin-top:4px}
   body #game-screen button#mobile-next{position:fixed!important;left:10px!important;right:10px!important;top:auto!important;bottom:74px!important;z-index:119!important;display:block!important;width:auto!important}
 }
 
+
+/* ===== Accessibility / battery: honour "reduce motion" =====
+   Decorative loops (glows, floats, sheen, ticker) stop; functional feedback
+   like popIn/toastIn stays but becomes instant. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .title-ape,.ape-stage::before,.ape-stage::after,.news-ticker-inner,#start-screen::before,#start-screen::after{animation:none!important}
+}
 </style>
 <style>
 /* ============================================================
@@ -661,11 +673,11 @@ input[type=text]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(240,18
   box-shadow:0 16px 50px -14px rgba(168,85,247,.6),0 0 0 1px rgba(255,255,255,.08);
 }
 .start-btn::after{
-  content:'';position:absolute;top:0;bottom:0;width:40%;left:-50%;
+  content:'';position:absolute;top:0;bottom:0;width:40%;left:0;will-change:transform;
   background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);
   animation:sheen 3.4s ease-in-out infinite;
 }
-@keyframes sheen{0%{left:-50%}55%,100%{left:130%}}
+@keyframes sheen{0%{transform:translateX(-150%)}55%,100%{transform:translateX(340%)}}
 #howto-manual-btn{
   border-radius:14px!important;border:1px solid var(--v3-line)!important;
   background:rgba(255,255,255,.025)!important;font-family:'JetBrains Mono',monospace;
