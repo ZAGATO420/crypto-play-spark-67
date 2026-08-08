@@ -4578,7 +4578,7 @@ header{background:rgba(9,12,26,.88)}
     season.innerHTML=
       '<div class="panel-title"><span>SEASON STATUS</span><span id="v4-lvl" style="color:#ffd76a">LVL 1</span></div>'+
       '<div class="season-top">'+
-        '<img id="v4-tier-img" class="season-badge stk" src="'+IMG.t1+'" alt="Tier badge">'+
+        '<img decoding="async" loading="lazy" id="v4-tier-img" class="season-badge stk" src="'+IMG.t1+'" alt="Tier badge">'+
         '<div style="min-width:0">'+
           '<div class="season-tier-l">DEGEN TIER</div>'+
           '<div class="season-tier" id="v4-tier-name">EXIT LIQUIDITY</div>'+
@@ -4596,7 +4596,7 @@ header{background:rgba(9,12,26,.88)}
     player.innerHTML=
       '<div class="panel-title"><span>PLAYER</span><span id="v4-day-chip" style="color:#8d97ba">DAY 1 / 30</span></div>'+
       '<div class="player-card">'+
-        '<img id="v4-player-av" class="player-av stk" src="'+IMG.coder+'" alt="Avatar">'+
+        '<img decoding="async" loading="lazy" id="v4-player-av" class="player-av stk" src="'+IMG.coder+'" alt="Avatar">'+
         '<div style="min-width:0">'+
           '<div class="player-name" id="v4-player-name">Player</div>'+
           '<div class="player-chips" id="v4-player-chips"></div>'+
@@ -4605,7 +4605,7 @@ header{background:rgba(9,12,26,.88)}
 
     const mis=document.createElement('div');
     mis.className='panel';mis.dataset.pane='port';
-    mis.innerHTML='<div class="panel-title"><span><img class="v4-panel-ic stk" src="'+IMG.quest+'" alt=""> DAILY MISSIONS</span>'+
+    mis.innerHTML='<div class="panel-title"><span><img decoding="async" loading="lazy" class="v4-panel-ic stk" src="'+IMG.quest+'" alt=""> DAILY MISSIONS</span>'+
       '<span id="v4-mis-count" style="color:#2dd4bf"></span></div><div id="v4-missions"></div>';
 
     /* chart moves to the top of the middle column, exchange-desk style */
@@ -5322,7 +5322,7 @@ header{background:rgba(9,12,26,.88)}
     if(tabs&&!tabs.querySelector('[data-side-tab="book"]')){
       const b=document.createElement('button');
       b.dataset.sideTab='book';
-      b.innerHTML='<img class="stk" src="'+((window.TCFB_IMG&&window.TCFB_IMG.trophy)||'')+'" alt="">LEDGER';
+      b.innerHTML='<img decoding="async" loading="lazy" class="stk" src="'+((window.TCFB_IMG&&window.TCFB_IMG.trophy)||'')+'" alt="">LEDGER';
       tabs.appendChild(b);
     }
     renderBook();
