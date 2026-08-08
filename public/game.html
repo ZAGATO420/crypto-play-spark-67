@@ -6099,6 +6099,7 @@ main .cf-rows.v6-fold{display:none}
     w.classList.add('v7wrap');
     const kids=Array.from(l.children);if(!kids.length)return;
     const limit=w.clientHeight-6;if(limit<80)return;
+    if(l.scrollHeight<=limit+2)return;
     let cut=-1;
     for(let i=0;i<kids.length;i++){
       const k=kids[i];
@@ -6145,7 +6146,7 @@ main .cf-rows.v6-fold{display:none}
   window.renderMarket=function(){
     const r=origRM?origRM.apply(this,arguments):undefined;
     const l=$('market-list');
-    if(l&&l.dataset.v7full!=='1')requestAnimationFrame(fold);
+    if(l&&l.dataset.v7full!=='1')requestAnimationFrame(()=>requestAnimationFrame(fold));
     return r;
   };
 
