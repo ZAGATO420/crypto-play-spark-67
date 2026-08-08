@@ -559,10 +559,11 @@ header.compact .xp-wrap{margin-top:4px}
 .logo-hero{
   display:grid;grid-template-columns:minmax(0,1fr) auto;
   grid-template-areas:"hud ape" "title ape" "banner banner" "meta meta";
+  grid-template-rows:auto 1fr auto auto;
   align-items:end;column-gap:clamp(4px,1.6vw,24px);row-gap:0;
   text-align:left;position:relative;margin-bottom:6px;
 }
-.hero-hud{grid-area:hud;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;z-index:2;padding-bottom:clamp(18px,4vw,46px)}
+.hero-hud{grid-area:hud;align-self:start;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;z-index:2}
 .hh-left{display:flex;flex-direction:column;gap:7px;min-width:0}
 .hh-live{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
   letter-spacing:.22em;text-transform:uppercase;color:#34d399}
