@@ -5960,6 +5960,194 @@ main .cf-rows.v6-fold{display:none}
 </script>
 
 
+
+<style id="v7-skin">
+/* ============================================================
+   V7 — twin desks: CHART // P&L and PERP // P&L side by side,
+   both fixed, terminal never scrolls. Cosmetic layer only.
+   ============================================================ */
+#v7-top{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0}
+#v7-top>.panel{display:flex;flex-direction:column;min-width:0;overflow:hidden!important}
+#v7-top .chart-box{flex:1 1 auto;height:auto!important;min-height:90px}
+#v7-top #cost-list{flex:0 0 auto;max-height:34px;overflow:hidden}
+.v7pk{display:grid;grid-template-columns:1fr 1fr;gap:1px;border-radius:13px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.07);margin-top:9px;flex:0 0 auto}
+.v7pk>div{background:rgba(9,12,26,.92);padding:7px 9px;min-width:0}
+.v7pk .l{font:800 8px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#7e88ad}
+.v7pk .v{font:800 12.5px 'JetBrains Mono',monospace;color:#eef1ff;font-variant-numeric:tabular-nums;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.v7big{font:900 clamp(18px,2.2vw,28px) 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.v7sub{font:700 9px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#7e88ad;margin-top:3px}
+.v7rows{margin-top:9px;display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-height:0;overflow:hidden}
+.v7row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;cursor:pointer;
+  padding:7px 9px;border-radius:11px;border:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(168deg,rgba(255,255,255,.055),rgba(15,20,40,.7));transition:.16s}
+.v7row:hover{border-color:rgba(240,180,41,.45);transform:translateY(-1px)}
+.v7row .n{font:900 11px 'JetBrains Mono',monospace;letter-spacing:.04em;display:flex;gap:6px;align-items:center}
+.v7row .m{font:700 8px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7e88ad;margin-top:2px}
+.v7row .p{font:900 12px 'JetBrains Mono',monospace;text-align:right;font-variant-numeric:tabular-nums}
+.v7empty{flex:1 1 auto;display:grid;place-items:center;text-align:center;padding:8px;
+  font:700 9.5px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#7e88ad;line-height:1.7}
+.v7cta{width:100%;height:34px;flex:0 0 auto;margin-top:9px;border-radius:11px;cursor:pointer;
+  border:1px solid rgba(240,180,41,.4);color:#ffd76a;background:linear-gradient(168deg,rgba(240,180,41,.14),rgba(15,20,40,.8));
+  font:900 9.5px 'JetBrains Mono',monospace;letter-spacing:.16em}
+.v7cta:hover{border-color:rgba(240,180,41,.75)}
+#market-list.dexgrid{grid-template-columns:repeat(auto-fill,minmax(116px,1fr))}
+.v7wrap{overflow:hidden!important}
+.dxt.v7more,.v7more-tile{display:grid;place-items:center;gap:2px;text-align:center;
+  border-style:dashed!important;border-color:rgba(240,180,41,.4)!important;color:#ffd76a;
+  font:900 11px 'JetBrains Mono',monospace;letter-spacing:.1em;cursor:pointer}
+@media(min-width:1151px){
+  body.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 auto;height:37%;min-height:210px}
+  body.v4-live main>div:nth-child(2)>.panel:last-child{flex:1 1 auto;min-height:0}
+}
+@media(max-width:1150px){
+  #v7-top{grid-template-columns:1fr}
+  #v7-top>.panel{max-height:none}
+  #v7-top .chart-box{min-height:170px}
+}
+</style>
+<script>
+/* V7 layer: twin fixed desks + scroll-free terminal grid. Additive only. */
+(function(){
+  const $=id=>document.getElementById(id);
+  const S=()=>(typeof state!=='undefined'&&state)?state:null;
+  const money=v=>(typeof fmt==='function'?fmt(v):'$'+Math.round(v).toLocaleString());
+  const psx=v=>(typeof priceStr==='function'?priceStr(v):(+v).toFixed(2));
+
+  function buildTwin(){
+    if($('v7-top'))return;
+    const main=document.querySelector('main');if(!main)return;
+    const mid=main.children[1];if(!mid)return;
+    const chart=Array.from(mid.children).find(p=>p.classList&&p.classList.contains('panel')&&
+      ((p.querySelector('.panel-title')||{}).textContent||'').indexOf('CHART')>-1);
+    if(!chart)return;
+    const wrap=document.createElement('div');wrap.id='v7-top';
+    mid.insertBefore(wrap,chart);
+    wrap.appendChild(chart);
+    const perp=document.createElement('div');
+    perp.className='panel';perp.id='v7-perp';perp.dataset.pane='market';
+    perp.innerHTML='<div class="panel-title"><span>PERP // P&amp;L</span>'+
+      '<span style="font-size:10px;color:var(--muted)" id="v7-open">0 / 3</span></div>'+
+      '<div id="v7-perp-body" style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0"></div>';
+    wrap.appendChild(perp);
+    renderPerpPnl();
+  }
+
+  function renderPerpPnl(){
+    const b=$('v7-perp-body');const s=S();if(!b||!s)return;
+    const ps=s.perps||[];
+    const oc=$('v7-open');if(oc)oc.textContent=ps.length+' / 3';
+    if(!ps.length){
+      b.innerHTML='<div class="v7empty">NO OPEN POSITIONS<br>'+
+        'LEVERAGE 2x \u2013 50x \u00b7 LONG OR SHORT</div>'+
+        '<button class="v7cta" onclick="setFilter(\'PERPS\')">OPEN PERP DESK</button>';
+      return;
+    }
+    let pnl=0,marg=0,size=0,worst=0;
+    ps.forEach(p=>{
+      let v=0;try{v=perpPnl(p)}catch(e){}
+      pnl+=v;marg+=p.margin;size+=p.margin*p.lev;
+      let r=0;try{r=perpRisk(p)}catch(e){}
+      if(r>worst)worst=r;
+    });
+    const col=pnl>=0?'#34d399':'#f87171';
+    const pct=marg?pnl/marg*100:0;
+    let rc='#34d399';try{rc=riskCol(worst)}catch(e){if(worst>70)rc='#f87171';else if(worst>40)rc='#f0b429'}
+    b.innerHTML=
+      '<div class="v7big" style="color:'+col+'">'+(pnl>=0?'+':'')+money(pnl)+
+        ' <span style="font-size:13px;opacity:.85">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></div>'+
+      '<div class="v7sub">UNREALISED \u00b7 '+ps.length+' POSITION'+(ps.length>1?'S':'')+'</div>'+
+      '<div class="v7pk">'+
+        '<div><div class="l">MARGIN</div><div class="v">'+money(marg)+'</div></div>'+
+        '<div><div class="l">NOTIONAL</div><div class="v">'+money(size)+'</div></div>'+
+        '<div><div class="l">WORST RISK</div><div class="v" style="color:'+rc+'">'+worst.toFixed(0)+'%</div></div>'+
+        '<div><div class="l">AVG LEV</div><div class="v">'+(marg?(size/marg).toFixed(0):0)+'x</div></div>'+
+      '</div>'+
+      '<div class="v7rows">'+ps.slice(0,3).map((p,i)=>{
+        let v=0;try{v=perpPnl(p)}catch(e){}
+        let lq=p.entry;try{lq=perpLiq(p.entry,p.dir,p.lev)}catch(e){}
+        const pc=p.margin?v/p.margin*100:0;
+        return '<div class="v7row" onclick="v6Pos('+i+')">'+
+          '<div style="min-width:0"><div class="n">'+p.sym+
+            '<span class="v6dir '+(p.dir==='long'?'l':'s')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span></div>'+
+            '<div class="m">ENTRY $'+psx(p.entry)+' \u00b7 LIQ $'+psx(lq)+'</div></div>'+
+          '<div class="p" style="color:'+(v>=0?'#34d399':'#f87171')+'">'+(v>=0?'+':'')+money(v)+
+            '<br><span style="font-size:9px;opacity:.8">'+(pc>=0?'+':'')+pc.toFixed(1)+'%</span></div></div>';
+      }).join('')+'</div>'+
+      '<button class="v7cta" onclick="setFilter(\'PERPS\')">MANAGE PERP DESK</button>';
+  }
+  window.v7PerpPnl=renderPerpPnl;
+
+  /* ---- terminal: no scroll, overflow folds into a popup ---- */
+  function wrapEl(){
+    const l=$('market-list');return l?l.parentElement:null;
+  }
+  function fold(){
+    const l=$('market-list'),w=wrapEl();if(!l||!w)return;
+    w.classList.add('v7wrap');
+    const kids=Array.from(l.children);if(!kids.length)return;
+    const limit=w.clientHeight-6;if(limit<80)return;
+    let cut=-1;
+    for(let i=0;i<kids.length;i++){
+      const k=kids[i];
+      if(k.offsetTop+k.offsetHeight>limit){cut=i;break}
+    }
+    if(cut<0)return;
+    if(cut>0)cut=cut-1;                              /* room for the MORE tile */
+    const hidden=kids.slice(cut);
+    if(!hidden.length)return;
+    hidden.forEach(k=>k.remove());
+    const b=document.createElement('button');
+    b.className='dxt v7more';
+    b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE</span>';
+    b.onclick=()=>showAll();
+    l.appendChild(b);
+  }
+  function showAll(){
+    const l=$('market-list');if(!l)return;
+    l.dataset.v7full='1';
+    if(typeof renderMarket==='function')renderMarket();
+    const html=l.innerHTML;
+    l.dataset.v7full='';
+    if(typeof v7Modal==='function')v7Modal(html);
+    if(typeof renderMarket==='function')setTimeout(renderMarket,0);
+  }
+  window.v7Modal=function(html){
+    let m=$('v7m');
+    if(!m){
+      m=document.createElement('div');m.id='v7m';
+      m.style.cssText='position:fixed;inset:0;z-index:420;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,6,14,.76);backdrop-filter:blur(7px)';
+      m.innerHTML='<div style="width:min(760px,100%);max-height:88vh;overflow:auto;border-radius:22px;padding:18px;border:1px solid rgba(255,255,255,.13);background:linear-gradient(168deg,rgba(26,32,60,.98),rgba(9,12,24,.99))">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+        '<b style="font:900 13px \'JetBrains Mono\',monospace;letter-spacing:.14em">ALL MARKETS</b>'+
+        '<button id="v7mx" style="width:32px;height:32px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#cbd3ec;cursor:pointer">\u2715</button></div>'+
+        '<div id="v7m-grid" class="dexgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:9px"></div></div>';
+      document.body.appendChild(m);
+      m.addEventListener('click',e=>{if(e.target===m||e.target.id==='v7mx')m.style.display='none'});
+    }
+    m.style.display='flex';
+    const g=$('v7m-grid');if(g)g.innerHTML=html;
+  };
+
+  const origRM=window.renderMarket;
+  window.renderMarket=function(){
+    const r=origRM?origRM.apply(this,arguments):undefined;
+    const l=$('market-list');
+    if(l&&l.dataset.v7full!=='1')requestAnimationFrame(fold);
+    return r;
+  };
+
+  function tick(){
+    const s=S();if(!s||s._gameEnded)return;
+    buildTwin();renderPerpPnl();
+  }
+  setInterval(tick,900);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tick);else tick();
+  window.addEventListener('resize',()=>{if(typeof renderMarket==='function')renderMarket()});
+})();
+</script>
+
 </body>
 </html>
 
