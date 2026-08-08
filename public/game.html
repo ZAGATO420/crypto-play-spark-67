@@ -1071,31 +1071,29 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
 <div id="game-screen">
   <header>
     <div class="header-top">
-      <div class="player-info">
-        <img class="hdr-logo" decoding="async" src="/__l5e/assets-v1/b365c9c5-15ba-4d87-9258-8748ebd1fcf3/tcfb-logo-128.webp" alt="" width="28">
-        <div class="avatar-box" id="hdr-avatar">🧑‍💻</div>
-        <div>
-          <div style="font-weight:900;font-size:13px" id="hdr-name">Player</div>
-          <div style="font-size:11px;color:#7a86a8" id="hdr-meta">DE • Jan 2020</div>
-        </div>
+      <span id="hdr-avatar" hidden></span>
+      <div class="hud-net">
+        <div class="hud-net-label">NET WORTH</div>
+        <div class="hud-net-val" id="stat-net">$10,000</div>
+        <div class="hud-meta"><span id="hdr-name">Player</span> <span class="hud-meta-dim" id="hdr-meta">DE • Jan 2020</span></div>
       </div>
-      <div class="stats-row">
-        <div class="stat-pill"><div class="l">Cash</div><div class="v" id="stat-cash">$10,000</div></div>
-        <div class="stat-pill"><div class="l">Net Worth</div><div class="v" id="stat-net">$10,000</div></div>
-        <div class="stat-pill"><div class="l">Portfolio</div><div class="v" id="stat-port">$0</div></div>
-        <div class="risk-bar-wrap">
-          <div style="font-size:9px;color:var(--muted);display:flex;justify-content:space-between"><span>RISK</span><span id="stat-risk">8%</span></div>
+      <div class="hud-figs">
+        <div class="hud-fig"><div class="l">Cash</div><div class="v" id="stat-cash">$10,000</div></div>
+        <div class="hud-fig"><div class="l">Portfolio</div><div class="v" id="stat-port">$0</div></div>
+        <div class="hud-fig hud-fig-risk">
+          <div class="l">Risk <b id="stat-risk">8%</b></div>
           <div class="risk-bar"><div class="risk-fill" id="risk-fill" style="width:8%"></div></div>
         </div>
-        <div class="surv-bars">
-          <div class="surv-item"><div class="top"><span>🍔</span><span id="h-val">20%</span></div><div class="bar"><div class="fill" id="h-fill" style="width:20%;background:#22c55e"></div></div></div>
-          <div class="surv-item"><div class="top"><span>🧠</span><span id="s-val">15%</span></div><div class="bar"><div class="fill" id="s-fill" style="width:15%;background:#22c55e"></div></div></div>
-          <div class="surv-item"><div class="top"><span>❤️</span><span id="hp-val">100%</span></div><div class="bar"><div class="fill" id="hp-fill" style="width:100%;background:#22c55e"></div></div></div>
-        </div>
-        <div class="hud-quick"><button id="hud-eat" onclick="buyItem('food')" title="Essen kaufen">🍔</button><button id="hud-therapy" onclick="buyItem('therapy')" title="Therapie">🧘</button></div>
-        <button class="tc-btn" id="sound-btn" style="background:#1a1e33;border-color:#3f3f46" onclick="toggleSoundBtn()" title="Sound an">🔊</button>
-        <button class="tc-btn" style="background:#1a1e33;border-color:#3f3f46" onclick="openSettings()">⚙️</button>
-        <button class="tc-btn" style="background:#2a1620;border-color:#5a2338;color:#ff8fa3" onclick="quitGame()">QUIT</button>
+      </div>
+      <div class="hud-vitals">
+        <div class="vital"><span class="vi">🍔</span><div class="vb"><div class="fill" id="h-fill" style="width:20%;background:#22c55e"></div></div><span class="vv" id="h-val">20%</span><button class="vq" id="hud-eat" onclick="buyItem('food')" title="Essen kaufen">EAT</button></div>
+        <div class="vital"><span class="vi">🧠</span><div class="vb"><div class="fill" id="s-fill" style="width:15%;background:#22c55e"></div></div><span class="vv" id="s-val">15%</span><button class="vq" id="hud-therapy" onclick="buyItem('therapy')" title="Therapie">CALM</button></div>
+        <div class="vital"><span class="vi">❤️</span><div class="vb"><div class="fill" id="hp-fill" style="width:100%;background:#22c55e"></div></div><span class="vv" id="hp-val">100%</span></div>
+      </div>
+      <div class="hud-sys">
+        <button class="hud-ic" id="sound-btn" onclick="toggleSoundBtn()" title="Sound an">🔊</button>
+        <button class="hud-ic" onclick="openSettings()" title="Settings">⚙️</button>
+        <button class="hud-ic hud-ic-quit" onclick="quitGame()" title="Quit">✕</button>
       </div>
     </div>
     <div class="xp-wrap">
