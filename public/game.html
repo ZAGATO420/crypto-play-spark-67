@@ -6151,8 +6151,15 @@ main .cf-rows.v6-fold{display:none}
     const isPerp=!!l.querySelector('.v6pos, .v6tile');
     const lr=l.getBoundingClientRect();
     const wr=w.getBoundingClientRect();
-    const avail=Math.min(w.clientHeight-(lr.top-wr.top)-4,floorY()-lr.top-8);
+    let avail=Math.min(w.clientHeight-(lr.top-wr.top)-4,floorY()-lr.top-8);
     if(avail<40)return;
+    /* dense mode on short screens: more tokens per row before anything folds */
+    const dense=avail<210;
+    if(dense!==l.classList.contains('v7dense')){
+      l.classList.toggle('v7dense',dense);
+      const nr=l.getBoundingClientRect();
+      avail=Math.min(w.clientHeight-(nr.top-w.getBoundingClientRect().top)-4,floorY()-nr.top-8);
+    }
     /* group tiles into visual rows, keep only rows that fit completely */
     const rows=[];
     kids.forEach(k=>{
