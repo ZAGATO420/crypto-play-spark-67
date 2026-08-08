@@ -5992,8 +5992,18 @@ main .cf-rows.v6-fold{display:none}
   border:1px solid rgba(240,180,41,.4);color:#ffd76a;background:linear-gradient(168deg,rgba(240,180,41,.14),rgba(15,20,40,.8));
   font:900 9.5px 'JetBrains Mono',monospace;letter-spacing:.16em}
 .v7cta:hover{border-color:rgba(240,180,41,.75)}
-#market-list.dexgrid{grid-template-columns:repeat(auto-fill,minmax(116px,1fr))}
+#market-list.dexgrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));align-content:start}
 .v7wrap{overflow:hidden!important}
+/* folded terminal: compact tiles so full rows fit instead of being clipped */
+@media(min-width:1151px){
+  .v7wrap #market-list .dxt{padding:9px 10px 10px}
+  .v7wrap #market-list .v6tile{padding:9px 10px 10px;gap:2px}
+  .v7wrap #market-list .v6tile .p{font-size:13.5px}
+  .v7wrap #market-list .v6pos{padding:9px 11px;gap:6px 10px}
+  .v7wrap #market-list .v6pos .pn{font-size:12.5px}
+  .v7wrap #market-list .v6pos .cls button{height:28px}
+}
+.v7more{min-height:56px}
 .dxt.v7more,.v7more-tile{display:grid;place-items:center;gap:2px;text-align:center;
   border-style:dashed!important;border-color:rgba(240,180,41,.4)!important;color:#ffd76a;
   font:900 11px 'JetBrains Mono',monospace;letter-spacing:.1em;cursor:pointer}
