@@ -6144,8 +6144,9 @@ main .cf-rows.v6-fold{display:none}
     const kids=Array.from(l.children);if(!kids.length)return;
     const isPerp=!!l.querySelector('.v6pos, .v6tile');
     const lr=l.getBoundingClientRect();
-    const avail=Math.min(w.clientHeight-(lr.top-w.getBoundingClientRect().top)-4,floorY()-lr.top-10);
-    if(avail<64)return;
+    const wr=w.getBoundingClientRect();
+    const avail=Math.min(w.clientHeight-(lr.top-wr.top)-4,floorY()-lr.top-8);
+    if(avail<40)return;
     /* group tiles into visual rows, keep only rows that fit completely */
     const rows=[];
     kids.forEach(k=>{
