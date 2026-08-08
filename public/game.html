@@ -6307,7 +6307,7 @@ main .cf-rows.v6-fold{display:none}
   font-size:clamp(20px,3.6vw,50px);line-height:1;letter-spacing:-.01em}
 .ec9.win .ec9-title{color:#2ee59d}
 .ec9.boss .ec9-title{color:var(--gold2)}
-.ec9-cells{margin-top:auto;padding-top:clamp(10px,2%,20px);
+.ec9-cells{position:relative;z-index:2;margin-top:auto;padding-top:clamp(10px,2%,20px);
   border-top:1px solid rgba(255,255,255,.10);
   display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:clamp(6px,1.4%,18px)}
 .ec9-cell{min-width:0}
@@ -6319,12 +6319,17 @@ main .cf-rows.v6-fold{display:none}
   border-top:1px solid rgba(255,255,255,.07);
   font-family:'JetBrains Mono',monospace;color:#6a6f92;letter-spacing:.14em;
   font-size:clamp(7.5px,.9vw,13px)}
+@media(min-width:900px){ .end-card{max-width:1040px} }
+.ec9-body{text-align:left;padding-right:clamp(120px,26%,320px)}
+.ec9-cells{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ec9-cell .k{letter-spacing:.12em}
 @media(max-width:620px){
   .ec9{aspect-ratio:auto}
   .ec9-ape{height:34%;top:1%;right:-2%;opacity:.95}
   .ec9-net{font-size:clamp(28px,9vw,44px)}
   .ec9-title{font-size:clamp(18px,5.6vw,30px)}
-  .ec9-cells{grid-template-columns:repeat(3,1fr)}
+  .ec9-cells{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ec9-body{padding-right:clamp(90px,32%,150px)}
   .ec9-cell .v{font-size:14px}
 }
 </style>
