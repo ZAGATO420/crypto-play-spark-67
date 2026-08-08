@@ -6337,9 +6337,10 @@ main .cf-rows.v6-fold{display:none}
 </style>
 <script id="v9-endcard-js">
 (function(){
+  function cur(){try{return (typeof state!=='undefined')?state:null}catch(e){return null}}
   var APE='/__l5e/assets-v1/7b6262df-d3c4-4d4d-a087-93c8d47ae47b/boss-ape-crown.webp';
   function statusWord(){
-    if(!window.state) return 'REKT';
+    var state=cur(); if(!state) return 'REKT';
     if(state._bossWin) return 'FINAL BOSS DEFEATED';
     if(state._finalWin) return 'SURVIVED';
     var m=state._finalMonth||state.month||0;
@@ -6348,11 +6349,11 @@ main .cf-rows.v6-fold{display:none}
     return 'EARLY REKT';
   }
   function cells(){
-    var s=window.state||{};
+    var s=cur()||{};
     var xp=(typeof finalXP==='function')?finalXP():(s.xp||0);
     var lvl=(typeof xpLevel==='function')?xpLevel(xp)+1:1;
     var hist=0; try{ hist=Object.keys(s.histDone||{}).length; }catch(e){}
-    var trades=0; try{ trades=(window.tradeLog||[]).length; }catch(e){}
+    var trades=0; try{ trades=(typeof tradeLog!=='undefined'?tradeLog:[]).length; }catch(e){}
     var rank='—'; try{ rank=(typeof getRank==='function')?getRank(!!s._finalWin).title:'—'; }catch(e){}
     var mode=(s.diff||'')+(s.ironman?' · IRONMAN':'');
     return [
@@ -6360,7 +6361,7 @@ main .cf-rows.v6-fold{display:none}
       ['HISTORICAL EVENTS',''+hist],
       ['RANK',rank],
       ['XP · LEVEL',Math.round(xp).toLocaleString()+' · L'+lvl],
-      ['ACHIEVEMENTS',((s.achievements||[]).length)+(window.ACHIEVEMENTS?('/'+ACHIEVEMENTS.length):'')],
+      ['ACHIEVEMENTS',((s.achievements||[]).length)+((typeof ACHIEVEMENTS!=='undefined')?('/'+ACHIEVEMENTS.length):'')],
       ['TRADES',''+trades],
       ['MOONS / RUGS',(s.moons||0)+' / '+(s.rugged||0)],
       ['MODE',mode||'—']
@@ -6368,7 +6369,7 @@ main .cf-rows.v6-fold{display:none}
   }
   window.paintEndHero=function(){
     var card=document.getElementById('end-hero-card'); if(!card) return;
-    var s=window.state||{};
+    var s=cur()||{};
     card.className='ec9'+(s._bossWin?' boss':(s._finalWin?' win':''));
     var t=document.getElementById('end-title'); if(t) t.textContent=statusWord();
     var g=document.getElementById('ec9-cells');
@@ -6418,9 +6419,9 @@ main .cf-rows.v6-fold{display:none}
     c.fillText('N E T   W O R T H',PAD,140);
     var netEl=document.getElementById('end-net');
     var net=netEl?netEl.textContent.trim():'$0';
-    c.fillStyle=(window.state&&typeof finalNet==='function'&&finalNet()<0)?'#ff6b76':'#f0b429';
+    c.fillStyle=(typeof finalNet==='function'&&finalNet()<0)?'#ff6b76':'#f0b429';
     c.font='800 132px '+mono;c.fillText(net,PAD-6,272);
-    c.fillStyle=(window.state&&state._bossWin)?'#ffd76a':((window.state&&state._finalWin)?'#2ee59d':'#ff4d5e');
+    c.fillStyle=(cur()&&cur()._bossWin)?'#ffd76a':((cur()&&cur()._finalWin)?'#2ee59d':'#ff4d5e');
     c.font='900 72px Inter, system-ui, sans-serif';
     c.fillText(statusWord(),PAD,360);
 
@@ -6439,7 +6440,7 @@ main .cf-rows.v6-fold{display:none}
 
     var a=document.createElement('a');
     a.href=cv.toDataURL('image/png');
-    a.download='TCFB-'+((window.state&&state.name)||'run')+'-'+Date.now()+'.png';
+    a.download='TCFB-'+((cur()&&cur().name)||'run')+'-'+Date.now()+'.png';
     a.click();
     try{toast('Card saved — post it on X!','buy')}catch(e){}
   };
