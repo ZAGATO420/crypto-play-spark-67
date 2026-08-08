@@ -511,7 +511,7 @@ header.compact .xp-wrap{margin-top:4px}
   align-self:flex-end;margin-bottom:-6px;
   filter:brightness(1.28) saturate(1.35) contrast(1.05)
     drop-shadow(0 14px 30px rgba(0,0,0,.6))
-    drop-shadow(0 0 40px rgba(240,180,41,.5)) drop-shadow(0 0 90px rgba(139,92,246,.42));
+    drop-shadow(0 0 26px rgba(240,180,41,.42)) drop-shadow(0 0 54px rgba(139,92,246,.34));
   animation:apeFloat 6s ease-in-out infinite;
 }
 @keyframes apeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -524,9 +524,7 @@ header.compact .xp-wrap{margin-top:4px}
 .ape-stage::after{content:'';position:absolute;left:50%;bottom:-10px;width:88%;height:34px;transform:translateX(-50%);
   background:radial-gradient(ellipse at center,rgba(139,92,246,.5),rgba(139,92,246,.14) 55%,transparent 78%);
   filter:blur(9px);animation:crownPulse 4.8s ease-in-out infinite;pointer-events:none}
-.ape-stage .title-ape{position:relative;z-index:1;
-  -webkit-mask-image:linear-gradient(180deg,#000 84%,rgba(0,0,0,.35) 96%,transparent 100%);
-  mask-image:linear-gradient(180deg,#000 84%,rgba(0,0,0,.35) 96%,transparent 100%)}
+.ape-stage .title-ape{position:relative;z-index:1}
 @keyframes crownPulse{0%,100%{opacity:.55;transform:translateX(-50%) scale(.96)}50%{opacity:1;transform:translateX(-50%) scale(1.06)}}
 /* --- Coin Rain --- */
 #coin-rain{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
