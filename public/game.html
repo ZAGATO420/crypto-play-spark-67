@@ -6241,6 +6241,35 @@ main .cf-rows.v6-fold{display:none}
 })();
 </script>
 
+<style id="v8-polish">
+/* ============================================================
+   V8 POLISH — mobile filter chips, readable P&L panel on phones.
+   Cosmetic layer only.
+   ============================================================ */
+/* --- filter chips: text must never collide with the gold underline --- */
+.tc-btn[data-filter]{display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  white-space:nowrap;line-height:1;padding:0 13px}
+.tc-btn[data-filter].active{padding-bottom:4px}
+.tc-btn[data-filter].active::after{left:9px;right:9px;bottom:4px;height:2px}
+@media(max-width:1150px){
+  .term-head{gap:8px;flex-wrap:wrap}
+  .term-head>div{flex-wrap:wrap;gap:6px!important;justify-content:flex-end}
+  .tc-btn[data-filter]{height:36px;min-width:0;padding:0 12px;font-size:11px;border-radius:11px}
+  .tc-btn[data-filter].active{padding-bottom:5px}
+  .tc-btn[data-filter].active::after{left:10px;right:10px;bottom:5px}
+}
+@media(max-width:820px){
+  /* the P&L panel showed INCOME / COSTS clipped — release every height cap */
+  #v7-top #cost-list{max-height:none!important;overflow:visible!important;flex:0 0 auto}
+  #v7-top>.panel,#v7-top{overflow:visible!important;max-height:none!important;height:auto!important}
+  main .cf-rows.v6-fold{display:grid}
+  body[data-pane] main>div{overflow:visible}
+  /* this pane may scroll on phones (desktop stays scroll-free) */
+  main{padding-bottom:150px!important;-webkit-overflow-scrolling:touch}
+  #v7-top .chart-box{height:190px}
+}
+</style>
+
 </body>
 </html>
 
