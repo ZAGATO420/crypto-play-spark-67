@@ -1268,17 +1268,21 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
 <div id="mini-overlay" class="hidden"><div class="mini-card"></div></div>
 <div id="end-screen" class="end-screen hidden">
   <div class="end-card" id="end-card">
-    <div class="end-head">
-      <img class="popup-logo" loading="lazy" decoding="async" src="/__l5e/assets-v1/b365c9c5-15ba-4d87-9258-8748ebd1fcf3/tcfb-logo-128.webp" alt="" width="64" style="margin-bottom:12px">
-      <div class="end-kicker">RUN RECAP // THE CRYPTO FINAL BOSS</div>
-      <h2 id="end-title" class="end-title">YOU SURVIVED</h2>
-      <div id="rank-badge" class="rank-badge"></div>
-      <p id="end-msg" class="end-msg"></p>
+    <div class="ec9" id="end-hero-card">
+      <div class="ec9-grid" aria-hidden="true"></div>
+      <img class="ec9-ape" src="/__l5e/assets-v1/7b6262df-d3c4-4d4d-a087-93c8d47ae47b/boss-ape-crown.webp" alt="" decoding="async">
+      <div class="ec9-body">
+        <div class="ec9-kicker">NET WORTH</div>
+        <div id="end-net" class="ec9-net end-net">$0</div>
+        <h2 id="end-title" class="ec9-title">YOU SURVIVED</h2>
+        <div class="ec9-cells" id="ec9-cells"></div>
+        <div class="ec9-foot">THE CRYPTO FINAL BOSS · thecryptofinalboss.app</div>
+      </div>
     </div>
 
-    <div class="end-hero">
-      <div class="end-net-label">FINAL NET WORTH</div>
-      <div id="end-net" class="end-net">$0</div>
+    <div class="end-head" style="margin-top:16px">
+      <div id="rank-badge" class="rank-badge"></div>
+      <p id="end-msg" class="end-msg"></p>
       <div id="end-xp" class="end-xp"></div>
     </div>
 
@@ -6269,6 +6273,189 @@ main .cf-rows.v6-fold{display:none}
   #v7-top .chart-box{height:190px}
 }
 </style>
+
+<style id="v9-endcard">
+/* ============================================================
+   V9 END CARD — the run recap now opens with a wide, modern
+   share card (same visual language as the X posts). Cosmetic +
+   the canvas painter below exports exactly this card.
+   ============================================================ */
+.ec9{position:relative;overflow:hidden;border-radius:22px;isolation:isolate;
+  aspect-ratio:16/9;min-height:250px;
+  background:
+    radial-gradient(120% 130% at 100% 0%, rgba(139,92,246,.55), transparent 62%),
+    radial-gradient(90% 120% at 0% 100%, rgba(240,180,41,.10), transparent 60%),
+    linear-gradient(135deg,#1d1136 0%,#140c28 45%,#08060f 100%);
+  border:1px solid rgba(240,180,41,.22);
+  box-shadow:0 26px 70px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06)}
+.ec9-grid{position:absolute;inset:0;opacity:.16;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.32) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.32) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(circle at 30% 40%,#000,transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 30% 40%,#000,transparent 78%)}
+.ec9-ape{position:absolute;right:-1%;top:3%;height:58%;width:auto;object-fit:contain;
+  filter:drop-shadow(0 18px 46px rgba(0,0,0,.65));pointer-events:none}
+.ec9-body{position:relative;height:100%;display:flex;flex-direction:column;
+  padding:clamp(16px,3.2%,36px) clamp(16px,3.4%,40px)}
+.ec9-kicker{font-family:'JetBrains Mono',monospace;font-weight:700;color:#38e0f5;
+  letter-spacing:.24em;font-size:clamp(9px,1.15vw,15px)}
+.ec9-net{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--gold);
+  font-size:clamp(30px,6.4vw,88px);line-height:1;margin-top:.22em;letter-spacing:-.02em;
+  text-shadow:0 0 42px rgba(240,180,41,.28)}
+.ec9-title{font-weight:900;text-transform:uppercase;color:#ff4d5e;margin:.24em 0 0;
+  font-size:clamp(20px,3.6vw,50px);line-height:1;letter-spacing:-.01em}
+.ec9.win .ec9-title{color:#2ee59d}
+.ec9.boss .ec9-title{color:var(--gold2)}
+.ec9-cells{position:relative;z-index:2;margin-top:auto;padding-top:clamp(10px,2%,20px);
+  border-top:1px solid rgba(255,255,255,.10);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:clamp(6px,1.4%,18px)}
+.ec9-cell{min-width:0}
+.ec9-cell .k{font-family:'JetBrains Mono',monospace;color:#8b90b5;letter-spacing:.16em;
+  font-size:clamp(7.5px,.86vw,12px);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ec9-cell .v{font-family:'JetBrains Mono',monospace;color:#f6f4ff;font-weight:700;
+  font-size:clamp(12px,1.8vw,26px);margin-top:.2em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ec9-foot{margin-top:clamp(8px,1.6%,18px);padding-top:clamp(6px,1.2%,14px);
+  border-top:1px solid rgba(255,255,255,.07);
+  font-family:'JetBrains Mono',monospace;color:#6a6f92;letter-spacing:.14em;
+  font-size:clamp(7.5px,.9vw,13px)}
+@media(min-width:900px){ .end-card{max-width:1040px} }
+.ec9-body{text-align:left}
+.ec9-kicker,.ec9-net,.ec9-title{padding-right:clamp(120px,27%,330px)}
+.ec9-cells{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ec9-cell .k{letter-spacing:.12em}
+@media(max-width:620px){
+  .ec9{aspect-ratio:auto}
+  .ec9-ape{height:88px;top:8px;right:2px;opacity:.95}
+  .ec9-foot{line-height:1.5}
+  .ec9-net{font-size:clamp(28px,9vw,44px)}
+  .ec9-title{font-size:clamp(18px,5.6vw,30px)}
+  .ec9-cells{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ec9-kicker,.ec9-net,.ec9-title{padding-right:38%}
+  .ec9-cell .v{font-size:14px}
+}
+</style>
+<script id="v9-endcard-js">
+(function(){
+  function cur(){try{return (typeof state!=='undefined')?state:null}catch(e){return null}}
+  var APE='/__l5e/assets-v1/7b6262df-d3c4-4d4d-a087-93c8d47ae47b/boss-ape-crown.webp';
+  function statusWord(){
+    var state=cur(); if(!state) return 'REKT';
+    if(state._bossWin) return 'FINAL BOSS DEFEATED';
+    if(state._finalWin) return 'SURVIVED';
+    var m=state._finalMonth||state.month||0;
+    if(m>=36) return 'BURNED OUT';
+    if(m>=12) return 'REKT';
+    return 'EARLY REKT';
+  }
+  function cells(){
+    var s=cur()||{};
+    var xp=(typeof finalXP==='function')?finalXP():(s.xp||0);
+    var lvl=(typeof xpLevel==='function')?xpLevel(xp)+1:1;
+    var hist=0; try{ hist=Object.keys(s.histDone||{}).length; }catch(e){}
+    var trades=0; try{ trades=(typeof tradeLog!=='undefined'?tradeLog:[]).length; }catch(e){}
+    var rank='—'; try{ rank=(typeof getRank==='function')?getRank(!!s._finalWin).title:'—'; }catch(e){}
+    var mode=(s.diff||'')+(s.ironman?' · IRONMAN':'');
+    return [
+      ['MONTHS SURVIVED',(s._finalMonth!=null?s._finalMonth:(s.month||0))+' / 84'],
+      ['HISTORICAL EVENTS',''+hist],
+      ['RANK',rank],
+      ['XP · LEVEL',Math.round(xp).toLocaleString()+' · L'+lvl],
+      ['ACHIEVEMENTS',((s.achievements||[]).length)+((typeof ACHIEVEMENTS!=='undefined')?('/'+ACHIEVEMENTS.length):'')],
+      ['TRADES',''+trades],
+      ['MOONS / RUGS',(s.moons||0)+' / '+(s.rugged||0)],
+      ['MODE',mode||'—']
+    ];
+  }
+  window.paintEndHero=function(){
+    var card=document.getElementById('end-hero-card'); if(!card) return;
+    var s=cur()||{};
+    card.className='ec9'+(s._bossWin?' boss':(s._finalWin?' win':''));
+    var t=document.getElementById('end-title'); if(t) t.textContent=statusWord();
+    var g=document.getElementById('ec9-cells');
+    if(g) g.innerHTML=cells().map(function(c){
+      return '<div class="ec9-cell"><div class="k">'+c[0]+'</div><div class="v">'+String(c[1]).replace(/[<>&]/g,'')+'</div></div>';
+    }).join('');
+    var f=card.querySelector('.ec9-foot');
+    if(f) f.textContent='THE CRYPTO FINAL BOSS · thecryptofinalboss.app'+(s.name?('  ·  '+s.name):'');
+  };
+  var origEnd=window.endGame;
+  if(typeof origEnd==='function'){
+    window.endGame=function(){ var r=origEnd.apply(this,arguments); try{ paintEndHero(); }catch(e){} return r; };
+  }
+
+  /* --- canvas export: the very same card at 1600x900, ready for X --- */
+  function loadApe(){
+    return new Promise(function(res){
+      var im=new Image(); im.crossOrigin='anonymous';
+      im.onload=function(){res(im)}; im.onerror=function(){res(null)};
+      im.src=APE;
+    });
+  }
+  function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+  window.shareAsImage=async function(){
+    var W=1600,H=900,cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    var c=cv.getContext('2d');
+    var bg=c.createLinearGradient(0,0,W,H);
+    bg.addColorStop(0,'#1d1136');bg.addColorStop(.45,'#140c28');bg.addColorStop(1,'#08060f');
+    c.fillStyle=bg;c.fillRect(0,0,W,H);
+    var pg=c.createRadialGradient(W*1.02,0,0,W*1.02,0,W*.95);
+    pg.addColorStop(0,'rgba(139,92,246,.38)');pg.addColorStop(1,'rgba(139,92,246,0)');
+    c.fillStyle=pg;c.fillRect(0,0,W,H);
+    var gg=c.createRadialGradient(0,H,0,0,H,W*.7);
+    gg.addColorStop(0,'rgba(240,180,41,.12)');gg.addColorStop(1,'rgba(240,180,41,0)');
+    c.fillStyle=gg;c.fillRect(0,0,W,H);
+    c.save();c.globalAlpha=.055;c.strokeStyle='#ffffff';c.lineWidth=1;
+    for(var x=0;x<=W;x+=74){c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke()}
+    for(var y=0;y<=H;y+=74){c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke()}
+    c.restore();
+
+    var ape=await loadApe();
+    var vg=c.createLinearGradient(0,H*.45,0,H);
+    vg.addColorStop(0,'rgba(6,4,14,0)');vg.addColorStop(1,'rgba(6,4,14,.72)');
+    c.fillStyle=vg;c.fillRect(0,0,W,H);
+    if(ape){var ah=430,aw=ape.width*(ah/ape.height);c.save();c.shadowColor='rgba(0,0,0,.6)';c.shadowBlur=50;c.drawImage(ape,W-aw-70,42,aw,ah);c.restore()}
+
+    var PAD=80, mono='"JetBrains Mono", ui-monospace, monospace';
+    c.textBaseline='alphabetic';
+    c.fillStyle='#38e0f5';c.font='700 26px '+mono;
+    c.fillText('N E T   W O R T H',PAD,140);
+    var netEl=document.getElementById('end-net');
+    var net=netEl?netEl.textContent.trim():'$0';
+    c.fillStyle=(typeof finalNet==='function'&&finalNet()<0)?'#ff6b76':'#f0b429';
+    c.font='800 132px '+mono;c.fillText(net,PAD-6,272);
+    c.fillStyle=(cur()&&cur()._bossWin)?'#ffd76a':((cur()&&cur()._finalWin)?'#2ee59d':'#ff4d5e');
+    c.font='900 72px Inter, system-ui, sans-serif';
+    c.fillText(statusWord(),PAD,360);
+
+    function fit(txt,maxW,base,weight){var sz=base;do{c.font=weight+' '+sz+'px '+mono;if(c.measureText(txt).width<=maxW)break;sz-=2}while(sz>16);return sz}
+    var list=cells().slice(0,8), cols=4, colW=(W-PAD*2)/cols, top=540;
+    c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=2;
+    c.beginPath();c.moveTo(PAD,top-40);c.lineTo(W-PAD,top-40);c.stroke();
+    list.forEach(function(it,i){
+      var cx=PAD+(i%cols)*colW, cy=top+Math.floor(i/cols)*118;
+      var lbl=it[0], val=String(it[1]), maxW=colW-34;
+      fit(lbl,maxW,20,'700');c.fillStyle='#8b90b5';c.fillText(lbl,cx,cy);
+      fit(val,maxW,38,'700');c.fillStyle='#f6f4ff';c.fillText(val,cx,cy+48);
+    });
+    c.strokeStyle='rgba(255,255,255,.09)';c.lineWidth=2;
+    c.beginPath();c.moveTo(PAD,H-116);c.lineTo(W-PAD,H-116);c.stroke();
+    c.fillStyle='#6a6f92';c.font='500 24px '+mono;
+    c.fillText('THE CRYPTO FINAL BOSS  ·  thecryptofinalboss.app  ·  @TCFB_game',PAD,H-64);
+
+    var a=document.createElement('a');
+    a.href=cv.toDataURL('image/png');
+    a.download='TCFB-'+((cur()&&cur().name)||'run')+'-'+Date.now()+'.png';
+    a.click();
+    try{toast('Card saved — post it on X!','buy')}catch(e){}
+  };
+  /* SHARE SCORE now also drops the card so the post has a visual */
+  var origShare=window.shareScore;
+  if(typeof origShare==='function'){
+    window.shareScore=function(){ var r=origShare.apply(this,arguments); try{ shareAsImage(); }catch(e){} return r; };
+  }
+})();
+</script>
 
 </body>
 </html>
