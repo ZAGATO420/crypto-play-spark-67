@@ -5992,8 +5992,24 @@ main .cf-rows.v6-fold{display:none}
   border:1px solid rgba(240,180,41,.4);color:#ffd76a;background:linear-gradient(168deg,rgba(240,180,41,.14),rgba(15,20,40,.8));
   font:900 9.5px 'JetBrains Mono',monospace;letter-spacing:.16em}
 .v7cta:hover{border-color:rgba(240,180,41,.75)}
-#market-list.dexgrid{grid-template-columns:repeat(auto-fill,minmax(116px,1fr))}
+#market-list.dexgrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));align-content:start}
 .v7wrap{overflow:hidden!important}
+/* folded terminal: compact tiles so full rows fit instead of being clipped */
+@media(min-width:1151px){
+  .v7wrap #market-list .dxt{padding:9px 10px 10px}
+  .v7wrap #market-list .v6tile{padding:9px 10px 10px;gap:2px}
+  .v7wrap #market-list .v6tile .p{font-size:13.5px}
+  .v7wrap #market-list .v6pos{padding:9px 11px;gap:6px 10px}
+  .v7wrap #market-list .v6pos .pn{font-size:12.5px}
+  .v7wrap #market-list .v6pos .cls button{height:28px}
+}
+.v7more{min-height:56px}
+/* short viewports: denser grid so more tokens stay visible instead of folding */
+#market-list.v7dense{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important;gap:7px}
+#market-list.v7dense .dxt{padding:7px 8px 8px}
+#market-list.v7dense .dxt .dxp,#market-list.v7dense .v6tile .p{font-size:12px}
+#market-list.v7dense .v6tile{padding:7px 8px 8px}
+#market-list.v7dense .v7more{min-height:44px;font-size:10px}
 .dxt.v7more,.v7more-tile{display:grid;place-items:center;gap:2px;text-align:center;
   border-style:dashed!important;border-color:rgba(240,180,41,.4)!important;color:#ffd76a;
   font:900 11px 'JetBrains Mono',monospace;letter-spacing:.1em;cursor:pointer}
@@ -6009,7 +6025,7 @@ main .cf-rows.v6-fold{display:none}
   #v7-top .v7row .p{font-size:11px}
   #v7-top .v7rows{overflow:hidden}
   #v7-top .v7cta{margin-top:7px;height:30px}
-  body.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 auto;height:46%;min-height:260px}
+  body.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 auto;height:clamp(186px,44%,420px);min-height:0}
   body.v4-live main>div:nth-child(2)>.panel:last-child{flex:1 1 auto;min-height:0}
 }
 @media(max-width:1150px){
@@ -6114,27 +6130,66 @@ main .cf-rows.v6-fold{display:none}
   function wrapEl(){
     const l=$('market-list');return l?l.parentElement:null;
   }
+  /* lowest point the grid may reach: top of the fixed bottom bar / tab bar */
+  function floorY(){
+    let y=window.innerHeight;
+    ['v4-bar','mobile-next','mobile-tabs'].forEach(id=>{
+      const e=$(id);if(!e)return;
+      const cs=getComputedStyle(e);
+      if(cs.display==='none'||cs.visibility==='hidden')return;
+      const r=e.getBoundingClientRect();
+      if(r.height>0&&r.top>140&&r.top<y)y=r.top;
+    });
+    return y;
+  }
   function fold(){
     const l=$('market-list'),w=wrapEl();if(!l||!w)return;
-    if(l.querySelector('.v6pos, .v6tile'))return;   /* perp desk lives in a popup */
+    /* already folded for this render? leave it alone (never drop the MORE tile) */
+    if(l.querySelector('.v7more')){if(window.innerWidth>1150)return}
+    if(window.innerWidth<=1150){
+      w.classList.remove('v7wrap');l.classList.remove('v7dense');
+      Array.from(l.children).forEach(k=>{if(k.classList&&k.classList.contains('v7more'))k.remove()});
+      return;                                                        /* mobile: panes flow */
+    }
     w.classList.add('v7wrap');
     const kids=Array.from(l.children);if(!kids.length)return;
-    const limit=w.clientHeight-6;if(limit<80)return;
-    if(l.scrollHeight<=limit+2)return;
-    let cut=-1;
-    for(let i=0;i<kids.length;i++){
-      const k=kids[i];
-      if(k.offsetTop+k.offsetHeight>limit){cut=i;break}
+    const isPerp=!!l.querySelector('.v6pos, .v6tile');
+    const lr=l.getBoundingClientRect();
+    const wr=w.getBoundingClientRect();
+    let avail=Math.min(w.clientHeight-(lr.top-wr.top)-4,floorY()-lr.top-8);
+    if(avail<40)return;
+    /* dense mode on short screens: more tokens per row before anything folds */
+    const dense=avail<210;
+    if(dense!==l.classList.contains('v7dense')){
+      l.classList.toggle('v7dense',dense);
+      const nr=l.getBoundingClientRect();
+      avail=Math.min(w.clientHeight-(nr.top-w.getBoundingClientRect().top)-4,floorY()-nr.top-8);
     }
-    if(cut<0)return;
-    if(cut>0)cut=cut-1;                              /* room for the MORE tile */
-    const hidden=kids.slice(cut);
+    /* group tiles into visual rows, keep only rows that fit completely */
+    const rows=[];
+    kids.forEach(k=>{
+      const t=k.offsetTop,b=t+k.offsetHeight;
+      const r=rows[rows.length-1];
+      if(r&&Math.abs(r.top-t)<6){r.items.push(k);r.bottom=Math.max(r.bottom,b)}
+      else rows.push({top:t,bottom:b,items:[k]});
+    });
+    const base=rows[0].top;
+    const cols=Math.max.apply(null,rows.map(r=>r.items.length));
+    let keep=[],lastRow=null;
+    for(const r of rows){
+      if(r.bottom-base<=avail){keep=keep.concat(r.items);lastRow=r}else break;
+    }
+    if(keep.length>=kids.length)return;
+    if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
+    /* free slot in the last visible row? then the MORE tile needs no sacrifice */
+    if(lastRow&&lastRow.items.length>=cols&&keep.length>1)keep=keep.slice(0,keep.length-1);
+    const hidden=kids.filter(k=>keep.indexOf(k)<0);
     if(!hidden.length)return;
     hidden.forEach(k=>k.remove());
     const b=document.createElement('button');
-    b.className='dxt v7more';
+    b.className=(isPerp?'v6tile':'dxt')+' v7more';
     b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE</span>';
-    b.onclick=()=>showAll();
+    b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
     l.appendChild(b);
   }
   function showAll(){
