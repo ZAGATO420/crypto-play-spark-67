@@ -6053,7 +6053,7 @@ main .cf-rows.v6-fold{display:none}
     if(!ps.length){
       b.innerHTML='<div class="v7empty">NO OPEN POSITIONS<br>'+
         'LEVERAGE 2x \u2013 50x \u00b7 LONG OR SHORT</div>'+
-        '<button class="v7cta" onclick="setFilter(\'PERPS\')">OPEN PERP DESK</button>';
+      '<button class="v7cta" onclick="v7PerpDesk()">OPEN PERP DESK</button>';
       return;
     }
     let pnl=0,marg=0,size=0,worst=0;
@@ -6087,9 +6087,28 @@ main .cf-rows.v6-fold{display:none}
           '<div class="p" style="color:'+(v>=0?'#34d399':'#f87171')+'">'+(v>=0?'+':'')+money(v)+
             '<br><span style="font-size:9px;opacity:.8">'+(pc>=0?'+':'')+pc.toFixed(1)+'%</span></div></div>';
       }).join('')+'</div>'+
-      '<button class="v7cta" onclick="setFilter(\'PERPS\')">MANAGE PERP DESK</button>';
+      '<button class="v7cta" onclick="v7PerpDesk()">MANAGE PERP DESK</button>';
   }
   window.v7PerpPnl=renderPerpPnl;
+
+  /* ---- perp desk as a popup (never folds the terminal grid) ---- */
+  function perpDeskHtml(){
+    const real=$('market-list');if(!real)return'';
+    real.id='market-list-v7tmp';
+    const t=document.createElement('div');t.id='market-list';
+    t.style.cssText='position:absolute;left:-9999px;top:0;width:640px';
+    document.body.appendChild(t);
+    let h='';
+    try{if(typeof window.renderPerpDesk==='function')window.renderPerpDesk();h=t.innerHTML}catch(e){}
+    t.remove();real.id='market-list';
+    return h;
+  }
+  window.v7PerpDesk=function(){
+    const h=perpDeskHtml();
+    if(!h)return;
+    try{if(typeof playSound==='function')playSound('click')}catch(e){}
+    v7Modal(h,'PERP DESK');
+  };
 
   /* ---- terminal: no scroll, overflow folds into a popup ---- */
   function wrapEl(){
@@ -6097,6 +6116,7 @@ main .cf-rows.v6-fold{display:none}
   }
   function fold(){
     const l=$('market-list'),w=wrapEl();if(!l||!w)return;
+    if(l.querySelector('.v6pos, .v6tile'))return;   /* perp desk lives in a popup */
     w.classList.add('v7wrap');
     const kids=Array.from(l.children);if(!kids.length)return;
     const limit=w.clientHeight-6;if(limit<80)return;
@@ -6126,20 +6146,21 @@ main .cf-rows.v6-fold{display:none}
     if(typeof v7Modal==='function')v7Modal(html);
     if(typeof renderMarket==='function')setTimeout(renderMarket,0);
   }
-  window.v7Modal=function(html){
+  window.v7Modal=function(html,title){
     let m=$('v7m');
     if(!m){
       m=document.createElement('div');m.id='v7m';
       m.style.cssText='position:fixed;inset:0;z-index:420;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,6,14,.76);backdrop-filter:blur(7px)';
       m.innerHTML='<div style="width:min(760px,100%);max-height:88vh;overflow:auto;border-radius:22px;padding:18px;border:1px solid rgba(255,255,255,.13);background:linear-gradient(168deg,rgba(26,32,60,.98),rgba(9,12,24,.99))">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
-        '<b style="font:900 13px \'JetBrains Mono\',monospace;letter-spacing:.14em">ALL MARKETS</b>'+
+        '<b id="v7m-title" style="font:900 13px \'JetBrains Mono\',monospace;letter-spacing:.14em">ALL MARKETS</b>'+
         '<button id="v7mx" style="width:32px;height:32px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#cbd3ec;cursor:pointer">\u2715</button></div>'+
         '<div id="v7m-grid" class="dexgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:9px"></div></div>';
       document.body.appendChild(m);
       m.addEventListener('click',e=>{if(e.target===m||e.target.id==='v7mx')m.style.display='none'});
     }
     m.style.display='flex';
+    const t=$('v7m-title');if(t)t.textContent=title||'ALL MARKETS';
     const g=$('v7m-grid');if(g)g.innerHTML=html;
   };
 
@@ -6154,6 +6175,10 @@ main .cf-rows.v6-fold{display:none}
   function tick(){
     const s=S();if(!s||s._gameEnded)return;
     buildTwin();renderPerpPnl();
+    const m=$('v7m');
+    if(m&&m.style.display==='flex'&&($('v7m-title')||{}).textContent==='PERP DESK'){
+      const g=$('v7m-grid');const h=perpDeskHtml();if(g&&h)g.innerHTML=h;
+    }
   }
   setInterval(tick,900);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tick);else tick();
