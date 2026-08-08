@@ -6004,6 +6004,12 @@ main .cf-rows.v6-fold{display:none}
   .v7wrap #market-list .v6pos .cls button{height:28px}
 }
 .v7more{min-height:56px}
+/* short viewports: denser grid so more tokens stay visible instead of folding */
+#market-list.v7dense{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important;gap:7px}
+#market-list.v7dense .dxt{padding:7px 8px 8px}
+#market-list.v7dense .dxt .dxp,#market-list.v7dense .v6tile .p{font-size:12px}
+#market-list.v7dense .v6tile{padding:7px 8px 8px}
+#market-list.v7dense .v7more{min-height:44px;font-size:10px}
 .dxt.v7more,.v7more-tile{display:grid;place-items:center;gap:2px;text-align:center;
   border-style:dashed!important;border-color:rgba(240,180,41,.4)!important;color:#ffd76a;
   font:900 11px 'JetBrains Mono',monospace;letter-spacing:.1em;cursor:pointer}
