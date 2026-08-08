@@ -4795,7 +4795,11 @@ header{background:rgba(9,12,26,.88)}
 
   /* ---------------- modern exchange-style chart ---------------- */
   window.initChart=function(){
-    const cv=$('pnl-chart');if(!cv||!window.Chart)return;
+    const cv=$('pnl-chart');if(!cv)return;
+    // Chart.js is loaded as a deferred external file now. If a player clicks
+    // START before it finished downloading, retry instead of silently skipping
+    // the chart for the whole run.
+    if(!window.Chart){setTimeout(()=>{try{window.initChart()}catch(e){}},120);return}
     const ctx=cv.getContext('2d');
     const g=ctx.createLinearGradient(0,0,0,220);
     g.addColorStop(0,'rgba(240,180,41,.38)');g.addColorStop(.5,'rgba(168,85,247,.16)');g.addColorStop(1,'rgba(168,85,247,0)');
