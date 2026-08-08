@@ -6169,13 +6169,15 @@ main .cf-rows.v6-fold{display:none}
       else rows.push({top:t,bottom:b,items:[k]});
     });
     const base=rows[0].top;
-    let keep=[];
+    const cols=Math.max.apply(null,rows.map(r=>r.items.length));
+    let keep=[],lastRow=null;
     for(const r of rows){
-      if(r.bottom-base<=avail)keep=keep.concat(r.items);else break;
+      if(r.bottom-base<=avail){keep=keep.concat(r.items);lastRow=r}else break;
     }
     if(keep.length>=kids.length)return;
-    if(!keep.length)keep=rows[0].items.slice();       /* never show nothing */
-    if(keep.length>1)keep=keep.slice(0,keep.length-1); /* slot for the MORE tile */
+    if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
+    /* free slot in the last visible row? then the MORE tile needs no sacrifice */
+    if(lastRow&&lastRow.items.length>=cols&&keep.length>1)keep=keep.slice(0,keep.length-1);
     const hidden=kids.filter(k=>keep.indexOf(k)<0);
     if(!hidden.length)return;
     hidden.forEach(k=>k.remove());
