@@ -6144,7 +6144,8 @@ main .cf-rows.v6-fold{display:none}
   }
   function fold(){
     const l=$('market-list'),w=wrapEl();if(!l||!w)return;
-    Array.from(l.children).forEach(k=>{if(k.classList&&k.classList.contains('v7more'))k.remove()});
+    /* already folded for this render? leave it alone (never drop the MORE tile) */
+    if(l.querySelector('.v7more')){if(window.innerWidth>1150)return}
     if(window.innerWidth<=1150){w.classList.remove('v7wrap');return}  /* mobile: panes flow */
     w.classList.add('v7wrap');
     const kids=Array.from(l.children);if(!kids.length)return;
