@@ -4559,7 +4559,7 @@ header{background:rgba(9,12,26,.88)}
       wrap.dataset.v4='1';
       wrap.innerHTML=AVATARS.map(a=>
         '<button class="avatar-btn'+(a.em===selEm.trim()?' selected':'')+'" title="'+a.t+'">'+
-        '<img class="stk" src="'+a.img+'" alt="'+a.t+'"><span class="av-em">'+a.em+'</span></button>').join('');
+        '<img class="stk" decoding="async" src="'+a.img+'" alt="'+a.t+'"><span class="av-em">'+a.em+'</span></button>').join('');
       wrap.querySelectorAll('.avatar-btn').forEach(b=>b.addEventListener('click',()=>{
         wrap.querySelectorAll('.avatar-btn').forEach(x=>x.classList.remove('selected'));
         b.classList.add('selected');
