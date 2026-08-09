@@ -3719,7 +3719,8 @@ async function submitGlobalScore(){
       months: state.month||0,
       achievements: (state.achievements||[]).length,
       trades: (typeof tradeLog!=='undefined'? tradeLog.length : 0),
-      survived: !!state._finalWin
+      survived: !!state._finalWin,
+      avatar: (state.avatar||'').trim()
     };
     // Global leaderboard API
     try{
