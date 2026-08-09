@@ -7696,11 +7696,11 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
       esc(state.diff||'NORMAL')+' \u2022 '+esc((state.pmode||'classic').toUpperCase())+
       (state.ironman?' \u2022 IRONMAN':'')+'</div></div>';
   }
-  const es=document.getElementById('end-screen');
-  if(es&&window.MutationObserver){
-    new MutationObserver(()=>{if(!es.classList.contains('hidden'))setTimeout(idStrip,30)})
-      .observe(es,{attributes:true,attributeFilter:['class','style']});
-  }
+  setInterval(function(){
+    const es=document.getElementById('end-screen');
+    if(!es||es.classList.contains('hidden'))return;
+    if(!document.getElementById('v14-id'))try{idStrip()}catch(e){}
+  },400);
 })();
 </script>
 
