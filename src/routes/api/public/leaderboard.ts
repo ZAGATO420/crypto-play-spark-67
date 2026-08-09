@@ -60,6 +60,7 @@ const runSchema = z.object({
   achievements: z.number().int().min(0).max(200),
   trades: z.number().int().min(0).max(20_000),
   survived: z.boolean().default(false),
+  avatar: z.string().trim().max(12).optional(),
 });
 
 // Mirrors the client's XP_LEVELS thresholds (public/game.html). level = index + 1.
@@ -134,7 +135,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         let query = supabaseAdmin
           .from("leaderboard_runs")
           .select(
-            "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, created_at",
+            "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at",
           )
           .order("created_at", { ascending: false })
           .limit(500);
@@ -155,6 +156,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           pos: i + 1,
           name: r.player_name,
           arch: r.archetype,
+          avatar: r.avatar || "",
           country: r.country,
           difficulty: r.difficulty,
           mode: r.mode,
@@ -205,6 +207,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           achievements: run.achievements,
           trades: run.trades,
           survived: run.survived,
+          avatar: run.avatar ?? null,
         });
 
         if (error) {

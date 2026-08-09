@@ -1,0 +1,1 @@
+ALTER TABLE public.leaderboard_runs ADD COLUMN IF NOT EXISTS avatar text;

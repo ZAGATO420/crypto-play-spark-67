@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           achievements: number
           archetype: string
+          avatar: string | null
           client_hash: string | null
           country: string
           created_at: string
@@ -36,6 +37,7 @@ export type Database = {
         Insert: {
           achievements?: number
           archetype: string
+          avatar?: string | null
           client_hash?: string | null
           country: string
           created_at?: string
@@ -54,6 +56,7 @@ export type Database = {
         Update: {
           achievements?: number
           archetype?: string
+          avatar?: string | null
           client_hash?: string | null
           country?: string
           created_at?: string
