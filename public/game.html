@@ -3165,20 +3165,24 @@ function buy(sym){
   if(spend<1){toast('Amount too small','buy');return}
   const total=spend*(1+fee);
   if(state.cash<total){toast('Not enough cash','buy');return}
-  const amount=spend/price;
+  /* V13: whale slippage — the bigger the ticket, the worse the fill */
+  const slip=slippage(sym,spend);
+  const fillPrice=price*(1+slip);
+  const amount=spend/fillPrice;
   state.cash-=total;
   const old=state.holdings[sym]||0;
   const oldAvg=state.avg[sym]||0;
   state.holdings[sym]=old+amount;
-  state.avg[sym]=(old+amount)>0?(old*oldAvg+amount*price)/(old+amount):price;
+  state.avg[sym]=(old+amount)>0?(old*oldAvg+amount*fillPrice)/(old+amount):fillPrice;
+  marketImpact(sym,spend,'buy');
   state.risk=Math.min(99,state.risk+(sym==='BTC'||sym==='ETH'?.7:2.2)*state.riskMult);
   if(COINS.find(c=>c.s===sym).tags.includes('MEME'))state.memeHeld.add(sym);
   if(sym==='BTC'&&state.btcHoldStart<0)state.btcHoldStart=state.month;
-  tradeLog.push({m:state.month,type:'BUY',sym,amount,price,spend});
+  tradeLog.push({m:state.month,type:'BUY',sym,amount,price:fillPrice,spend});
   unlockAch('first_trade');
   awardXP(Math.min(400,20+Math.round(spend/250)),'BUY '+sym);
   playSound('buy');
-  toast('+'+fmtAmt(amount)+' '+sym+' for $'+spend,'buy');
+  toast('+'+fmtAmt(amount)+' '+sym+' for $'+spend+(slip>.005?' • slippage '+(slip*100).toFixed(1)+'%':''),'buy');
   state._amt[sym]=0;
   if(checkGameOver())return;
   updateHeader();updateSidePanels();renderMarket();updateCriticalWarning();
@@ -3195,7 +3199,10 @@ function sell(sym){
   if(sellVal<1){toast('Amount too small','sell');return}
   const amount=sellVal/price;
   const fee=.01*DIFF[state.diff].fee*state.feeMult;
-  let net=sellVal*(1-fee);
+  /* V13: exiting size costs money too */
+  const slipS=slippage(sym,sellVal);
+  let net=sellVal*(1-fee)*(1-slipS);
+  marketImpact(sym,sellVal,'sell');
 
   // Stronger Leverage ×2.0
   const hasLeverage = !!state.businesses['leverage'];
