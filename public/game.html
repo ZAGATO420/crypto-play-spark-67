@@ -7476,7 +7476,6 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
   document.addEventListener('DOMContentLoaded',()=>{
     document.body.appendChild(vig);document.body.appendChild(grain);document.body.appendChild(sweep);
     try{if(localStorage.getItem('tcfb_grain')==='0')document.body.classList.add('no-grain')}catch(e){}
-    mountTape();
   });
   window.tcfbToggleGrain=function(){
     document.body.classList.toggle('no-grain');
@@ -7519,7 +7518,8 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
     const row=document.querySelector('#v13-tape .row');if(!row)return;
     const t=tapeText();row.innerHTML=t+t;
   }
-  const tapeWatch=setInterval(()=>{if(document.querySelector('main')){mountTape();clearInterval(tapeWatch)}},700);
+  /* the marquee tape is kept out of the live terminal: the band above the
+     columns already carries the news feed and sentiment chip. */
 
   /* ---- month sweep + net worth pulse ---- */
   let lastMonth=-1,lastNet=null;
