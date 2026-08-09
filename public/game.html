@@ -7416,11 +7416,11 @@ body.no-grain #v13-grain{display:none}
 #v13-vig{position:fixed;inset:0;z-index:9997;pointer-events:none;
   box-shadow:inset 0 0 130px 0 rgba(0,0,0,.22)}
 /* ---------- 6. The tape ---------- */
-#v13-tape{position:relative;overflow:hidden;height:22px;margin:0 0 6px;
+#v13-tape{position:absolute;top:-26px;left:0;right:0;overflow:hidden;height:24px;
   border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);
-  background:rgba(0,0,0,.45)}
+  background:rgba(0,0,0,.45);z-index:2;pointer-events:none}
 #v13-tape .row{position:absolute;white-space:nowrap;font-family:'JetBrains Mono',monospace;
-  font-size:11px;letter-spacing:.14em;line-height:22px;color:#8c8377;
+  font-size:11px;letter-spacing:.14em;line-height:24px;top:0;color:#8c8377;
   animation:v13tape 42s linear infinite}
 #v13-tape .up{color:#8dff6f}#v13-tape .dn{color:#ff6a6a}#v13-tape .gd{color:var(--gold2)}
 @keyframes v13tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -7503,7 +7503,9 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
     if(!host||document.getElementById('v13-tape'))return;
     const tape=document.createElement('div');tape.id='v13-tape';
     tape.innerHTML='<div class="row"></div>';
-    host.parentNode.insertBefore(tape,host);
+    const p=host.parentNode;
+    if(getComputedStyle(p).position==='static')p.style.position='relative';
+    p.insertBefore(tape,host);
     paintTape();setInterval(paintTape,6000);
   }
   function paintTape(){
