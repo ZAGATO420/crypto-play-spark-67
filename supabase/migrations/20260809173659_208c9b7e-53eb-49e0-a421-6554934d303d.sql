@@ -1,0 +1,1 @@
+delete from public.leaderboard_runs where player_name in ('qa1','qa2');
