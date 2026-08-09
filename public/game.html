@@ -6959,6 +6959,16 @@ main .cf-rows.v6-fold{display:none}
    V11 — nothing gets clipped between 821px and 1150px (tablet /
    small laptop). Desktop stays scroll-free, phones unchanged.
    ============================================================ */
+/* desktop: keep the single screen, but let long panels scroll internally
+   instead of cutting content off (launchpad lists, perp CTA) */
+@media(min-width:1151px){
+  body.v4-live main>div:last-child .panel[data-side].on{overflow-y:auto!important;max-height:100%}
+  body.v4-live main>div:last-child{overflow:hidden!important}
+  #v7-top>.panel{overflow-y:auto!important}
+  #v7-top .v7rows{overflow-y:auto!important}
+  #v7-top .v7cta{position:sticky;bottom:0}
+  body.v4-live main>div:nth-child(2)>#v7-top{height:clamp(210px,46%,440px)!important}
+}
 @media(min-width:821px) and (max-width:1150px){
   body.v4-live main>div:last-child,
   body.v4-live main>div:last-child .panel,
