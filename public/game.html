@@ -3670,11 +3670,14 @@ async function submitGlobalScore(){
         await loadGlobalLeaderboard();
         return;
       }
-    }catch(e){ console.log('api post failed', e); }
-    throw new Error('Leaderboard-API nicht erreichbar');
+      throw new Error(j && j.error ? ('Leaderboard: ' + j.error) : 'Leaderboard-API nicht erreichbar');
+    }catch(e){
+      console.log('api post failed', e);
+      throw e instanceof Error ? e : new Error('Leaderboard-API nicht erreichbar');
+    }
   }catch(e){
     console.error(e);
-    alert('Netzwerk Fehler - versuch nochmal: ' + e.message);
+    alert('Score konnte nicht gespeichert werden: ' + e.message);
     if(btn){ btn.textContent='SUBMIT SCORE'; btn.disabled=false; }
   }
 }
