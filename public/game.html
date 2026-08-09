@@ -4450,21 +4450,25 @@ function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO 
       b.classList.toggle('active', b.dataset.pane===name);
     });
     /* V15: bring the chosen section into view instead of jumping to the top */
-    try{
-      var first=document.querySelector('main .panel[data-pane="'+name+'"]');
-      if(first){
-        var hdr=document.querySelector('header');
-        var top=(hdr?hdr.getBoundingClientRect().height:0)+8;
-        var bot=window.innerHeight-120;
-        var r=first.getBoundingClientRect();
-        var visible=r.top>=top&&r.top<bot;
-        if(!visible){
-          var target=window.scrollY+r.top-Math.max(top,(window.innerHeight-r.height)/2);
-          window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
-        }
-      }
-    }catch(e){}
+    focusPane(name);
   };
+  /* measure only after the pane visibility change has been laid out */
+  function focusPane(name){
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      try{
+        if(window.innerWidth>820)return;
+        var first=document.querySelector('main .panel[data-pane="'+name+'"]');
+        if(!first||!first.offsetParent)return;
+        var h=document.querySelector('header');
+        var safeTop=(h?h.getBoundingClientRect().height:0)+8;
+        var r=first.getBoundingClientRect();
+        var visible=r.top>=safeTop&&r.top<window.innerHeight-140;
+        if(visible)return;
+        var wanted=Math.max(safeTop,(window.innerHeight-120-r.height)/2);
+        window.scrollTo({top:Math.max(0,window.scrollY+r.top-wanted),behavior:'smooth'});
+      }catch(e){}
+    })});
+  }
   function initPanes(){ tagPanes(); if(!document.body.getAttribute('data-pane')) setPane('market'); }
   document.addEventListener('DOMContentLoaded',initPanes);
   setTimeout(initPanes,600);
