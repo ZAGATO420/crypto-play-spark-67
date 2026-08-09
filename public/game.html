@@ -7329,11 +7329,11 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
 :root{
   --bg:#050505;--panel:#0b0b0d;--border:#231f1c;
   --neon:#39ff14;--neon-soft:rgba(57,255,20,.14);--neon-line:rgba(57,255,20,.42);
-  --plate:linear-gradient(168deg,rgba(255,255,255,.055),rgba(10,9,8,.92));
+  --plate:linear-gradient(168deg,rgba(255,255,255,.10),rgba(19,17,15,.94));
   --text:#f4f1ea;--text2:#a49c93;--muted:#7d746b;
   --green:#39ff14;--green2:#8dff6f;
   --v3-line:rgba(255,255,255,.075);
-  --v4-glass:linear-gradient(168deg,rgba(255,255,255,.05),rgba(9,8,7,.9));
+  --v4-glass:linear-gradient(168deg,rgba(255,255,255,.095),rgba(18,16,14,.93));
 }
 body{
   font-family:'Hind','Inter',system-ui,sans-serif;
@@ -7348,13 +7348,14 @@ h1,h2,h3,.hud-net-val,.end-stat b,.coin-price,.big,.dxm-price,
 .t,.tier-name,.end-title,.pcard h3{font-family:'Archivo Black','Hind',sans-serif;letter-spacing:-.02em}
 .hud-net-val{font-size:clamp(26px,3.2vw,40px);color:var(--gold2);
   text-shadow:0 0 26px rgba(240,180,41,.35),0 1px 0 rgba(0,0,0,.6)}
-.label,.hud-net-label{font-family:'Hind',sans-serif;font-weight:700;color:#8c8377}
+.label,.hud-net-label{font-family:'Hind',sans-serif;font-weight:700;color:#c9c0b3}
+.panel,.coin-card,.dxm,.pcard{color:#f4f1ea}
 .coin-price,.mono,#hud-date{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
 /* ---------- 2. Material: every panel is a brushed plate ---------- */
 .panel,.coin-card,.choice,.tc-btn,.dxm,.pcard,.end-card{position:relative}
 .panel{
-  background:var(--plate);border:1px solid rgba(255,255,255,.075);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px -26px #000;
+  background:var(--plate);border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 18px 40px -26px #000;
 }
 .panel::after{ /* tactical corner brackets */
   content:'';position:absolute;inset:6px;pointer-events:none;border-radius:12px;
@@ -7367,9 +7368,9 @@ h1,h2,h3,.hud-net-val,.end-stat b,.coin-price,.big,.dxm-price,
 }
 .panel:hover::after{opacity:1}
 .coin-card{
-  background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(8,7,6,.92))!important;
-  border:1px solid rgba(255,255,255,.08)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 10px 24px -18px #000;
+  background:linear-gradient(170deg,rgba(255,255,255,.095),rgba(16,14,13,.93))!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 24px -18px #000;
 }
 .coin-card:hover{border-color:var(--neon-line)!important;
   box-shadow:0 0 0 1px var(--neon-soft),0 14px 30px -18px rgba(57,255,20,.35)}
@@ -7408,12 +7409,12 @@ h1,h2,h3,.hud-net-val,.end-stat b,.coin-price,.big,.dxm-price,
 .mode-note{margin-top:10px;font-size:11px;line-height:1.55;color:#8c8377;
   border-left:2px solid rgba(240,180,41,.5);padding-left:10px}
 /* ---------- 5. Light: grain + scanlines over the whole pit ---------- */
-#v13-grain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.055;
+#v13-grain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.03;
   background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 1px,transparent 1px 3px);
   mix-blend-mode:overlay}
 body.no-grain #v13-grain{display:none}
 #v13-vig{position:fixed;inset:0;z-index:9997;pointer-events:none;
-  box-shadow:inset 0 0 240px 70px rgba(0,0,0,.8)}
+  box-shadow:inset 0 0 150px 0 rgba(0,0,0,.38)}
 /* ---------- 6. The tape ---------- */
 #v13-tape{position:relative;overflow:hidden;height:22px;margin:0 0 6px;
   border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);
