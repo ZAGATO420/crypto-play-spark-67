@@ -7497,7 +7497,9 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
     return parts.join('   ·   ')+'   ·   ';
   }
   function mountTape(){
-    const host=document.querySelector('#v7-top');
+    /* the tape belongs to the whole floor, so it sits above <main>, never
+       inside a column where it would be clipped */
+    const host=document.querySelector('main');
     if(!host||document.getElementById('v13-tape'))return;
     const tape=document.createElement('div');tape.id='v13-tape';
     tape.innerHTML='<div class="row"></div>';
@@ -7508,7 +7510,7 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
     const row=document.querySelector('#v13-tape .row');if(!row)return;
     const t=tapeText();row.innerHTML=t+t;
   }
-  const tapeWatch=setInterval(()=>{if(document.querySelector('#v7-top')){mountTape();clearInterval(tapeWatch)}},700);
+  const tapeWatch=setInterval(()=>{if(document.querySelector('main')){mountTape();clearInterval(tapeWatch)}},700);
 
   /* ---- month sweep + net worth pulse ---- */
   let lastMonth=-1,lastNet=null;
