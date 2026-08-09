@@ -1946,9 +1946,11 @@ const LAUNCHES=[
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COUNTRIES={DE:{rent:1500,tax:.3,flag:'🇩🇪',riskMod:.85,stressMod:.9,airdropMod:1,name:'Germany'},USA:{rent:2000,tax:.25,flag:'🇺🇸',riskMod:1,stressMod:1.05,airdropMod:1.25,name:'USA'},CH:{rent:2000,tax:.18,flag:'🇨🇭',riskMod:.78,stressMod:.85,airdropMod:.9,name:'Switzerland'},SG:{rent:2200,tax:.15,flag:'🇸🇬',riskMod:.9,stressMod:1.15,airdropMod:1.1,name:'Singapore'},PT:{rent:1250,tax:.2,flag:'🇵🇹',riskMod:.95,stressMod:.8,airdropMod:1,name:'Portugal'},NG:{rent:800,tax:.1,flag:'🇳🇬',riskMod:1.22,stressMod:1.08,airdropMod:.85,name:'Nigeria'}};
 const DIFF={
-  EASY:{cash:1.55,cost:.78,risk:.7,fee:.5,infl:.05,hs:.85,cat:.7,creep:0},
-  NORMAL:{cash:1.05,cost:1.06,risk:1,fee:.9,infl:.08,hs:1,cat:1,creep:.004},
-  BOSS:{cash:.8,cost:1.3,risk:1.32,fee:1.15,infl:.105,hs:1.28,cat:1.5,creep:.012}
+  /* V13 BRUTAL SPREAD — a NORMAL run must not print trillions any more.
+     slip = whale slippage multiplier, wtax = yearly wealth levy above $1M. */
+  EASY:{cash:1.45,cost:.82,risk:.75,fee:.6,infl:.06,hs:.9,cat:.75,creep:.002,slip:.6,wtax:.004},
+  NORMAL:{cash:1.0,cost:1.14,risk:1.08,fee:1,infl:.09,hs:1.05,cat:1.1,creep:.006,slip:1,wtax:.012},
+  BOSS:{cash:.72,cost:1.42,risk:1.4,fee:1.25,infl:.115,hs:1.34,cat:1.6,creep:.014,slip:1.5,wtax:.022}
 };
 /* Inflation: living costs compound every survived year, so a passive
    "click next month" run slowly bleeds out. */
@@ -1957,7 +1959,51 @@ function inflMult(){ if(!state)return 1; const d=DIFF[state.diff]||{}; const y=M
 function bearMult(){ if(!state)return 1; const m=state.month||0; const bear=(m>=24&&m<36)||(m>=60&&m<72); if(!bear)return 1; const d=DIFF[state.diff]||{}; return 1+0.12*((d.cat)||1) }
 /* Rookie ramp: cheap first year so you can build a stack, then the real
    cost of living kicks in and compounds with inflation. */
-function rampMult(){ if(!state)return 1; const m=state.month||0; return m<3?.62:m<8?.82:m<18?.94:1 }
+/* V13: the rookie discount runs out fast — no more free years. */
+function rampMult(){ if(!state)return 1; const m=state.month||0; return m<2?.7:m<5?.88:m<10?.97:1 }
+
+/* ===================== V13 MARKET FRICTION =====================
+   Real money cannot be moved without moving the market. Depth is the
+   USD notional a coin can absorb before the fill gets ugly. */
+function mktDepth(sym){
+  const c=COINS.find(x=>x.s===sym)||{};
+  const tags=c.tags||[];
+  let base=1.2e6;                                   // small cap default
+  if(sym==='BTC')base=9e8; else if(sym==='ETH')base=4.5e8;
+  else if(['SOL','BNB','ADA','XRP','AVAX','DOT','MATIC','LINK'].includes(sym))base=6e7;
+  else if(tags.includes('L1'))base=2.4e7;
+  else if(tags.includes('DEFI'))base=1.2e7;
+  else if(tags.includes('MEME'))base=3.5e6;
+  /* liquidity grows as the whole market matures over the years */
+  const yrs=(state?state.month:0)/12;
+  return base*(1+yrs*0.45);
+}
+/* Fraction of the order lost to slippage (0..0.42). */
+function slippage(sym,usd){
+  if(!state||!usd||usd<=0)return 0;
+  const d=mktDepth(sym);
+  const sMult=(DIFF[state.diff]&&DIFF[state.diff].slip)||1;
+  const s=Math.pow(usd/d,0.62)*0.55*sMult;
+  return Math.max(0,Math.min(.42,s));
+}
+/* Big orders drag the printed price with them. */
+function marketImpact(sym,usd,dir){
+  if(!state||!usd)return;
+  const d=mktDepth(sym);
+  const push=Math.min(.18,Math.pow(usd/d,0.7)*0.35);
+  if(push<0.0005)return;
+  state.prices[sym]=Math.max(1e-10,(state.prices[sym]||0)*(1+(dir==='buy'?push:-push)));
+}
+/* Progressive yearly levy once you are properly rich. */
+function wealthTax(){
+  if(!state)return 0;
+  const nw=netWorth();
+  if(nw<1e6)return 0;
+  const d=DIFF[state.diff]||{};
+  const band=Math.log10(nw/1e6);                     // 0 at $1M, 1 at $10M, 2 at $100M...
+  const rate=Math.min(.14,((d.wtax)||.012)*(1+band*1.35));
+  return Math.round((nw-1e6)*rate);
+}
 function costMult(){ return rampMult()*inflMult()*bearMult() }
 const ARCH={degen:{cash:5000,debt:0,memeBonus:1.2,feeMult:1,riskMult:1.15,stressMult:1.1},trader:{cash:10000,debt:0,memeBonus:1,feeMult:.5,riskMult:1,stressMult:1},influencer:{cash:9000,debt:12000,memeBonus:1.05,feeMult:1,riskMult:1.05,stressMult:1.05},hodler:{cash:8000,debt:0,memeBonus:1,feeMult:1,riskMult:.85,stressMult:.85}};
 
