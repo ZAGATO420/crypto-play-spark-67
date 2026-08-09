@@ -1082,13 +1082,14 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
         <div class="diff-grid" id="diffs">
           <button class="choice" data-diff="EASY"><div class="t">EASY</div><div class="d">Learning run • cheap life • 5% inflation</div></button>
           <button class="choice selected" data-diff="NORMAL"><div class="t">NORMAL</div><div class="d">Real costs • 8% inflation • fair fees</div></button>
-          <button class="choice" data-diff="BOSS"><div class="t">BOSS</div><div class="d">Small stack • +30% costs • 10.5% inflation • brutal events • ×2.5 XP</div></button>
+          <button class="choice" data-diff="BOSS"><div class="t">BOSS</div><div class="d">Tiny stack • +42% costs • 11.5% inflation • brutal slippage & wealth levy • ×2.5 XP</div></button>
         </div>
-        <div class="label" style="margin-top:18px">Presale Mode</div>
+        <div class="label" style="margin-top:18px">Run Mode</div>
         <div class="diff-grid" id="presale-mode">
-          <button class="choice selected" data-pmode="chaos"><div class="t">CHAOS</div><div class="d">Pure RNG</div></button>
-          <button class="choice" data-pmode="historical"><div class="t">HISTORICAL</div><div class="d">Real outcomes</div></button>
+          <button class="choice selected" data-pmode="chaos"><div class="t">CHAOS</div><div class="d">Nothing is written. More rugs, fatter moonshots — pure risk.<span class="xp-badge hot">XP ×1.25 · unpredictable</span></div></button>
+          <button class="choice" data-pmode="historical"><div class="t">HISTORICAL</div><div class="d">Every outcome follows the real 2020–2026 timeline. Knowledge wins.<span class="xp-badge cool">XP ×0.75 · predictable</span></div></button>
         </div>
+        <div class="mode-note">Historical rewards what you know, Chaos rewards what you risk — so the XP and the leaderboard score are weighted differently. Ironman still doubles on top.</div>
       </div>
       <div>
         <div class="label">Starting country</div>
@@ -1946,9 +1947,11 @@ const LAUNCHES=[
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COUNTRIES={DE:{rent:1500,tax:.3,flag:'🇩🇪',riskMod:.85,stressMod:.9,airdropMod:1,name:'Germany'},USA:{rent:2000,tax:.25,flag:'🇺🇸',riskMod:1,stressMod:1.05,airdropMod:1.25,name:'USA'},CH:{rent:2000,tax:.18,flag:'🇨🇭',riskMod:.78,stressMod:.85,airdropMod:.9,name:'Switzerland'},SG:{rent:2200,tax:.15,flag:'🇸🇬',riskMod:.9,stressMod:1.15,airdropMod:1.1,name:'Singapore'},PT:{rent:1250,tax:.2,flag:'🇵🇹',riskMod:.95,stressMod:.8,airdropMod:1,name:'Portugal'},NG:{rent:800,tax:.1,flag:'🇳🇬',riskMod:1.22,stressMod:1.08,airdropMod:.85,name:'Nigeria'}};
 const DIFF={
-  EASY:{cash:1.55,cost:.78,risk:.7,fee:.5,infl:.05,hs:.85,cat:.7,creep:0},
-  NORMAL:{cash:1.05,cost:1.06,risk:1,fee:.9,infl:.08,hs:1,cat:1,creep:.004},
-  BOSS:{cash:.8,cost:1.3,risk:1.32,fee:1.15,infl:.105,hs:1.28,cat:1.5,creep:.012}
+  /* V13 BRUTAL SPREAD — a NORMAL run must not print trillions any more.
+     slip = whale slippage multiplier, wtax = yearly wealth levy above $1M. */
+  EASY:{cash:1.45,cost:.82,risk:.75,fee:.6,infl:.06,hs:.9,cat:.75,creep:.002,slip:.6,wtax:.004},
+  NORMAL:{cash:1.0,cost:1.14,risk:1.08,fee:1,infl:.09,hs:1.05,cat:1.1,creep:.006,slip:1,wtax:.012},
+  BOSS:{cash:.72,cost:1.42,risk:1.4,fee:1.25,infl:.115,hs:1.34,cat:1.6,creep:.014,slip:1.5,wtax:.022}
 };
 /* Inflation: living costs compound every survived year, so a passive
    "click next month" run slowly bleeds out. */
@@ -1957,7 +1960,51 @@ function inflMult(){ if(!state)return 1; const d=DIFF[state.diff]||{}; const y=M
 function bearMult(){ if(!state)return 1; const m=state.month||0; const bear=(m>=24&&m<36)||(m>=60&&m<72); if(!bear)return 1; const d=DIFF[state.diff]||{}; return 1+0.12*((d.cat)||1) }
 /* Rookie ramp: cheap first year so you can build a stack, then the real
    cost of living kicks in and compounds with inflation. */
-function rampMult(){ if(!state)return 1; const m=state.month||0; return m<3?.62:m<8?.82:m<18?.94:1 }
+/* V13: the rookie discount runs out fast — no more free years. */
+function rampMult(){ if(!state)return 1; const m=state.month||0; return m<2?.7:m<5?.88:m<10?.97:1 }
+
+/* ===================== V13 MARKET FRICTION =====================
+   Real money cannot be moved without moving the market. Depth is the
+   USD notional a coin can absorb before the fill gets ugly. */
+function mktDepth(sym){
+  const c=COINS.find(x=>x.s===sym)||{};
+  const tags=c.tags||[];
+  let base=1.2e6;                                   // small cap default
+  if(sym==='BTC')base=9e8; else if(sym==='ETH')base=4.5e8;
+  else if(['SOL','BNB','ADA','XRP','AVAX','DOT','MATIC','LINK'].includes(sym))base=6e7;
+  else if(tags.includes('L1'))base=2.4e7;
+  else if(tags.includes('DEFI'))base=1.2e7;
+  else if(tags.includes('MEME'))base=3.5e6;
+  /* liquidity grows as the whole market matures over the years */
+  const yrs=(state?state.month:0)/12;
+  return base*(1+yrs*0.45);
+}
+/* Fraction of the order lost to slippage (0..0.42). */
+function slippage(sym,usd){
+  if(!state||!usd||usd<=0)return 0;
+  const d=mktDepth(sym);
+  const sMult=(DIFF[state.diff]&&DIFF[state.diff].slip)||1;
+  const s=Math.pow(usd/d,0.62)*0.55*sMult;
+  return Math.max(0,Math.min(.42,s));
+}
+/* Big orders drag the printed price with them. */
+function marketImpact(sym,usd,dir){
+  if(!state||!usd)return;
+  const d=mktDepth(sym);
+  const push=Math.min(.18,Math.pow(usd/d,0.7)*0.35);
+  if(push<0.0005)return;
+  state.prices[sym]=Math.max(1e-10,(state.prices[sym]||0)*(1+(dir==='buy'?push:-push)));
+}
+/* Progressive yearly levy once you are properly rich. */
+function wealthTax(){
+  if(!state)return 0;
+  const nw=netWorth();
+  if(nw<1e6)return 0;
+  const d=DIFF[state.diff]||{};
+  const band=Math.log10(nw/1e6);                     // 0 at $1M, 1 at $10M, 2 at $100M...
+  const rate=Math.min(.14,((d.wtax)||.012)*(1+band*1.35));
+  return Math.round((nw-1e6)*rate);
+}
 function costMult(){ return rampMult()*inflMult()*bearMult() }
 const ARCH={degen:{cash:5000,debt:0,memeBonus:1.2,feeMult:1,riskMult:1.15,stressMult:1.1},trader:{cash:10000,debt:0,memeBonus:1,feeMult:.5,riskMult:1,stressMult:1},influencer:{cash:9000,debt:12000,memeBonus:1.05,feeMult:1,riskMult:1.05,stressMult:1.05},hodler:{cash:8000,debt:0,memeBonus:1,feeMult:1,riskMult:.85,stressMult:.85}};
 
@@ -2113,6 +2160,9 @@ function calculateXP(){
 function getXPMultiplier(){
   const d = {EASY:1.0,NORMAL:1.6,BOSS:2.5}[state?.diff]||1;
   let m = d;
+  /* V13 FAIRNESS: historical outcomes are knowable, chaos is not.
+     Knowledge pays less than risk. */
+  m *= (state?.pmode==='historical') ? 0.75 : 1.25;
   if(state?.ironman) m*=2;
   return m;
 }
@@ -2277,6 +2327,15 @@ function nextMonth(){
       }
     }
     state._realizedYear=0;
+    /* V13 WEALTH LEVY — exponential runs pay an exponential price */
+    const levy=wealthTax();
+    if(levy>0){
+      state.cash-=levy;
+      state.stress=Math.min(100,state.stress+6);
+      toast('🏛 Wealth levy '+c.flag+' -'+fmt(levy),'sell');
+      addNews('Wealth levy assessed: '+fmt(levy));
+      if(state.cash<0&&portValue()>0)emergencyRaise(-state.cash+100);
+    }
   }
   // Storage affects FTX event severity later via flags
   if(Math.random()<0.35)pushRandomNews();
@@ -3119,20 +3178,24 @@ function buy(sym){
   if(spend<1){toast('Amount too small','buy');return}
   const total=spend*(1+fee);
   if(state.cash<total){toast('Not enough cash','buy');return}
-  const amount=spend/price;
+  /* V13: whale slippage — the bigger the ticket, the worse the fill */
+  const slip=slippage(sym,spend);
+  const fillPrice=price*(1+slip);
+  const amount=spend/fillPrice;
   state.cash-=total;
   const old=state.holdings[sym]||0;
   const oldAvg=state.avg[sym]||0;
   state.holdings[sym]=old+amount;
-  state.avg[sym]=(old+amount)>0?(old*oldAvg+amount*price)/(old+amount):price;
+  state.avg[sym]=(old+amount)>0?(old*oldAvg+amount*fillPrice)/(old+amount):fillPrice;
+  marketImpact(sym,spend,'buy');
   state.risk=Math.min(99,state.risk+(sym==='BTC'||sym==='ETH'?.7:2.2)*state.riskMult);
   if(COINS.find(c=>c.s===sym).tags.includes('MEME'))state.memeHeld.add(sym);
   if(sym==='BTC'&&state.btcHoldStart<0)state.btcHoldStart=state.month;
-  tradeLog.push({m:state.month,type:'BUY',sym,amount,price,spend});
+  tradeLog.push({m:state.month,type:'BUY',sym,amount,price:fillPrice,spend});
   unlockAch('first_trade');
   awardXP(Math.min(400,20+Math.round(spend/250)),'BUY '+sym);
   playSound('buy');
-  toast('+'+fmtAmt(amount)+' '+sym+' for $'+spend,'buy');
+  toast('+'+fmtAmt(amount)+' '+sym+' for $'+spend+(slip>.005?' • slippage '+(slip*100).toFixed(1)+'%':''),'buy');
   state._amt[sym]=0;
   if(checkGameOver())return;
   updateHeader();updateSidePanels();renderMarket();updateCriticalWarning();
@@ -3149,7 +3212,10 @@ function sell(sym){
   if(sellVal<1){toast('Amount too small','sell');return}
   const amount=sellVal/price;
   const fee=.01*DIFF[state.diff].fee*state.feeMult;
-  let net=sellVal*(1-fee);
+  /* V13: exiting size costs money too */
+  const slipS=slippage(sym,sellVal);
+  let net=sellVal*(1-fee)*(1-slipS);
+  marketImpact(sym,sellVal,'sell');
 
   // Stronger Leverage ×2.0
   const hasLeverage = !!state.businesses['leverage'];
@@ -3274,8 +3340,14 @@ function investPresale(id,cost){
   setTimeout(()=>{
     if(win){
       const histMult = (p.mult || 2) * (0.75 + Math.random()*0.5);
-      const mult = (state.pmode==='historical') ? Math.max(1.15, Math.min(24, histMult)) : (1.5 + Math.random()*1.6);
-      const gain = Math.round(cost * mult);
+      /* V13: historical payouts are capped tighter (you already know the answer),
+         chaos keeps the fat tail. Allocation itself is soft-capped by net worth,
+         so a nine-figure stack can no longer compound through presales. */
+      let mult = (state.pmode==='historical') ? Math.max(1.15, Math.min(14, histMult*0.8)) : (1.5 + Math.random()*1.9);
+      const nw = netWorth();
+      const alloc = Math.min(cost, Math.max(1000, nw*0.06));
+      const eff = alloc/Math.max(1,cost);
+      const gain = Math.round(cost * mult * (0.35 + 0.65*eff));
       state.cash += gain;
       state.presaleWins = (state.presaleWins||0) + 1;
       if(state.presaleWins >= 3) unlockAch('presale_win');
@@ -3972,7 +4044,11 @@ function processPerps(){
   for(let i=state.perps.length-1;i>=0;i--){
     const p=state.perps[i];
     // monthly funding on the notional keeps permanent leverage expensive
-    p.fund=(p.fund||0)+Math.round(p.margin*p.lev*0.0038);
+    /* V13: funding scales with size and with how long you sit on it */
+    const age=Math.max(0,state.month-(p.m||0));
+    const notional=p.margin*p.lev;
+    const rate=0.0052*(1+age*0.22)*(1+Math.min(1.6,notional/2.5e6));
+    p.fund=(p.fund||0)+Math.round(notional*rate);
     const pnl=perpPnl(p);
     if(pnl<=-p.margin*0.92){
       liquidatePerp(i);
@@ -7237,6 +7313,230 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
       clearInterval(watch);setTimeout(start,900);
     }
   },600);
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@400;500;600;700&display=swap">
+<style id="v13-skin">
+/* =====================================================================
+   V13 SKIN — "NEON TRADING PIT"
+   A lit trading floor at 3am: hot green tape, gold leaf on the crown,
+   warm CRT light instead of cold moonlight. Cosmetic only — no layout,
+   no markup and no game math touched.
+   ===================================================================== */
+:root{
+  --bg:#0b0908;--panel:#17130f;--border:#332b25;
+  --neon:#39ff14;--neon-soft:rgba(57,255,20,.14);--neon-line:rgba(57,255,20,.42);
+  --plate:linear-gradient(168deg,rgba(255,255,255,.14),rgba(32,27,23,.96));
+  --text:#f7f4ee;--text2:#bab1a5;--muted:#9c9285;
+  --green:#39ff14;--green2:#8dff6f;
+  --v3-line:rgba(255,255,255,.12);
+  --v4-glass:linear-gradient(168deg,rgba(255,255,255,.13),rgba(31,26,22,.95));
+}
+body{
+  font-family:'Hind','Inter',system-ui,sans-serif;
+  background:#0b0908;
+  background-image:
+    radial-gradient(ellipse 72% 48% at 50% -12%,rgba(240,180,41,.20),transparent),
+    radial-gradient(ellipse 58% 42% at 88% 104%,rgba(57,255,20,.11),transparent),
+    radial-gradient(ellipse 48% 36% at 6% 90%,rgba(139,92,246,.13),transparent);
+}
+/* ---------- 1. Type: Archivo Black carries every number ---------- */
+h1,h2,h3,.hud-net-val,.end-stat b,.coin-price,.big,.dxm-price,
+.t,.tier-name,.end-title,.pcard h3{font-family:'Archivo Black','Hind',sans-serif;letter-spacing:-.02em}
+.hud-net-val{font-size:clamp(26px,3.2vw,40px);color:var(--gold2);
+  text-shadow:0 0 26px rgba(240,180,41,.35),0 1px 0 rgba(0,0,0,.6)}
+.label,.hud-net-label{font-family:'Hind',sans-serif;font-weight:700;color:#c9c0b3}
+.panel,.coin-card,.dxm,.pcard{color:#f4f1ea}
+.coin-price,.mono,#hud-date{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+/* ---------- 2. Material: every panel is a brushed plate ---------- */
+.panel,.coin-card,.choice,.tc-btn,.dxm,.pcard,.end-card{position:relative}
+.panel{
+  background:var(--plate);border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 18px 40px -26px #000;
+}
+.panel::after{ /* tactical corner brackets */
+  content:'';position:absolute;inset:6px;pointer-events:none;border-radius:12px;
+  background:
+    linear-gradient(var(--neon-line),var(--neon-line)) left top/10px 1px no-repeat,
+    linear-gradient(var(--neon-line),var(--neon-line)) left top/1px 10px no-repeat,
+    linear-gradient(rgba(240,180,41,.4),rgba(240,180,41,.4)) right bottom/10px 1px no-repeat,
+    linear-gradient(rgba(240,180,41,.4),rgba(240,180,41,.4)) right bottom/1px 10px no-repeat;
+  opacity:.5;transition:opacity .25s;
+}
+.panel:hover::after{opacity:1}
+.coin-card{
+  background:linear-gradient(170deg,rgba(255,255,255,.13),rgba(29,25,21,.95))!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 24px -18px #000;
+}
+.coin-card:hover{border-color:var(--neon-line)!important;
+  box-shadow:0 0 0 1px var(--neon-soft),0 14px 30px -18px rgba(57,255,20,.35)}
+.coin-card.held{border-color:rgba(57,255,20,.45)!important;
+  background:linear-gradient(180deg,rgba(57,255,20,.09),rgba(8,7,6,.92))!important}
+/* coin logo halo */
+.coin-card img,.v7rows img,.tile img{filter:drop-shadow(0 0 10px rgba(240,180,41,.35))}
+/* ---------- 3. Neon green is the action colour ---------- */
+.exec-btn.exec-buy,.dxm-go.b,.v6go.b,.mode-btns button.on-buy{
+  background:linear-gradient(135deg,#39ff14,#0fd400)!important;color:#04140a!important;
+  border-color:#39ff14!important;font-family:'Archivo Black',sans-serif;
+  box-shadow:0 8px 26px -12px rgba(57,255,20,.85),inset 0 1px 0 rgba(255,255,255,.5)!important;
+}
+.exec-btn.exec-buy:hover,.dxm-go.b:hover,.v6go.b:hover{filter:brightness(1.12)}
+.exec-btn:active,.dxm-go:active,.v6go:active,.tc-btn:active,button:active{transform:translateY(1px)}
+.tc-btn.active{
+  background:linear-gradient(168deg,rgba(57,255,20,.14),rgba(8,7,6,.9))!important;
+  border-color:var(--neon-line)!important;color:#b9ff9f!important;
+  box-shadow:0 0 22px -10px rgba(57,255,20,.7)!important;
+}
+.tc-btn.active::after{background:var(--neon)!important;box-shadow:0 0 10px var(--neon)!important}
+#btn-month,.next-month,#bottom-bar .primary{
+  font-family:'Archivo Black',sans-serif!important;
+}
+/* keep gold for money & prestige, violet for story */
+.hud-net{border-color:rgba(240,180,41,.5)!important;
+  background:linear-gradient(150deg,rgba(240,180,41,.13),rgba(8,7,6,.92))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 34px -18px rgba(240,180,41,.8)!important}
+.choice.selected{border-color:var(--neon-line)!important;
+  box-shadow:0 0 0 1px var(--neon-soft),0 0 26px -14px rgba(57,255,20,.8)!important}
+/* ---------- 4. Run-mode XP badges ---------- */
+.xp-badge{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:999px;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.12em}
+.xp-badge.hot{background:rgba(57,255,20,.12);border:1px solid rgba(57,255,20,.45);color:#a9ff8c}
+.xp-badge.cool{background:rgba(139,92,246,.13);border:1px solid rgba(139,92,246,.45);color:#c4b0ff}
+.mode-note{margin-top:10px;font-size:11px;line-height:1.55;color:#8c8377;
+  border-left:2px solid rgba(240,180,41,.5);padding-left:10px}
+/* ---------- 5. Light: grain + scanlines over the whole pit ---------- */
+#v13-grain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.03;
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 1px,transparent 1px 3px);
+  mix-blend-mode:overlay}
+body.no-grain #v13-grain{display:none}
+#v13-vig{position:fixed;inset:0;z-index:9997;pointer-events:none;
+  box-shadow:inset 0 0 130px 0 rgba(0,0,0,.22)}
+/* ---------- 6. The tape ---------- */
+#v13-tape{position:absolute;top:-26px;left:0;right:0;overflow:hidden;height:24px;
+  border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(0,0,0,.45);z-index:2;pointer-events:none}
+#v13-tape .row{position:absolute;white-space:nowrap;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.14em;line-height:24px;top:0;color:#8c8377;
+  animation:v13tape 42s linear infinite}
+#v13-tape .up{color:#8dff6f}#v13-tape .dn{color:#ff6a6a}#v13-tape .gd{color:var(--gold2)}
+@keyframes v13tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ---------- 7. Feedback pulses ---------- */
+@keyframes v13win{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px -26px #000}
+  45%{box-shadow:0 0 0 1px rgba(57,255,20,.7),0 0 40px -12px rgba(57,255,20,.55)}}
+@keyframes v13loss{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px -26px #000}
+  45%{box-shadow:0 0 0 1px rgba(255,80,80,.7),0 0 40px -12px rgba(255,80,80,.5)}}
+.panel.v13-win{animation:v13win .8s ease}
+.panel.v13-loss{animation:v13loss .8s ease}
+/* month change: a light sweep across the pit */
+#v13-sweep{position:fixed;inset:0;z-index:9996;pointer-events:none;opacity:0;
+  background:linear-gradient(100deg,transparent 40%,rgba(57,255,20,.16),transparent 60%)}
+#v13-sweep.go{animation:v13sweep .9s ease}
+@keyframes v13sweep{0%{opacity:1;transform:translateX(-60%)}100%{opacity:0;transform:translateX(60%)}}
+/* ---------- 8. Boss sigil as a watermark, never as decoration ---------- */
+/* the live terminal scopes almost everything to body.v4-live — match it so the
+   pit is warm instead of cold blue */
+body.v4-live{background:
+  radial-gradient(1200px 640px at 18% -8%,rgba(240,180,41,.17),transparent 62%),
+  radial-gradient(1000px 540px at 90% 2%,rgba(57,255,20,.09),transparent 62%),
+  radial-gradient(900px 520px at 6% 96%,rgba(139,92,246,.13),transparent 64%),
+  #0b0908!important}
+body.v4-live .panel{
+  background:var(--plate)!important;
+  border-color:rgba(255,255,255,.12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 14px 34px -24px #000!important}
+body.v4-live .panel:hover{border-color:rgba(240,180,41,.35)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 30px -16px rgba(240,180,41,.5)!important}
+body.v4-live .panel-title{color:#d8cfbe!important;letter-spacing:.14em}
+body.v4-live .coin-card{
+  background:linear-gradient(170deg,rgba(255,255,255,.13),rgba(29,25,21,.95))!important;
+  border-color:rgba(255,255,255,.16)!important}
+body.v4-live .coin-card.held{border-color:rgba(57,255,20,.5)!important;
+  background:linear-gradient(180deg,rgba(57,255,20,.11),rgba(24,21,18,.95))!important}
+body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!important}
+#v7-top::before{
+  content:'';position:absolute;right:10px;bottom:6px;width:190px;height:190px;
+  background:url("/__l5e/assets-v1/1bd688df-7edd-45a6-9977-6d0e3b31ed41/ape-bg.png") right bottom/contain no-repeat;
+  opacity:.055;pointer-events:none;filter:grayscale(1) brightness(1.5)}
+#v7-top{position:relative}
+@media (max-width:900px){#v7-top::before{display:none}}
+</style>
+<script>
+/* =====================================================================
+   V13 SKIN RUNTIME — tape, sweep, grain toggle, animated numbers.
+   Purely presentational; it reads state, never writes it.
+   ===================================================================== */
+(function(){
+  const grain=document.createElement('div');grain.id='v13-grain';
+  const vig=document.createElement('div');vig.id='v13-vig';
+  const sweep=document.createElement('div');sweep.id='v13-sweep';
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.body.appendChild(vig);document.body.appendChild(grain);document.body.appendChild(sweep);
+    try{if(localStorage.getItem('tcfb_grain')==='0')document.body.classList.add('no-grain')}catch(e){}
+  });
+  window.tcfbToggleGrain=function(){
+    document.body.classList.toggle('no-grain');
+    try{localStorage.setItem('tcfb_grain',document.body.classList.contains('no-grain')?'0':'1')}catch(e){}
+  };
+
+  /* ---- running tape under the HUD ---- */
+  function tapeText(){
+    if(!window.state||!window.COINS)return 'THE CRYPTO FINAL BOSS · SURVIVE 2020 → 2026 · ';
+    const parts=[];
+    COINS.forEach(c=>{
+      const p=state.prices&&state.prices[c.s];
+      if(!p||p<=0||state.month<c.launch)return;
+      const cls=(state.noise&&state.noise[c.s]>=1)?'up':'dn';
+      parts.push('<span class="'+cls+'">'+c.s+' '+(typeof priceStr==='function'?priceStr(p):p)+'</span>');
+    });
+    parts.push('<span class="gd">$TCFB SOON</span>');
+    return parts.join('   ·   ')+'   ·   ';
+  }
+  function mountTape(){
+    /* the tape belongs to the whole floor, so it sits above <main>, never
+       inside a column where it would be clipped */
+    const host=document.querySelector('main');
+    if(!host||document.getElementById('v13-tape'))return;
+    const tape=document.createElement('div');tape.id='v13-tape';
+    tape.innerHTML='<div class="row"></div>';
+    const p=host.parentNode;
+    if(getComputedStyle(p).position==='static')p.style.position='relative';
+    p.insertBefore(tape,host);
+    /* park the tape in the dead band directly above the columns and keep it
+       there on resize — it must never steal layout height */
+    const place=()=>{
+      const mt=host.getBoundingClientRect().top-p.getBoundingClientRect().top;
+      tape.style.top=Math.max(0,mt-27)+'px';
+    };
+    place();addEventListener('resize',place);setInterval(place,1500);
+    paintTape();setInterval(paintTape,6000);
+  }
+  function paintTape(){
+    const row=document.querySelector('#v13-tape .row');if(!row)return;
+    const t=tapeText();row.innerHTML=t+t;
+  }
+  /* the marquee tape is kept out of the live terminal: the band above the
+     columns already carries the news feed and sentiment chip. */
+
+  /* ---- month sweep + net worth pulse ---- */
+  let lastMonth=-1,lastNet=null;
+  setInterval(()=>{
+    if(!window.state)return;
+    if(state.month!==lastMonth){
+      if(lastMonth>=0){sweep.classList.remove('go');void sweep.offsetWidth;sweep.classList.add('go')}
+      lastMonth=state.month;
+    }
+    let nw=0;try{nw=netWorth()}catch(e){return}
+    if(lastNet!==null&&Math.abs(nw-lastNet)/Math.max(1,lastNet)>0.02){
+      const p=document.querySelector('#v7-top .panel')||document.querySelector('.panel');
+      if(p){const k=nw>lastNet?'v13-win':'v13-loss';p.classList.remove('v13-win','v13-loss');
+        void p.offsetWidth;p.classList.add(k);setTimeout(()=>p.classList.remove(k),900)}
+    }
+    lastNet=nw;
+  },900);
 })();
 </script>
 
