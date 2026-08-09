@@ -4034,7 +4034,11 @@ function processPerps(){
   for(let i=state.perps.length-1;i>=0;i--){
     const p=state.perps[i];
     // monthly funding on the notional keeps permanent leverage expensive
-    p.fund=(p.fund||0)+Math.round(p.margin*p.lev*0.0038);
+    /* V13: funding scales with size and with how long you sit on it */
+    const age=Math.max(0,state.month-(p.m||0));
+    const notional=p.margin*p.lev;
+    const rate=0.0052*(1+age*0.22)*(1+Math.min(1.6,notional/2.5e6));
+    p.fund=(p.fund||0)+Math.round(notional*rate);
     const pnl=perpPnl(p);
     if(pnl<=-p.margin*0.92){
       liquidatePerp(i);
