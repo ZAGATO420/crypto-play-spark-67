@@ -62,16 +62,33 @@ const runSchema = z.object({
   survived: z.boolean().default(false),
 });
 
+// Mirrors the client's XP_LEVELS thresholds (public/game.html). level = index + 1.
+const XP_THRESHOLDS = [
+  0, 400, 1200, 2600, 4800, 8000, 12500, 18500, 26000, 36000, 50000, 70000,
+  95000, 130000, 180000, 250000,
+];
+
+function maxLevelForXp(xp: number): number {
+  let i = 0;
+  for (let k = 0; k < XP_THRESHOLDS.length; k++) {
+    if (xp >= XP_THRESHOLDS[k]!) i = k;
+  }
+  return i + 1;
+}
+
 // Plausibility gate: a run cannot be richer than the game's own math allows.
 // Ceiling scales with how long the player actually played, so a "month 3,
 // one trillion dollars" payload is rejected before it ever reaches the table.
 function isPlausible(run: z.infer<typeof runSchema>): boolean {
-  const monthCeiling = 25_000 * Math.pow(1.85, Math.max(run.months, 1));
+  // Airdrops/presales can multiply an early run hard, so keep a generous floor
+  // for short runs and let the ceiling grow with months played.
+  const monthCeiling = Math.max(5_000_000, 25_000 * Math.pow(1.85, Math.max(run.months, 1)));
   if (run.net > Math.min(monthCeiling, 1e10)) return false;
   // XP is earned per action; it cannot outrun the number of months by orders of magnitude.
   if (run.xp > 20_000 + run.months * 30_000) return false;
   if (run.trades > 40 + run.months * 60) return false;
-  if (run.level > 1 + Math.floor(run.xp / 900)) return false;
+  // Level must match the client's XP curve (allow +1 for rounding drift).
+  if (run.level > maxLevelForXp(run.xp) + 1) return false;
   return true;
 }
 
