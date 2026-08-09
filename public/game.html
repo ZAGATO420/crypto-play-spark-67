@@ -6954,6 +6954,29 @@ main .cf-rows.v6-fold{display:none}
 })();
 </script>
 
+<style id="v11-noclip">
+/* ============================================================
+   V11 — nothing gets clipped between 821px and 1150px (tablet /
+   small laptop). Desktop stays scroll-free, phones unchanged.
+   ============================================================ */
+@media(min-width:821px) and (max-width:1150px){
+  body.v4-live main>div:last-child,
+  body.v4-live main>div:last-child .panel,
+  body.v4-live main>div:nth-child(2),
+  body.v4-live main>div:nth-child(2)>.panel,
+  body.v4-live main>div:nth-child(2)>.panel:first-child,
+  body.v4-live main>div:nth-child(2)>.panel:last-child,
+  #v7-top,#v7-top>.panel{
+    overflow:visible!important;max-height:none!important;height:auto!important
+  }
+  #v7-top .v7rows{overflow:visible!important}
+  #v7-top #cost-list{max-height:none!important;overflow:visible!important}
+  main .cf-rows.v6-fold{display:grid}
+  #market-list.dexgrid,.market-grid{max-height:none!important;overflow:visible!important}
+  main{padding-bottom:120px!important}
+}
+</style>
+
 </body>
 </html>
 
