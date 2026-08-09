@@ -7722,6 +7722,129 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
 })();
 </script>
 
+
+<style id="v15-skin">
+/* ---------- V15: Ironman card + XP preview ---------- */
+.im-card{text-align:left}
+.im-card[aria-pressed="true"]{border-color:rgba(239,68,68,.65)!important;
+  background:linear-gradient(160deg,rgba(127,29,29,.35),rgba(10,8,7,.6))!important;
+  box-shadow:0 0 26px -8px rgba(239,68,68,.75)}
+.im-card[aria-pressed="true"] .t{color:#ffb4a2}
+.xp-preview{margin-top:10px;padding:10px 12px;border-radius:12px;
+  border:1px solid rgba(240,180,41,.32);background:rgba(240,180,41,.07);
+  font-size:11.5px;line-height:1.5;color:#d9cfae;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.xp-preview b{color:#ffd76a;font-size:13px}
+.xp-preview .im-on{color:#ffb4a2}
+
+/* ---------- V15: NEXT MONTH — dark plate, gold hairline, neon action ---------- */
+#mobile-next,.v4-next{
+  background:linear-gradient(180deg,#141210,#0a0908)!important;
+  color:#eafff0!important;
+  border:1px solid rgba(240,180,41,.42)!important;
+  box-shadow:0 10px 28px -14px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.07)!important;
+  transition:box-shadow .16s ease,transform .12s ease,border-color .16s ease}
+#mobile-next{min-height:56px;border-radius:14px!important;padding:8px 14px!important;
+  display:flex!important;align-items:center;gap:11px;text-align:left}
+.v4-next{height:48px!important;display:inline-flex;align-items:center;gap:10px}
+#mobile-next .nm-ic,.v4-next .nm-ic{flex:0 0 auto;width:26px;height:26px;display:block;
+  filter:drop-shadow(0 0 6px rgba(57,255,20,.45))}
+#mobile-next .nm-txt,.v4-next .nm-txt{min-width:0;display:flex;flex-direction:column;gap:2px}
+#mobile-next .nm-main,.v4-next .nm-main{font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:13px;letter-spacing:.16em;color:#39ff14;text-shadow:0 0 12px rgba(57,255,20,.35)}
+#mobile-next .nm-sub,.v4-next .nm-sub{font-size:9.5px;letter-spacing:.08em;color:#9a9384;
+  font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mobile-next:hover,.v4-next:hover{border-color:rgba(57,255,20,.55)!important;
+  box-shadow:0 0 0 1px rgba(57,255,20,.25),0 14px 34px -16px rgba(57,255,20,.5)!important;transform:none!important;filter:none!important}
+#mobile-next:active,.v4-next:active{transform:translateY(1px)!important;
+  box-shadow:0 0 26px -6px rgba(57,255,20,.65),inset 0 0 0 1px rgba(57,255,20,.35)!important}
+#mobile-next:disabled,.v4-next:disabled{opacity:1!important;border-color:rgba(255,255,255,.12)!important;
+  box-shadow:none!important;cursor:not-allowed}
+#mobile-next:disabled .nm-main,.v4-next:disabled .nm-main{color:#6c6a63;text-shadow:none}
+#mobile-next:disabled .nm-ic,.v4-next:disabled .nm-ic{filter:grayscale(1);opacity:.5}
+@media(max-width:820px){
+  #mobile-next{bottom:calc(66px + env(safe-area-inset-bottom))!important}
+  body #game-screen button#mobile-next{bottom:calc(66px + env(safe-area-inset-bottom))!important}
+}
+</style>
+<script>
+/* =====================================================================
+   V15 — Ironman clarity, mobile pane focus, month action polish.
+   Presentation only: no XP formula, price, cost or difficulty change.
+   ===================================================================== */
+(function(){
+  var $=function(id){return document.getElementById(id)};
+
+  /* ---------------- Ironman card + live XP preview ---------------- */
+  var DIFF_M={EASY:1.0,NORMAL:1.6,BOSS:2.5};
+  function sel(id){var e=document.querySelector('#'+id+' .selected');return e?e.dataset:{}}
+  function renderXP(){
+    var box=$('xp-preview'),cb=$('ironman'),card=$('ironman-card');
+    if(!box)return;
+    var diff=(sel('diffs').diff)||'NORMAL';
+    var pmode=(sel('presale-mode').pmode)||'chaos';
+    var on=!!(cb&&cb.checked);
+    var dm=DIFF_M[diff]||1, mm=(pmode==='historical')?0.75:1.25, im=on?2:1;
+    var total=dm*mm*im;
+    if(card)card.setAttribute('aria-pressed',on?'true':'false');
+    box.innerHTML='This run: '+diff+' ×'+dm.toFixed(2)+' · '+
+      (pmode==='historical'?'Historical ×0.75':'Chaos ×1.25')+
+      (on?' · <span class="im-on">Ironman ×2</span>':' · Ironman off')+
+      ' = <b>XP ×'+total.toFixed(2)+'</b>'+
+      (on?'<br>Time keeps running — pause, week and month skip stay locked.'
+         :'<br>Turn Ironman on for the highest possible score.');
+  }
+  function bind(){
+    var card=$('ironman-card'),cb=$('ironman');
+    if(card&&cb&&!card.dataset.v15){
+      card.dataset.v15='1';
+      card.addEventListener('click',function(){
+        cb.checked=!cb.checked;
+        try{if(typeof playSound==='function')playSound('click')}catch(e){}
+        renderXP();
+      });
+    }
+    ['diffs','presale-mode'].forEach(function(id){
+      var w=$(id);if(!w||w.dataset.v15)return;w.dataset.v15='1';
+      w.addEventListener('click',function(){setTimeout(renderXP,0)});
+    });
+    renderXP();
+  }
+  document.addEventListener('DOMContentLoaded',bind);
+  setTimeout(bind,300);setTimeout(bind,900);
+
+  /* ---------------- NEXT MONTH: icon + context line ---------------- */
+  var ICON='<svg class="nm-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
+    '<rect x="2.6" y="4.4" width="18.8" height="16.4" rx="3.2" stroke="#f0b429" stroke-width="1.6"/>'+
+    '<path d="M2.6 9.2h18.8" stroke="#f0b429" stroke-width="1.6"/>'+
+    '<path d="M7.4 2.6v3.4M16.6 2.6v3.4" stroke="#f0b429" stroke-width="1.6" stroke-linecap="round"/>'+
+    '<path d="M9.4 12.6l3.6 2.9-3.6 2.9" stroke="#39ff14" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<path d="M14.4 12.6l3.6 2.9-3.6 2.9" stroke="#39ff14" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>'+
+    '</svg>';
+  function dress(btn){
+    if(!btn||btn.dataset.v15)return;
+    btn.dataset.v15='1';
+    btn.innerHTML=ICON+'<span class="nm-txt"><span class="nm-main">NEXT MONTH</span>'+
+      '<span class="nm-sub">advance time</span></span>';
+  }
+  function subText(){
+    var s=(typeof state!=='undefined'&&state)?state:null;
+    if(!s)return'advance time';
+    if(s.ironman)return'IRONMAN — time runs on its own';
+    return'Month '+((s.month||0)+1)+' / 84 · costs due';
+  }
+  function tick(){
+    var list=[$('mobile-next')].concat([].slice.call(document.querySelectorAll('.v4-next')));
+    var t=subText();
+    list.forEach(function(b){
+      if(!b)return;dress(b);
+      var sub=b.querySelector('.nm-sub');if(sub&&sub.textContent!==t)sub.textContent=t;
+      var s=(typeof state!=='undefined'&&state)?state:null;
+      if(s&&s.ironman)b.disabled=true;
+    });
+  }
+  setInterval(tick,600);setTimeout(tick,200);
+})();
+</script>
 </body>
 </html>
 
