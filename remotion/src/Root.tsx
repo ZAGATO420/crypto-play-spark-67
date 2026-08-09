@@ -4,6 +4,7 @@ import { MainVideo, TOTAL } from "./MainVideo";
 import { WideVideo, WIDE_TOTAL } from "./wide/WideVideo";
 import { UpdateVideo, UPDATE_TOTAL } from "./update/UpdateVideo";
 import { TrailerVideo, TRAILER_TOTAL } from "./trailer/TrailerVideo";
+import { V16Trailer, V16_TOTAL } from "./v16/V16Trailer";
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -11,5 +12,6 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="wide" component={WideVideo} durationInFrames={WIDE_TOTAL} fps={30} width={1920} height={1080} />
     <Composition id="update" component={UpdateVideo} durationInFrames={UPDATE_TOTAL} fps={30} width={1920} height={1080} />
     <Composition id="trailer" component={TrailerVideo} durationInFrames={TRAILER_TOTAL} fps={30} width={1920} height={1080} />
+    <Composition id="v16" component={V16Trailer} durationInFrames={V16_TOTAL} fps={30} width={1920} height={1080} />
   </>
 );
