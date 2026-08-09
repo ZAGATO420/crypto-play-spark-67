@@ -7683,18 +7683,20 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
 
   /* identity strip on the end card */
   function idStrip(){
-    const head=document.querySelector('#end-screen .end-head');if(!head||!window.state)return;
+    const head=document.querySelector('#end-screen .end-head');
+    const st=(typeof state!=='undefined'&&state)?state:null;
+    if(!head||!st)return;
     let el=document.getElementById('v14-id');
     if(!el){el=document.createElement('div');el.id='v14-id';el.className='v14-id';
       head.parentNode.insertBefore(el,head);}
-    const av=(state.avatar||'').trim();
+    const av=(st.avatar||'').trim();
     const src=(typeof window.TCFB_avImg==='function')?window.TCFB_avImg(av):'';
     const lvl=(typeof xpLevel==='function'&&typeof finalXP==='function')?xpLevel(finalXP())+1:1;
     el.innerHTML=(src?'<img src="'+src+'" alt="">':'')+
-      '<div class="t"><div class="n">'+(FLAG[state.country]||'')+' '+esc(state.name||'Anon')+'</div>'+
-      '<div class="m">'+esc(String(state.arch||'').toUpperCase())+' \u2022 LVL '+lvl+' \u2022 '+
-      esc(state.diff||'NORMAL')+' \u2022 '+esc((state.pmode||'classic').toUpperCase())+
-      (state.ironman?' \u2022 IRONMAN':'')+'</div></div>';
+      '<div class="t"><div class="n">'+(FLAG[st.country]||'')+' '+esc(st.name||'Anon')+'</div>'+
+      '<div class="m">'+esc(String(st.arch||'').toUpperCase())+' \u2022 LVL '+lvl+' \u2022 '+
+      esc(st.diff||'NORMAL')+' \u2022 '+esc((st.pmode||'classic').toUpperCase())+
+      (st.ironman?' \u2022 IRONMAN':'')+'</div></div>';
   }
   setInterval(function(){
     const es=document.getElementById('end-screen');
