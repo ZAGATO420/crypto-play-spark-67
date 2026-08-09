@@ -105,11 +105,18 @@ function rankScore(r: {
   months_survived: number;
   achievements: number;
   survived: boolean;
+  mode?: string | null;
 }): number {
   const net = Number(r.net_worth) || 0;
   let score = net + r.xp * 10 + r.months_survived * 500 + r.achievements * 250;
   if (r.survived) score += 25_000;
   if (r.months_survived < 6) score -= 5_000;
+  // Historical runs follow the real timeline and are therefore predictable;
+  // chaos runs carry real risk. Weight them so knowledge alone cannot top a
+  // chaos run (mirrors the client's XP multipliers).
+  const mode = (r.mode || "").toLowerCase();
+  if (mode.includes("historical")) score *= 0.8;
+  else if (mode.includes("chaos")) score *= 1.2;
   return score;
 }
 
