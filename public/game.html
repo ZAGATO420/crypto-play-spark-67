@@ -4454,7 +4454,7 @@ function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO 
   };
   /* measure only after the pane visibility change has been laid out */
   function focusPane(name){
-    requestAnimationFrame(function(){requestAnimationFrame(function(){
+    function step(smooth){
       try{
         if(window.innerWidth>820)return;
         var first=document.querySelector('main .panel[data-pane="'+name+'"]');
@@ -4462,11 +4462,15 @@ function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO 
         var h=document.querySelector('header');
         var safeTop=(h?h.getBoundingClientRect().height:0)+8;
         var r=first.getBoundingClientRect();
-        var visible=r.top>=safeTop&&r.top<window.innerHeight-140;
-        if(visible)return;
+        if(r.top>=safeTop&&r.top<window.innerHeight-140)return;
         var wanted=Math.max(safeTop,(window.innerHeight-120-r.height)/2);
-        window.scrollTo({top:Math.max(0,window.scrollY+r.top-wanted),behavior:'smooth'});
+        window.scrollTo({top:Math.max(0,window.scrollY+r.top-wanted),behavior:smooth?'smooth':'auto'});
       }catch(e){}
+    }
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      step(true);
+      /* layout can settle late (charts, lists) — correct once more */
+      setTimeout(function(){step(false)},420);
     })});
   }
   function initPanes(){ tagPanes(); if(!document.body.getAttribute('data-pane')) setPane('market'); }
