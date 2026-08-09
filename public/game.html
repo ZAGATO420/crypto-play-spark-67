@@ -6675,6 +6675,25 @@ main .cf-rows.v6-fold{display:none}
   };
 
   /* ============ event / presale cards get the same frame ============ */
+  var origEarly=window._showEarlyDecisionNow;
+  if(typeof origEarly==='function'){
+    window._showEarlyDecisionNow=function(d){
+      buildDecisionShell();
+      var r=origEarly.apply(this,arguments);
+      try{
+        var card=document.getElementById('decision-card');card.className='decision-card';
+        var dt=document.getElementById('decision-date');if(dt)dt.textContent=when();
+        var sn=senderFor(d||{title:'',desc:''}),from=document.getElementById('decision-from');
+        if(from){from.querySelector('.pcard-av').textContent=sn.a;from.querySelector('.n').textContent=sn.n;from.querySelector('.r').textContent=sn.r}
+        var b=document.getElementById('decision-badge');if(b)b.textContent='EARLY CHOICE';
+        document.querySelectorAll('#decision-options .decision-btn').forEach(function(btn){
+          if(btn.querySelector('.ob'))return;
+          var t=btn.textContent;btn.innerHTML='<div class="ob"><div class="ol">'+esc(t)+'</div></div><span class="oa">\u203a</span>';
+        });
+      }catch(e){}
+      return r;
+    };
+  }
   var origEventNow=window._showEventNow;
   window._showEventNow=function(title,type,flavor){
     var r=origEventNow.apply(this,arguments);
