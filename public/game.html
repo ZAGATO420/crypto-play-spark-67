@@ -7018,7 +7018,11 @@ main .cf-rows.v6-fold{display:none}
   body.v4-live main>div,body.v4-live main>div>.panel,
   body.v4-live main .panel,#v7-top,#v7-top>.panel,#v7-top .v7rows,#v7-top #cost-list{
     height:auto!important;max-height:none!important;overflow:visible!important}
-  body.v4-live main>div:nth-child(2){grid-column:1/-1;display:flex;flex-direction:column;gap:14px}
+  body.v4-live main>div:nth-child(2){order:1;grid-column:1/-1;display:flex;flex-direction:column;gap:14px}
+  body.v4-live main>div:first-child{order:2}
+  body.v4-live main>div:last-child{order:3}
+  body.v4-live main>div:last-child .panel[data-side]{display:none}
+  body.v4-live main>div:last-child .panel[data-side].on{display:flex;flex-direction:column}
   #v7-top{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px}
   #market-list.dexgrid,.market-grid{max-height:none!important;overflow:visible!important}
   main .cf-rows.v6-fold{display:grid!important}
