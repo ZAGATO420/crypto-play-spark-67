@@ -2323,6 +2323,15 @@ function nextMonth(){
       }
     }
     state._realizedYear=0;
+    /* V13 WEALTH LEVY — exponential runs pay an exponential price */
+    const levy=wealthTax();
+    if(levy>0){
+      state.cash-=levy;
+      state.stress=Math.min(100,state.stress+6);
+      toast('🏛 Wealth levy '+c.flag+' -'+fmt(levy),'sell');
+      addNews('Wealth levy assessed: '+fmt(levy));
+      if(state.cash<0&&portValue()>0)emergencyRaise(-state.cash+100);
+    }
   }
   // Storage affects FTX event severity later via flags
   if(Math.random()<0.35)pushRandomNews();
