@@ -7506,6 +7506,13 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
     const p=host.parentNode;
     if(getComputedStyle(p).position==='static')p.style.position='relative';
     p.insertBefore(tape,host);
+    /* park the tape in the dead band directly above the columns and keep it
+       there on resize — it must never steal layout height */
+    const place=()=>{
+      const mt=host.getBoundingClientRect().top-p.getBoundingClientRect().top;
+      tape.style.top=Math.max(0,mt-27)+'px';
+    };
+    place();addEventListener('resize',place);setInterval(place,1500);
     paintTape();setInterval(paintTape,6000);
   }
   function paintTape(){
