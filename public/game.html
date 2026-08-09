@@ -7161,8 +7161,13 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
   function modalOpen(){
     return [...document.querySelectorAll('body > *')].some(e=>{
       if(e.id==='tl-tour')return false;
+      /* only real interrupting overlays count — decorative fixed layers such
+         as #xp-layer are click-through and must not block the tour forever */
+      const id=e.id||'',cls=typeof e.className==='string'?e.className:'';
+      if(!/overlay|modal|popup|sheet|dialog/i.test(id+' '+cls))return false;
       const cs=getComputedStyle(e);
       if(cs.display==='none'||cs.visibility==='hidden'||cs.position!=='fixed')return false;
+      if(cs.pointerEvents==='none')return false;
       if(parseFloat(cs.opacity||'1')<.05)return false;
       const r=e.getBoundingClientRect();
       return r.width>240&&r.height>160;
