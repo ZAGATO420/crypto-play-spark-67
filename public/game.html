@@ -7437,6 +7437,26 @@ body.no-grain #v13-grain{display:none}
 #v13-sweep.go{animation:v13sweep .9s ease}
 @keyframes v13sweep{0%{opacity:1;transform:translateX(-60%)}100%{opacity:0;transform:translateX(60%)}}
 /* ---------- 8. Boss sigil as a watermark, never as decoration ---------- */
+/* the live terminal scopes almost everything to body.v4-live — match it so the
+   pit is warm instead of cold blue */
+body.v4-live{background:
+  radial-gradient(1200px 640px at 18% -8%,rgba(240,180,41,.17),transparent 62%),
+  radial-gradient(1000px 540px at 90% 2%,rgba(57,255,20,.09),transparent 62%),
+  radial-gradient(900px 520px at 6% 96%,rgba(139,92,246,.13),transparent 64%),
+  #0b0908!important}
+body.v4-live .panel{
+  background:var(--plate)!important;
+  border-color:rgba(255,255,255,.12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 14px 34px -24px #000!important}
+body.v4-live .panel:hover{border-color:rgba(240,180,41,.35)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 30px -16px rgba(240,180,41,.5)!important}
+body.v4-live .panel-title{color:#d8cfbe!important;letter-spacing:.14em}
+body.v4-live .coin-card{
+  background:linear-gradient(170deg,rgba(255,255,255,.13),rgba(29,25,21,.95))!important;
+  border-color:rgba(255,255,255,.16)!important}
+body.v4-live .coin-card.held{border-color:rgba(57,255,20,.5)!important;
+  background:linear-gradient(180deg,rgba(57,255,20,.11),rgba(24,21,18,.95))!important}
+body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!important}
 #v7-top::before{
   content:'';position:absolute;right:10px;bottom:6px;width:190px;height:190px;
   background:url("/__l5e/assets-v1/1bd688df-7edd-45a6-9977-6d0e3b31ed41/ape-bg.png") right bottom/contain no-repeat;
