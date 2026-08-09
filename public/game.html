@@ -3336,8 +3336,14 @@ function investPresale(id,cost){
   setTimeout(()=>{
     if(win){
       const histMult = (p.mult || 2) * (0.75 + Math.random()*0.5);
-      const mult = (state.pmode==='historical') ? Math.max(1.15, Math.min(24, histMult)) : (1.5 + Math.random()*1.6);
-      const gain = Math.round(cost * mult);
+      /* V13: historical payouts are capped tighter (you already know the answer),
+         chaos keeps the fat tail. Allocation itself is soft-capped by net worth,
+         so a nine-figure stack can no longer compound through presales. */
+      let mult = (state.pmode==='historical') ? Math.max(1.15, Math.min(14, histMult*0.8)) : (1.5 + Math.random()*1.9);
+      const nw = netWorth();
+      const alloc = Math.min(cost, Math.max(1000, nw*0.06));
+      const eff = alloc/Math.max(1,cost);
+      const gain = Math.round(cost * mult * (0.35 + 0.65*eff));
       state.cash += gain;
       state.presaleWins = (state.presaleWins||0) + 1;
       if(state.presaleWins >= 3) unlockAch('presale_win');
