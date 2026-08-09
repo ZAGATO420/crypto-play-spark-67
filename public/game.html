@@ -2159,6 +2159,9 @@ function calculateXP(){
 function getXPMultiplier(){
   const d = {EASY:1.0,NORMAL:1.6,BOSS:2.5}[state?.diff]||1;
   let m = d;
+  /* V13 FAIRNESS: historical outcomes are knowable, chaos is not.
+     Knowledge pays less than risk. */
+  m *= (state?.pmode==='historical') ? 0.75 : 1.25;
   if(state?.ironman) m*=2;
   return m;
 }
