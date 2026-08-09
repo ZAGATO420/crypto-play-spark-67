@@ -7238,10 +7238,11 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
     if(seen())return;
     if(!document.body.classList.contains('v4-live'))return;
     if(!document.querySelector('main>div:nth-child(2)'))return;
+    if(modalOpen()){setTimeout(start,700);return}
     if(!root)build();
     idx=0;root.classList.add('on');paint();
   }
-  window.tlStartTour=function(){try{localStorage.removeItem('tcfb_tour')}catch(e){}idx=0;if(!root)build();root.classList.add('on');paint()};
+  window.tlStartTour=function(){try{localStorage.removeItem('tcfb_tour')}catch(e){}idx=0;if(!root)build();root.dataset.forced='1';root.classList.add('on');paint()};
   const watch=setInterval(()=>{
     if(document.body.classList.contains('v4-live')&&document.querySelector('#v7-top')){
       clearInterval(watch);setTimeout(start,900);
