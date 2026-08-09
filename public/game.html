@@ -7091,9 +7091,12 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
 /* ---------- first-run coach marks ---------- */
 #tl-tour{position:fixed;inset:0;z-index:400;display:none}
 #tl-tour.on{display:block}
-#tl-tour .tl-veil{position:absolute;inset:0;background:rgba(4,6,14,.72);backdrop-filter:blur(2px)}
-#tl-tour .tl-ring{position:absolute;border:2px solid rgba(240,180,41,.9);border-radius:16px;
-  box-shadow:0 0 0 9999px rgba(4,6,14,.66),0 0 26px rgba(240,180,41,.35);transition:all .25s ease}
+/* no full-screen veil: the ring's own outer shadow is the spotlight, so the
+   highlighted panel stays fully readable instead of going black */
+#tl-tour .tl-veil{display:none}
+#tl-tour .tl-ring{position:absolute;border:2px solid rgba(240,180,41,.95);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(4,6,14,.62),0 0 26px rgba(240,180,41,.4),
+             0 0 0 1px rgba(255,255,255,.08) inset;transition:all .22s ease}
 #tl-tour .tl-box{position:absolute;max-width:320px;padding:14px 16px;border-radius:16px;
   background:linear-gradient(180deg,rgba(24,30,56,.98),rgba(11,15,32,.98));
   border:1px solid rgba(240,180,41,.32);box-shadow:0 20px 50px rgba(0,0,0,.6)}
