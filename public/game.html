@@ -6949,38 +6949,264 @@ main .cf-rows.v6-fold{display:none}
 })();
 </script>
 
-<style id="v11-noclip">
+<style id="terminal-layout">
 /* ============================================================
-   V11 — nothing gets clipped between 821px and 1150px (tablet /
-   small laptop). Desktop stays scroll-free, phones unchanged.
+   TERMINAL LAYOUT — the single source of truth for terminal
+   geometry (columns, heights, overflow). Older skins keep their
+   colours and card looks; every height/overflow decision lives
+   here so no breakpoint can clip content any more.
+
+   PHONE   <=820px   one column, page scrolls, fixed bottom bar
+   TABLET  821-1099  two columns, page scrolls
+   LAPTOP  1100-1499 three columns, panels scroll internally
+   BIG     >=1500    three columns, more air
    ============================================================ */
-/* desktop: keep the single screen, but let long panels scroll internally
-   instead of cutting content off (launchpad lists, perp CTA) */
-@media(min-width:1151px){
-  body.v4-live main>div:last-child .panel[data-side].on{overflow-y:auto!important;max-height:100%}
-  body.v4-live main>div:last-child{overflow:hidden!important}
-  #v7-top>.panel{overflow-y:auto!important}
-  #v7-top .v7rows{overflow-y:auto!important}
-  #v7-top .v7cta{position:sticky;bottom:0}
-  body.v4-live main>div:nth-child(2)>#v7-top{height:clamp(210px,46%,440px)!important}
-}
-@media(min-width:821px) and (max-width:1150px){
-  body.v4-live main>div:last-child,
-  body.v4-live main>div:last-child .panel,
-  body.v4-live main>div:nth-child(2),
-  body.v4-live main>div:nth-child(2)>.panel,
-  body.v4-live main>div:nth-child(2)>.panel:first-child,
-  body.v4-live main>div:nth-child(2)>.panel:last-child,
-  #v7-top,#v7-top>.panel{
-    overflow:visible!important;max-height:none!important;height:auto!important
-  }
-  #v7-top .v7rows{overflow:visible!important}
-  #v7-top #cost-list{max-height:none!important;overflow:visible!important}
-  main .cf-rows.v6-fold{display:grid}
+
+/* ---------- universal rule: nothing is ever cut off ---------- */
+.scrollzone{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  -webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 22px),transparent 100%);
+          mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 22px),transparent 100%)}
+.scrollzone.at-end{-webkit-mask-image:none;mask-image:none}
+.scrollzone::-webkit-scrollbar{width:6px}
+.scrollzone::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:9px}
+.zone-hint{flex:0 0 auto;margin-top:6px;text-align:center;
+  font:800 8.5px 'JetBrains Mono',monospace;letter-spacing:.16em;color:#7e88ad;opacity:.85}
+
+/* ---------- ops tab strip: scrolls sideways, never clips ---------- */
+#v4-side-tabs{
+  display:flex!important;gap:8px;margin-bottom:4px;
+  overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;
+  padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#v4-side-tabs::-webkit-scrollbar{display:none}
+#v4-side-tabs button{
+  flex:0 0 auto;min-width:84px;scroll-snap-align:start;
+  padding:10px 8px;border-radius:14px;border:1px solid var(--v3-line);
+  background:rgba(255,255,255,.045);color:#9aa4c6;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;line-height:1.25;
+  transition:border-color .18s,color .18s,background .18s}
+#v4-side-tabs button:hover{border-color:rgba(240,180,41,.35);color:#e6e9f5}
+#v4-side-tabs button.active{border-color:rgba(240,180,41,.5);color:#ffd76a;
+  background:linear-gradient(168deg,rgba(240,180,41,.16),rgba(15,20,40,.85));
+  box-shadow:0 0 0 1px rgba(240,180,41,.14) inset}
+@media(min-width:1500px){#v4-side-tabs button{min-width:96px;font-size:9.5px}}
+
+/* ---------- PHONE ---------- */
+@media(max-width:820px){
+  body.v4-live{overflow:auto}
+  body.v4-live main{display:block!important;padding:10px 10px 132px!important;max-width:none}
+  body.v4-live main>div,body.v4-live main>div>.panel,
+  body.v4-live main .panel,#v7-top,#v7-top>.panel{
+    height:auto!important;max-height:none!important;overflow:visible!important}
+  #v7-top{display:grid!important;grid-template-columns:1fr!important;gap:12px}
   #market-list.dexgrid,.market-grid{max-height:none!important;overflow:visible!important}
-  main{padding-bottom:120px!important}
+  main .cf-rows.v6-fold{display:grid!important}
+  #v4-side-tabs{position:sticky;top:0;z-index:8;background:rgba(6,9,20,.92);
+    backdrop-filter:blur(14px);border-radius:14px}
+  #v4-side-tabs button{min-width:76px;min-height:58px}
+  body.v4-live main>div:last-child .panel[data-side]{display:none}
+  body.v4-live main>div:last-child .panel[data-side].on{display:flex;flex-direction:column}
 }
+
+/* ---------- TABLET ---------- */
+@media(min-width:821px) and (max-width:1099px){
+  body.v4-live{overflow:auto}
+  body.v4-live #game-screen{height:auto!important;overflow:visible!important}
+  body.v4-live main{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px;padding:12px 14px 136px!important;max-width:none;
+    height:auto!important;overflow:visible!important}
+  body.v4-live main>div,body.v4-live main>div>.panel,
+  body.v4-live main .panel,#v7-top,#v7-top>.panel,#v7-top .v7rows,#v7-top #cost-list{
+    height:auto!important;max-height:none!important;overflow:visible!important}
+  body.v4-live main>div:nth-child(2){grid-column:1/-1;display:flex;flex-direction:column;gap:14px}
+  #v7-top{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px}
+  #market-list.dexgrid,.market-grid{max-height:none!important;overflow:visible!important}
+  main .cf-rows.v6-fold{display:grid!important}
+  #v4-bar{display:none!important}
+}
+
+/* ---------- LAPTOP + BIG: single screen, internal scrolling ---------- */
+@media(min-width:1100px){
+  body.v4-live{overflow:hidden}
+  body.v4-live #game-screen{display:flex!important;flex-direction:column;height:100vh;overflow:hidden}
+  body.v4-live main{
+    display:grid!important;flex:1 1 auto;min-height:0;overflow:hidden;
+    grid-template-columns:300px minmax(0,1fr) 330px;gap:12px;
+    padding:10px 16px 8px!important;max-width:1720px}
+  body.v4-live main>div{min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+  /* left + right rails scroll as a whole, so the last button is reachable */
+  body.v4-live main>div:first-child,
+  body.v4-live main>div:last-child{overflow-y:auto;scrollbar-width:thin}
+  body.v4-live main>div:first-child::-webkit-scrollbar,
+  body.v4-live main>div:last-child::-webkit-scrollbar{width:6px}
+  body.v4-live main>div:first-child::-webkit-scrollbar-thumb,
+  body.v4-live main>div:last-child::-webkit-scrollbar-thumb{background:rgba(255,255,255,.13);border-radius:9px}
+  body.v4-live main>div>.panel{flex:0 0 auto}
+  body.v4-live main>div:last-child .panel[data-side]{display:none}
+  body.v4-live main>div:last-child .panel[data-side].on{display:flex;flex-direction:column;
+    flex:1 1 auto;min-height:0;overflow:hidden}
+  /* centre column: twin desks on top, market fills the rest */
+  body.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 auto;min-height:0}
+  #v7-top>.panel{overflow:hidden;display:flex;flex-direction:column;min-height:0}
+  #v7-top .v7rows{min-height:0}
+  #v7-top .v7cta{position:sticky;bottom:0;z-index:2}
+  body.v4-live main>div:nth-child(2)>.panel:last-child{flex:1 1 auto;min-height:0;overflow:hidden}
+  body.v4-live #v4-bar{display:flex;flex:0 0 auto;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:9px 16px;border-top:1px solid var(--v3-line);background:rgba(9,12,26,.94);backdrop-filter:blur(18px)}
+  body.v4-live .chart-box{height:200px}
+}
+@media(min-width:1500px){
+  body.v4-live main{grid-template-columns:340px minmax(0,1fr) 372px;gap:16px;padding:14px 24px 10px!important}
+  body.v4-live .chart-box{height:250px}
+  body.v4-live .panel{padding:16px;border-radius:18px}
+  #market-list.dexgrid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))!important;gap:10px}
+}
+
+/* ---------- friendlier polish ---------- */
+body.v4-live{background:
+  radial-gradient(1200px 620px at 18% -8%,rgba(124,58,237,.14),transparent 60%),
+  radial-gradient(1000px 520px at 88% 0%,rgba(34,211,238,.09),transparent 62%),
+  #080c1a}
+body.v4-live .panel{background:linear-gradient(180deg,rgba(21,27,50,.72),rgba(11,15,32,.86));
+  border-color:rgba(255,255,255,.075);box-shadow:0 10px 30px -22px rgba(0,0,0,.9)}
+body.v4-live .panel:hover{border-color:rgba(255,255,255,.13);box-shadow:0 14px 34px -22px rgba(0,0,0,.95)}
+body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
+.tl-empty{padding:16px 12px;text-align:center;color:#8d97ba;font-size:11.5px;line-height:1.6}
+
+/* ---------- first-run coach marks ---------- */
+#tl-tour{position:fixed;inset:0;z-index:400;display:none}
+#tl-tour.on{display:block}
+#tl-tour .tl-veil{position:absolute;inset:0;background:rgba(4,6,14,.72);backdrop-filter:blur(2px)}
+#tl-tour .tl-ring{position:absolute;border:2px solid rgba(240,180,41,.9);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(4,6,14,.66),0 0 26px rgba(240,180,41,.35);transition:all .25s ease}
+#tl-tour .tl-box{position:absolute;max-width:320px;padding:14px 16px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(24,30,56,.98),rgba(11,15,32,.98));
+  border:1px solid rgba(240,180,41,.32);box-shadow:0 20px 50px rgba(0,0,0,.6)}
+#tl-tour .tl-k{font:800 9px 'JetBrains Mono',monospace;letter-spacing:.18em;color:#ffd76a}
+#tl-tour .tl-t{margin-top:6px;font-weight:900;font-size:15px;color:#eef1f8}
+#tl-tour .tl-d{margin-top:5px;font-size:12.5px;line-height:1.6;color:#9aa4c6}
+#tl-tour .tl-a{margin-top:12px;display:flex;gap:8px;align-items:center}
+#tl-tour .tl-a button{flex:1;height:36px;border-radius:11px;cursor:pointer;font-weight:800;font-size:11.5px;
+  border:1px solid rgba(240,180,41,.4);background:linear-gradient(100deg,#7c3aed,#a78bfa);color:#fff}
+#tl-tour .tl-a .skip{flex:0 0 auto;padding:0 12px;background:transparent;color:#8d97ba;border-color:rgba(255,255,255,.14)}
 </style>
+<script>
+/* =====================================================================
+   TERMINAL LAYOUT LAYER — makes every list reachable at every width,
+   keeps the ops tab strip in view, and greets first-time players.
+   No prices, XP, perp math or leaderboard logic touched.
+   ===================================================================== */
+(function(){
+  const $=id=>document.getElementById(id);
+
+  /* ---- 1. turn overflowing lists into visible scroll zones ---- */
+  const ZONES=['#market-list','#cost-list','#v7-top .v7rows','.panel[data-side].on .side-body',
+               '#presale-list','#launch-list','#airdrop-list','#shop-list','#trophy-list','#ledger-list'];
+  function markZone(el){
+    if(!el)return;
+    const over=el.scrollHeight-el.clientHeight>4;
+    el.classList.toggle('scrollzone',over);
+    if(!over){el.classList.remove('at-end');return}
+    el.classList.toggle('at-end',el.scrollTop+el.clientHeight>=el.scrollHeight-6);
+    if(!el.dataset.tlBound){
+      el.dataset.tlBound='1';
+      el.addEventListener('scroll',()=>markZone(el),{passive:true});
+    }
+  }
+  function sweep(){
+    ZONES.forEach(sel=>document.querySelectorAll(sel).forEach(markZone));
+    /* the tall side panels themselves may need to scroll on laptop */
+    document.querySelectorAll('body.v4-live main>div:last-child .panel[data-side].on').forEach(p=>{
+      if(window.innerWidth>=1100){p.style.overflowY='auto';markZone(p)}
+      else{p.style.overflowY=''}
+    });
+  }
+  window.tlSweep=sweep;
+
+  /* ---- 2. keep the active ops tab scrolled into view ---- */
+  function centerTab(){
+    const strip=$('v4-side-tabs');if(!strip)return;
+    const on=strip.querySelector('button.active');if(!on)return;
+    const left=on.offsetLeft-(strip.clientWidth-on.offsetWidth)/2;
+    strip.scrollTo({left:Math.max(0,left),behavior:'smooth'});
+  }
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#v4-side-tabs button')){setTimeout(()=>{centerTab();sweep()},60)}
+  });
+
+  /* ---- 3. re-measure on resize / render ---- */
+  let raf=0;
+  const kick=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{sweep();centerTab()})};
+  window.addEventListener('resize',kick);
+  window.addEventListener('orientationchange',kick);
+  const mo=new MutationObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(sweep)});
+  document.addEventListener('DOMContentLoaded',()=>{
+    const main=document.querySelector('main');
+    if(main)mo.observe(main,{childList:true,subtree:true});
+    kick();
+  });
+  setInterval(sweep,1200);
+
+  /* ---- 4. four-step coach marks on the first terminal visit ---- */
+  const STEPS=[
+    {sel:'.hud-net',k:'STEP 1 / 4',t:'This is your money',d:'Net worth and cash. Everything you buy, every bill and every liquidation lands here first.'},
+    {sel:'main>div:nth-child(2)>.panel:last-child',k:'STEP 2 / 4',t:'This is where you trade',d:'Tap a token to open the trade window. You pick the amount there — nothing happens by accident.'},
+    {sel:'#v7-top',k:'STEP 3 / 4',t:'Profit and loss live here',d:'Left is the chart, right is your perp desk. Green is profit, red is loss. Leverage is optional — you can win without it.'},
+    {sel:'#v4-side-tabs',k:'STEP 4 / 4',t:'Everything else is optional',d:'Launchpad, degen ops, business and shop sit in this strip. Swipe it sideways. Then press NEXT MONTH to move time forward.'}
+  ];
+  let idx=0,root=null;
+  function seen(){try{return localStorage.getItem('tcfb_tour')==='1'}catch(e){return true}}
+  function markSeen(){try{localStorage.setItem('tcfb_tour','1')}catch(e){}}
+  function build(){
+    root=document.createElement('div');root.id='tl-tour';
+    root.innerHTML='<div class="tl-veil"></div><div class="tl-ring"></div>'+
+      '<div class="tl-box"><div class="tl-k"></div><div class="tl-t"></div><div class="tl-d"></div>'+
+      '<div class="tl-a"><button class="next"></button><button class="skip">SKIP</button></div></div>';
+    document.body.appendChild(root);
+    root.querySelector('.skip').addEventListener('click',close);
+    root.querySelector('.next').addEventListener('click',()=>{idx++;idx>=STEPS.length?close():paint()});
+  }
+  function close(){markSeen();if(root)root.classList.remove('on')}
+  function paint(){
+    const s=STEPS[idx];if(!s)return close();
+    const el=document.querySelector(s.sel);
+    if(!el){idx++;return idx>=STEPS.length?close():paint()}
+    const r=el.getBoundingClientRect();
+    const ring=root.querySelector('.tl-ring');
+    const pad=6;
+    ring.style.left=Math.max(4,r.left-pad)+'px';
+    ring.style.top=Math.max(4,r.top-pad)+'px';
+    ring.style.width=Math.min(window.innerWidth-8,r.width+pad*2)+'px';
+    ring.style.height=Math.min(window.innerHeight-8,r.height+pad*2)+'px';
+    const box=root.querySelector('.tl-box');
+    root.querySelector('.tl-k').textContent=s.k;
+    root.querySelector('.tl-t').textContent=s.t;
+    root.querySelector('.tl-d').textContent=s.d;
+    root.querySelector('.next').textContent=idx===STEPS.length-1?'LET ME PLAY':'NEXT';
+    box.style.visibility='hidden';
+    requestAnimationFrame(()=>{
+      const bw=box.offsetWidth,bh=box.offsetHeight;
+      let left=Math.min(Math.max(10,r.left),window.innerWidth-bw-10);
+      let top=r.bottom+14;
+      if(top+bh>window.innerHeight-10)top=Math.max(10,r.top-bh-14);
+      box.style.left=left+'px';box.style.top=top+'px';box.style.visibility='visible';
+    });
+  }
+  function start(){
+    if(seen())return;
+    if(!document.body.classList.contains('v4-live'))return;
+    if(!document.querySelector('main>div:nth-child(2)'))return;
+    if(!root)build();
+    idx=0;root.classList.add('on');paint();
+  }
+  window.tlStartTour=function(){try{localStorage.removeItem('tcfb_tour')}catch(e){}idx=0;if(!root)build();root.classList.add('on');paint()};
+  const watch=setInterval(()=>{
+    if(document.body.classList.contains('v4-live')&&document.querySelector('#v7-top')){
+      clearInterval(watch);setTimeout(start,900);
+    }
+  },600);
+})();
+</script>
 
 </body>
 </html>
