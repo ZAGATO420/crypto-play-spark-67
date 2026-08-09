@@ -4342,21 +4342,8 @@ function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO 
 
 <script>
 (function(){
-  function showTutIfNeeded(){
-    try{
-      const overlay=document.getElementById('tutorial-overlay');
-      if(!overlay) return;
-      let need=false;
-      try{ if(!localStorage.getItem('tfcb_tut_done')) need=true; }catch{ need=true; }
-      if(need && overlay.classList.contains('hidden')){
-        overlay.classList.remove('hidden');
-        overlay.style.display='flex';
-        if(typeof showTutStep==='function'){ try{ tutStep=0; showTutStep(); }catch{} }
-      }
-    }catch{}
-  }
-  document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(showTutIfNeeded, 600); });
-  window.addEventListener('load', ()=>{ setTimeout(showTutIfNeeded, 400); });
+  /* The old 3-step card is no longer auto-shown: first-time players get the
+     in-terminal coach marks instead. It stays reachable via "HOW TO PLAY". */
   const origStart=window.actuallyStartGame;
   window.actuallyStartGame=function(){
     try{ const b=document.getElementById('airdrop-start-banner'); if(b) b.style.display='none'; }catch{}
