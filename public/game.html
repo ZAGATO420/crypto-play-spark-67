@@ -7091,9 +7091,12 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
 /* ---------- first-run coach marks ---------- */
 #tl-tour{position:fixed;inset:0;z-index:400;display:none}
 #tl-tour.on{display:block}
-#tl-tour .tl-veil{position:absolute;inset:0;background:rgba(4,6,14,.72);backdrop-filter:blur(2px)}
-#tl-tour .tl-ring{position:absolute;border:2px solid rgba(240,180,41,.9);border-radius:16px;
-  box-shadow:0 0 0 9999px rgba(4,6,14,.66),0 0 26px rgba(240,180,41,.35);transition:all .25s ease}
+/* no full-screen veil: the ring's own outer shadow is the spotlight, so the
+   highlighted panel stays fully readable instead of going black */
+#tl-tour .tl-veil{display:none}
+#tl-tour .tl-ring{position:absolute;border:2px solid rgba(240,180,41,.95);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(4,6,14,.62),0 0 26px rgba(240,180,41,.4),
+             0 0 0 1px rgba(255,255,255,.08) inset;transition:all .22s ease}
 #tl-tour .tl-box{position:absolute;max-width:320px;padding:14px 16px;border-radius:16px;
   background:linear-gradient(180deg,rgba(24,30,56,.98),rgba(11,15,32,.98));
   border:1px solid rgba(240,180,41,.32);box-shadow:0 20px 50px rgba(0,0,0,.6)}
@@ -7170,6 +7173,22 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
     {sel:'#v4-side-tabs',k:'STEP 4 / 4',t:'Everything else is optional',d:'Launchpad, degen ops, business and shop sit in this strip. Swipe it sideways. Then press NEXT MONTH to move time forward.'}
   ];
   let idx=0,root=null;
+  /* a decision / trade / chapter card is modal — the tour must never sit on top of one */
+  function modalOpen(){
+    return [...document.querySelectorAll('body > *')].some(e=>{
+      if(e.id==='tl-tour')return false;
+      const cs=getComputedStyle(e);
+      if(cs.display==='none'||cs.visibility==='hidden'||cs.position!=='fixed')return false;
+      if(parseFloat(cs.opacity||'1')<.05)return false;
+      const r=e.getBoundingClientRect();
+      return r.width>240&&r.height>160;
+    });
+  }
+  function usable(el){
+    if(!el||!el.offsetParent&&getComputedStyle(el).position!=='fixed')return false;
+    const r=el.getBoundingClientRect();
+    return r.width>60&&r.height>40;
+  }
   function seen(){try{return localStorage.getItem('tcfb_tour')==='1'}catch(e){return true}}
   function markSeen(){try{localStorage.setItem('tcfb_tour','1')}catch(e){}}
   function build(){
@@ -7184,9 +7203,17 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
   function close(){markSeen();if(root)root.classList.remove('on')}
   function paint(){
     const s=STEPS[idx];if(!s)return close();
+    if(modalOpen()){root.classList.remove('on');setTimeout(()=>{if(!seen()||root.dataset.forced){root.classList.add('on');paint()}},800);return}
+    root.classList.add('on');
     const el=document.querySelector(s.sel);
-    if(!el){idx++;return idx>=STEPS.length?close():paint()}
+    if(!usable(el)){idx++;return idx>=STEPS.length?close():paint()}
+    /* make sure the target is actually on screen before we draw the ring */
+    const pre=el.getBoundingClientRect();
+    if(pre.top<0||pre.bottom>window.innerHeight){
+      try{el.scrollIntoView({block:'center',behavior:'auto'})}catch(e){}
+    }
     const r=el.getBoundingClientRect();
+    if(r.bottom<40||r.top>window.innerHeight-40){idx++;return idx>=STEPS.length?close():paint()}
     const ring=root.querySelector('.tl-ring');
     const pad=6;
     ring.style.left=Math.max(4,r.left-pad)+'px';
@@ -7211,10 +7238,11 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
     if(seen())return;
     if(!document.body.classList.contains('v4-live'))return;
     if(!document.querySelector('main>div:nth-child(2)'))return;
+    if(modalOpen()){setTimeout(start,700);return}
     if(!root)build();
     idx=0;root.classList.add('on');paint();
   }
-  window.tlStartTour=function(){try{localStorage.removeItem('tcfb_tour')}catch(e){}idx=0;if(!root)build();root.classList.add('on');paint()};
+  window.tlStartTour=function(){try{localStorage.removeItem('tcfb_tour')}catch(e){}idx=0;if(!root)build();root.dataset.forced='1';root.classList.add('on');paint()};
   const watch=setInterval(()=>{
     if(document.body.classList.contains('v4-live')&&document.querySelector('#v7-top')){
       clearInterval(watch);setTimeout(start,900);
