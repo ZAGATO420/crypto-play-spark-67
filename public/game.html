@@ -6468,6 +6468,473 @@ main .cf-rows.v6-fold{display:none}
 })();
 </script>
 
+<style id="v10-story">
+/* ---- v10: unified popup card language (dossier look) ---- */
+.popup-logo{display:none!important}
+.event-card,.presale-result,.decision-card,.story-card{
+  position:relative;overflow:hidden;isolation:isolate;text-align:left;
+  border:1px solid rgba(240,180,41,.22)!important;border-radius:22px!important;
+  background:
+    radial-gradient(120% 130% at 100% 0%, rgba(139,92,246,.30), transparent 62%),
+    radial-gradient(90% 120% at 0% 100%, rgba(240,180,41,.08), transparent 60%),
+    linear-gradient(135deg,#1a1030 0%,#120b24 45%,#07060e 100%)!important;
+  box-shadow:0 26px 70px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.06)!important;
+  padding:26px 28px 24px!important;max-width:560px}
+.event-card::before,.presale-result::before,.decision-card::before,.story-card::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:radial-gradient(circle at 70% 0%,#000,transparent 78%);
+          mask-image:radial-gradient(circle at 70% 0%,#000,transparent 78%)}
+.event-card::after,.presale-result::after,.decision-card::after,.story-card::after{
+  content:'';position:absolute;left:0;top:16px;bottom:16px;width:3px;border-radius:3px;z-index:1;
+  background:linear-gradient(180deg,var(--gold,#f0b429),rgba(139,92,246,.9))}
+.event-card>*,.presale-result>*,.decision-card>*,.story-card>*{position:relative;z-index:2}
+.pcard-sigil{position:absolute;right:-14px;bottom:-18px;height:150px;width:auto;z-index:1;
+  opacity:.13;filter:grayscale(.25) drop-shadow(0 10px 30px rgba(0,0,0,.6));pointer-events:none}
+.decision-card.hist .pcard-sigil{opacity:.3;filter:none}
+.pcard-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.pcard-chip{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:800;letter-spacing:.16em;
+  padding:5px 10px;border-radius:99px;color:#c4b5fd;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.45)}
+.decision-card.hist .pcard-chip{color:#ffd76a;background:rgba(240,180,41,.12);border-color:rgba(240,180,41,.5)}
+.pcard-date{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:#6f7599;white-space:nowrap}
+.pcard-from{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.pcard-av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.pcard-from .n{font-size:12.5px;font-weight:800;color:#e6e2ff;line-height:1.15}
+.pcard-from .r{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#6f7599}
+.pcard-title{font-weight:900;font-size:clamp(20px,2.4vw,27px);line-height:1.12;letter-spacing:-.01em;color:#f6f4ff;margin-bottom:9px}
+.pcard-desc{color:#b9bfd8;font-size:14px;line-height:1.62}
+.decision-options{gap:8px!important;margin-top:18px!important}
+.decision-btn{display:flex!important;align-items:center;gap:12px;
+  padding:12px 14px!important;border-radius:14px!important;
+  background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.09)!important;
+  transition:border-color .16s,background .16s,box-shadow .16s!important;transform:none!important;cursor:pointer}
+.decision-btn:hover:not(:disabled){border-color:rgba(240,180,41,.6)!important;background:rgba(240,180,41,.07)!important;
+  box-shadow:0 0 0 1px rgba(240,180,41,.18) inset,0 10px 26px rgba(0,0,0,.4)!important;transform:none!important}
+.decision-btn .ob{flex:1;min-width:0;text-align:left}
+.decision-btn .ol{font-size:14px;font-weight:800;color:#f1eeff;line-height:1.25}
+.decision-btn .om{margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#7f86ab}
+.decision-btn .om b{font-weight:800}
+.decision-btn .oa{color:#6a7098;font-size:16px;flex:0 0 auto}
+.decision-btn:hover:not(:disabled) .oa{color:var(--gold,#f0b429)}
+.pc-cost{color:#ff8a94}.pc-gain{color:#2ee59d}.pc-xp{color:#c4b5fd}.pc-risk{color:#f0b429}
+.pcard-foot{margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#565c7c}
+.presale-result .big{margin:6px 0 4px!important}
+.event-card{text-align:center}
+.event-card .pcard-head{justify-content:center}
+
+/* ---- chapter + briefing ---- */
+.story-overlay{position:fixed;inset:0;background:rgba(0,0,0,.86);backdrop-filter:blur(16px);z-index:305;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.story-overlay.hidden{display:none}
+.story-card{width:100%;max-width:600px;animation:popIn .35s cubic-bezier(.16,1,.3,1)}
+.story-act{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;color:var(--gold,#f0b429);font-weight:800}
+.story-goal{margin-top:14px;padding:11px 13px;border-radius:13px;border:1px solid rgba(240,180,41,.28);
+  background:rgba(240,180,41,.06);font-size:13px;color:#ffe6ae;font-weight:700}
+.brief-list{margin-top:14px;display:flex;flex-direction:column;gap:7px;max-height:44vh;overflow:auto}
+.brief-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);font-size:13px;color:#cdd2e6;line-height:1.45}
+.brief-item .bi{flex:0 0 auto}
+.story-btn{margin-top:18px;width:100%;padding:13px;border-radius:14px;font-weight:900;letter-spacing:.06em;
+  color:#0a0713;border:0;cursor:pointer;background:linear-gradient(100deg,#f0b429,#8b5cf6)}
+.chronicle{margin-top:18px;text-align:left}
+.chronicle h4{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:#6f7599;margin:0 0 9px}
+.chron-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:#c6cbe2;line-height:1.45}
+.chron-row .cm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold,#f0b429);flex:0 0 78px;letter-spacing:.06em}
+@media(max-width:620px){
+  .event-card,.presale-result,.decision-card,.story-card{padding:20px 18px!important}
+  .pcard-sigil{height:110px;opacity:.1}
+  .pcard-desc{font-size:13.5px}
+  .chron-row .cm{flex:0 0 66px}
+}
+</style>
+<script id="v10-story-js">
+(function(){
+  var APE='/__l5e/assets-v1/7b6262df-d3c4-4d4d-a087-93c8d47ae47b/boss-ape-crown.webp';
+  function S(){try{return (typeof state!=='undefined')?state:null}catch(e){return null}}
+  function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function money(n){try{return (typeof fmt==='function')?fmt(Math.round(n)):('$'+Math.round(n).toLocaleString())}catch(e){return '$'+Math.round(n)}}
+  function when(){try{return (typeof dateStr==='function')?dateStr().toUpperCase():''}catch(e){return ''}}
+
+  /* ============ pacing mode ============ */
+  var PACING=(function(){try{return localStorage.getItem('tcfb_pacing')||'story'}catch(e){return 'story'}})();
+  window.setPacing=function(v){PACING=(v==='degen')?'degen':'story';try{localStorage.setItem('tcfb_pacing',PACING)}catch(e){}
+    try{toast(PACING==='story'?'STORY pacing — fewer interruptions':'DEGEN pacing — full chaos','buy')}catch(e){}};
+  document.addEventListener('DOMContentLoaded',function(){var el=document.getElementById('pacing-mode');if(el)el.value=PACING});
+  function story(){return PACING==='story'}
+
+  /* ============ acts ============ */
+  var ACTS=[
+    {m:0,  t:'ACT I — 2020: NOBODY',        z:'You have a boring job, a small stack and no idea what is coming. Nobody knows your name yet.', g:'Survive your first year without going broke.'},
+    {m:12, t:'ACT II — 2021: EUPHORIA',     z:'Everything moons. Your timeline is a casino and everyone is a genius. This is where fortunes are made and given back.', g:'Ride the bull, but leave the party before the lights go out.'},
+    {m:24, t:'ACT III — 2022: THE WINTER',  z:'Funds implode, exchanges vanish overnight and the only thing pumping is your stress level.', g:'Still be here in December 2022.'},
+    {m:36, t:'ACT IV — 2023: SILENCE',      z:'The crowd left. Prices grind sideways. This is the boring chapter that decides everything.', g:'Accumulate while nobody is watching.'},
+    {m:48, t:'ACT V — 2024: THE RETURN',    z:'Halving, ETFs, fresh money. The tourists are coming back and the memes are louder than ever.', g:'Turn patience into position.'},
+    {m:60, t:'ACT VI — 2025: THE MACHINE',  z:'Bots, points, perps. The game got faster than you and the edge is thinner every month.', g:'Do not get liquidated chasing the last leg.'},
+    {m:72, t:'ACT VII — 2026: FINAL BOSS',  z:'One last cycle. Everything you learned, everything you still owe. The Final Boss is your own greed.', g:'Reach 2027 alive — and rich.'}
+  ];
+  function actFor(m){var a=ACTS[0];for(var i=0;i<ACTS.length;i++){if(m>=ACTS[i].m)a=ACTS[i]}return a}
+
+  /* ============ senders ============ */
+  var SENDERS=[
+    {k:'alpha',  n:'@0xLiquid',        r:'ALPHA CALLER · 41% ACCURATE', a:'📣'},
+    {k:'dev',    n:'anon dev',         r:'UNVERIFIED CONTRACT',        a:'🕶️'},
+    {k:'friend', n:'Marco',            r:'EX-COLLEAGUE · STILL BROKE',  a:'🙃'},
+    {k:'tax',    n:'Finanzamt',        r:'OFFICIAL CORRESPONDENCE',     a:'🧾'},
+    {k:'whale',  n:'0x7f…c4a1',        r:'WHALE WALLET · WATCHED',      a:'🐋'},
+    {k:'desk',   n:'TCFB Terminal',    r:'SYSTEM FEED',                 a:'🖥️'},
+    {k:'mod',    n:'TG Admin',         r:'GROUP OF 40,000 DEGENS',      a:'👾'}
+  ];
+  function senderFor(d){
+    var s=(d.title+' '+(d.desc||'')).toLowerCase();
+    if(/tax|steuer|report|audit|clawback|sybil/.test(s))return SENDERS[3];
+    if(/friend|loan|bailout|kolleg/.test(s))return SENDERS[2];
+    if(/dev|contract|mint|presale|launch|private sale/.test(s))return SENDERS[1];
+    if(/whale|liquidat|perp|leverage|long|short/.test(s))return SENDERS[4];
+    if(/shill|timeline|ct |twitter|thread/.test(s))return SENDERS[0];
+    if(/telegram|group|call|airdrop|farm/.test(s))return SENDERS[6];
+    return SENDERS[5];
+  }
+  function chipFor(d){
+    if(d._hist)return '📜 '+((d._era||'REAL HISTORY')+'').toUpperCase();
+    var s=(d.title+' '+(d.desc||'')).toLowerCase();
+    if(/airdrop|farm|sybil|points/.test(s))return 'AIRDROP';
+    if(/perp|leverage|long|short|liquidat/.test(s))return 'PERPS';
+    if(/rug|scam|drain|hack|phish/.test(s))return 'RUG RISK';
+    if(/presale|launch|mint|ico|private sale/.test(s))return 'LAUNCH';
+    if(/tax|steuer|audit|report/.test(s))return 'PAPERWORK';
+    if(/panic|crash|sell/.test(s))return 'MARKET STRESS';
+    return 'DECISION';
+  }
+
+  /* ============ decision card ============ */
+  function buildDecisionShell(){
+    var card=document.getElementById('decision-card'); if(!card)return null;
+    if(card.dataset.v10)return card;
+    card.dataset.v10='1';
+    card.innerHTML=
+      '<img class="pcard-sigil" src="'+APE+'" alt="" decoding="async">'+
+      '<div class="pcard-head"><span class="pcard-chip" id="decision-badge">DECISION</span><span class="pcard-date" id="decision-date"></span></div>'+
+      '<div class="pcard-from" id="decision-from"><div class="pcard-av"></div><div><div class="n"></div><div class="r"></div></div></div>'+
+      '<div class="pcard-title" id="decision-title"></div>'+
+      '<div class="pcard-desc" id="decision-desc"></div>'+
+      '<div class="decision-options" id="decision-options"></div>'+
+      '<div class="pcard-foot">ONE CHOICE · NO UNDO · THE CRYPTO FINAL BOSS</div>';
+    return card;
+  }
+  function optMeta(opt){
+    var bits=[];
+    if(opt.cash&&opt.cash<0)bits.push('<b class="pc-cost">-'+money(-opt.cash)+'</b>');
+    if(opt.cash&&opt.cash>0)bits.push('<b class="pc-gain">+'+money(opt.cash)+'</b>');
+    var r=(opt.risk||0)+Math.abs(opt.drain||0)*40+Math.abs(opt.failDrain||0)*40;
+    if(opt.chance!==undefined)bits.push('<b class="pc-risk">'+Math.round(opt.chance*100)+'% odds</b>');
+    if(r>=12)bits.push('<b class="pc-risk">high risk</b>');
+    else if(r>=5)bits.push('<b class="pc-risk">medium risk</b>');
+    else if(r>0)bits.push('low risk');
+    if(opt.risk&&opt.risk<0)bits.push('<b class="pc-gain">de-risks</b>');
+    if(opt.stress&&opt.stress>=8)bits.push('stress +'+opt.stress);
+    var xp=opt.xp||opt.winXP;if(xp)bits.push('<b class="pc-xp">XP +'+xp+'</b>');
+    if(!bits.length)bits.push('no direct cost');
+    return bits.join(' &middot; ');
+  }
+  window._showDecisionNow=function(d){
+    var st=S(); if(st)st.paused=true;
+    try{playSound('decision')}catch(e){}
+    var card=buildDecisionShell(); if(!card)return;
+    card.className='decision-card'+(d._hist?' hist':'');
+    document.getElementById('decision-badge').textContent=chipFor(d);
+    document.getElementById('decision-date').textContent=when();
+    var sn=senderFor(d),from=document.getElementById('decision-from');
+    from.querySelector('.pcard-av').textContent=sn.a;
+    from.querySelector('.n').textContent=sn.n;
+    from.querySelector('.r').textContent=sn.r;
+    document.getElementById('decision-title').textContent=d.title;
+    document.getElementById('decision-desc').textContent=d.desc;
+    var opts=document.getElementById('decision-options');opts.innerHTML='';
+    var affordable=0;
+    (d.options||[]).forEach(function(opt){
+      var btn=document.createElement('button');btn.className='decision-btn';
+      var cost=(opt.cash&&opt.cash<0)?-opt.cash:0;
+      var broke=cost>0&&st&&st.cash<cost&&(typeof portValue==='function'?portValue():0)<=0;
+      btn.innerHTML='<div class="ob"><div class="ol">'+esc(opt.label)+'</div><div class="om">'+
+        (broke?'locked &middot; not enough cash':optMeta(opt))+'</div></div><span class="oa">›</span>';
+      if(broke){btn.classList.add('disabled');btn.disabled=true}
+      else{affordable++;btn.onclick=function(){resolveDecision(opt)}}
+      opts.appendChild(btn);
+    });
+    if(!affordable){
+      var b=document.createElement('button');b.className='decision-btn';
+      b.innerHTML='<div class="ob"><div class="ol">You are broke. Walk away.</div><div class="om">stress +6 &middot; <b class="pc-xp">XP +20</b></div></div><span class="oa">›</span>';
+      b.onclick=function(){resolveDecision({msg:'You had no capital left to act. You walk away.',stress:6,xp:20})};
+      opts.appendChild(b);
+    }
+    window._v10LastDecision=d;
+    document.getElementById('decision-overlay').classList.remove('hidden');
+  };
+
+  /* ============ event / presale cards get the same frame ============ */
+  var origEventNow=window._showEventNow;
+  window._showEventNow=function(title,type,flavor){
+    var r=origEventNow.apply(this,arguments);
+    try{
+      var card=document.getElementById('event-card');
+      if(card&&!card.querySelector('.pcard-sigil')){
+        var im=document.createElement('img');im.className='pcard-sigil';im.src=APE;im.alt='';card.appendChild(im);
+      }
+      var head=card.querySelector('.pcard-head');
+      if(!head){head=document.createElement('div');head.className='pcard-head';
+        head.innerHTML='<span class="pcard-chip"></span><span class="pcard-date"></span>';
+        card.insertBefore(head,card.firstChild);}
+      head.querySelector('.pcard-chip').textContent=(type==='crash')?'MARKET SHOCK':(type==='pump')?'MARKET MOVE':'SIGNAL';
+      head.querySelector('.pcard-date').textContent=when();
+    }catch(e){}
+    return r;
+  };
+  (function(){
+    var pr=document.getElementById('presale-result');
+    if(pr&&!pr.querySelector('.pcard-sigil')){var im=document.createElement('img');im.className='pcard-sigil';im.src=APE;im.alt='';pr.appendChild(im)}
+  })();
+
+  /* ============ generic story overlay (chapter + briefing) ============ */
+  function overlay(){
+    var o=document.getElementById('story-overlay');
+    if(!o){
+      o=document.createElement('div');o.id='story-overlay';o.className='story-overlay hidden';
+      o.innerHTML='<div class="story-card" id="story-card"></div>';
+      document.body.appendChild(o);
+    }
+    return o;
+  }
+  function closeStory(){
+    var o=overlay();o.classList.add('hidden');
+    var st=S();if(st&&!st._gameEnded)st.paused=false;
+    try{pqRelease('story')}catch(e){}
+  }
+  window.closeStoryCard=closeStory;
+
+  function showChapterNow(a){
+    var st=S();if(st)st.paused=true;
+    try{playSound('quest')}catch(e){}
+    overlay().classList.remove('hidden');
+    document.getElementById('story-card').innerHTML=
+      '<img class="pcard-sigil" src="'+APE+'" alt="" decoding="async">'+
+      '<div class="pcard-head"><span class="pcard-chip">NEW CHAPTER</span><span class="pcard-date">'+esc(when())+'</span></div>'+
+      '<div class="story-act">'+esc(a.t)+'</div>'+
+      '<div class="pcard-title" style="margin-top:8px">'+esc(a.t.split('—')[1]?a.t.split('—')[1].trim():a.t)+'</div>'+
+      '<div class="pcard-desc">'+esc(a.z)+'</div>'+
+      '<div class="story-goal">CHAPTER GOAL &middot; '+esc(a.g)+'</div>'+
+      '<button class="story-btn" onclick="closeStoryCard()">CONTINUE</button>';
+  }
+  function showBriefingNow(items){
+    var st=S();if(st)st.paused=true;
+    try{playSound('click')}catch(e){}
+    overlay().classList.remove('hidden');
+    document.getElementById('story-card').innerHTML=
+      '<img class="pcard-sigil" src="'+APE+'" alt="" decoding="async">'+
+      '<div class="pcard-head"><span class="pcard-chip">MONTHLY BRIEFING</span><span class="pcard-date">'+esc(when())+'</span></div>'+
+      '<div class="pcard-title">While you were trading</div>'+
+      '<div class="pcard-desc">Everything that happened since your last briefing — collected, so it does not interrupt your run.</div>'+
+      '<div class="brief-list">'+items.map(function(it){
+        return '<div class="brief-item"><span class="bi">'+esc(it.icon||'•')+'</span><span>'+esc(it.text)+'</span></div>';
+      }).join('')+'</div>'+
+      '<button class="story-btn" onclick="closeStoryCard()">GOT IT</button>';
+  }
+
+  /* ============ pacing: budget + minimum gap ============ */
+  var origEnqueue=window.pqEnqueue, origRelease=window.pqRelease;
+  var lastClosed=0, shownThisMonth=0;
+  window.pqRelease=function(kind){lastClosed=Date.now();return origRelease.apply(this,arguments)};
+  function brief(text,icon){
+    var st=S();if(!st)return;
+    if(!st._briefing)st._briefing=[];
+    if(st._briefing.length<12)st._briefing.push({text:text,icon:icon||'•'});
+  }
+  window.pqEnqueue=function(kind,run,prio){
+    if(!story()||kind==='story'||kind==='levelup')return origEnqueue.apply(this,arguments);
+    var budget=2;
+    if(shownThisMonth>=budget&&(kind==='event'||kind==='decision')){
+      if(kind==='event'){brief(window._v10LastEventTitle||'Market event passed without you','⚡');return}
+      // decisions beyond budget are postponed to the next month instead of stacking
+      var st=S();if(st){if(!st._postponed)st._postponed=[];if(st._postponed.length<3&&window._v10PendingDecision)st._postponed.push(window._v10PendingDecision)}
+      return;
+    }
+    shownThisMonth++;
+    var gap=1400-(Date.now()-lastClosed);
+    if(gap>0){setTimeout(function(){origEnqueue(kind,run,prio)},gap);return}
+    return origEnqueue.apply(this,arguments);
+  };
+  var origShowDecision=window.showDecision;
+  window.showDecision=function(d){window._v10PendingDecision=d;return origShowDecision.apply(this,arguments)};
+  var origShowEvent=window.showEvent;
+  window.showEvent=function(title,type,flavor){window._v10LastEventTitle=title;return origShowEvent.apply(this,arguments)};
+
+  /* ============ chronicle ============ */
+  function chron(text){
+    var st=S();if(!st)return;
+    if(!st.chronicle)st.chronicle=[];
+    if(st.chronicle.length>40)return;
+    st.chronicle.push({m:when(),t:text});
+  }
+  window._v10Chron=chron;
+
+  /* ============ rival + momentum ============ */
+  function rival(){
+    var st=S();if(!st)return null;
+    if(!st._rival){
+      var names=['@ser_exitliquidity','@gigachad_eth','0xNoSleep','@rugsurvivor','@maxpainmax'];
+      st._rival={name:names[Math.floor(Math.random()*names.length)],net:10000,dead:false};
+    }
+    return st._rival;
+  }
+  function stepRival(){
+    var st=S(),r=rival();if(!st||!r||r.dead)return;
+    var sent=(st.sentiment||50)/50;
+    var swing=(Math.random()-0.46)*0.5*sent+0.02;
+    r.net=Math.max(0,r.net*(1+swing));
+    if(Math.random()<0.035){r.net*=0.25;chron(r.name+' got liquidated. You did not.')}
+    if(r.net<250&&!r.dead){r.dead=true;chron(r.name+' is gone. Rekt in '+when()+'.')}
+  }
+  function paintHud(){
+    var st=S(),r=st&&st._rival;var fig=document.getElementById('hud-rival-fig');
+    if(!fig||!r)return;
+    fig.hidden=false;
+    var el=document.getElementById('hud-rival');
+    if(el)el.textContent=r.dead?'REKT':money(r.net);
+    var mo=document.getElementById('hud-momentum');
+    if(mo){var s=st._streak||0;mo.textContent=s>=2?('🔥'+s):'';}
+    if(el){var mine=(typeof netWorth==='function')?netWorth():0;el.style.color=(r.dead||mine>=r.net)?'#2ee59d':'#ff6b76'}
+  }
+  var origHeader=window.updateHeader;
+  window.updateHeader=function(){var r=origHeader.apply(this,arguments);try{paintHud()}catch(e){}return r};
+
+  /* ============ consequences ============ */
+  function scheduleFollowup(d,opt){
+    var st=S();if(!st)return;
+    if(Math.random()>0.4)return;
+    if(!st._followups)st._followups=[];
+    if(st._followups.length>=3)return;
+    st._followups.push({m:st.month+2+Math.floor(Math.random()*5),title:d.title,label:opt.label||'your call'});
+  }
+  function followupCard(f){
+    var good=Math.random()<0.5;
+    return {
+      title:'The bill for "'+f.title+'"',
+      desc:'Months ago you chose: "'+f.label+'". That thread just came back. '+
+        (good?'Someone from that deal reaches out again — this time with an actual opportunity.'
+             :'The people involved are gone, and what is left is a mess with your wallet address on it.'),
+      options: good ? [
+        {label:'Take the follow-up allocation',cash:-600,risk:5,stress:3,chance:0.58,winCash:2100,winMsg:'The second round actually paid.',failMsg:'Same story, different month. Gone.',xp:60},
+        {label:'Ask for a smaller size',cash:-250,risk:2,stress:1,chance:0.6,winCash:800,winMsg:'Small, clean, profitable.',failMsg:'Small loss. Cheap lesson.',xp:40},
+        {label:'Leave it. You learned.',stress:-3,xp:30,msg:'You closed the chapter yourself.'}
+      ] : [
+        {label:'Lawyer up ($450)',cash:-450,risk:0,stress:-4,xp:60,msg:'Expensive, but the noise stops.'},
+        {label:'Post the receipts publicly',risk:6,stress:6,chance:0.45,winCash:900,winMsg:'CT rallied behind you. Partial recovery.',failMsg:'You got ratioed and nothing came back.',xp:50},
+        {label:'Ignore it and move on',stress:8,xp:20,msg:'It keeps sitting in the back of your head.'}
+      ]
+    };
+  }
+
+  /* ============ milestones ============ */
+  function milestones(){
+    var st=S();if(!st)return;
+    if(!st._ms)st._ms={};
+    var net=(typeof netWorth==='function')?netWorth():0;
+    function once(k,line,icon){if(st._ms[k])return;st._ms[k]=1;chron(line);brief(line,icon||'★');}
+    if(net>=100000)once('100k','You crossed six figures. For the first time it felt real — and terrifying.','💰');
+    if(net>=1000000)once('1m','Seven figures. You stopped telling people what you do.','👑');
+    if((st.liquidations||0)>0)once('liq','Your first liquidation. The number went to zero while you watched.','💀');
+    if((st.rugged||0)>=3)once('rug3','Three rugs deep. You started reading contracts. A bit.','🩸');
+    if((st.stress||0)>=85)once('burn','Burnout territory. You are trading on nerves alone.','🧠');
+    if((st.moons||0)>=5)once('moon5','Five moons. You believe you are early. Everyone does.','🚀');
+  }
+
+  /* ============ month hook ============ */
+  var origNextMonth=window.nextMonth;
+  window.nextMonth=function(){
+    var before=S()?S().month:0;
+    var r=origNextMonth.apply(this,arguments);
+    var st=S();
+    if(!st||st._gameEnded)return r;
+    shownThisMonth=0;
+    try{stepRival()}catch(e){}
+    try{milestones()}catch(e){}
+    // chapter card on act change
+    try{
+      var a=actFor(st.month);
+      if(a && a.m===st.month && st.month>before-1){
+        st._act=a.t;chron(a.t);
+        pqEnqueue('story',function(){showChapterNow(a)},9);
+      }
+    }catch(e){}
+    // briefing with everything that was folded away
+    try{
+      if(story()&&st._briefing&&st._briefing.length){
+        var items=st._briefing.slice(0);st._briefing=[];
+        pqEnqueue('story',function(){showBriefingNow(items)},4);
+      }
+    }catch(e){}
+    // postponed decisions
+    try{
+      if(st._postponed&&st._postponed.length){
+        var d=st._postponed.shift();
+        setTimeout(function(){try{showDecision(d)}catch(e){}},1200);
+      }
+    }catch(e){}
+    // due follow-ups
+    try{
+      if(st._followups&&st._followups.length){
+        var due=st._followups.filter(function(f){return f.m<=st.month});
+        st._followups=st._followups.filter(function(f){return f.m>st.month});
+        if(due.length)setTimeout(function(){try{showDecision(followupCard(due[0]))}catch(e){}},1800);
+      }
+    }catch(e){}
+    return r;
+  };
+
+  /* ============ decision resolution: streak + chronicle + follow-up ============ */
+  var origResolve=window.resolveDecision;
+  window.resolveDecision=function(opt){
+    var st=S(),d=window._v10LastDecision;
+    var before=(st&&typeof netWorth==='function')?netWorth():0;
+    var r=origResolve.apply(this,arguments);
+    try{
+      var st2=S();if(!st2)return r;
+      var after=(typeof netWorth==='function')?netWorth():0;
+      var delta=after-before;
+      st2._streak=(delta>=0)?((st2._streak||0)+1):0;
+      if(st2._streak===3){try{awardXP(120,'MOMENTUM x3')}catch(e){}try{toast('🔥 Momentum x3 — you are reading this market','buy')}catch(e){}}
+      if(st2._streak===5){try{awardXP(300,'MOMENTUM x5')}catch(e){}try{toast('🔥🔥 Momentum x5 — untouchable','buy')}catch(e){}}
+      if(d&&Math.abs(delta)>=400){
+        chron((delta>0?'You chose "':'You chose "')+(opt.label||'—')+'" — '+(delta>0?'+':'')+money(delta)+'.');
+      }
+      if(d&&!d._followup)scheduleFollowup(d,opt||{});
+      paintHud();
+    }catch(e){}
+    return r;
+  };
+
+  /* ============ endscreen chronicle ============ */
+  function paintChronicle(){
+    var st=S();if(!st)return;
+    var host=document.getElementById('end-history');if(!host)return;
+    var old=document.getElementById('v10-chronicle');if(old)old.remove();
+    var lines=(st.chronicle||[]).slice(-7);
+    if(!lines.length)return;
+    var div=document.createElement('div');div.id='v10-chronicle';div.className='chronicle';
+    div.innerHTML='<h4>YOUR STORY</h4>'+lines.map(function(l){
+      return '<div class="chron-row"><span class="cm">'+esc(l.m)+'</span><span>'+esc(l.t)+'</span></div>';
+    }).join('');
+    host.parentNode.insertBefore(div,host.nextSibling);
+  }
+  var origEnd=window.endGame;
+  if(typeof origEnd==='function'){
+    window.endGame=function(){var r=origEnd.apply(this,arguments);try{paintChronicle()}catch(e){}return r};
+  }
+})();
+</script>
+
 </body>
 </html>
 
