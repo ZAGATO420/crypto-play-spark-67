@@ -7316,6 +7316,198 @@ body.v4-live .panel-title{color:#aab3d0;letter-spacing:.14em}
 })();
 </script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Hind:wght@400;500;600;700&display=swap">
+<style id="v13-skin">
+/* =====================================================================
+   V13 SKIN — "NEON TRADING PIT"
+   A lit trading floor at 3am: hot green tape, gold leaf on the crown,
+   warm CRT light instead of cold moonlight. Cosmetic only — no layout,
+   no markup and no game math touched.
+   ===================================================================== */
+:root{
+  --bg:#050505;--panel:#0b0b0d;--border:#231f1c;
+  --neon:#39ff14;--neon-soft:rgba(57,255,20,.14);--neon-line:rgba(57,255,20,.42);
+  --plate:linear-gradient(168deg,rgba(255,255,255,.055),rgba(10,9,8,.92));
+  --text:#f4f1ea;--text2:#a49c93;--muted:#7d746b;
+  --green:#39ff14;--green2:#8dff6f;
+  --v3-line:rgba(255,255,255,.075);
+  --v4-glass:linear-gradient(168deg,rgba(255,255,255,.05),rgba(9,8,7,.9));
+}
+body{
+  font-family:'Hind','Inter',system-ui,sans-serif;
+  background:#050505;
+  background-image:
+    radial-gradient(ellipse 70% 45% at 50% -12%,rgba(240,180,41,.11),transparent),
+    radial-gradient(ellipse 55% 40% at 88% 104%,rgba(57,255,20,.06),transparent),
+    radial-gradient(ellipse 46% 34% at 8% 92%,rgba(139,92,246,.07),transparent);
+}
+/* ---------- 1. Type: Archivo Black carries every number ---------- */
+h1,h2,h3,.hud-net-val,.end-stat b,.coin-price,.big,.dxm-price,
+.t,.tier-name,.end-title,.pcard h3{font-family:'Archivo Black','Hind',sans-serif;letter-spacing:-.02em}
+.hud-net-val{font-size:clamp(26px,3.2vw,40px);color:var(--gold2);
+  text-shadow:0 0 26px rgba(240,180,41,.35),0 1px 0 rgba(0,0,0,.6)}
+.label,.hud-net-label{font-family:'Hind',sans-serif;font-weight:700;color:#8c8377}
+.coin-price,.mono,#hud-date{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+/* ---------- 2. Material: every panel is a brushed plate ---------- */
+.panel,.coin-card,.choice,.tc-btn,.dxm,.pcard,.end-card{position:relative}
+.panel{
+  background:var(--plate);border:1px solid rgba(255,255,255,.075);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px -26px #000;
+}
+.panel::after{ /* tactical corner brackets */
+  content:'';position:absolute;inset:6px;pointer-events:none;border-radius:12px;
+  background:
+    linear-gradient(var(--neon-line),var(--neon-line)) left top/10px 1px no-repeat,
+    linear-gradient(var(--neon-line),var(--neon-line)) left top/1px 10px no-repeat,
+    linear-gradient(rgba(240,180,41,.4),rgba(240,180,41,.4)) right bottom/10px 1px no-repeat,
+    linear-gradient(rgba(240,180,41,.4),rgba(240,180,41,.4)) right bottom/1px 10px no-repeat;
+  opacity:.5;transition:opacity .25s;
+}
+.panel:hover::after{opacity:1}
+.coin-card{
+  background:linear-gradient(170deg,rgba(255,255,255,.05),rgba(8,7,6,.92))!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 10px 24px -18px #000;
+}
+.coin-card:hover{border-color:var(--neon-line)!important;
+  box-shadow:0 0 0 1px var(--neon-soft),0 14px 30px -18px rgba(57,255,20,.35)}
+.coin-card.held{border-color:rgba(57,255,20,.45)!important;
+  background:linear-gradient(180deg,rgba(57,255,20,.09),rgba(8,7,6,.92))!important}
+/* coin logo halo */
+.coin-card img,.v7rows img,.tile img{filter:drop-shadow(0 0 10px rgba(240,180,41,.35))}
+/* ---------- 3. Neon green is the action colour ---------- */
+.exec-btn.exec-buy,.dxm-go.b,.v6go.b,.mode-btns button.on-buy{
+  background:linear-gradient(135deg,#39ff14,#0fd400)!important;color:#04140a!important;
+  border-color:#39ff14!important;font-family:'Archivo Black',sans-serif;
+  box-shadow:0 8px 26px -12px rgba(57,255,20,.85),inset 0 1px 0 rgba(255,255,255,.5)!important;
+}
+.exec-btn.exec-buy:hover,.dxm-go.b:hover,.v6go.b:hover{filter:brightness(1.12)}
+.exec-btn:active,.dxm-go:active,.v6go:active,.tc-btn:active,button:active{transform:translateY(1px)}
+.tc-btn.active{
+  background:linear-gradient(168deg,rgba(57,255,20,.14),rgba(8,7,6,.9))!important;
+  border-color:var(--neon-line)!important;color:#b9ff9f!important;
+  box-shadow:0 0 22px -10px rgba(57,255,20,.7)!important;
+}
+.tc-btn.active::after{background:var(--neon)!important;box-shadow:0 0 10px var(--neon)!important}
+#btn-month,.next-month,#bottom-bar .primary{
+  font-family:'Archivo Black',sans-serif!important;
+}
+/* keep gold for money & prestige, violet for story */
+.hud-net{border-color:rgba(240,180,41,.5)!important;
+  background:linear-gradient(150deg,rgba(240,180,41,.13),rgba(8,7,6,.92))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 34px -18px rgba(240,180,41,.8)!important}
+.choice.selected{border-color:var(--neon-line)!important;
+  box-shadow:0 0 0 1px var(--neon-soft),0 0 26px -14px rgba(57,255,20,.8)!important}
+/* ---------- 4. Run-mode XP badges ---------- */
+.xp-badge{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:999px;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.12em}
+.xp-badge.hot{background:rgba(57,255,20,.12);border:1px solid rgba(57,255,20,.45);color:#a9ff8c}
+.xp-badge.cool{background:rgba(139,92,246,.13);border:1px solid rgba(139,92,246,.45);color:#c4b0ff}
+.mode-note{margin-top:10px;font-size:11px;line-height:1.55;color:#8c8377;
+  border-left:2px solid rgba(240,180,41,.5);padding-left:10px}
+/* ---------- 5. Light: grain + scanlines over the whole pit ---------- */
+#v13-grain{position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.055;
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 1px,transparent 1px 3px);
+  mix-blend-mode:overlay}
+body.no-grain #v13-grain{display:none}
+#v13-vig{position:fixed;inset:0;z-index:9997;pointer-events:none;
+  box-shadow:inset 0 0 240px 70px rgba(0,0,0,.8)}
+/* ---------- 6. The tape ---------- */
+#v13-tape{position:relative;overflow:hidden;height:22px;margin:0 0 6px;
+  border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(0,0,0,.45)}
+#v13-tape .row{position:absolute;white-space:nowrap;font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.14em;line-height:22px;color:#8c8377;
+  animation:v13tape 42s linear infinite}
+#v13-tape .up{color:#8dff6f}#v13-tape .dn{color:#ff6a6a}#v13-tape .gd{color:var(--gold2)}
+@keyframes v13tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* ---------- 7. Feedback pulses ---------- */
+@keyframes v13win{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px -26px #000}
+  45%{box-shadow:0 0 0 1px rgba(57,255,20,.7),0 0 40px -12px rgba(57,255,20,.55)}}
+@keyframes v13loss{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 18px 40px -26px #000}
+  45%{box-shadow:0 0 0 1px rgba(255,80,80,.7),0 0 40px -12px rgba(255,80,80,.5)}}
+.panel.v13-win{animation:v13win .8s ease}
+.panel.v13-loss{animation:v13loss .8s ease}
+/* month change: a light sweep across the pit */
+#v13-sweep{position:fixed;inset:0;z-index:9996;pointer-events:none;opacity:0;
+  background:linear-gradient(100deg,transparent 40%,rgba(57,255,20,.16),transparent 60%)}
+#v13-sweep.go{animation:v13sweep .9s ease}
+@keyframes v13sweep{0%{opacity:1;transform:translateX(-60%)}100%{opacity:0;transform:translateX(60%)}}
+/* ---------- 8. Boss sigil as a watermark, never as decoration ---------- */
+#v7-top::before{
+  content:'';position:absolute;right:10px;bottom:6px;width:190px;height:190px;
+  background:url("/__l5e/assets-v1/1bd688df-7edd-45a6-9977-6d0e3b31ed41/ape-bg.png") right bottom/contain no-repeat;
+  opacity:.055;pointer-events:none;filter:grayscale(1) brightness(1.5)}
+#v7-top{position:relative}
+@media (max-width:900px){#v7-top::before{display:none}}
+</style>
+<script>
+/* =====================================================================
+   V13 SKIN RUNTIME — tape, sweep, grain toggle, animated numbers.
+   Purely presentational; it reads state, never writes it.
+   ===================================================================== */
+(function(){
+  const grain=document.createElement('div');grain.id='v13-grain';
+  const vig=document.createElement('div');vig.id='v13-vig';
+  const sweep=document.createElement('div');sweep.id='v13-sweep';
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.body.appendChild(vig);document.body.appendChild(grain);document.body.appendChild(sweep);
+    try{if(localStorage.getItem('tcfb_grain')==='0')document.body.classList.add('no-grain')}catch(e){}
+    mountTape();
+  });
+  window.tcfbToggleGrain=function(){
+    document.body.classList.toggle('no-grain');
+    try{localStorage.setItem('tcfb_grain',document.body.classList.contains('no-grain')?'0':'1')}catch(e){}
+  };
+
+  /* ---- running tape under the HUD ---- */
+  function tapeText(){
+    if(!window.state||!window.COINS)return 'THE CRYPTO FINAL BOSS · SURVIVE 2020 → 2026 · ';
+    const parts=[];
+    COINS.forEach(c=>{
+      const p=state.prices&&state.prices[c.s];
+      if(!p||p<=0||state.month<c.launch)return;
+      const cls=(state.noise&&state.noise[c.s]>=1)?'up':'dn';
+      parts.push('<span class="'+cls+'">'+c.s+' '+(typeof priceStr==='function'?priceStr(p):p)+'</span>');
+    });
+    parts.push('<span class="gd">$TCFB SOON</span>');
+    return parts.join('   ·   ')+'   ·   ';
+  }
+  function mountTape(){
+    const host=document.querySelector('#v7-top');
+    if(!host||document.getElementById('v13-tape'))return;
+    const tape=document.createElement('div');tape.id='v13-tape';
+    tape.innerHTML='<div class="row"></div>';
+    host.parentNode.insertBefore(tape,host);
+    paintTape();setInterval(paintTape,6000);
+  }
+  function paintTape(){
+    const row=document.querySelector('#v13-tape .row');if(!row)return;
+    const t=tapeText();row.innerHTML=t+t;
+  }
+  const tapeWatch=setInterval(()=>{if(document.querySelector('#v7-top')){mountTape();clearInterval(tapeWatch)}},700);
+
+  /* ---- month sweep + net worth pulse ---- */
+  let lastMonth=-1,lastNet=null;
+  setInterval(()=>{
+    if(!window.state)return;
+    if(state.month!==lastMonth){
+      if(lastMonth>=0){sweep.classList.remove('go');void sweep.offsetWidth;sweep.classList.add('go')}
+      lastMonth=state.month;
+    }
+    let nw=0;try{nw=netWorth()}catch(e){return}
+    if(lastNet!==null&&Math.abs(nw-lastNet)/Math.max(1,lastNet)>0.02){
+      const p=document.querySelector('#v7-top .panel')||document.querySelector('.panel');
+      if(p){const k=nw>lastNet?'v13-win':'v13-loss';p.classList.remove('v13-win','v13-loss');
+        void p.offsetWidth;p.classList.add(k);setTimeout(()=>p.classList.remove(k),900)}
+    }
+    lastNet=nw;
+  },900);
+})();
+</script>
+
 </body>
 </html>
 
