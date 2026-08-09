@@ -1089,7 +1089,7 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
           <button class="choice selected" data-pmode="chaos"><div class="t">CHAOS</div><div class="d">Nothing is written. More rugs, fatter moonshots — pure risk.<span class="xp-badge hot">XP ×1.25 · unpredictable</span></div></button>
           <button class="choice" data-pmode="historical"><div class="t">HISTORICAL</div><div class="d">Every outcome follows the real 2020–2026 timeline. Knowledge wins.<span class="xp-badge cool">XP ×0.75 · predictable</span></div></button>
         </div>
-        <div class="mode-note">Historical rewards what you know, Chaos rewards what you risk — so the XP and the leaderboard score are weighted differently. Ironman still doubles on top.</div>
+        <div class="mode-note">Historical rewards what you know, Chaos rewards what you risk — so the XP and the leaderboard score are weighted differently. Ironman is the strongest lever of all: it doubles everything on top.</div>
       </div>
       <div>
         <div class="label">Starting country</div>
@@ -1110,13 +1110,15 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
           <button class="avatar-btn">🤖</button>
           <button class="avatar-btn">💎</button>
         </div>
-        <div class="ironman-row">
-          <input type="checkbox" id="ironman">
-          <div>
-            <div style="font-weight:700;font-size:13px">⚔️ Ironman Mode</div>
-            <div style="font-size:11px;color:#fca5a5">No skip / pause • harder</div>
-          </div>
+        <div class="label" style="margin-top:18px">Ironman</div>
+        <div class="diff-grid" id="ironman-grid">
+          <button type="button" class="choice im-card" id="ironman-card" aria-pressed="false">
+            <div class="t">⚔️ IRONMAN MODE</div>
+            <div class="d">No pause, no week skip, no second chance — time runs on its own and every mistake stays.<span class="xp-badge hot">XP ×2 · highest multiplier</span></div>
+          </button>
         </div>
+        <input type="checkbox" id="ironman" hidden>
+        <div class="xp-preview" id="xp-preview">This run: <b>XP ×2.00</b></div>
       </div>
     </div>
     <button class="start-btn" id="start-btn">START SURVIVAL</button><button id="howto-manual-btn" onclick="try{ if(typeof openTutorial==='function') openTutorial(); }catch(e){}" style="margin-top:10px;width:100%;padding:10px;border-radius:10px;background:#0a0e1a;border:1px solid #333;color:#a78bfa;font-weight:700;cursor:pointer;">📖 HOW TO PLAY</button>
