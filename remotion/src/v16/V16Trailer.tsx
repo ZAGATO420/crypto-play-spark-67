@@ -226,10 +226,11 @@ export const V16Trailer: React.FC = () => (
           clip="09_end.mp4"
           kick="// FINAL SCORE"
           kickColor={C.gold}
+          size={78}
           line={
             <>
               GLOBAL<br />
-              <span style={{ color: C.gold }}>LEADERBOARD.</span>
+              <span style={{ color: C.gold }}>RANK. XP. FLEX.</span>
             </>
           }
           fx={48}
