@@ -2127,12 +2127,6 @@ function checkGameOver(){if(!state)return true;if(state._gameEnded)return true;i
 
 function startGame(){
   try{
-    const tutDone=localStorage.getItem('tfcb_tut_done');
-    if(!tutDone){
-      window._afterTut = ()=>{ actuallyStartGame(); };
-      openTutorial();
-      return;
-    }
     actuallyStartGame();
   }catch(e){ console.error(e); alert('Start error: '+e.message); }
 }
