@@ -7853,6 +7853,60 @@ body.v4-live .tl-empty,body.v4-live .sub,body.v4-live .dim{color:#a89f93!importa
   setInterval(tick,600);setTimeout(tick,200);
 })();
 </script>
+
+<style id="v16-fix">
+/* ---------- V16.1: descriptions must never be clipped ---------- */
+.choice,.im-card{overflow:visible!important}
+.choice .d,.im-card .d{overflow-wrap:anywhere;word-break:break-word}
+.choice .d .xp-badge,.im-card .d .xp-badge{white-space:normal!important;
+  max-width:100%;line-height:1.35;text-align:left}
+#xp-preview{overflow-wrap:anywhere}
+
+/* ---------- V16.2: only one NEXT MONTH per screen ---------- */
+@media(min-width:1100px){
+  #mobile-next{display:none!important}
+}
+
+/* ---------- V16.3: reliable taps (no 300ms delay, no ghost hover) ---------- */
+button,.choice,.im-card,.tc-btn,.mini-choice,.coin-card,[onclick]{
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+</style>
+<script>
+/* =====================================================================
+   V16 — tap reliability on touch devices.
+   Panels re-render on timers; if the element under the finger is replaced
+   between pointerdown and pointerup the browser fires no click at all,
+   which felt like "I have to tap two or three times". We detect exactly
+   that case and replay the tap on the element that took its place.
+   No game logic, price, XP or difficulty change.
+   ===================================================================== */
+(function(){
+  var A='button,a,[onclick],.choice,.im-card,.mini-choice,.coin-card,.tc-btn,input,select,textarea,label';
+  var down=null;
+  function act(el){return el&&el.closest?el.closest(A):null}
+  function sig(el){
+    return [el.id||'',el.getAttribute('onclick')||'',
+            el.className||'',(el.textContent||'').trim().slice(0,40)].join('|');
+  }
+  document.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'){down=null;return}
+    var el=act(e.target);
+    down=el?{el:el,sig:sig(el),x:e.clientX,y:e.clientY,t:Date.now()}:null;
+  },true);
+  document.addEventListener('pointerup',function(e){
+    var d=down;down=null;
+    if(!d||e.pointerType==='mouse')return;
+    if(Date.now()-d.t>700)return;                                  /* long press */
+    if(Math.abs(e.clientX-d.x)>14||Math.abs(e.clientY-d.y)>14)return; /* scroll */
+    if(document.contains(d.el))return;        /* normal click will fire */
+    setTimeout(function(){
+      var now=act(document.elementFromPoint(d.x,d.y));
+      if(!now||sig(now)!==d.sig)return;       /* different control — never guess */
+      try{now.click()}catch(err){}
+    },0);
+  },true);
+})();
+</script>
 </body>
 </html>
 
