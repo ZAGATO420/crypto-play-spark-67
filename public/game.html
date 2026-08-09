@@ -1369,6 +1369,13 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
       <label>Mute All</label>
       <input type="checkbox" id="mute-all" onchange="toggleMute(this.checked)">
     </div>
+    <div class="settings-row">
+      <label>Pacing</label>
+      <select id="pacing-mode" onchange="setPacing(this.value)" style="background:#0c1220;border:1px solid #2f365a;color:#e2e8f0;border-radius:9px;padding:7px 9px;font-weight:700;font-size:12px">
+        <option value="story">STORY — calm, chapters + briefings</option>
+        <option value="degen">DEGEN — everything, all at once</option>
+      </select>
+    </div>
     <button class="settings-close" onclick="closeSettings()">CLOSE</button>
   </div>
 </div>
