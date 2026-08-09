@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, OffthreadVideo, staticFile, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, Video, staticFile, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
 import { WBg } from "../wide/WBg";
 import { Kick, Line, Chip, Scrim } from "../trailer/Cap";
 import { C } from "../theme";
@@ -51,7 +51,7 @@ export const VBeat: React.FC<VBeatProps> = ({
     <AbsoluteFill>
       <WBg tint={tint} />
       <AbsoluteFill style={{ opacity: fadeIn * fadeOut, overflow: "hidden" }}>
-        <OffthreadVideo
+        <Video
           src={staticFile(`v16/${clip}`)}
           startFrom={startFrom}
           playbackRate={playbackRate}
