@@ -6307,7 +6307,12 @@ main .cf-rows.v6-fold{display:none}
     hidden.forEach(k=>k.remove());
     const b=document.createElement('button');
     b.className=(isPerp?'v6tile':'dxt')+' v7more';
-    b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE</span>';
+    if(isPerp){
+      b.style.cssText='grid-column:1/-1;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:8px 11px';
+      b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE \u00b7 OPEN PERP DESK</span>';
+    }else{
+      b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE</span>';
+    }
     b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
     l.appendChild(b);
   }
