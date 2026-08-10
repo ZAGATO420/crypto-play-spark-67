@@ -5627,6 +5627,15 @@ header{background:rgba(9,12,26,.88)}
 .v6dir{font:800 8.5px 'JetBrains Mono',monospace;letter-spacing:.14em;padding:2px 7px;border-radius:7px}
 .v6dir.l{color:#4ade80;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35)}
 .v6dir.s{color:#f87171;background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.35)}
+/* slim position rows for the terminal grid: everything fits, details live in the popup */
+.v6pos.slim{padding:8px 11px;gap:4px 10px;grid-template-columns:minmax(0,1fr) auto}
+.v6pos.slim .full,.v6pos.slim .cls{display:none}
+.v6pos.slim .hd{font-size:11.5px}
+.v6pos.slim .mt{margin-top:2px;font-size:8px}
+.v6pos.slim .pn{font-size:12.5px;line-height:1.15}
+.v6note{grid-column:1/-1;padding:7px 11px;border-radius:12px;border:1px dashed rgba(240,180,41,.28);
+  background:rgba(240,180,41,.05);font:700 8.5px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#9aa4c6;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* --- scroll-free panels (layout now owned by #terminal-layout) --- */
 #v5-book .bk-row:nth-of-type(n+6){display:none}
 .v6more{width:100%;height:34px;margin-top:9px;border-radius:11px;cursor:pointer;
@@ -5931,7 +5940,7 @@ main .cf-rows.v6-fold{display:none}
   }
 
   /* ---------------- terminal: perp tiles + compact positions ------- */
-  window.renderPerpDesk=function(){
+  window.renderPerpDesk=function(full){
     const el=$('market-list');const s=S();if(!el||!s)return;
     el.classList.add('dexgrid');
     const ps=s.perps||[];
@@ -5939,10 +5948,11 @@ main .cf-rows.v6-fold{display:none}
     ps.forEach((p,i)=>{
       const pnl=perpPnl(p),pct=p.margin?pnl/p.margin*100:0;
       const risk=perpRisk(p),lq=perpLiq(p.entry,p.dir,p.lev),move=perpMoveToLiq(p);
-      h+='<div class="v6pos" onclick="v6Pos('+i+')">'+
+      h+='<div class="v6pos'+(full?'':' slim')+'" onclick="v6Pos('+i+')">'+
         '<div style="min-width:0"><div class="hd">'+p.sym+
           '<span class="v6dir '+(p.dir==='long'?'l':'s')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span></div>'+
-          '<div class="mt">MARGIN '+money(p.margin)+' \u00b7 SIZE '+money(p.margin*p.lev)+' \u00b7 ENTRY $'+psx(p.entry)+'</div></div>'+
+          '<div class="mt">MARGIN '+money(p.margin)+' \u00b7 SIZE '+money(p.margin*p.lev)+
+          (full?' \u00b7 ENTRY $'+psx(p.entry):' \u00b7 '+risk.toFixed(0)+'% RISK')+'</div></div>'+
         '<div class="pn" id="pp-'+i+'" style="color:'+(pnl>=0?'#34d399':'#f87171')+'">'+(pnl>=0?'+':'')+money(pnl)+
           '<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></div>'+
         '<div class="full"><div class="liq-bar'+(risk>85?' danger':'')+'" id="plw-'+i+'" style="margin:2px 0 4px">'+
@@ -5968,9 +5978,13 @@ main .cf-rows.v6-fold{display:none}
         '<span class="c" style="color:#ffd76a">\u26a1 LEVERAGE</span>'+
       '</button>';
     });
-    h+='<div class="v6pos" style="cursor:default;grid-template-columns:1fr"><div class="mt" style="margin:0;line-height:1.6">'+
-       'Tap a perp to set <b style="color:#ffd76a">margin</b> and <b style="color:#ffd76a">position size</b>. Funding is charged monthly, '+
-       'positions auto-close after 6 months, liquidation at -92% of margin is permanent. Max 3 open positions.</div></div>';
+    if(full){
+      h+='<div class="v6pos" style="cursor:default;grid-template-columns:1fr"><div class="mt" style="margin:0;line-height:1.6">'+
+         'Tap a perp to set <b style="color:#ffd76a">margin</b> and <b style="color:#ffd76a">position size</b>. Funding is charged monthly, '+
+         'positions auto-close after 6 months, liquidation at -92% of margin is permanent. Max 3 open positions.</div></div>';
+    }else{
+      h+='<div class="v6note">TAP A PERP \u2192 MARGIN &amp; LEVERAGE \u00b7 TAP A POSITION \u2192 CLOSE / DETAILS \u00b7 MAX 3 OPEN</div>';
+    }
     el.innerHTML=h;
   };
 
@@ -6210,7 +6224,7 @@ main .cf-rows.v6-fold{display:none}
     t.style.cssText='position:absolute;left:-9999px;top:0;width:640px';
     document.body.appendChild(t);
     let h='';
-    try{if(typeof window.renderPerpDesk==='function')window.renderPerpDesk();h=t.innerHTML}catch(e){}
+    try{if(typeof window.renderPerpDesk==='function')window.renderPerpDesk(true);h=t.innerHTML}catch(e){}
     t.remove();real.id='market-list';
     return h;
   }
@@ -6276,14 +6290,29 @@ main .cf-rows.v6-fold{display:none}
     }
     if(keep.length>=kids.length)return;
     if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
-    /* free slot in the last visible row? then the MORE tile needs no sacrifice */
-    if(lastRow&&lastRow.items.length>=cols&&keep.length>1)keep=keep.slice(0,keep.length-1);
+    /* the MORE tile needs a slot. a full-width row (perp position, note) has none,
+       so drop that whole row instead of letting MORE spill into a clipped new line */
+    if(lastRow&&keep.length>1){
+      const gw=l.clientWidth;
+      const wide=lastRow.items.some(k=>k.offsetWidth>gw-24);
+      if(wide){
+        const cut=keep.length-lastRow.items.length;
+        if(cut>0)keep=keep.slice(0,cut);
+      }else if(lastRow.items.length>=cols){
+        keep=keep.slice(0,keep.length-1);
+      }
+    }
     const hidden=kids.filter(k=>keep.indexOf(k)<0);
     if(!hidden.length)return;
     hidden.forEach(k=>k.remove());
     const b=document.createElement('button');
     b.className=(isPerp?'v6tile':'dxt')+' v7more';
-    b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE</span>';
+    if(isPerp){
+      b.style.cssText='grid-column:1/-1;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:8px 11px';
+      b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE \u00b7 OPEN PERP DESK</span>';
+    }else{
+      b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE</span>';
+    }
     b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
     l.appendChild(b);
   }
