@@ -6290,8 +6290,18 @@ main .cf-rows.v6-fold{display:none}
     }
     if(keep.length>=kids.length)return;
     if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
-    /* free slot in the last visible row? then the MORE tile needs no sacrifice */
-    if(lastRow&&lastRow.items.length>=cols&&keep.length>1)keep=keep.slice(0,keep.length-1);
+    /* the MORE tile needs a slot. a full-width row (perp position, note) has none,
+       so drop that whole row instead of letting MORE spill into a clipped new line */
+    if(lastRow&&keep.length>1){
+      const gw=l.clientWidth;
+      const wide=lastRow.items.some(k=>k.offsetWidth>gw-24);
+      if(wide){
+        const cut=keep.length-lastRow.items.length;
+        if(cut>0)keep=keep.slice(0,cut);
+      }else if(lastRow.items.length>=cols){
+        keep=keep.slice(0,keep.length-1);
+      }
+    }
     const hidden=kids.filter(k=>keep.indexOf(k)<0);
     if(!hidden.length)return;
     hidden.forEach(k=>k.remove());
