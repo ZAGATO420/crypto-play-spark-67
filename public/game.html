@@ -5940,7 +5940,7 @@ main .cf-rows.v6-fold{display:none}
   }
 
   /* ---------------- terminal: perp tiles + compact positions ------- */
-  window.renderPerpDesk=function(){
+  window.renderPerpDesk=function(full){
     const el=$('market-list');const s=S();if(!el||!s)return;
     el.classList.add('dexgrid');
     const ps=s.perps||[];
@@ -5948,10 +5948,11 @@ main .cf-rows.v6-fold{display:none}
     ps.forEach((p,i)=>{
       const pnl=perpPnl(p),pct=p.margin?pnl/p.margin*100:0;
       const risk=perpRisk(p),lq=perpLiq(p.entry,p.dir,p.lev),move=perpMoveToLiq(p);
-      h+='<div class="v6pos" onclick="v6Pos('+i+')">'+
+      h+='<div class="v6pos'+(full?'':' slim')+'" onclick="v6Pos('+i+')">'+
         '<div style="min-width:0"><div class="hd">'+p.sym+
           '<span class="v6dir '+(p.dir==='long'?'l':'s')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span></div>'+
-          '<div class="mt">MARGIN '+money(p.margin)+' \u00b7 SIZE '+money(p.margin*p.lev)+' \u00b7 ENTRY $'+psx(p.entry)+'</div></div>'+
+          '<div class="mt">MARGIN '+money(p.margin)+' \u00b7 SIZE '+money(p.margin*p.lev)+
+          (full?' \u00b7 ENTRY $'+psx(p.entry):' \u00b7 '+risk.toFixed(0)+'% RISK')+'</div></div>'+
         '<div class="pn" id="pp-'+i+'" style="color:'+(pnl>=0?'#34d399':'#f87171')+'">'+(pnl>=0?'+':'')+money(pnl)+
           '<br><span style="font-size:10px;opacity:.8">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span></div>'+
         '<div class="full"><div class="liq-bar'+(risk>85?' danger':'')+'" id="plw-'+i+'" style="margin:2px 0 4px">'+
@@ -5977,9 +5978,13 @@ main .cf-rows.v6-fold{display:none}
         '<span class="c" style="color:#ffd76a">\u26a1 LEVERAGE</span>'+
       '</button>';
     });
-    h+='<div class="v6pos" style="cursor:default;grid-template-columns:1fr"><div class="mt" style="margin:0;line-height:1.6">'+
-       'Tap a perp to set <b style="color:#ffd76a">margin</b> and <b style="color:#ffd76a">position size</b>. Funding is charged monthly, '+
-       'positions auto-close after 6 months, liquidation at -92% of margin is permanent. Max 3 open positions.</div></div>';
+    if(full){
+      h+='<div class="v6pos" style="cursor:default;grid-template-columns:1fr"><div class="mt" style="margin:0;line-height:1.6">'+
+         'Tap a perp to set <b style="color:#ffd76a">margin</b> and <b style="color:#ffd76a">position size</b>. Funding is charged monthly, '+
+         'positions auto-close after 6 months, liquidation at -92% of margin is permanent. Max 3 open positions.</div></div>';
+    }else{
+      h+='<div class="v6note">TAP A PERP \u2192 MARGIN &amp; LEVERAGE \u00b7 TAP A POSITION \u2192 CLOSE / DETAILS \u00b7 MAX 3 OPEN</div>';
+    }
     el.innerHTML=h;
   };
 
@@ -6219,7 +6224,7 @@ main .cf-rows.v6-fold{display:none}
     t.style.cssText='position:absolute;left:-9999px;top:0;width:640px';
     document.body.appendChild(t);
     let h='';
-    try{if(typeof window.renderPerpDesk==='function')window.renderPerpDesk();h=t.innerHTML}catch(e){}
+    try{if(typeof window.renderPerpDesk==='function')window.renderPerpDesk(true);h=t.innerHTML}catch(e){}
     t.remove();real.id='market-list';
     return h;
   }
