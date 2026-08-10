@@ -5627,6 +5627,15 @@ header{background:rgba(9,12,26,.88)}
 .v6dir{font:800 8.5px 'JetBrains Mono',monospace;letter-spacing:.14em;padding:2px 7px;border-radius:7px}
 .v6dir.l{color:#4ade80;background:rgba(34,197,94,.13);border:1px solid rgba(34,197,94,.35)}
 .v6dir.s{color:#f87171;background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.35)}
+/* slim position rows for the terminal grid: everything fits, details live in the popup */
+.v6pos.slim{padding:8px 11px;gap:4px 10px;grid-template-columns:minmax(0,1fr) auto}
+.v6pos.slim .full,.v6pos.slim .cls{display:none}
+.v6pos.slim .hd{font-size:11.5px}
+.v6pos.slim .mt{margin-top:2px;font-size:8px}
+.v6pos.slim .pn{font-size:12.5px;line-height:1.15}
+.v6note{grid-column:1/-1;padding:7px 11px;border-radius:12px;border:1px dashed rgba(240,180,41,.28);
+  background:rgba(240,180,41,.05);font:700 8.5px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#9aa4c6;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* --- scroll-free panels (layout now owned by #terminal-layout) --- */
 #v5-book .bk-row:nth-of-type(n+6){display:none}
 .v6more{width:100%;height:34px;margin-top:9px;border-radius:11px;cursor:pointer;
