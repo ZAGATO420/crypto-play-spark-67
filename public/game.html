@@ -6274,7 +6274,7 @@ main .cf-rows.v6-fold{display:none}
     const lr=l.getBoundingClientRect();
     let cap=Math.min(wr.bottom,floorY())-8;
     let avail=cap-lr.top;
-    if(avail<40)return;
+    if(avail<32)return;
     /* dense mode on short screens: more tokens per row before anything folds */
     const dense=avail<210;
     if(dense!==l.classList.contains('v7dense')){
@@ -6297,7 +6297,9 @@ main .cf-rows.v6-fold{display:none}
       if(r.bottom<=cap){keep=keep.concat(r.items);lastRow=r}else break;
     }
     if(keep.length>=kids.length)return;
-    if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
+    /* If no complete row fits, show one compact navigation tile rather than
+       forcing a real row into the clipped area. */
+    if(!keep.length){lastRow=null}
     /* the MORE tile needs a slot. a full-width row (perp position, note) has none,
        so drop that whole row instead of letting MORE spill into a clipped new line */
     if(lastRow&&keep.length>1){
@@ -6318,6 +6320,7 @@ main .cf-rows.v6-fold{display:none}
     hidden.forEach(k=>k.remove());
     const b=document.createElement('button');
     b.className=(isPerp?'v6tile':'dxt')+' v7more';
+    b.style.minHeight='36px';
     if(isPerp){
       b.style.cssText='grid-column:1/-1;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:8px 11px';
       b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE \u00b7 OPEN PERP DESK</span>';
