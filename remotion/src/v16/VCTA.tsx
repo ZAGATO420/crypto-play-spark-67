@@ -40,9 +40,9 @@ export const VCTA: React.FC = () => {
           textShadow: `0 20px 80px rgba(0,0,0,.9), 0 0 70px ${C.gold}35`,
         }}
       >
-        THE FINAL
+        THE CRYPTO
         <br />
-        <span style={{ color: C.gold }}>CRYPTO BOSS</span>
+        <span style={{ color: C.gold }}>FINAL BOSS</span>
       </div>
       <div
         style={{

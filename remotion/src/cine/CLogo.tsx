@@ -38,9 +38,9 @@ export const CLogo: React.FC<{ dur: number }> = ({ dur }) => {
             textShadow: `0 26px 100px rgba(0,0,0,.95), 0 0 80px ${C.gold}38`,
           }}
         >
-          THE FINAL
+          THE CRYPTO
           <br />
-          <span style={{ color: C.gold }}>CRYPTO BOSS</span>
+          <span style={{ color: C.gold }}>FINAL BOSS</span>
         </div>
         <div
           style={{
