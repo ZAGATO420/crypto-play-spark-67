@@ -6305,7 +6305,10 @@ main .cf-rows.v6-fold{display:none}
       const wide=lastRow.items.some(k=>k.offsetWidth>gw-24);
       if(wide){
         const cut=keep.length-lastRow.items.length;
-        if(cut>0)keep=keep.slice(0,cut);
+        /* If the first visible row is a full-width open position there is no
+           spare grid cell for MORE. On very short laptops, replace that row
+           with the desk CTA instead of placing the CTA underneath the floor. */
+        keep=cut>0?keep.slice(0,cut):[];
       }else if(lastRow.items.length>=cols){
         keep=keep.slice(0,keep.length-1);
       }
@@ -6380,6 +6383,7 @@ main .cf-rows.v6-fold{display:none}
   function tick(){
     const s=S();if(!s||s._gameEnded)return;
     buildTwin();renderPerpPnl();watchMarket();
+    fold();
     const m=$('v7m');
     if(m&&m.style.display==='flex'&&($('v7m-title')||{}).textContent==='PERP DESK'){
       const g=$('v7m-grid');const h=perpDeskHtml();if(g&&h)g.innerHTML=h;
