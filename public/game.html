@@ -6274,7 +6274,23 @@ main .cf-rows.v6-fold{display:none}
     const lr=l.getBoundingClientRect();
     let cap=Math.min(wr.bottom,floorY(),window.innerHeight)-8;
     let avail=cap-lr.top;
-    if(avail<32)return;
+    if(avail<32){
+      /* The market starts below the remaining viewport at an unusually short
+         laptop breakpoint. Collapse its changing contents to a stable desk
+         launcher instead of leaving several invisible/clipped rows behind. */
+      if(window.innerWidth>=1100){
+        const isPerp=!!l.querySelector('.v6pos, .v6tile');
+        const hiddenCount=l.children.length;
+        l.innerHTML='';
+        const b=document.createElement('button');
+        b.className=(isPerp?'v6tile':'dxt')+' v7more';
+        b.style.cssText='grid-column:1/-1;min-height:36px;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:7px 11px';
+        b.innerHTML='<span style="font:800 9px JetBrains Mono,monospace;letter-spacing:.12em">'+(isPerp?'OPEN PERP DESK':'OPEN ALL MARKETS')+' · '+hiddenCount+' ITEMS</span>';
+        b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
+        l.appendChild(b);
+      }
+      return;
+    }
     /* dense mode on short screens: more tokens per row before anything folds */
     const dense=avail<210;
     if(dense!==l.classList.contains('v7dense')){
