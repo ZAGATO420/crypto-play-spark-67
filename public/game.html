@@ -5986,6 +5986,12 @@ main .cf-rows.v6-fold{display:none}
       h+='<div class="v6note">TAP A PERP \u2192 MARGIN &amp; LEVERAGE \u00b7 TAP A POSITION \u2192 CLOSE / DETAILS \u00b7 MAX 3 OPEN</div>';
     }
     el.innerHTML=h;
+    /* Opening/closing a position can repaint the desk without going through
+       renderMarket(). Re-measure after every such repaint so a second trade
+       can never leave half a row below the terminal floor. */
+    if(!full&&typeof window.v7Fold==='function'){
+      setTimeout(window.v7Fold,240);
+    }
   };
 
   /* PERPS mode must always reach the popup desk, however it was switched */
@@ -6253,9 +6259,10 @@ main .cf-rows.v6-fold{display:none}
   }
   function fold(){
     const l=$('market-list'),w=wrapEl();if(!l||!w)return;
-    /* already folded for this render? leave it alone (never drop the MORE tile) */
-    if(l.querySelector('.v7more')){if(window.innerWidth>1150)return}
-    if(window.innerWidth<=1150){
+    /* A folded grid is already complete for this paint. Fresh market/perp
+       renders replace its innerHTML and therefore remove this marker. */
+    if(l.querySelector('.v7more'))return;
+    if(window.innerWidth<1100){
       w.classList.remove('v7wrap');l.classList.remove('v7dense');
       Array.from(l.children).forEach(k=>{if(k.classList&&k.classList.contains('v7more'))k.remove()});
       return;                                                        /* mobile: panes flow */
@@ -6263,33 +6270,52 @@ main .cf-rows.v6-fold{display:none}
     w.classList.add('v7wrap');
     const kids=Array.from(l.children);if(!kids.length)return;
     const isPerp=!!l.querySelector('.v6pos, .v6tile');
-    const lr=l.getBoundingClientRect();
     const wr=w.getBoundingClientRect();
-    let avail=Math.min(w.clientHeight-(lr.top-wr.top)-4,floorY()-lr.top-8);
-    if(avail<40)return;
+    const lr=l.getBoundingClientRect();
+    let cap=Math.min(wr.bottom,floorY(),window.innerHeight)-8;
+    let avail=cap-lr.top;
+    if(avail<32){
+      /* The market starts below the remaining viewport at an unusually short
+         laptop breakpoint. Collapse its changing contents to a stable desk
+         launcher instead of leaving several invisible/clipped rows behind. */
+      if(window.innerWidth>=1100){
+        const isPerp=!!l.querySelector('.v6pos, .v6tile');
+        const hiddenCount=l.children.length;
+        l.innerHTML='';
+        const b=document.createElement('button');
+        b.className=(isPerp?'v6tile':'dxt')+' v7more';
+        b.style.cssText='grid-column:1/-1;min-height:36px;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:7px 11px';
+        b.innerHTML='<span style="font:800 9px JetBrains Mono,monospace;letter-spacing:.12em">'+(isPerp?'OPEN PERP DESK':'OPEN ALL MARKETS')+' · '+hiddenCount+' ITEMS</span>';
+        b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
+        l.appendChild(b);
+      }
+      return;
+    }
     /* dense mode on short screens: more tokens per row before anything folds */
     const dense=avail<210;
     if(dense!==l.classList.contains('v7dense')){
       l.classList.toggle('v7dense',dense);
       const nr=l.getBoundingClientRect();
-      avail=Math.min(w.clientHeight-(nr.top-w.getBoundingClientRect().top)-4,floorY()-nr.top-8);
+      cap=Math.min(w.getBoundingClientRect().bottom,floorY(),window.innerHeight)-8;
+      avail=cap-nr.top;
     }
     /* group tiles into visual rows, keep only rows that fit completely */
     const rows=[];
     kids.forEach(k=>{
-      const t=k.offsetTop,b=t+k.offsetHeight;
+      const kr=k.getBoundingClientRect(),t=kr.top,b=kr.bottom;
       const r=rows[rows.length-1];
       if(r&&Math.abs(r.top-t)<6){r.items.push(k);r.bottom=Math.max(r.bottom,b)}
       else rows.push({top:t,bottom:b,items:[k]});
     });
-    const base=rows[0].top;
     const cols=Math.max.apply(null,rows.map(r=>r.items.length));
     let keep=[],lastRow=null;
     for(const r of rows){
-      if(r.bottom-base<=avail){keep=keep.concat(r.items);lastRow=r}else break;
+      if(r.bottom<=cap){keep=keep.concat(r.items);lastRow=r}else break;
     }
     if(keep.length>=kids.length)return;
-    if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
+    /* If no complete row fits, show one compact navigation tile rather than
+       forcing a real row into the clipped area. */
+    if(!keep.length){lastRow=null}
     /* the MORE tile needs a slot. a full-width row (perp position, note) has none,
        so drop that whole row instead of letting MORE spill into a clipped new line */
     if(lastRow&&keep.length>1){
@@ -6297,7 +6323,10 @@ main .cf-rows.v6-fold{display:none}
       const wide=lastRow.items.some(k=>k.offsetWidth>gw-24);
       if(wide){
         const cut=keep.length-lastRow.items.length;
-        if(cut>0)keep=keep.slice(0,cut);
+        /* If the first visible row is a full-width open position there is no
+           spare grid cell for MORE. On very short laptops, replace that row
+           with the desk CTA instead of placing the CTA underneath the floor. */
+        keep=cut>0?keep.slice(0,cut):[];
       }else if(lastRow.items.length>=cols){
         keep=keep.slice(0,keep.length-1);
       }
@@ -6307,6 +6336,7 @@ main .cf-rows.v6-fold{display:none}
     hidden.forEach(k=>k.remove());
     const b=document.createElement('button');
     b.className=(isPerp?'v6tile':'dxt')+' v7more';
+    b.style.minHeight='36px';
     if(isPerp){
       b.style.cssText='grid-column:1/-1;flex-direction:row;align-items:center;justify-content:center;gap:8px;padding:8px 11px';
       b.innerHTML='+'+hidden.length+'<span style="font:700 8px \'JetBrains Mono\',monospace;letter-spacing:.12em;color:#8d97ba">MORE \u00b7 OPEN PERP DESK</span>';
@@ -6315,6 +6345,18 @@ main .cf-rows.v6-fold{display:none}
     }
     b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
     l.appendChild(b);
+  }
+  window.v7Fold=fold;
+  /* Some legacy refresh paths write market-list.innerHTML directly instead
+     of calling renderMarket(). Observe those writes as well, especially the
+     second/third perp position and the following switch back to spot coins. */
+  function watchMarket(){
+    const l=$('market-list');if(!l||l.dataset.v7watched)return;
+    l.dataset.v7watched='1';
+    new MutationObserver(muts=>{
+      if(muts.some(m=>Array.from(m.addedNodes).some(n=>n.nodeType===1&&n.classList&&n.classList.contains('v7more'))))return;
+      setTimeout(fold,80);
+    }).observe(l,{childList:true});
   }
   function showAll(){
     const l=$('market-list');if(!l)return;
@@ -6347,13 +6389,20 @@ main .cf-rows.v6-fold{display:none}
   window.renderMarket=function(){
     const r=origRM?origRM.apply(this,arguments):undefined;
     const l=$('market-list');
-    if(l&&l.dataset.v7full!=='1')requestAnimationFrame(()=>requestAnimationFrame(fold));
+    if(l&&l.dataset.v7full!=='1'){
+      clearTimeout(window._v7FoldTimer);
+      /* Twin P&L desks can change height after a position opens. Measure only
+         after that reflow settles; folding earlier is what produced clipped
+         second trades and then clipped spot coins. */
+      window._v7FoldTimer=setTimeout(fold,220);
+    }
     return r;
   };
 
   function tick(){
     const s=S();if(!s||s._gameEnded)return;
-    buildTwin();renderPerpPnl();
+    buildTwin();renderPerpPnl();watchMarket();
+    fold();
     const m=$('v7m');
     if(m&&m.style.display==='flex'&&($('v7m-title')||{}).textContent==='PERP DESK'){
       const g=$('v7m-grid');const h=perpDeskHtml();if(g&&h)g.innerHTML=h;
@@ -7175,11 +7224,17 @@ main .cf-rows.v6-fold{display:none}
   body.v4-live main>div:last-child .panel[data-side].on{display:flex;flex-direction:column;
     flex:1 1 auto;min-height:0;overflow:hidden}
   /* centre column: twin desks on top, market fills the rest */
-  body.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 auto;min-height:0}
+  /* Keep the analytics desks at a stable height. Open perp rows used to grow
+     this block and push the market underneath the fixed month bar. */
+  body.v4-live main>div:nth-child(2)>#v7-top{
+    flex:0 0 clamp(220px,32vh,340px);
+    height:clamp(220px,32vh,340px);min-height:220px;overflow:hidden}
   #v7-top>.panel{overflow:hidden;display:flex;flex-direction:column;min-height:0}
   #v7-top .v7rows{min-height:0}
   #v7-top .v7cta{position:sticky;bottom:0;z-index:2}
   body.v4-live main>div:nth-child(2)>.panel:last-child{flex:1 1 auto;min-height:0;overflow:hidden}
+  body.v4-live main>div:nth-child(2)>.panel:last-child>.market-grid{
+    max-height:100%;overflow:hidden}
   body.v4-live #v4-bar{display:flex;flex:0 0 auto;align-items:center;gap:12px;flex-wrap:wrap;
     padding:9px 16px;border-top:1px solid var(--v3-line);background:rgba(9,12,26,.94);backdrop-filter:blur(18px)}
   body.v4-live .chart-box{height:200px}
