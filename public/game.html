@@ -7191,11 +7191,17 @@ main .cf-rows.v6-fold{display:none}
   body.v4-live main>div:last-child .panel[data-side].on{display:flex;flex-direction:column;
     flex:1 1 auto;min-height:0;overflow:hidden}
   /* centre column: twin desks on top, market fills the rest */
-  body.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 auto;min-height:0}
+  /* Keep the analytics desks at a stable height. Open perp rows used to grow
+     this block and push the market underneath the fixed month bar. */
+  body.v4-live main>div:nth-child(2)>#v7-top{
+    flex:0 0 min(340px,calc(100vh - 330px));
+    height:min(340px,calc(100vh - 330px));min-height:250px;overflow:hidden}
   #v7-top>.panel{overflow:hidden;display:flex;flex-direction:column;min-height:0}
   #v7-top .v7rows{min-height:0}
   #v7-top .v7cta{position:sticky;bottom:0;z-index:2}
   body.v4-live main>div:nth-child(2)>.panel:last-child{flex:1 1 auto;min-height:0;overflow:hidden}
+  body.v4-live main>div:nth-child(2)>.panel:last-child>.market-grid{
+    max-height:100%;overflow:hidden}
   body.v4-live #v4-bar{display:flex;flex:0 0 auto;align-items:center;gap:12px;flex-wrap:wrap;
     padding:9px 16px;border-top:1px solid var(--v3-line);background:rgba(9,12,26,.94);backdrop-filter:blur(18px)}
   body.v4-live .chart-box{height:200px}
