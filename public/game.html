@@ -5986,6 +5986,13 @@ main .cf-rows.v6-fold{display:none}
       h+='<div class="v6note">TAP A PERP \u2192 MARGIN &amp; LEVERAGE \u00b7 TAP A POSITION \u2192 CLOSE / DETAILS \u00b7 MAX 3 OPEN</div>';
     }
     el.innerHTML=h;
+    /* Opening/closing a position can repaint the desk without going through
+       renderMarket(). Re-measure after every such repaint so a second trade
+       can never leave half a row below the terminal floor. */
+    if(!full&&typeof window.v7Fold==='function'){
+      clearTimeout(window._v7FoldTimer);
+      window._v7FoldTimer=setTimeout(window.v7Fold,220);
+    }
   };
 
   /* PERPS mode must always reach the popup desk, however it was switched */
@@ -6253,9 +6260,10 @@ main .cf-rows.v6-fold{display:none}
   }
   function fold(){
     const l=$('market-list'),w=wrapEl();if(!l||!w)return;
-    /* already folded for this render? leave it alone (never drop the MORE tile) */
-    if(l.querySelector('.v7more')){if(window.innerWidth>1150)return}
-    if(window.innerWidth<=1150){
+    /* A folded grid is already complete for this paint. Fresh market/perp
+       renders replace its innerHTML and therefore remove this marker. */
+    if(l.querySelector('.v7more'))return;
+    if(window.innerWidth<1100){
       w.classList.remove('v7wrap');l.classList.remove('v7dense');
       Array.from(l.children).forEach(k=>{if(k.classList&&k.classList.contains('v7more'))k.remove()});
       return;                                                        /* mobile: panes flow */
@@ -6263,30 +6271,31 @@ main .cf-rows.v6-fold{display:none}
     w.classList.add('v7wrap');
     const kids=Array.from(l.children);if(!kids.length)return;
     const isPerp=!!l.querySelector('.v6pos, .v6tile');
-    const lr=l.getBoundingClientRect();
     const wr=w.getBoundingClientRect();
-    let avail=Math.min(w.clientHeight-(lr.top-wr.top)-4,floorY()-lr.top-8);
+    const lr=l.getBoundingClientRect();
+    let cap=Math.min(wr.bottom,floorY())-8;
+    let avail=cap-lr.top;
     if(avail<40)return;
     /* dense mode on short screens: more tokens per row before anything folds */
     const dense=avail<210;
     if(dense!==l.classList.contains('v7dense')){
       l.classList.toggle('v7dense',dense);
       const nr=l.getBoundingClientRect();
-      avail=Math.min(w.clientHeight-(nr.top-w.getBoundingClientRect().top)-4,floorY()-nr.top-8);
+      cap=Math.min(w.getBoundingClientRect().bottom,floorY())-8;
+      avail=cap-nr.top;
     }
     /* group tiles into visual rows, keep only rows that fit completely */
     const rows=[];
     kids.forEach(k=>{
-      const t=k.offsetTop,b=t+k.offsetHeight;
+      const kr=k.getBoundingClientRect(),t=kr.top,b=kr.bottom;
       const r=rows[rows.length-1];
       if(r&&Math.abs(r.top-t)<6){r.items.push(k);r.bottom=Math.max(r.bottom,b)}
       else rows.push({top:t,bottom:b,items:[k]});
     });
-    const base=rows[0].top;
     const cols=Math.max.apply(null,rows.map(r=>r.items.length));
     let keep=[],lastRow=null;
     for(const r of rows){
-      if(r.bottom-base<=avail){keep=keep.concat(r.items);lastRow=r}else break;
+      if(r.bottom<=cap){keep=keep.concat(r.items);lastRow=r}else break;
     }
     if(keep.length>=kids.length)return;
     if(!keep.length){keep=rows[0].items.slice();lastRow=rows[0]}   /* never show nothing */
@@ -6316,6 +6325,7 @@ main .cf-rows.v6-fold{display:none}
     b.onclick=()=>{isPerp?window.v7PerpDesk():showAll()};
     l.appendChild(b);
   }
+  window.v7Fold=fold;
   function showAll(){
     const l=$('market-list');if(!l)return;
     l.dataset.v7full='1';
@@ -6347,7 +6357,13 @@ main .cf-rows.v6-fold{display:none}
   window.renderMarket=function(){
     const r=origRM?origRM.apply(this,arguments):undefined;
     const l=$('market-list');
-    if(l&&l.dataset.v7full!=='1')requestAnimationFrame(()=>requestAnimationFrame(fold));
+    if(l&&l.dataset.v7full!=='1'){
+      clearTimeout(window._v7FoldTimer);
+      /* Twin P&L desks can change height after a position opens. Measure only
+         after that reflow settles; folding earlier is what produced clipped
+         second trades and then clipped spot coins. */
+      window._v7FoldTimer=setTimeout(fold,220);
+    }
     return r;
   };
 
