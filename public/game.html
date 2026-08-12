@@ -5990,8 +5990,7 @@ main .cf-rows.v6-fold{display:none}
        renderMarket(). Re-measure after every such repaint so a second trade
        can never leave half a row below the terminal floor. */
     if(!full&&typeof window.v7Fold==='function'){
-      clearTimeout(window._v7FoldTimer);
-      window._v7FoldTimer=setTimeout(window.v7Fold,220);
+      setTimeout(window.v7Fold,240);
     }
   };
 
@@ -6326,6 +6325,17 @@ main .cf-rows.v6-fold{display:none}
     l.appendChild(b);
   }
   window.v7Fold=fold;
+  /* Some legacy refresh paths write market-list.innerHTML directly instead
+     of calling renderMarket(). Observe those writes as well, especially the
+     second/third perp position and the following switch back to spot coins. */
+  function watchMarket(){
+    const l=$('market-list');if(!l||l.dataset.v7watched)return;
+    l.dataset.v7watched='1';
+    new MutationObserver(muts=>{
+      if(muts.some(m=>Array.from(m.addedNodes).some(n=>n.nodeType===1&&n.classList&&n.classList.contains('v7more'))))return;
+      setTimeout(fold,80);
+    }).observe(l,{childList:true});
+  }
   function showAll(){
     const l=$('market-list');if(!l)return;
     l.dataset.v7full='1';
@@ -6369,7 +6379,7 @@ main .cf-rows.v6-fold{display:none}
 
   function tick(){
     const s=S();if(!s||s._gameEnded)return;
-    buildTwin();renderPerpPnl();
+    buildTwin();renderPerpPnl();watchMarket();
     const m=$('v7m');
     if(m&&m.style.display==='flex'&&($('v7m-title')||{}).textContent==='PERP DESK'){
       const g=$('v7m-grid');const h=perpDeskHtml();if(g&&h)g.innerHTML=h;
@@ -7194,8 +7204,8 @@ main .cf-rows.v6-fold{display:none}
   /* Keep the analytics desks at a stable height. Open perp rows used to grow
      this block and push the market underneath the fixed month bar. */
   body.v4-live main>div:nth-child(2)>#v7-top{
-    flex:0 0 min(340px,calc(100vh - 330px));
-    height:min(340px,calc(100vh - 330px));min-height:250px;overflow:hidden}
+    flex:0 0 clamp(220px,32vh,340px);
+    height:clamp(220px,32vh,340px);min-height:220px;overflow:hidden}
   #v7-top>.panel{overflow:hidden;display:flex;flex-direction:column;min-height:0}
   #v7-top .v7rows{min-height:0}
   #v7-top .v7cta{position:sticky;bottom:0;z-index:2}
