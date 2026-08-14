@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "tcfb-the-crypto-final-boss",
+      "version": "0.1.0",
+      "title": "TCFB The Crypto Final Boss"
+    },
+    "tools": [
+      {
+        "name": "get_leaderboard",
+        "title": "Get global leaderboard",
+        "description": "Read the global THE CRYPTO FINAL BOSS leaderboard, ranked by the in-game score (net worth, XP, months survived, achievements and game mode weighting).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "mode": {
+              "default": "all",
+              "description": "Filter by game mode, or 'all'.",
+              "type": "string",
+              "enum": [
+                "all",
+                "classic",
+                "chaos",
+                "historical",
+                "IRONMAN-classic",
+                "IRONMAN-chaos",
+                "IRONMAN-historical"
+              ]
+            },
+            "limit": {
+              "default": 20,
+              "description": "How many entries to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_player_runs",
+        "title": "Get a player's runs",
+        "description": "Look up the submitted leaderboard runs of a player by their in-game name (case-insensitive, partial match allowed).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The player name shown on the leaderboard."
+            },
+            "limit": {
+              "default": 10,
+              "description": "How many runs to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_game_guide",
+        "title": "Get game guide",
+        "description": "Explain THE CRYPTO FINAL BOSS: game modes, difficulties, mechanics, how the leaderboard score is calculated and survival tips.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "section": {
+              "default": "all",
+              "description": "Which part of the guide to return.",
+              "type": "string",
+              "enum": [
+                "all",
+                "modes",
+                "mechanics",
+                "scoring",
+                "tips"
+              ]
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
