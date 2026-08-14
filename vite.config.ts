@@ -12,4 +12,19 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      fs: {
+        // Never serve internal working files (marketing docs, video project, plans, agent notes).
+        deny: [
+          "**/x-assets/**",
+          "**/remotion/**",
+          "**/.lovable/**",
+          "**/.workspace/**",
+          "**/*.md",
+          "**/.env*",
+        ],
+      },
+    },
+  },
 });
