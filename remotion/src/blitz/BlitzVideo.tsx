@@ -99,7 +99,7 @@ export const BlitzVideo: React.FC = () => (
         <CShot
           dur={D.warp}
           clip="09_end.mp4"
-          kick="// 2020 → 2026 · FINAL SCORE"
+          kick="// FINAL SCORE"
           kickColor={C.green}
           line={<>SURVIVE<br />ALL 84 MONTHS.</>}
           size={70}
