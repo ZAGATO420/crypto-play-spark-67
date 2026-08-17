@@ -103,10 +103,10 @@ export const BlitzVideo: React.FC = () => (
           kickColor={C.green}
           line={<>SURVIVE<br />ALL 84 MONTHS.</>}
           size={70}
-          fx={40}
-          fy={22}
-          from={1.16}
-          to={1.3}
+          fx={34}
+          fy={12}
+          from={1.4}
+          to={1.58}
           tint={C.green}
         />
       </TransitionSeries.Sequence>
