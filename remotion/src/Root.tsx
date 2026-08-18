@@ -7,6 +7,7 @@ import { TrailerVideo, TRAILER_TOTAL } from "./trailer/TrailerVideo";
 import { V16Trailer, V16_TOTAL } from "./v16/V16Trailer";
 import { CineVideo, CINE_TOTAL } from "./cine/CineVideo";
 import { BlitzVideo, BLITZ_TOTAL } from "./blitz/BlitzVideo";
+import { OnboardVideo, ONB_TOTAL } from "./onb/OnboardVideo";
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -17,5 +18,6 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="v16" component={V16Trailer} durationInFrames={V16_TOTAL} fps={30} width={1920} height={1080} />
     <Composition id="cine" component={CineVideo} durationInFrames={CINE_TOTAL} fps={30} width={1920} height={1080} />
     <Composition id="blitz" component={BlitzVideo} durationInFrames={BLITZ_TOTAL} fps={30} width={1920} height={1080} />
+    <Composition id="onboard" component={OnboardVideo} durationInFrames={ONB_TOTAL} fps={30} width={1920} height={1080} />
   </>
 );
