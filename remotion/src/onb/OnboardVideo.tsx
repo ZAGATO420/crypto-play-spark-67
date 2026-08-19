@@ -49,10 +49,10 @@ export const OnboardVideo: React.FC = () => (
           line={<>TYPE YOUR NAME.<br />IT GETS REMEMBERED.</>}
           size={64}
           tint={C.gold}
-          fx={12}
-          fy={30}
-          from={1.9}
-          to={2.05}
+          fx={26}
+          fy={16}
+          from={1.42}
+          to={1.52}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={wipe({ direction: "from-right" })} timing={spr(T[1])} />
@@ -70,10 +70,10 @@ export const OnboardVideo: React.FC = () => (
           note="EACH ONE CHANGES CASH, FEES, RISK AND MEME GAINS"
           align="right"
           tint={C.purple2}
-          fx={16}
-          fy={52}
-          from={1.85}
-          to={2.0}
+          fx={26}
+          fy={46}
+          from={1.34}
+          to={1.44}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={slide({ direction: "from-right" })} timing={spr(T[2])} />
@@ -89,10 +89,10 @@ export const OnboardVideo: React.FC = () => (
           size={64}
           note="TINY STACK · +42% COSTS · BRUTAL SLIPPAGE"
           tint={C.red}
-          fx={12}
-          fy={62}
-          from={1.9}
-          to={2.05}
+          fx={28}
+          fy={18}
+          from={1.44}
+          to={1.54}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={fade()} timing={cut(T[3])} />
@@ -101,7 +101,7 @@ export const OnboardVideo: React.FC = () => (
         <OShot
           dur={D.mode}
           src="onb/c_diff.mp4"
-          startFrom={150}
+          startFrom={140}
           step="STEP 04"
           label="RUN MODE"
           kick="// HISTORICAL OR CHAOS"
@@ -110,10 +110,10 @@ export const OnboardVideo: React.FC = () => (
           note="HISTORICAL XP ×0.75 · CHAOS XP ×1.25"
           align="right"
           tint={C.green}
-          fx={14}
-          fy={78}
-          from={1.9}
-          to={2.02}
+          fx={21}
+          fy={48}
+          from={1.44}
+          to={1.54}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={wipe({ direction: "from-left" })} timing={spr(T[4])} />
@@ -129,10 +129,10 @@ export const OnboardVideo: React.FC = () => (
           size={60}
           note="CHEAP LIVING OR LOW TAX — PICK YOUR POISON"
           tint={C.gold}
-          fx={78}
-          fy={26}
-          from={1.85}
-          to={2.0}
+          fx={32}
+          fy={34}
+          from={1.4}
+          to={1.5}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={fade()} timing={cut(T[5])} />
@@ -141,7 +141,7 @@ export const OnboardVideo: React.FC = () => (
         <OShot
           dur={D.iron}
           src="onb/d_iron.mp4"
-          startFrom={40}
+          startFrom={55}
           step="STEP 06"
           label="IRONMAN"
           kick="// NO PAUSE · NO SKIP · NO SECOND RUN"
@@ -150,10 +150,10 @@ export const OnboardVideo: React.FC = () => (
           note="THIS RUN: XP ×6.25"
           align="right"
           tint={C.red}
-          fx={80}
-          fy={62}
-          from={1.95}
-          to={2.12}
+          fx={57}
+          fy={40}
+          from={1.46}
+          to={1.56}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={fade()} timing={cut(T[6])} />
@@ -162,7 +162,7 @@ export const OnboardVideo: React.FC = () => (
         <OShot
           dur={D.start}
           src="onb/e_start.mp4"
-          startFrom={40}
+          startFrom={150}
           step="RUN LIVE"
           label="JAN 2020"
           kick="// FIRST CHOICE, ALREADY DANGEROUS"
@@ -170,9 +170,9 @@ export const OnboardVideo: React.FC = () => (
           size={62}
           tint={C.purple2}
           fx={50}
-          fy={50}
-          from={1.35}
-          to={1.5}
+          fy={46}
+          from={1.1}
+          to={1.2}
         />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition presentation={wipe({ direction: "from-bottom" })} timing={spr(T[7])} />
