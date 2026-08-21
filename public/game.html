@@ -2120,7 +2120,6 @@ function shareAsImage(){
 function loadLeaderboard(){try{const data=JSON.parse(localStorage.getItem('tfcb_lb')||'[]');return data.sort((a,b)=>b.net-a.net).slice(0,10)}catch(e){return[]}}
 function saveRun(run){const lb=loadLeaderboard();lb.push(run);lb.sort((a,b)=>b.net-a.net);localStorage.setItem('tfcb_lb',JSON.stringify(lb.slice(0,15)))}
 function renderLeaderboard(elId){const lb=loadLeaderboard();const el=document.getElementById(elId);if(!el)return;if(!lb.length){el.innerHTML='No runs yet – be the first.';return}el.innerHTML=lb.map((r,i)=>`<div class="lb-row"><span>${i+1}. ${escapeHtml(r.name)} (${escapeHtml(r.arch)})</span><span style="color:${r.net>=0?'#22c55e':'#ef4444'}">${fmt(r.net)} • ${escapeHtml(r.rank)}</span></div>`).join('')}
-renderLeaderboard('lb-list');
 (function(){
   try{
     const raw=localStorage.getItem('tfcb_autosave');
@@ -3664,10 +3663,14 @@ async function loadGlobalLeaderboard(){
     if(!res.ok) throw new Error('api error');
     const data = await res.json();
     globalLeaderboardCache = Array.isArray(data)? data : [];
+    const t=document.getElementById('lb-title');
+    if(t) t.textContent = 'LIVE GLOBAL LEADERBOARD'+(globalLeaderboardCache.length?(' • '+globalLeaderboardCache.length+' RUNS'):'');
     renderGlobalLeaderboard('lb-list');
     renderGlobalLeaderboard('end-lb-list');
   }catch(e){
     console.log('api failed, fallback to local leaderboard', e);
+    const t=document.getElementById('lb-title');
+    if(t) t.textContent = 'LOCAL LEADERBOARD (OFFLINE)';
     if(typeof renderLeaderboard==='function'){
       renderLeaderboard('lb-list');
       renderLeaderboard('end-lb-list');
