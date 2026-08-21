@@ -1123,9 +1123,10 @@ input[type=range]::-webkit-slider-thumb{border-color:#0a0713;box-shadow:0 0 14px
     </div>
     <button class="start-btn" id="start-btn">START SURVIVAL</button><button id="howto-manual-btn" onclick="try{ if(typeof openTutorial==='function') openTutorial(); }catch(e){}" style="margin-top:10px;width:100%;padding:10px;border-radius:10px;background:#0a0e1a;border:1px solid #333;color:#a78bfa;font-weight:700;cursor:pointer;">📖 HOW TO PLAY</button>
     <div class="leaderboard" id="start-leaderboard">
-      <div class="leaderboard-title">LOCAL LEADERBOARD</div>
-      <div id="lb-list">No runs yet – be the first.</div>
+      <div class="leaderboard-title" id="lb-title">LIVE GLOBAL LEADERBOARD</div>
+      <div id="lb-list"><div style="text-align:center;color:var(--muted);padding:14px;font-size:12px">Loading live scores…</div></div>
     </div>
+
     <a href="https://www.x.com/TCFB_game" target="_blank" class="x-link">Follow @TCFB_game on X</a>
   </div>
 </div>
