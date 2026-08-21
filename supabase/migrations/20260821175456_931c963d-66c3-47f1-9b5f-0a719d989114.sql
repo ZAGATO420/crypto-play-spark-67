@@ -1,0 +1,1 @@
+delete from public.leaderboard_runs where player_name = '__probe__';
