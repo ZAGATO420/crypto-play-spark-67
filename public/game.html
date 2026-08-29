@@ -6238,6 +6238,7 @@ main .cf-rows.v6-fold{display:none}
     t.remove();real.id='market-list';
     return h;
   }
+  window.v17PerpHtml=perpDeskHtml;
   window.v7PerpDesk=function(){
     /* V17: the perp desk is its own window. Route every legacy CTA there so we
        never open the old empty #v7m shell again. */
@@ -8227,6 +8228,9 @@ body.v17-mob input[type=range],body.v17-mob .v17-tile,body.v17-mob #v17-dock but
 body.v17 #v7-top{display:block!important}
 body.v17 #v7-top>#v7-perp{display:none!important}
 body.v17 #v17-vault #v7-perp{display:flex!important}
+#v17-sheet #v7-perp .v7cta{display:none!important}
+#v17-perpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:12px}
+@media(max-width:520px){#v17-perpgrid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}}
 body.v17 #v17-sheet #v7-perp{display:flex!important;flex-direction:column;background:none;border:0;padding:0}
 
 /* narrow desktops: let the vitals own their own row instead of crushing them */
@@ -8384,6 +8388,22 @@ body.v17 .tl-empty,body.v17 .v7empty{color:var(--v17-t3);font-size:11.5px;line-h
     });
   }
 
+  /* the PERPS window needs the actual leverage desk, not just the P&L summary */
+  var perpTimer=null;
+  function paintPerpGrid(){
+    var g=$('v17-perpgrid');if(!g)return;
+    var h='';try{if(typeof window.v17PerpHtml==='function')h=window.v17PerpHtml()}catch(e){}
+    if(h)g.innerHTML=h;
+  }
+  function mountPerpGrid(){
+    var g=document.createElement('div');g.id='v17-perpgrid';g.className='dexgrid';
+    body.appendChild(g);paintPerpGrid();
+    clearInterval(perpTimer);perpTimer=setInterval(function(){
+      if(!sheet||!sheet.classList.contains('on')||cur!=='perp'){clearInterval(perpTimer);perpTimer=null;return}
+      if(window._dragLock)return;
+      paintPerpGrid();
+    },1200);
+  }
   function open(k){
     var s=null;SET.forEach(function(x){if(x.k===k)s=x});
     if(!s)return;
@@ -8391,6 +8411,7 @@ body.v17 .tl-empty,body.v17 .v7empty{color:var(--v17-t3);font-size:11.5px;line-h
     buildShell();clearBody();
     setHead(s.i,s.t,s.s);
     body.appendChild(p);
+    if(k==='perp')mountPerpGrid();
     foot.querySelector('.v17-back').style.display=openedFromOps?'':'none';
     sheet.classList.add('on');cur=k;
     try{if(window.renderMarket)renderMarket()}catch(e){}
