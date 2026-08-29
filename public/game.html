@@ -6239,11 +6239,18 @@ main .cf-rows.v6-fold{display:none}
     return h;
   }
   window.v7PerpDesk=function(){
+    /* V17: the perp desk is its own window. Route every legacy CTA there so we
+       never open the old empty #v7m shell again. */
+    if(typeof window.v17Open==='function'){
+      try{if(typeof playSound==='function')playSound('click')}catch(e){}
+      window.v17Open('perp');return;
+    }
     const h=perpDeskHtml();
     if(!h)return;
     try{if(typeof playSound==='function')playSound('click')}catch(e){}
     v7Modal(h,'PERP DESK');
   };
+
 
   /* ---- terminal: no scroll, overflow folds into a popup ---- */
   function wrapEl(){
