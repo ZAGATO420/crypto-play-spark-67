@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Check, Copy, Search } from "lucide-react";
 
-import replyRaw from "../../x-assets/x-reply-library.md?raw";
-import calendarRaw from "../../x-assets/x-30-day-calendar.md?raw";
-import playbookRaw from "../../x-assets/x-playbook.md?raw";
+import replyRaw from "@/content/x-reply-library.md?raw";
+import calendarRaw from "@/content/x-30-day-calendar.md?raw";
+import playbookRaw from "@/content/x-playbook.md?raw";
 import {
   KIND_LABEL,
   parseCalendar,
