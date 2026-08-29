@@ -8221,7 +8221,8 @@ body.v17 #v17-sheet #v7-perp{display:flex!important;flex-direction:column;backgr
 /* narrow desktops: let the vitals own their own row instead of crushing them */
 @media(min-width:900px) and (max-width:1319px){
   body.v17 .header-top{flex-wrap:wrap!important}
-  body.v17 .hud-vitals{flex:1 1 100%;grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.v17 .hud-vitals{flex:1 1 420px;grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.v17 .hud-sys{flex:0 0 auto;align-self:center}
 }
 /* short laptops: trim the head and the desks so nothing is cut off */
 @media(min-width:900px) and (max-height:770px){
@@ -8234,8 +8235,8 @@ body.v17 #v17-sheet #v7-perp{display:flex!important;flex-direction:column;backgr
   body.v17 .sentiment{padding:5px 12px!important}
   body.v17 .xp-wrap{margin-top:4px!important}
   body.v17 .time-controls{margin-top:4px!important}
-  body.v17.v4-live main>div:nth-child(2)>#v7-top{flex:0 0 200px!important;height:200px!important;min-height:0!important}
-  body.v17.v4-live .chart-box{height:126px!important}
+  body.v17 #v7-top{flex:0 0 200px!important;height:200px!important;min-height:0!important;max-height:200px!important;overflow:hidden}
+  body.v17 .chart-box{height:120px!important;min-height:0!important}
 }
 
 /* ---------- phone: a compact head so the game itself owns the screen ---------- */
