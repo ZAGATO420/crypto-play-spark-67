@@ -4407,7 +4407,7 @@ function renderDegenOps(){
       const col=pnl>=0?'#34d399':'#f87171';
       h+='<div class="dg-row"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="dg-n">'+p.sym+' <span class="dg-chip '+(p.dir==='long'?'ok':'bad')+'">'+p.lev+'x '+p.dir.toUpperCase()+'</span></div><div class="dg-m">margin '+fmt(p.margin)+' \u2022 PnL <span style="color:'+col+'">'+(pnl>=0?'+':'')+fmt(pnl)+' ('+(pct>=0?'+':'')+pct.toFixed(1)+'%)</span></div></div><button class="dg-btn warn" onclick="closePerp('+i+')">CLOSE</button></div><div class="dg-bar"><i style="width:'+dist.toFixed(0)+'%;background:'+(dist<25?'#ef4444':dist<55?'#f0b429':'#10b981')+'"></i></div><div class="dg-m" style="margin-top:4px">liq distance '+dist.toFixed(0)+'%</div></div>';
     });
-    h+='<button class="sq-card" onclick="v7PerpDesk()"><div><div class="dg-n">\u26a1 OPEN PERP DESK</div><div class="dg-m">margin + leverage im terminal</div></div><span class="dg-chip mid">TERMINAL</span></button>';
+    h+='<button class="sq-card" onclick="v7PerpDesk()"><div><div class="dg-n">\u26a1 OPEN PERP DESK</div><div class="dg-m">margin + leverage window</div></div><span class="dg-chip mid">TERMINAL</span></button>';
   }
   const _tk=(typeof sqTickets==='function'?sqTickets():0);
   h+='<button class="sq-card" '+(_tk>0?'':'disabled')+' onclick="startMinigame(true)"><div><div class="dg-n">\ud83c\udfb0 SIDE QUEST</div><div class="dg-m">1 ticket every 3 months</div></div><div class="sq-dots"><i class="'+(_tk>0?'on':'')+'"></i><i class="'+(_tk>1?'on':'')+'"></i></div></button>';
