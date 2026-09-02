@@ -9010,6 +9010,7 @@ body.v20 .end-btn.primary{background:var(--grad-boss);color:#0a0d05}
     head:'/__l5e/assets-v1/ca2a52b2-ec95-4836-8c19-e036187104ab/boss-head.webp'
   };
   window.V20_BOSS=B;
+  function S(){ try{ return (typeof state!=='undefined')?state:(window.state||null) }catch(e){ return null } }
   document.body.classList.add('v20');
 
   /* ---------- 1. START: ARENA ---------- */
@@ -9062,8 +9063,8 @@ body.v20 .end-btn.primary{background:var(--grad-boss);color:#0a0d05}
     {y:2026,t:'THE FINAL BOSS',goal:5000000}
   ];
   function mood(){
-    if(!window.state)return'throne';
-    var s=state, danger=Math.max(s.hunger||0,s.stress||0,s.risk||0), hp=s.health||100;
+    var st=S(); if(!st)return'throne';
+    var s=st, danger=Math.max(s.hunger||0,s.stress||0,s.risk||0), hp=s.health||100;
     if(hp<40||danger>85)return'broken';
     if(danger>70)return'enraged';
     if(danger>50)return'stressed';
@@ -9083,10 +9084,10 @@ body.v20 .end-btn.primary{background:var(--grad-boss);color:#0a0d05}
     return el;
   }
   function hudTick(){
-    if(!window.state||!document.getElementById('game-screen')||document.getElementById('game-screen').style.display==='none')return;
+    var st=S(); if(!st||!document.getElementById('game-screen')||document.getElementById('game-screen').style.display==='none')return;
     var el=bossHud(); if(!el)return;
     var m=mood(); if(el.dataset.mood!==m){el.dataset.mood=m;el.querySelector('img').src=B[m];el.querySelector('.bb-m').textContent=MOODTXT[m]||'WATCHING';}
-    var i=Math.min(6,Math.floor((state.month||0)/12)), c=CH[i];
+    var i=Math.min(6,Math.floor((st.month||0)/12)), c=CH[i];
     el.querySelector('.bb-t').textContent='CH '+(i+1)+' · '+c.t;
     var p=0; try{p=Math.max(0,Math.min(100,netWorth()/c.goal*100))}catch(e){}
     el.querySelector('.bb-bar i').style.width=p.toFixed(1)+'%';
@@ -9136,8 +9137,8 @@ body.v20 .end-btn.primary{background:var(--grad-boss);color:#0a0d05}
   }
   var lastCrit=false;
   function critWatch(){
-    if(!window.state)return;
-    var c=(state.hunger>78||state.stress>78||state.risk>75||state.health<40);
+    var st=S(); if(!st)return;
+    var c=(st.hunger>78||st.stress>78||st.risk>75||st.health<40);
     if(c&&!lastCrit)react('broken',pick(HOT),'bad');
     lastCrit=c;
   }
