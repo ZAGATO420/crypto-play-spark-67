@@ -9676,6 +9676,216 @@ body.v21-flow #v21-steps{display:block}
 })();
 </script>
 
+<style id="v22-core">
+/* =====================================================================
+   V22 — readable actions, one moment per month, boss orders, OPS hub.
+   Presentation + pacing only: prices, XP formulas, perp math untouched.
+   ===================================================================== */
+
+/* ---------- 1. NEXT MONTH: dark plate, acid ink — always readable ---------- */
+body.v17 .v4-next,body.v17 #mobile-next,
+body.v20 .v4-next,body.v20 #mobile-next{
+  background:linear-gradient(150deg,#0f160d,#080a10)!important;
+  color:#d8ff8a!important;text-shadow:none!important;
+  border:1px solid rgba(143,212,30,.55)!important;
+  box-shadow:0 16px 38px -20px rgba(143,212,30,.45),inset 0 1px 0 rgba(255,255,255,.06)!important}
+body.v17 .v4-next:hover,body.v17 #mobile-next:hover,
+body.v20 .v4-next:hover,body.v20 #mobile-next:hover{
+  border-color:rgba(143,212,30,.9)!important;
+  box-shadow:0 0 0 1px rgba(143,212,30,.3),0 18px 44px -18px rgba(143,212,30,.6)!important}
+body.v17 .v4-next .nm-main,body.v17 #mobile-next .nm-main,
+body.v20 .v4-next .nm-main,body.v20 #mobile-next .nm-main{
+  color:#c9f76a!important;text-shadow:0 0 14px rgba(143,212,30,.35)!important;font-weight:900!important}
+body.v17 .v4-next .nm-sub,body.v17 #mobile-next .nm-sub,
+body.v20 .v4-next .nm-sub,body.v20 #mobile-next .nm-sub{
+  color:#9fb08c!important;font-weight:700!important}
+body.v17 .v4-next .nm-ic,body.v20 .v4-next .nm-ic,
+body.v17 #mobile-next .nm-ic,body.v20 #mobile-next .nm-ic{
+  filter:drop-shadow(0 0 8px rgba(143,212,30,.4))!important}
+
+/* contrast pass: no light text on light acid surfaces anywhere */
+body.v20 .tut-btn:not(.skip),body.v20 .v17-next,body.v20 .start-btn,
+body.v20 .end-btn.primary,body.v20 #global-submit-btn,body.v20 .g-cta,
+body.v20 .coach-btn,body.v20 .tour-next{
+  color:#07130a!important;text-shadow:none!important;font-weight:900!important}
+.v22num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* ---------- 2. BOSS ORDER bar ---------- */
+#v22-order{position:fixed;left:14px;bottom:16px;z-index:640;max-width:min(380px,52vw);
+  display:none;gap:11px;align-items:center;padding:10px 13px;border-radius:16px;
+  background:linear-gradient(150deg,rgba(16,20,12,.94),rgba(8,10,14,.94));
+  border:1px solid rgba(143,212,30,.3);
+  box-shadow:0 20px 48px -26px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(10px);font-family:'JetBrains Mono',monospace}
+#v22-order.on{display:flex}
+#v22-order img{width:40px;height:40px;object-fit:contain;flex:0 0 auto;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.7))}
+#v22-order .ob{min-width:0;display:flex;flex-direction:column;gap:3px}
+#v22-order .ok{font-size:8.5px;letter-spacing:.24em;font-weight:900;color:#8fd41e}
+#v22-order .ot{font-size:12px;font-weight:800;color:#f4fff0;line-height:1.28;
+  font-family:Inter,system-ui,sans-serif}
+#v22-order .os{font-size:9.5px;letter-spacing:.05em;color:#9aa38f;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#v22-order .ostreak{margin-left:auto;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+  gap:1px;padding:5px 9px;border-radius:11px;border:1px solid rgba(240,180,41,.34);
+  background:rgba(240,180,41,.08)}
+#v22-order .ostreak b{font-size:14px;color:#ffd76a;line-height:1}
+#v22-order .ostreak i{font-style:normal;font-size:7.5px;letter-spacing:.16em;color:#a6935f}
+#v22-order.hit{animation:v22hit .7s ease}
+@keyframes v22hit{0%{box-shadow:0 0 0 0 rgba(143,212,30,.5)}40%{box-shadow:0 0 0 8px rgba(143,212,30,0)}100%{box-shadow:0 20px 48px -26px rgba(0,0,0,.95)}}
+@media(max-width:900px){
+  #v22-order{left:10px;right:10px;max-width:none;bottom:calc(120px + env(safe-area-inset-bottom))}
+  #v22-order img{width:34px;height:34px}
+}
+
+</style>
+<script id="v22-js">
+(function(){
+  function $(i){return document.getElementById(i)}
+  function S(){try{return (typeof state!=='undefined')?state:(window.state||null)}catch(e){return null}}
+  var B=window.V20_BOSS||{};
+  function say(mood,txt,kind){try{if(typeof v20React==='function')v20React(mood,txt,kind)}catch(e){}}
+  function nw(){try{return (typeof netWorth==='function')?netWorth():0}catch(e){return 0}}
+
+  /* =========================================================
+     1. CARD DIET — one full-screen moment per month
+     ========================================================= */
+  function spent(){var s=S();return !!s&&s._v22card===s.month}
+  function mark(){var s=S();if(s)s._v22card=s.month}
+
+  var origEvent=window.showEvent;
+  if(typeof origEvent==='function'){
+    window.showEvent=function(title,type,flavor){
+      var s=S();
+      if(!s||s._gameEnded)return origEvent.apply(this,arguments);
+      var shock=(type==='crash');
+      if(shock&&!spent()){mark();return origEvent.apply(this,arguments)}
+      /* everything else becomes a ticker line + a colour pulse, not an overlay */
+      try{toast(String(title||'').replace(/^\s+/,''),shock?'sell':'buy')}catch(e){}
+      try{if(typeof addNews==='function')addNews(String(title||''))}catch(e){}
+      try{document.body.classList.add(shock?'flash-red':'flash-green');
+        setTimeout(function(){document.body.classList.remove('flash-red','flash-green')},420)}catch(e){}
+      return null;
+    };
+  }
+
+  var origDec=window.showDecision;
+  if(typeof origDec==='function'){
+    window.showDecision=function(d){
+      var s=S();
+      if(!s||s._gameEnded)return origDec.apply(this,arguments);
+      if(spent()){                                   /* never stack — save it for a quiet month */
+        s._v22defer=s._v22defer||[];
+        if(s._v22defer.length<4)s._v22defer.push(d);
+        return null;
+      }
+      mark();
+      return origDec.apply(this,arguments);
+    };
+  }
+
+  /* =========================================================
+     2. BOSS ORDERS + STREAK
+     ========================================================= */
+  var ORDERS=[
+    {id:'profit', t:'Grow your net worth this month.', s:'Any gain counts. Boss watches the line.',
+     start:function(s){s._v22o={nw:nw()}}, done:function(s){return nw()>(s._v22o&&s._v22o.nw||0)}},
+    {id:'hold',   t:'End the month holding a bag.', s:'Cash is safe. Safe is not how you get crowned.',
+     start:function(){}, done:function(){try{return (typeof portValue==='function')&&portValue()>0}catch(e){return false}}},
+    {id:'noliq',  t:'Survive the month without a liquidation.', s:'Liquidation = your position gets force-sold.',
+     start:function(s){s._v22o={liq:s.liquidations||0}}, done:function(s){return (s.liquidations||0)<=((s._v22o&&s._v22o.liq)||0)}},
+    {id:'trade',  t:'Make at least one trade.', s:'Standing still is also a decision. A bad one.',
+     start:function(s){s._v22o={tr:(s._v22trades||0)}}, done:function(s){return (s._v22trades||0)>((s._v22o&&s._v22o.tr)||0)}},
+    {id:'cash',   t:'Keep enough cash for next month\u2019s bills.', s:'Rent does not care about your conviction.',
+     start:function(){}, done:function(s){return (s.cash||0)>=(s._monthlyCost||500)}}
+  ];
+  function pick(s){
+    var pool=ORDERS.filter(function(o){return o.id!==(s._v22oid||'')});
+    var o=pool[Math.floor(Math.random()*pool.length)];
+    s._v22oid=o.id; o.start(s); return o;
+  }
+  function current(s){return ORDERS.filter(function(o){return o.id===s._v22oid})[0]||null}
+
+  function bar(){
+    var el=$('v22-order');
+    if(!el){
+      el=document.createElement('div');el.id='v22-order';
+      el.innerHTML='<img src="'+(B.smug||B.head||'')+'" alt="">'+
+        '<div class="ob"><div class="ok">BOSS ORDER</div>'+
+        '<div class="ot"></div><div class="os"></div></div>'+
+        '<div class="ostreak"><b class="v22num">0</b><i>STREAK</i></div>';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function paint(){
+    var s=S(),el=bar();
+    var live=s&&!s._gameEnded&&$('game-screen')&&$('game-screen').style.display!=='none'&&!document.body.classList.contains('v20-start');
+    el.classList.toggle('on',!!live);
+    if(!live)return;
+    var o=current(s)||pick(s);
+    el.querySelector('.ot').textContent=o.t;
+    el.querySelector('.os').textContent=o.s;
+    var st=s._v22streak||0;
+    el.querySelector('.ostreak b').textContent=st>0?('\u00d7'+(1+st*0.1).toFixed(1)):'0';
+    var img=el.querySelector('img');
+    var want=(st>=3?(B.crowned||B.smug):(s.stress>70?(B.stressed||B.smug):(B.smug||B.head)))||'';
+    if(want&&img.getAttribute('src')!==want)img.setAttribute('src',want);
+  }
+
+  function rollover(s){
+    var o=current(s);
+    if(o){
+      if(o.done(s)){
+        try{if(typeof awardXP==='function')awardXP(140,'BOSS ORDER')}catch(e){}
+        try{toast('\ud83d\udc51 Boss order complete \u2014 +XP','buy')}catch(e){}
+        bar().classList.add('hit');setTimeout(function(){bar().classList.remove('hit')},760);
+      }else{
+        say('smug','Order missed. I expected nothing else.','bad');
+      }
+    }
+    /* streak: profitable months stack a multiplier, a liquidation breaks it */
+    var prev=s._v22nw;
+    var liqNow=s.liquidations||0;
+    if(liqNow>(s._v22liq||0)){s._v22streak=0}
+    else if(typeof prev==='number'&&nw()>prev){s._v22streak=(s._v22streak||0)+1}
+    else{s._v22streak=0}
+    s._v22liq=liqNow; s._v22nw=nw();
+    if((s._v22streak||0)===3)say('crowned','Three green months. Now do not get greedy.','good');
+
+    pick(s);
+
+    /* a moment that was held back gets the quiet month it deserves */
+    if(s._v22defer&&s._v22defer.length){
+      var d=s._v22defer.shift();
+      setTimeout(function(){try{if(!spent())window.showDecision(d)}catch(e){}},1400);
+    }
+    paint();
+  }
+
+  var origNext=window.nextMonth;
+  if(typeof origNext==='function'){
+    window.nextMonth=function(){
+      var s=S(),before=s?s.month:null;
+      var r=origNext.apply(this,arguments);
+      var t=S();
+      if(t&&!t._gameEnded&&t.month!==before){try{rollover(t)}catch(e){}}
+      return r;
+    };
+  }
+  ['buy','sell','openPerp','closePerp'].forEach(function(fn){
+    var o=window[fn];
+    if(typeof o==='function')window[fn]=function(){var s=S();if(s)s._v22trades=(s._v22trades||0)+1;return o.apply(this,arguments)};
+  });
+
+  function boot(){
+    paint();
+    setInterval(paint,900);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
 </body>
 </html>
 
