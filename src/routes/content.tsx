@@ -177,6 +177,7 @@ function ContentCenter() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
+              aria-label="Inhalte durchsuchen"
               placeholder="durchsuchen, z.B. luna, airdrop, rekt"
               className="w-full rounded-md border border-border bg-card py-2 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
             />
@@ -184,6 +185,7 @@ function ContentCenter() {
           <select
             value={section}
             onChange={(e) => setSection(e.target.value)}
+            aria-label="Nach Thema filtern"
             className="rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
           >
             <option value="all">alle Themen</option>
@@ -197,6 +199,7 @@ function ContentCenter() {
             <select
               value={kind}
               onChange={(e) => setKind(e.target.value as typeof kind)}
+              aria-label="Nach Typ filtern"
               className="rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
             >
               <option value="all">alle Typen</option>

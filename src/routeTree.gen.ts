@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContentRouteImport } from './routes/content'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiPublicLeaderboardRouteImport } from './routes/api/public/leaderboard'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const ContentRoute = ContentRouteImport.update({
   path: '/content',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicLeaderboardRoute = ApiPublicLeaderboardRouteImport.update({
   id: '/api/public/leaderboard',
   path: '/api/public/leaderboard',
@@ -32,30 +38,34 @@ const ApiPublicLeaderboardRoute = ApiPublicLeaderboardRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/content': typeof ContentRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/content': typeof ContentRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/content': typeof ContentRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/content' | '/api/public/leaderboard'
+  fullPaths: '/' | '/content' | '/sitemap.xml' | '/api/public/leaderboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/content' | '/api/public/leaderboard'
-  id: '__root__' | '/' | '/content' | '/api/public/leaderboard'
+  to: '/' | '/content' | '/sitemap.xml' | '/api/public/leaderboard'
+  id: '__root__' | '/' | '/content' | '/sitemap.xml' | '/api/public/leaderboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContentRoute: typeof ContentRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicLeaderboardRoute: typeof ApiPublicLeaderboardRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/leaderboard': {
       id: '/api/public/leaderboard'
       path: '/api/public/leaderboard'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContentRoute: ContentRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicLeaderboardRoute: ApiPublicLeaderboardRoute,
 }
 export const routeTree = rootRouteImport
