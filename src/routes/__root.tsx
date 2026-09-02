@@ -101,19 +101,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "The Crypto Final Boss" },
+      // Title, description and social preview tags live on each leaf route so
+      // the router never emits duplicates (root + leaf metadata is concatenated).
       { name: "author", content: "The Crypto Final Boss" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "THE CRYPTO FINAL BOSS" },
-      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@TCFB_game" },
-      { property: "og:title", content: "The Crypto Final Boss" },
-      { name: "twitter:title", content: "The Crypto Final Boss" },
-      { name: "description", content: "The Crypto Final Boss is LIVE // The game is harder than the market itself // Survive 2020 → 2026." },
-      { property: "og:description", content: "The Crypto Final Boss is LIVE // The game is harder than the market itself // Survive 2020 → 2026." },
-      { name: "twitter:description", content: "The Crypto Final Boss is LIVE // The game is harder than the market itself // Survive 2020 → 2026." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785607211579-social-image.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/tYpw8EAvwSX4iSbaxcnDmAlLqHd2/social-images/social-1785607211579-social-image.webp" },
       { "script:ld+json": JSON.parse(WEBSITE_LD) } as any,
       { "script:ld+json": JSON.parse(ORGANIZATION_LD) } as any,
     ],

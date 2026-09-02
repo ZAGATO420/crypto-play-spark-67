@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ogAsset from "@/assets/tcfb-og.jpg.asset.json";
 
-const TITLE = "THE CRYPTO FINAL BOSS — Crypto Trading Survival Game 2020–2026";
+const TITLE = "THE CRYPTO FINAL BOSS — Crypto Survival Trading Game";
 const DESCRIPTION =
   "Trade real historical crypto prices from 2020 to 2026. Survive presales, rugs, airdrops, leverage and liquidations across 84 months — climb the global leaderboard.";
 // Own branded 1200x630 card. The previous value was an auto-generated preview
