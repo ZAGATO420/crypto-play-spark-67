@@ -10138,10 +10138,12 @@ body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
   /* ---------------- 2. resume a run ---------------- */
   function enc(k,v){ return (v instanceof Set)?{__set:Array.from(v)}:v }
   function dec(k,v){ return (v&&typeof v==='object'&&v.__set)?new Set(v.__set):v }
+  function S(){try{return (typeof state!=='undefined')?state:(window.state||null)}catch(e){return null}}
   function saveSnap(){
     try{
-      if(!window.state||state._gameEnded)return;
-      localStorage.setItem(SNAP,JSON.stringify(state,enc));
+      var s=S();
+      if(!s||s._gameEnded)return;
+      localStorage.setItem(SNAP,JSON.stringify(s,enc));
     }catch(e){}
   }
   function readSnap(){
@@ -10161,7 +10163,9 @@ body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
     try{
       if(typeof initAudio==='function')initAudio();
       if(!(s.memeHeld instanceof Set))s.memeHeld=new Set(s.memeHeld||[]);
-      window.state=s;
+      /* the game keeps its run in a top-level `let state`, so assign the
+         lexical binding, not a window property. */
+      try{ state=s }catch(e){ window.state=s }
       try{if(typeof initHistPool==='function')initHistPool()}catch(e){}
       document.body.classList.remove('v21-gate','v21-flow');
       var st=$('start-screen'),g=$('game-screen');
@@ -10181,14 +10185,15 @@ body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
   (function(){
     var last=-1;
     setInterval(function(){
-      if(!window.state)return;
+      var s=S();if(!s)return;
       if(!document.body.classList.contains('v23-ingame'))document.body.classList.add('v23-ingame');
-      if(state._gameEnded){clearSnap();return}
-      if(state.month!==last){last=state.month;saveSnap()}
+      if(s._gameEnded){clearSnap();return}
+      if(s.month!==last){last=s.month;saveSnap()}
     },1500);
     document.addEventListener('visibilitychange',function(){if(document.hidden)saveSnap()});
     window.addEventListener('pagehide',saveSnap);
   })();
+
 
   /* ---------------- 3. dock: BAGS instead of a duplicate perps slot ---- */
   function fixDock(){
