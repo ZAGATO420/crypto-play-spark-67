@@ -10017,13 +10017,14 @@ html,body{max-width:100%;overflow-x:hidden!important;overscroll-behavior-y:conta
   body.v17-mob #v4-side-tabs::-webkit-scrollbar,body.v17-mob .tabs::-webkit-scrollbar{height:0}
 }
 
-/* --- sound chip (phones arrive muted from the feed) --- */
-#v23-sound{position:fixed;z-index:96;top:calc(8px + env(safe-area-inset-top));right:8px;
-  display:none;align-items:center;gap:6px;min-height:38px;padding:0 12px;border-radius:99px;
-  background:rgba(10,14,26,.86);border:1px solid rgba(255,255,255,.16);color:#d8ff8a;
-  font:800 11px/1 Inter,system-ui,sans-serif;letter-spacing:.1em;cursor:pointer;
-  backdrop-filter:blur(8px)}
-body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
+/* --- HUD system buttons must stay reachable on phones (sound / settings / quit) --- */
+body.v17-mob .hud-sys{position:relative;z-index:60;display:flex!important;gap:6px;
+  align-items:center;flex:0 0 auto}
+body.v17-mob .hud-sys .hud-ic{min-width:44px;min-height:44px;display:inline-flex;
+  align-items:center;justify-content:center;font-size:16px;line-height:1;padding:0}
+body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#ff8080;
+  background:rgba(255,60,60,.12)}
+
 
 /* --- coach bubbles (first phone run) --- */
 #v23-coach{position:fixed;inset:0;z-index:210;display:none}
@@ -10244,20 +10245,17 @@ body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
   }
   var st2=0,si=setInterval(function(){ if(swipe()||++st2>60)clearInterval(si) },300);
 
-  /* ---------------- 5. sound chip + rotate hint ---------------- */
+  /* ---------------- 5. audio unlock on HUD sound button + rotate hint ---------------- */
   function chrome(){
-    if(!$('v23-sound')){
-      var b=document.createElement('button');b.id='v23-sound';b.type='button';
-      b.innerHTML='<span>\uD83D\uDD0A</span> SOUND';
-      b.addEventListener('click',function(){
+    var old=$('v23-sound'); if(old&&old.parentNode)old.parentNode.removeChild(old);
+    var sb=$('sound-btn');
+    if(sb&&!sb.dataset.v23Audio){
+      sb.dataset.v23Audio='1';
+      sb.addEventListener('pointerdown',function(){
         try{if(typeof initAudio==='function')initAudio()}catch(e){}
-        try{if(typeof toggleSoundBtn==='function')toggleSoundBtn();
-            else if(typeof toggleSound==='function')toggleSound()}catch(e){}
-        var off=!!window.muted;
-        b.innerHTML='<span>'+(off?'\uD83D\uDD07':'\uD83D\uDD0A')+'</span> '+(off?'MUTED':'SOUND');
-      });
-      document.body.appendChild(b);
+      },{capture:true});
     }
+
     if(!$('v23-rotate')){
       var r=document.createElement('div');r.id='v23-rotate';
       r.innerHTML='<i>\uD83D\uDCF1</i><b>Turn your phone back up</b>'+
