@@ -9658,6 +9658,12 @@ body.v21-flow #v21-steps{display:block}
     };
   }
 
+  /* scene mapper for the trap bed */
+  window.v21Music=function(name){
+    var map={menu:'menu',run:'trade',trade:'trade',heat:'heat',boss:'boss',end:'end'};
+    try{if(typeof setMusicScene==='function')setMusicScene(map[name]||'trade',2.4)}catch(e){}
+  };
+
   function boot(){
     if(!document.getElementById('game-screen')||getComputedStyle($('game-screen')).display==='none'){
       if(!document.body.classList.contains('v21-flow'))gate();
