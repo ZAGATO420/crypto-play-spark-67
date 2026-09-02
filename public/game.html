@@ -9184,6 +9184,468 @@ body.v20 .coach-btn,body.v20 .tour-next{color:#0a0d05!important}
 })();
 </script>
 
+<style id="v21-core">
+/* ============ V21 THRONE ROOM ============ */
+:root{--v21-acid:#b6ff2e;--v21-mag:#ff2ea6;--v21-gold:#ffc53d}
+
+/* ---- coin badges (real logos in boss coin frames) ---- */
+.v21coin{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  width:var(--z,26px);height:var(--z,26px);flex:0 0 auto;border-radius:50%;
+  background:radial-gradient(circle at 32% 26%,#1b2130,#080b12 72%);
+  border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 2px 8px -4px #000;overflow:hidden}
+.v21coin img{width:66%;height:66%;object-fit:contain;border-radius:50%;display:block}
+.v21coin::after{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.dxt.held .v21coin,.v21coin.own{border-color:rgba(255,197,61,.7);box-shadow:0 0 0 1px rgba(255,197,61,.25),0 4px 14px -8px rgba(255,197,61,.8)}
+.v21coin.up{border-color:rgba(182,255,46,.6)}
+.v21coin.dn{border-color:rgba(255,46,166,.55)}
+.dxb.v21b{background:none!important;color:transparent!important;border:0!important;box-shadow:none!important;
+  display:inline-flex!important;padding:0!important;overflow:visible!important}
+.v6tile .s .v21coin,.hold-item .v21coin{margin-right:6px;vertical-align:-5px}
+.v21lock{position:absolute;inset:0;display:grid;place-items:center;border-radius:50%;
+  background:rgba(4,6,10,.66);font-size:calc(var(--z,26px)*.42);color:#8b93a5}
+
+/* ---- gate: throne room ---- */
+#v21-gate{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;align-items:center;
+  padding:calc(10px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  background:radial-gradient(110% 78% at 50% 4%,#111927 0%,#070a11 58%,#020306 100%);overflow:hidden}
+body.v21-gate #v21-gate{display:flex}
+body.v21-gate #start-screen>.start-card{display:none!important}
+body.v21-gate #v20-arena{display:none!important}
+body.v21-gate{overflow:hidden}
+#v21-gate .g-grid{position:absolute;inset:0;opacity:.14;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:74px 74px;mask-image:radial-gradient(ellipse at 50% 42%,#000,transparent 74%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 42%,#000,transparent 74%)}
+#v21-gate .g-beam{position:absolute;left:50%;top:-24%;width:min(88vw,900px);height:120%;pointer-events:none;
+  transform:translateX(-50%);opacity:.5;
+  background:conic-gradient(from 200deg at 50% 0%,transparent 0deg,rgba(182,255,46,.10) 24deg,transparent 52deg);
+  animation:v21beam 16s linear infinite}
+@keyframes v21beam{0%{transform:translateX(-50%) rotate(-7deg)}50%{transform:translateX(-50%) rotate(7deg)}100%{transform:translateX(-50%) rotate(-7deg)}}
+#v21-gate .g-boss{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);
+  height:min(88vh,980px);max-width:118vw;object-fit:contain;pointer-events:none;
+  filter:drop-shadow(0 34px 90px rgba(0,0,0,.9)) contrast(1.06) saturate(1.04);
+  mask-image:linear-gradient(#000 76%,transparent 99%);-webkit-mask-image:linear-gradient(#000 76%,transparent 99%);
+  animation:v21breathe 9s ease-in-out infinite}
+@keyframes v21breathe{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.018)}}
+#v21-gate .g-vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 240px 90px rgba(0,0,0,.9)}
+#v21-gate .g-live{position:relative;z-index:3;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+  font:700 9.5px 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b93a5;text-transform:uppercase}
+#v21-gate .g-live b{color:#fff}
+#v21-gate .g-live .dot{width:6px;height:6px;border-radius:50%;background:var(--v21-acid);align-self:center;
+  box-shadow:0 0 10px var(--v21-acid);animation:v21pulse 1.8s ease-in-out infinite}
+@keyframes v21pulse{0%,100%{opacity:1}50%{opacity:.25}}
+#v21-gate .g-mid{position:relative;z-index:3;margin-top:auto;text-align:center;width:100%}
+#v21-gate .g-mark{font-family:'Russo One',sans-serif;line-height:.94;text-transform:uppercase;
+  text-shadow:0 0 44px rgba(0,0,0,.9),0 2px 0 rgba(0,0,0,.6)}
+#v21-gate .g-mark .a{display:block;font-size:clamp(15px,3.2vw,26px);letter-spacing:.42em;color:#c8cfdd}
+#v21-gate .g-mark .b{display:block;font-size:clamp(38px,9.4vw,104px);letter-spacing:.03em;
+  background:linear-gradient(180deg,#fff 38%,#ffc53d 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#v21-gate .g-tag{margin:10px auto 0;max-width:520px;font:600 12.5px/1.5 Inter,system-ui,sans-serif;color:#98a1b2}
+#v21-gate .g-tag b{color:#fff}
+#v21-gate .g-cta{position:relative;z-index:3;margin:18px auto 0;display:block;width:min(420px,92vw);
+  padding:19px 22px;border:0;border-radius:16px;cursor:pointer;
+  font-family:'Russo One',sans-serif;font-size:19px;letter-spacing:.14em;text-transform:uppercase;color:#08110a;
+  background:linear-gradient(180deg,#d3ff5e,#8fd616);
+  box-shadow:0 0 0 1px rgba(182,255,46,.5),0 20px 44px -18px rgba(182,255,46,.75);
+  transition:transform .14s ease,box-shadow .2s ease;animation:v21cta 2.6s ease-in-out infinite}
+@keyframes v21cta{0%,100%{box-shadow:0 0 0 1px rgba(182,255,46,.5),0 20px 44px -20px rgba(182,255,46,.6)}
+  50%{box-shadow:0 0 0 1px rgba(182,255,46,.8),0 24px 54px -16px rgba(182,255,46,.95)}}
+#v21-gate .g-cta:hover{transform:translateY(-2px)}
+#v21-gate .g-cta:active{transform:translateY(1px)}
+#v21-gate .g-sub{position:relative;z-index:3;margin:9px 0 0;font:700 9.5px 'JetBrains Mono',monospace;
+  letter-spacing:.2em;color:#6f7889;text-align:center}
+#v21-gate .g-links{position:relative;z-index:3;margin-top:auto;padding-top:16px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+#v21-gate .g-links button{background:none;border:1px solid rgba(255,255,255,.13);border-radius:999px;
+  padding:9px 15px;min-height:40px;color:#9aa3b4;cursor:pointer;
+  font:700 9.5px 'JetBrains Mono',monospace;letter-spacing:.18em;transition:.16s}
+#v21-gate .g-links button:hover{color:#fff;border-color:rgba(255,197,61,.55)}
+@media(max-width:760px){
+  #v21-gate .g-boss{height:min(62vh,560px);bottom:16%}
+  #v21-gate .g-mid{margin-top:auto}
+  #v21-gate .g-tag{display:none}
+}
+
+/* ---- sheets over the gate (board / how) ---- */
+#v21-sheet{position:fixed;inset:0;z-index:80;display:none;background:rgba(3,4,8,.86);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:16px}
+#v21-sheet.on{display:grid;place-items:center}
+#v21-sheet .sh{width:min(720px,96vw);max-height:88vh;display:flex;flex-direction:column;
+  background:linear-gradient(168deg,#121722,#080b12);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;box-shadow:0 40px 100px -30px #000;overflow:hidden}
+#v21-sheet .sh-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+#v21-sheet .sh-h b{font-family:'Russo One',sans-serif;letter-spacing:.14em;font-size:14px;color:#fff}
+#v21-sheet .sh-h button{margin-left:auto;background:none;border:1px solid rgba(255,255,255,.15);color:#c8cfdd;
+  width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:14px}
+#v21-sheet .sh-b{padding:14px 16px 18px;overflow:auto;-webkit-overflow-scrolling:touch}
+#v21-sheet .sh-b .leaderboard,#v21-sheet .sh-b .howto{display:block!important;margin:0}
+
+/* ---- step flow ---- */
+body.v21-flow #start-screen>.start-card{max-width:min(980px,96vw);margin:0 auto}
+body.v21-flow .logo-hero,body.v21-flow .howto,body.v21-flow .leaderboard,
+body.v21-flow .x-link,body.v21-flow #howto-manual-btn,body.v21-flow #start-btn,
+body.v21-flow .mode-note,body.v21-flow #airdrop-start-banner{display:none!important}
+body.v21-flow .form-grid{display:none!important}
+#v21-steps{display:none}
+body.v21-flow #v21-steps{display:block}
+#v21-steps .st-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#v21-steps .st-top img{width:46px;height:46px;border-radius:13px;object-fit:cover;
+  border:1px solid rgba(255,197,61,.4);background:#0a0e16}
+#v21-steps .st-q{font-family:'Russo One',sans-serif;font-size:clamp(17px,3vw,24px);letter-spacing:.04em;color:#fff;line-height:1.1}
+#v21-steps .st-l{font:700 9.5px 'JetBrains Mono',monospace;letter-spacing:.2em;color:var(--v21-acid);margin-bottom:3px}
+#v21-steps .st-dots{margin-left:auto;display:flex;gap:5px}
+#v21-steps .st-dots i{width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.14)}
+#v21-steps .st-dots i.on{background:var(--v21-acid)}
+#v21-steps .v21-step{display:none;animation:v21in .22s ease}
+#v21-steps .v21-step.on{display:block}
+@keyframes v21in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#v21-steps .st-nav{display:flex;gap:10px;margin-top:16px}
+#v21-steps .st-nav button{flex:1;min-height:54px;border-radius:14px;cursor:pointer;
+  font-family:'Russo One',sans-serif;letter-spacing:.12em;font-size:15px;text-transform:uppercase}
+#v21-steps .st-back{flex:0 0 34%;background:#0b0f18;border:1px solid rgba(255,255,255,.14);color:#9aa3b4}
+#v21-steps .st-next{border:0;color:#08110a;background:linear-gradient(180deg,#d3ff5e,#8fd616);
+  box-shadow:0 16px 40px -20px rgba(182,255,46,.8)}
+#v21-steps .st-next.go{background:linear-gradient(180deg,#ffe08a,#ffb92e);box-shadow:0 16px 40px -20px rgba(255,197,61,.9)}
+#v21-steps .st-boss{margin-top:12px;padding:11px 13px;border-radius:13px;border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(168deg,rgba(255,255,255,.05),rgba(8,11,18,.9));
+  font:600 12px/1.45 Inter,system-ui,sans-serif;color:#c2c9d6}
+#v21-steps .st-boss b{color:var(--v21-gold)}
+
+/* ---- shards in HUD ---- */
+#v21-shards{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
+  border:1px solid rgba(255,197,61,.34);background:rgba(255,197,61,.08);
+  font:800 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--v21-gold);cursor:help}
+#v21-shards span{color:#fff}
+#v21-shards.full{border-color:var(--v21-gold);box-shadow:0 0 0 1px rgba(255,197,61,.3),0 0 22px -6px rgba(255,197,61,.8)}
+</style>
+
+<script id="v21-js">
+(function(){
+  var B=window.V20_BOSS||{};
+  function $(i){return document.getElementById(i)}
+  function S(){try{return (typeof state!=='undefined')?state:(window.state||null)}catch(e){return null}}
+
+  /* =========================================================
+     1. COIN BADGES — real logos inside a boss coin frame
+     ========================================================= */
+  function url(sym){var m=window.COIN_ICON||{};return m[sym]||m[String(sym||'').toUpperCase()]||''}
+  function badge(sym,size,cls){
+    var u=url(sym);
+    if(!u)return '';
+    return '<span class="v21coin '+(cls||'')+'" style="--z:'+size+'px"><img src="'+u+'" alt="'+sym+'" loading="lazy" decoding="async"></span>';
+  }
+  window.coinBadge=badge;
+
+  function symFrom(el){
+    var t=el.closest('.dxt');
+    if(t){var s=t.querySelector('.dxs');if(s)return s.textContent.trim()}
+    var top=el.closest('.dxm-top');
+    if(top){var k=top.querySelector('.bk-m');if(k)return k.textContent.trim().split(/[\s•·]/)[0]}
+    return (el.textContent||'').trim();
+  }
+  function deco(){
+    try{
+      document.querySelectorAll('.dxb:not([data-v21])').forEach(function(b){
+        var sym=symFrom(b);var u=url(sym);
+        b.setAttribute('data-v21','1');
+        if(!u)return;
+        var big=b.closest('.dxm-top');
+        b.classList.add('v21b');
+        b.innerHTML=badge(sym,big?42:26);
+        b.removeAttribute('style');
+      });
+      document.querySelectorAll('.v6tile .s:not([data-v21])').forEach(function(s){
+        s.setAttribute('data-v21','1');
+        var sym=(s.textContent||'').trim().split('-')[0];
+        if(url(sym))s.insertAdjacentHTML('afterbegin',badge(sym,20));
+      });
+      document.querySelectorAll('.hold-item > div > b:not([data-v21])').forEach(function(b){
+        b.setAttribute('data-v21','1');
+        var sym=(b.textContent||'').trim();
+        if(url(sym))b.insertAdjacentHTML('afterbegin',badge(sym,22,'own'));
+      });
+      document.querySelectorAll('.v6pos .sy:not([data-v21]),.v6pos .s:not([data-v21])').forEach(function(s){
+        s.setAttribute('data-v21','1');
+        var sym=(s.textContent||'').trim().split(/[-\s]/)[0];
+        if(url(sym))s.insertAdjacentHTML('afterbegin',badge(sym,18));
+      });
+    }catch(e){}
+  }
+  window.v21Deco=deco;
+  ['renderMarket','renderPerpDesk','updateSidePanels'].forEach(function(fn){
+    var o=window[fn];
+    if(typeof o==='function')window[fn]=function(){var r=o.apply(this,arguments);deco();return r};
+  });
+  var mo=new MutationObserver(function(){clearTimeout(mo._t);mo._t=setTimeout(deco,40)});
+  function watch(){
+    ['market-list','holdings-list','dx-modal','v6m','v17-sheet'].forEach(function(id){
+      var el=$(id);if(el&&!el._v21w){el._v21w=1;mo.observe(el,{childList:true,subtree:true})}
+    });
+  }
+
+  /* =========================================================
+     2. GATE — throne room, one button
+     ========================================================= */
+  var LINES=[
+    ['84','MONTHS'],['22','COINS'],['1','LIFE']
+  ];
+  function gate(){
+    if($('v21-gate'))return;
+    var g=document.createElement('div');g.id='v21-gate';
+    g.innerHTML=
+      '<div class="g-grid"></div><div class="g-beam"></div>'+
+      '<img class="g-boss" src="'+(B.throne||'')+'" alt="The Crypto Final Boss" decoding="async" fetchpriority="high">'+
+      '<div class="g-vig"></div>'+
+      '<div class="g-live"><span class="dot"></span><span id="v21-runs">LIVE RUN</span>'+
+        '<span>&middot;</span><span>TOP <b id="v21-top">&mdash;</b></span>'+
+        '<span>&middot;</span><span>$TCFB <b>OCT 2026</b></span></div>'+
+      '<div class="g-mid">'+
+        '<div class="g-mark"><span class="a">THE CRYPTO</span><span class="b">FINAL BOSS</span></div>'+
+        '<div class="g-tag">84 months of real crypto history, <b>Jan 2020 &rarr; Dec 2026</b>. One life. The Boss has not been beaten yet.</div>'+
+        '<button class="g-cta" id="v21-enter">ENTER THE ARENA</button>'+
+        '<div class="g-sub">FREE &middot; NO WALLET &middot; 2 MIN TO START</div>'+
+      '</div>'+
+      '<div class="g-links">'+
+        '<button data-v21l="board">LEADERBOARD</button>'+
+        '<button data-v21l="how">HOW TO PLAY</button>'+
+        '<button data-v21l="sound">SOUND</button>'+
+        '<button data-v21l="set">SETTINGS</button>'+
+      '</div>';
+    document.body.appendChild(g);
+    document.body.classList.add('v21-gate');
+    $('v21-enter').addEventListener('click',function(){
+      try{if(typeof initAudio==='function')initAudio();if(typeof playSound==='function')playSound('click')}catch(e){}
+      try{if(typeof v21Music==='function')v21Music('menu')}catch(e){}
+      document.body.classList.remove('v21-gate');
+      flow(1);
+      try{window.scrollTo(0,0)}catch(e){}
+    });
+    g.querySelectorAll('[data-v21l]').forEach(function(b){
+      b.addEventListener('click',function(){
+        var k=b.getAttribute('data-v21l');
+        if(k==='board')sheet('LIVE GLOBAL LEADERBOARD','#start-leaderboard');
+        else if(k==='how')sheet('HOW TO SURVIVE','#start-screen .howto');
+        else if(k==='sound'){try{toggleSoundBtn()}catch(e){} b.textContent=(window.muted?'SOUND OFF':'SOUND ON')}
+        else if(k==='set'){try{openSettings()}catch(e){sheet('HOW TO SURVIVE','#start-screen .howto')}}
+      });
+    });
+    liveline();
+  }
+  function liveline(){
+    try{
+      fetch('/api/public/leaderboard').then(function(r){return r.json()}).then(function(d){
+        var rows=(d&&(d.entries||d.scores||d.data||d))||[];
+        if(!Array.isArray(rows))return;
+        var n=rows.length,top=rows[0]&&(rows[0].score||rows[0].net_worth||0);
+        var re=$('v21-runs');if(re)re.textContent=n+' RUNS LOGGED';
+        var te=$('v21-top');if(te&&top)te.textContent='$'+Number(top).toLocaleString();
+      }).catch(function(){});
+    }catch(e){}
+  }
+  var back=null;
+  function sheet(title,sel){
+    var src=document.querySelector(sel);if(!src)return;
+    var s=$('v21-sheet');
+    if(!s){
+      s=document.createElement('div');s.id='v21-sheet';
+      s.innerHTML='<div class="sh"><div class="sh-h"><b></b><button type="button">&#10005;</button></div><div class="sh-b"></div></div>';
+      document.body.appendChild(s);
+      s.addEventListener('click',function(e){if(e.target===s)closeSheet()});
+      s.querySelector('.sh-h button').addEventListener('click',closeSheet);
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
+    }
+    s.querySelector('.sh-h b').textContent=title;
+    back={node:src,parent:src.parentNode,next:src.nextSibling};
+    s.querySelector('.sh-b').appendChild(src);
+    s.classList.add('on');
+    try{playSound('click')}catch(e){}
+  }
+  function closeSheet(){
+    var s=$('v21-sheet');if(!s)return;
+    s.classList.remove('on');
+    if(back&&back.node&&back.parent){back.parent.insertBefore(back.node,back.next);back=null}
+  }
+
+  /* =========================================================
+     3. STEP FLOW — one question per screen
+     ========================================================= */
+  var STEPS=[
+    {l:'STEP 1 / 3',q:'Who walks into 2020?',pose:'smug',
+     boss:'<b>The Boss:</b> "Names don\u2019t matter. Survivors do. Pick your archetype \u2014 it decides your bankroll and your bad habits."',
+     take:['.label:first-of-type','#player-name','#archetypes']},
+    {l:'STEP 2 / 3',q:'How much pain do you want?',pose:'enraged',
+     boss:'<b>The Boss:</b> "Higher difficulty pays more XP. Ironman doubles everything \u2014 and forgives nothing."',
+     take:['#diffs','#presale-mode','#ironman-grid','#xp-preview']},
+    {l:'STEP 3 / 3',q:'Where do you survive from?',pose:'throne',
+     boss:'<b>The Boss:</b> "Rent and taxes decide how long you last. Then pick a face \u2014 it goes on your leaderboard card."',
+     take:['#countries','#avatars']}
+  ];
+  var step=0;
+  function build(){
+    if($('v21-steps'))return;
+    var card=document.querySelector('#start-screen .start-card');if(!card)return;
+    var w=document.createElement('div');w.id='v21-steps';
+    w.innerHTML='<div class="st-top"><img id="v21-sboss" src="'+(B.smug||'')+'" alt="">'+
+      '<div><div class="st-l" id="v21-sl"></div><div class="st-q" id="v21-sq"></div></div>'+
+      '<div class="st-dots"><i></i><i></i><i></i></div></div>';
+    STEPS.forEach(function(st,i){
+      var d=document.createElement('div');d.className='v21-step';d.dataset.i=i;
+      st.take.forEach(function(sel){
+        var n=document.querySelector('#start-screen '+sel);
+        if(!n)return;
+        var lab=n.previousElementSibling;
+        if(lab&&lab.classList&&lab.classList.contains('label'))d.appendChild(lab);
+        d.appendChild(n);
+      });
+      w.appendChild(d);
+    });
+    var boss=document.createElement('div');boss.className='st-boss';boss.id='v21-sbtxt';
+    w.appendChild(boss);
+    var nav=document.createElement('div');nav.className='st-nav';
+    nav.innerHTML='<button type="button" class="st-back">BACK</button><button type="button" class="st-next">NEXT</button>';
+    w.appendChild(nav);
+    var sb=$('start-btn');
+    card.insertBefore(w,sb||null);
+    nav.querySelector('.st-back').addEventListener('click',function(){
+      try{playSound('click')}catch(e){}
+      if(step===0){document.body.classList.add('v21-gate');document.body.classList.remove('v21-flow');return}
+      flow(step);
+    });
+    nav.querySelector('.st-next').addEventListener('click',function(){
+      try{playSound('click')}catch(e){}
+      if(step>=STEPS.length){return}
+      if(step===STEPS.length-1){var b=$('start-btn');if(b)b.click();return}
+      flow(step+2);
+    });
+  }
+  function flow(n){
+    build();
+    document.body.classList.add('v21-flow');
+    document.body.classList.remove('v21-gate');
+    step=Math.max(0,Math.min(STEPS.length-1,n-1));
+    var st=STEPS[step];
+    document.querySelectorAll('#v21-steps .v21-step').forEach(function(d,i){d.classList.toggle('on',i===step)});
+    $('v21-sl').textContent=st.l;
+    $('v21-sq').textContent=st.q;
+    $('v21-sboss').src=B[st.pose]||B.smug||'';
+    $('v21-sbtxt').innerHTML=st.boss;
+    document.querySelectorAll('#v21-steps .st-dots i').forEach(function(d,i){d.classList.toggle('on',i<=step)});
+    var nx=document.querySelector('#v21-steps .st-next');
+    var last=step===STEPS.length-1;
+    nx.textContent=last?'START SURVIVAL':'NEXT';
+    nx.classList.toggle('go',last);
+    try{window.scrollTo(0,0)}catch(e){}
+  }
+  window.v21Flow=flow;
+
+  /* =========================================================
+     4. BOSS SHARDS  (7 — one per year)
+     ========================================================= */
+  function shards(){var s=S();if(!s)return [];if(!s.shards)s.shards=[];return s.shards}
+  window.v21Shard=function(reason){
+    var s=S();if(!s)return;
+    var y=Math.min(6,Math.floor((s.month||0)/12));
+    var have=shards();
+    if(have.indexOf(y)>-1)return;
+    have.push(y);
+    try{if(typeof toast==='function')toast('BOSS SHARD '+have.length+'/7 claimed — '+(reason||'chapter cleared'),'buy')}catch(e){}
+    try{if(typeof v20React==='function')v20React('crowned','A shard. '+have.length+' of 7. Keep coming.','good')}catch(e){}
+    hud();
+  };
+  function hud(){
+    var s=S();if(!s)return;
+    var host=document.querySelector('#game-screen .xp-wrap');if(!host)return;
+    var el=$('v21-shards');
+    if(!el){el=document.createElement('div');el.id='v21-shards';
+      el.innerHTML='\uD83D\uDC51 SHARDS <span>0/7</span>';
+      el.title='Boss Shards decide your $TCFB allocation in the final chapter.';
+      host.appendChild(el);}
+    var n=shards().length;
+    el.querySelector('span').textContent=n+'/7';
+    el.classList.toggle('full',n>=7);
+  }
+  window.v21ShardHud=hud;
+
+  /* shard triggers: chapter goal reached, big airdrop, surviving a rug */
+  function shardWatch(){
+    var s=S();if(!s)return;
+    try{
+      var y=Math.min(6,Math.floor((s.month||0)/12));
+      var goals=[25000,120000,150000,300000,800000,2000000,5000000];
+      if(netWorth()>=goals[y])window.v21Shard('chapter '+(y+1)+' target beaten');
+    }catch(e){}
+    hud();
+  }
+
+  /* =========================================================
+     5. $TCFB — the final boss trade (Oct-Dec 2026)
+     ========================================================= */
+  var TCFB={s:'TCFB',n:'The Crypto Final Boss',tags:['MEME','BOSS'],launch:81,vol:4.2,base:0.004};
+  function armTcfb(){
+    try{
+      if(typeof COINS==='undefined'||!Array.isArray(COINS))return;
+      if(COINS.some(function(c){return c.s==='TCFB'}))return;
+      COINS.push(TCFB);
+      var s=S();
+      if(s){s.prices.TCFB=0;s.noise.TCFB=1;s.holdings.TCFB=0;s.avg.TCFB=0}
+    }catch(e){}
+  }
+  /* price path for the final three months: presale -> launch -> mania */
+  var TPATH={81:0.004,82:0.019,83:0.061};
+  function tcfbTick(){
+    var s=S();if(!s)return;
+    armTcfb();
+    var m=s.month||0;
+    if(m<81){s.prices.TCFB=0;return}
+    var base=TPATH[Math.min(83,m)]||0.061;
+    var boost=1+shards().length*0.09;               /* shards = bigger run, not a different price */
+    var wob=0.86+((s.noise&&s.noise.TCFB)||1)*0;
+    s.prices.TCFB=+(base*boost*(0.94+Math.random()*0.12)).toFixed(6);
+    if(m===81&&!s._tcfbAnnounced){
+      s._tcfbAnnounced=1;
+      try{if(typeof v20React==='function')v20React('roar','$TCFB is live. Your '+shards().length+' shards decide how big you can go. Last call.','good')}catch(e){}
+      try{if(typeof toast==='function')toast('$TCFB PRESALE LIVE — the final boss trade is open','buy')}catch(e){}
+      try{if(typeof v21Music==='function')v21Music('boss')}catch(e){}
+    }
+  }
+  /* allocation cap driven by shards */
+  window.v21TcfbCap=function(){
+    var s=S();if(!s)return 0;
+    return Math.max(500,Math.round(s.cash*(0.15+shards().length*0.12)));
+  };
+
+  /* =========================================================
+     6. HOOKS
+     ========================================================= */
+  var _am=window.advanceMonth;
+  if(typeof _am==='function'){
+    window.advanceMonth=function(){
+      var r=_am.apply(this,arguments);
+      try{tcfbTick();shardWatch();deco();watch()}catch(e){}
+      return r;
+    };
+  }
+  var _ag=window.actuallyStartGame;
+  if(typeof _ag==='function'){
+    window.actuallyStartGame=function(){
+      var r=_ag.apply(this,arguments);
+      try{document.body.classList.remove('v21-flow','v21-gate');armTcfb();hud();watch();deco()}catch(e){}
+      try{if(typeof v21Music==='function')v21Music('run')}catch(e){}
+      return r;
+    };
+  }
+
+  function boot(){
+    if(!document.getElementById('game-screen')||getComputedStyle($('game-screen')).display==='none'){
+      if(!document.body.classList.contains('v21-flow'))gate();
+    }
+    watch();deco();
+    setInterval(function(){watch();shardWatch()},1500);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
 </body>
 </html>
 
