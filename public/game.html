@@ -9351,6 +9351,7 @@ body.v21-flow #v21-steps{display:block}
   /* =========================================================
      1. COIN BADGES — real logos inside a boss coin frame
      ========================================================= */
+  try{if(window.COIN_ICON&&!window.COIN_ICON.TCFB&&(B.head||B.crowned))window.COIN_ICON.TCFB=B.head||B.crowned}catch(e){}
   function url(sym){var m=window.COIN_ICON||{};return m[sym]||m[String(sym||'').toUpperCase()]||''}
   function badge(sym,size,cls){
     var u=url(sym);
