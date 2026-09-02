@@ -57,11 +57,30 @@ export const Route = createFileRoute("/")({
 // portable to any host while this route supplies SSR metadata.
 function Index() {
   return (
-    <iframe
-      src="/game.html"
-      title="The Crypto Final Boss"
-      className="fixed inset-0 h-full w-full border-0"
-      allow="autoplay; clipboard-write"
-    />
+    <main>
+      {/* Indexable description of the game for crawlers and screen readers.
+          The playable build itself lives in the frame below and covers the viewport. */}
+      <section className="sr-only">
+        <h1>The Crypto Final Boss — crypto trading survival game</h1>
+        <p>
+          The Crypto Final Boss is a free browser game where you trade real historical
+          crypto prices from 2020 to 2026. Start with a small stack, pick an archetype
+          and survive 84 months of bull runs, crashes, presales, rugs, airdrops,
+          launchpads and leveraged perpetuals.
+        </p>
+        <p>
+          Every month serves one decision card: buy the dip, chase a launch, farm an
+          airdrop or open a perp with liquidation risk. Net worth, XP, level and
+          survival streak decide your rank on the global leaderboard. Play in Classic,
+          Chaos, Historical or Ironman mode on desktop or mobile.
+        </p>
+      </section>
+      <iframe
+        src="/game.html"
+        title="The Crypto Final Boss"
+        className="fixed inset-0 h-full w-full border-0"
+        allow="autoplay; clipboard-write"
+      />
+    </main>
   );
 }
