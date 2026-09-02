@@ -10389,7 +10389,21 @@ body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
     return true;
   }
   var lt=0,li=setInterval(function(){ if(slim()||++lt>80)clearInterval(li) },300);
+
+  /* ---------------- 9. one onboarding on the phone, not two -------------
+     The legacy coach-mark tour auto-starts for new players and its ring
+     swallows every tap. On the phone the V23 coach bubbles do that job,
+     so the old tour is marked as seen (the settings button still forces
+     it via tlStartTour). */
+  if(matchMedia('(max-width:820px)').matches){
+    try{ if(localStorage.getItem('tcfb_tour')!=='1')localStorage.setItem('tcfb_tour','1') }catch(e){}
+    setTimeout(function(){
+      var t=document.getElementById('tl-tour');
+      if(t&&!t.dataset.forced)t.classList.remove('on');
+    },1500);
+  }
 })();
+
 </script>
 
 <style id="v23-slimhead">
