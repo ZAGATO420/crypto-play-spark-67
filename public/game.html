@@ -4838,7 +4838,7 @@ header{background:rgba(9,12,26,.88)}
 .v4-day-top{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:#8d97ba}
 .v4-day-track{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px}
 .v4-day-track i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#22d3ee,#d8ff8a)}
-#mobile-next{background:linear-gradient(100deg,#8fd41e,#d8ff8a 55%,#22d3ee)!important;color:#fff!important}
+#mobile-next{background:linear-gradient(100deg,#8fd41e,#d8ff8a 55%,#b6ff2e)!important;color:#0a0d05!important}
 
 /* ---------- side tabs (desktop right column) ---------- */
 #v4-side-tabs{display:none;gap:6px;margin-bottom:2px}
@@ -9000,6 +9000,7 @@ body.v20 .end-btn.primary{background:var(--grad-boss);color:#0a0d05}
 body.v20 #start-screen>.start-card{background:linear-gradient(168deg,rgba(16,20,28,.90),rgba(6,8,12,.94))!important;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #v20-arena .v20-throne{opacity:.40}
+body.v20-start #mobile-nav,body.v20-start #mobile-next,body.v20-start .v17-dock{display:none!important}
 /* dunkler Text auf Acid-Flächen */
 body.v20 .tut-btn:not(.skip),body.v20 #mobile-next,body.v20 .v17-next,body.v20 .start-btn,
 body.v20 .end-btn.primary,body.v20 #global-submit-btn{color:#0a0d05!important;text-shadow:none!important}
@@ -9152,8 +9153,13 @@ body.v20 .coach-btn,body.v20 .tour-next{color:#0a0d05!important}
     lastCrit=c;
   }
 
+  function startVis(){
+    var st=document.getElementById('start-screen'), gs=document.getElementById('game-screen');
+    var on=!!(st&&getComputedStyle(st).display!=='none'&&(!gs||gs.style.display==='none'));
+    document.body.classList.toggle('v20-start',on);
+  }
   function boot(){
-    arena(); howto(); hudTick();
+    arena(); howto(); hudTick(); startVis(); setInterval(startVis,600);
     setInterval(function(){hudTick();critWatch()},900);
     var sb=document.getElementById('start-btn');
     if(sb)sb.addEventListener('click',function(){setTimeout(function(){hudTick();react('roar','84 months. One life. Show me.','good')},900)});
