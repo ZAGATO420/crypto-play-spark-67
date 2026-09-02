@@ -1,0 +1,19 @@
+{
+  "name": "The Crypto Final Boss",
+  "short_name": "FINAL BOSS",
+  "description": "Survive 84 months of real crypto history, 2020 to 2026. One life.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05070d",
+  "theme_color": "#05070d",
+  "icons": [
+    {
+      "src": "/tcfb-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
