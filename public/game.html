@@ -9927,6 +9927,44 @@ body.v20 .coach-btn,body.v20 .tour-next{
 })();
 </script>
 
+<style id="v22-mob-chart">
+/* =====================================================================
+   Phone CHART view: the CHART // P&L desk was hidden by the legacy pane
+   system (the chart panel is tagged as a "port" pane while the phone
+   sits on the "market" pane), so the tab opened an empty screen.
+   Presentation only.
+   ===================================================================== */
+body.v17-mob[data-v17view="chart"] main{height:auto!important;min-height:0!important;overflow:visible!important}
+body.v17-mob[data-v17view="chart"] main>div{height:auto!important;max-height:none!important;
+  min-height:0!important;overflow:visible!important}
+body.v17-mob[data-v17view="chart"] #v7-top{
+  display:grid!important;grid-template-columns:1fr!important;gap:10px;height:auto!important}
+body.v17-mob[data-v17view="chart"] #v7-top>.panel{
+  display:flex!important;flex-direction:column;height:auto!important;max-height:none!important;
+  overflow:visible!important}
+body.v17-mob[data-v17view="chart"] #v7-top>.panel>.panel-title{display:flex!important}
+body.v17-mob[data-v17view="chart"] #v7-top .chart-box{
+  display:block!important;flex:0 0 auto;height:210px!important;min-height:210px!important}
+body.v17-mob[data-v17view="chart"] #pnl-chart{display:block!important}
+body.v17-mob[data-v17view="chart"] #v7-top #cost-list{display:block!important;max-height:none!important;
+  overflow:visible!important}
+</style>
+<script>
+/* Phone CHART view: let Chart.js pick up the container size once it is shown. */
+(function(){
+  function kick(){
+    try{if(window.chart&&chart.resize){chart.resize();chart.update('none')}}catch(e){}
+  }
+  function watch(){
+    var d=document.getElementById('v17-dock');if(!d)return false;
+    d.addEventListener('click',function(){setTimeout(kick,60);setTimeout(kick,320)});
+    return true;
+  }
+  var n=0,t=setInterval(function(){ if(watch()||++n>40)clearInterval(t) },300);
+})();
+</script>
+
+
 </body>
 </html>
 
