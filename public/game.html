@@ -9826,15 +9826,42 @@ body.v20 .coach-btn,body.v20 .tour-next{
       el.innerHTML='<img src="'+(B.smug||B.head||'')+'" alt="">'+
         '<div class="ob"><div class="ok">BOSS ORDER</div>'+
         '<div class="ot"></div><div class="os"></div></div>'+
-        '<div class="ostreak"><b class="v22num">0</b><i>STREAK</i></div>';
+        '<div class="ostreak"><b class="v22num">0</b><i>STREAK</i></div>'+
+        '<button class="ox" type="button" title="Minimize">\u2715</button>';
       document.body.appendChild(el);
+      el.querySelector('.ox').addEventListener('click',function(e){
+        e.stopPropagation();el.classList.add('mini');
+        try{localStorage.setItem('tcfb_order_mini','1')}catch(_){}
+      });
+      el.addEventListener('click',function(){
+        if(!el.classList.contains('mini'))return;
+        el.classList.remove('mini');
+        try{localStorage.removeItem('tcfb_order_mini')}catch(_){}
+        clearTimeout(el._t);el._t=setTimeout(function(){el.classList.add('mini')},7000);
+      });
+      var m='0';try{m=localStorage.getItem('tcfb_order_mini')}catch(_){}
+      if(m==='1')el.classList.add('mini');
+      else el._t=setTimeout(function(){el.classList.add('mini')},9000);
     }
     return el;
+  }
+  /* never sit on top of a card, window or the start screen */
+  var VEIL=['event-overlay','presale-overlay','decision-overlay','settings-overlay',
+            'mini-overlay','tutorial-overlay','v17-sheet','v6m','dx-modal'];
+  function blocked(){
+    for(var i=0;i<VEIL.length;i++){
+      var n=$(VEIL[i]);if(!n)continue;
+      if(n.classList.contains('hidden'))continue;
+      var cs=getComputedStyle(n);
+      if(cs.display!=='none'&&cs.visibility!=='hidden'&&cs.opacity!=='0')return true;
+    }
+    return false;
   }
   function paint(){
     var s=S(),el=bar();
     var live=s&&!s._gameEnded&&$('game-screen')&&$('game-screen').style.display!=='none'&&!document.body.classList.contains('v20-start');
     el.classList.toggle('on',!!live);
+    el.classList.toggle('veil',!!live&&blocked());
     if(!live)return;
     var o=current(s)||pick(s);
     el.querySelector('.ot').textContent=o.t;
@@ -9857,6 +9884,7 @@ body.v20 .coach-btn,body.v20 .tour-next{
         say('smug','Order missed. I expected nothing else.','bad');
       }
     }
+
     /* streak: profitable months stack a multiplier, a liquidation breaks it */
     var prev=s._v22nw;
     var liqNow=s.liquidations||0;
