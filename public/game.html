@@ -10427,6 +10427,284 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
 }
 </style>
 
+<style id="v24-choice">
+/* =====================================================================
+   V24 — the choices stay visible on a phone.
+   Quick start remains the default, but the player can see what they are
+   starting with, can open the full setup, and can fix name / avatar /
+   archetype afterwards. Presentation + entry flow only.
+   ===================================================================== */
+
+/* --- gate: preset chip + full-width customize button --- */
+#v24-preset{position:relative;z-index:4;display:none;width:min(420px,92vw);margin:10px auto 0;
+  align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:99px;cursor:pointer;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:#c6cfe2;
+  font:700 11px/1.25 Inter,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;
+  text-align:left}
+#v24-preset.on{display:flex}
+#v24-preset .p-av{width:26px;height:26px;border-radius:8px;flex:0 0 auto;object-fit:contain;
+  background:#0a0e1a}
+#v24-preset .p-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v24-preset .p-e{color:#8fd41e;font-weight:900;letter-spacing:.12em}
+#v23-gate-extra .v23-cust{width:100%;min-height:48px;border-radius:14px;padding:8px 12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.18);color:#e6ecf8;
+  font:900 12.5px/1 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+#v23-gate-extra .v23-cust small{font:600 10px/1.2 Inter,system-ui,sans-serif;letter-spacing:.04em;
+  text-transform:none;color:#8d97ba}
+#v23-gate-extra .v23-cust:hover{border-color:rgba(143,212,30,.5);color:#d8ff8a}
+
+/* --- profile chip + sheet --- */
+#v24-profchip{display:inline-flex;align-items:center;gap:6px;margin-top:8px;margin-left:6px;
+  min-height:38px;padding:0 12px;border-radius:99px;cursor:pointer;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#b9c2d4;
+  font:800 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.14em}
+#v24-profchip img{width:20px;height:20px;border-radius:6px;object-fit:contain}
+#v24-prof{position:fixed;inset:0;z-index:320;display:none}
+#v24-prof.on{display:block}
+#v24-prof .p-dim{position:absolute;inset:0;background:rgba(3,5,10,.68)}
+#v24-prof .p-win{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:min(520px,100vw);max-height:90vh;display:flex;flex-direction:column;
+  background:linear-gradient(170deg,#101627,#080c16);border:1px solid rgba(182,255,46,.32);
+  border-radius:20px 20px 0 0;box-shadow:0 -18px 60px rgba(0,0,0,.6)}
+#v24-prof .p-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
+#v24-prof .p-head b{font:900 14px/1 Inter,system-ui,sans-serif;color:#fff;letter-spacing:.06em}
+#v24-prof .p-x{min-width:44px;min-height:44px;border-radius:12px;cursor:pointer;
+  background:#0a0e1a;border:1px solid rgba(255,255,255,.16);color:#b9c2d4;font-size:16px}
+#v24-prof .p-body{padding:12px 16px 4px;overflow:auto}
+#v24-prof .p-lab{margin:10px 0 6px;font:800 10px/1 Inter,system-ui,sans-serif;letter-spacing:.18em;
+  color:#8fd41e;text-transform:uppercase}
+#v24-prof input[type=text]{width:100%;min-height:46px;border-radius:12px;padding:0 12px;
+  background:#070b14;border:1px solid rgba(255,255,255,.16);color:#fff;
+  font:800 15px/1 Inter,system-ui,sans-serif}
+#v24-prof .p-avs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#v24-prof .p-avs button{aspect-ratio:1/1;min-height:56px;border-radius:14px;cursor:pointer;
+  background:#070b14;border:1px solid rgba(255,255,255,.14);padding:5px}
+#v24-prof .p-avs button img{width:100%;height:100%;object-fit:contain}
+#v24-prof .p-avs button.sel{border-color:#8fd41e;box-shadow:0 0 22px -6px rgba(143,212,30,.8)}
+#v24-prof .p-archs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#v24-prof .p-archs button{min-height:52px;border-radius:12px;cursor:pointer;text-align:left;
+  padding:8px 10px;background:#070b14;border:1px solid rgba(255,255,255,.14);color:#e6ecf8;
+  font:800 12px/1.2 Inter,system-ui,sans-serif}
+#v24-prof .p-archs button span{display:block;margin-top:3px;color:#8d97ba;
+  font:600 10px/1.3 Inter,system-ui,sans-serif}
+#v24-prof .p-archs button.sel{border-color:#8fd41e;color:#d8ff8a}
+#v24-prof .p-note{margin:10px 0 2px;font:600 11px/1.45 Inter,system-ui,sans-serif;color:#7f8aa3}
+#v24-prof .p-foot{position:sticky;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(8,12,22,0),rgba(8,12,22,.96) 40%)}
+#v24-prof .p-save{width:100%;min-height:50px;border-radius:14px;cursor:pointer;border:0;
+  background:linear-gradient(120deg,#8fd41e,#22d3ee);color:#08130a;
+  font:900 13px/1 Inter,system-ui,sans-serif;letter-spacing:.1em}
+
+/* --- leaderboard entry: pick the avatar that gets saved --- */
+#v24-lbav{margin:10px 0 4px}
+#v24-lbav .l-lab{margin-bottom:6px;font:800 10px/1 Inter,system-ui,sans-serif;letter-spacing:.16em;
+  color:#8fd41e;text-transform:uppercase}
+#v24-lbav .l-row{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+#v24-lbav .l-row button{aspect-ratio:1/1;min-height:40px;border-radius:11px;cursor:pointer;
+  background:#070b14;border:1px solid rgba(255,255,255,.14);padding:3px}
+#v24-lbav .l-row button img{width:100%;height:100%;object-fit:contain}
+#v24-lbav .l-row button.sel{border-color:#8fd41e;box-shadow:0 0 18px -6px rgba(143,212,30,.8)}
+</style>
+<script>
+/* =====================================================================
+   V24 behaviour — visible choices, editable profile
+   ===================================================================== */
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var S=function(){try{return (typeof state!=='undefined'&&state)?state:(window.state||null)}catch(e){return null}};
+  var ARCHS=[['degen','\u{1F98D} Degen','$5k start \u00B7 +20% meme gains'],
+             ['trader','\u{1F4C8} Trader','$10k start \u00B7 \u201350% fees'],
+             ['influencer','\u{1F4F8} Influencer','$9k + $12k debt \u00B7 presale radar'],
+             ['hodler','\u{1F48E} HODLer','$8k start \u00B7 \u201315% risk']];
+  function avImg(em){try{return window.TCFB_avImg?window.TCFB_avImg(em):''}catch(e){return ''}}
+  function avList(){
+    var out=[];
+    document.querySelectorAll('#avatars .avatar-btn').forEach(function(b){
+      var em=(b.querySelector('.av-em')||b).textContent||'';
+      em=em.trim(); if(!em)return;
+      out.push({em:em,img:avImg(em),t:b.getAttribute('title')||''});
+    });
+    return out;
+  }
+  function selText(sel){
+    var b=document.querySelector(sel+' .selected');
+    if(!b)return '';
+    var t=b.querySelector('.t');
+    return ((t?t.textContent:b.textContent)||'').trim();
+  }
+  function selAvEm(){
+    var b=document.querySelector('#avatars .selected');
+    if(!b)return '';
+    return (((b.querySelector('.av-em')||b).textContent)||'').trim();
+  }
+
+  /* ---------------- 1. gate: show what PLAY NOW starts with ---------------- */
+  function dressGate(){
+    var extra=$('v23-gate-extra');if(!extra)return false;
+    var cust=extra.querySelector('.v23-cust');
+    if(cust&&!cust.dataset.v24){
+      cust.dataset.v24='1';
+      cust.innerHTML='CUSTOMIZE RUN<small>Archetype \u00B7 difficulty \u00B7 avatar \u00B7 country</small>';
+    }
+    var chip=$('v24-preset');
+    if(!chip){
+      chip=document.createElement('button');chip.type='button';chip.id='v24-preset';
+      chip.innerHTML='<img class="p-av" alt=""><span class="p-t"></span><span class="p-e">EDIT</span>';
+      chip.addEventListener('click',function(){
+        try{if(typeof playSound==='function')playSound('click')}catch(e){}
+        try{if(typeof window.v21Flow==='function')window.v21Flow(1)}catch(e){}
+      });
+      extra.parentNode.insertBefore(chip,extra.nextSibling);
+    }
+    var nameEl=$('player-name');
+    var nm=(nameEl&&nameEl.value.trim())||'ANON';
+    var arch=selText('#archetypes')||'\u{1F98D} Degen';
+    var diff=selText('#diffs')||'NORMAL';
+    var em=selAvEm();
+    var img=chip.querySelector('.p-av');
+    if(em&&img){var u=avImg(em);if(u&&img.src.indexOf(u)<0)img.src=u}
+    chip.querySelector('.p-t').textContent=nm+' \u00B7 '+arch.replace(/^\S+\s/,'')+' \u00B7 '+diff+
+      (em?'':' \u00B7 random avatar');
+    chip.classList.add('on');
+    return true;
+  }
+  var gt=0,gi=setInterval(function(){ dressGate(); if(++gt>80)clearInterval(gi) },400);
+
+  /* ---------------- 2. profile sheet (name / avatar / archetype) ---------------- */
+  function buildSheet(){
+    if($('v24-prof'))return $('v24-prof');
+    var w=document.createElement('div');w.id='v24-prof';
+    w.innerHTML='<div class="p-dim"></div><div class="p-win">'+
+      '<div class="p-head"><b>YOUR PROFILE</b><button type="button" class="p-x">\u2715</button></div>'+
+      '<div class="p-body">'+
+        '<div class="p-lab">Player name</div><input type="text" id="v24-nm" maxlength="20" placeholder="ANON">'+
+        '<div class="p-lab">Avatar</div><div class="p-avs" id="v24-avs"></div>'+
+        '<div class="p-lab" id="v24-archlab">Archetype</div><div class="p-archs" id="v24-archs"></div>'+
+        '<div class="p-note" id="v24-note"></div>'+
+      '</div>'+
+      '<div class="p-foot"><button type="button" class="p-save">SAVE</button></div>'+
+    '</div>';
+    document.body.appendChild(w);
+    w.querySelector('.p-dim').addEventListener('click',close);
+    w.querySelector('.p-x').addEventListener('click',close);
+    w.querySelector('.p-save').addEventListener('click',save);
+    return w;
+  }
+  var pickEm='',pickArch='';
+  function open(){
+    var s=S();if(!s)return;
+    var w=buildSheet();
+    $('v24-nm').value=s.name||'ANON';
+    pickEm=(s.avatar||'').trim();pickArch=s.arch||'degen';
+    var avs=$('v24-avs');avs.innerHTML='';
+    avList().forEach(function(a){
+      var b=document.createElement('button');b.type='button';b.title=a.t;
+      b.innerHTML='<img src="'+a.img+'" alt="'+a.t+'">';
+      if(a.em===pickEm)b.classList.add('sel');
+      b.addEventListener('click',function(){
+        pickEm=a.em;
+        avs.querySelectorAll('button').forEach(function(x){x.classList.remove('sel')});
+        b.classList.add('sel');
+        try{if(typeof playSound==='function')playSound('click')}catch(e){}
+      });
+      avs.appendChild(b);
+    });
+    /* archetype changes the live multipliers, so only in the very first month */
+    var early=(s.month||0)<=1;
+    var host=$('v24-archs');host.innerHTML='';
+    $('v24-archlab').style.display=early?'':'none';
+    host.style.display=early?'':'none';
+    if(early){
+      ARCHS.forEach(function(a){
+        var b=document.createElement('button');b.type='button';
+        b.innerHTML=a[1]+'<span>'+a[2]+'</span>';
+        if(a[0]===pickArch)b.classList.add('sel');
+        b.addEventListener('click',function(){
+          pickArch=a[0];
+          host.querySelectorAll('button').forEach(function(x){x.classList.remove('sel')});
+          b.classList.add('sel');
+          try{if(typeof playSound==='function')playSound('click')}catch(e){}
+        });
+        host.appendChild(b);
+      });
+    }
+    $('v24-note').textContent=early
+      ? 'Difficulty, country and run mode are locked once a run starts \u2014 they decide the XP score. Start a new run to change them.'
+      : 'Archetype, difficulty and country are locked after month 1. Name and avatar stay editable and are used for the leaderboard.';
+    buildSheet().classList.add('on');
+  }
+  function close(){var w=$('v24-prof');if(w)w.classList.remove('on')}
+  function save(){
+    var s=S();if(!s){close();return}
+    var nm=($('v24-nm').value||'').trim().slice(0,20);
+    if(nm)s.name=nm;
+    if(pickEm)s.avatar=pickEm;
+    var early=(s.month||0)<=1;
+    if(early&&pickArch)s.arch=pickArch;
+    try{if(typeof updateHeader==='function')updateHeader()}catch(e){}
+    try{if(typeof toast==='function')toast('Profile saved','buy')}catch(e){}
+    syncChip();close();
+  }
+  window.v24Profile=open;
+
+  function syncChip(){
+    var s=S(),c=$('v24-profchip');if(!s||!c)return;
+    var im=c.querySelector('img'),u=avImg((s.avatar||'').trim());
+    if(im&&u&&im.src.indexOf(u)<0)im.src=u;
+    var t=c.querySelector('span');if(t)t.textContent=(s.name||'ANON').toUpperCase();
+  }
+  function mountChip(){
+    if($('v24-profchip'))return true;
+    var head=document.querySelector('header');if(!head)return false;
+    var host=head.querySelector('.hud-net')||head.querySelector('.header-top');if(!host)return false;
+    var c=document.createElement('button');c.type='button';c.id='v24-profchip';
+    c.innerHTML='<img alt=""><span>ANON</span>';
+    c.addEventListener('click',function(){
+      try{if(typeof playSound==='function')playSound('click')}catch(e){}
+      open();
+    });
+    host.appendChild(c);syncChip();
+    return true;
+  }
+  var mt=0,mi=setInterval(function(){ if(mountChip()||++mt>80)clearInterval(mi) },300);
+  setInterval(syncChip,1500);
+
+  /* ---------------- 3. leaderboard entry: avatar picker ---------------- */
+  function dressSubmit(){
+    var area=$('global-submit-area');if(!area||area.classList.contains('hidden'))return;
+    if($('v24-lbav')){syncLbAv();return}
+    var s=S();if(!s)return;
+    var box=document.createElement('div');box.id='v24-lbav';
+    box.innerHTML='<div class="l-lab">Your avatar on the board</div><div class="l-row"></div>';
+    var row=box.querySelector('.l-row');
+    avList().forEach(function(a){
+      var b=document.createElement('button');b.type='button';b.title=a.t;b.dataset.em=a.em;
+      b.innerHTML='<img src="'+a.img+'" alt="'+a.t+'">';
+      b.addEventListener('click',function(){
+        var st=S();if(st)st.avatar=a.em;
+        row.querySelectorAll('button').forEach(function(x){x.classList.remove('sel')});
+        b.classList.add('sel');syncChip();
+        try{if(typeof playSound==='function')playSound('click')}catch(e){}
+      });
+      row.appendChild(b);
+    });
+    var input=$('global-name-input');
+    if(input)input.parentNode.insertBefore(box,input);
+    else area.appendChild(box);
+    syncLbAv();
+  }
+  function syncLbAv(){
+    var s=S(),box=$('v24-lbav');if(!s||!box)return;
+    var em=(s.avatar||'').trim();
+    box.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('sel',b.dataset.em===em);
+    });
+  }
+  setInterval(dressSubmit,900);
+})();
+</script>
 
 </body>
 </html>
