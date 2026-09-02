@@ -9000,6 +9000,14 @@ body.v20 .end-btn.primary{background:var(--grad-boss);color:#0a0d05}
 body.v20 #start-screen>.start-card{background:linear-gradient(168deg,rgba(16,20,28,.90),rgba(6,8,12,.94))!important;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #v20-arena .v20-throne{opacity:.40}
+#v20-taunt{display:flex;gap:12px;align-items:center;margin-top:14px;max-width:340px;padding:12px;border-radius:16px;
+  background:linear-gradient(168deg,rgba(255,255,255,.07),rgba(8,10,15,.9));border:1px solid var(--acid-line)}
+#v20-taunt img{width:74px;height:74px;object-fit:contain;flex:0 0 auto;filter:drop-shadow(0 8px 22px rgba(0,0,0,.7))}
+#v20-taunt .tt{display:flex;flex-direction:column;gap:3px}
+#v20-taunt .tt b{font-size:14px;color:#fff;line-height:1.3}
+#v20-taunt .tt span{font-size:11.5px;color:var(--text2)}
+#v20-taunt .tt i{font-style:normal;font-size:9.5px;letter-spacing:.2em;font-weight:800;color:var(--acid)}
+@media(max-width:760px){#v20-taunt{max-width:none;margin-top:10px}#v20-taunt img{width:56px;height:56px}}
 body.v20-start #v17-dock,body.v20-start #mobile-tabs,body.v20-start #mobile-next{display:none!important}
 /* dunkler Text auf Acid-Flächen */
 body.v20 .tut-btn:not(.skip),body.v20 #mobile-next,body.v20 .v17-next,body.v20 .start-btn,
@@ -9031,6 +9039,13 @@ body.v20 .coach-btn,body.v20 .tour-next{color:#0a0d05!important}
     a.innerHTML='<div class="v20-halo"></div><img class="v20-throne" src="'+B.throne+'" alt="" decoding="async">'
       +'<div class="v20-scan"></div>';
     s.insertBefore(a,s.firstChild);
+    var hh=s.querySelector('.hero-hud .hh-left');
+    if(hh&&!document.getElementById('v20-taunt')){
+      var t=document.createElement('div'); t.id='v20-taunt';
+      t.innerHTML='<img src="'+B.roar+'" alt=""><div class="tt"><b>"84 months. One life."</b>'
+        +'<span>Nobody has beaten me yet. Try.</span><i>&mdash; THE FINAL BOSS</i></div>';
+      hh.appendChild(t);
+    }
     var sub=s.querySelector('.logo-sub');
     if(sub&&!document.getElementById('v20-live')){
       var l=document.createElement('div'); l.id='v20-live';
