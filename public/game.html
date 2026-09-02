@@ -10245,20 +10245,17 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
   }
   var st2=0,si=setInterval(function(){ if(swipe()||++st2>60)clearInterval(si) },300);
 
-  /* ---------------- 5. sound chip + rotate hint ---------------- */
+  /* ---------------- 5. audio unlock on HUD sound button + rotate hint ---------------- */
   function chrome(){
-    if(!$('v23-sound')){
-      var b=document.createElement('button');b.id='v23-sound';b.type='button';
-      b.innerHTML='<span>\uD83D\uDD0A</span> SOUND';
-      b.addEventListener('click',function(){
+    var old=$('v23-sound'); if(old&&old.parentNode)old.parentNode.removeChild(old);
+    var sb=$('sound-btn');
+    if(sb&&!sb.dataset.v23Audio){
+      sb.dataset.v23Audio='1';
+      sb.addEventListener('pointerdown',function(){
         try{if(typeof initAudio==='function')initAudio()}catch(e){}
-        try{if(typeof toggleSoundBtn==='function')toggleSoundBtn();
-            else if(typeof toggleSound==='function')toggleSound()}catch(e){}
-        var off=!!window.muted;
-        b.innerHTML='<span>'+(off?'\uD83D\uDD07':'\uD83D\uDD0A')+'</span> '+(off?'MUTED':'SOUND');
-      });
-      document.body.appendChild(b);
+      },{capture:true});
     }
+
     if(!$('v23-rotate')){
       var r=document.createElement('div');r.id='v23-rotate';
       r.innerHTML='<i>\uD83D\uDCF1</i><b>Turn your phone back up</b>'+
