@@ -9710,14 +9710,16 @@ body.v20 .coach-btn,body.v20 .tour-next{
   color:#07130a!important;text-shadow:none!important;font-weight:900!important}
 .v22num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 
-/* ---------- 2. BOSS ORDER bar ---------- */
-#v22-order{position:fixed;left:14px;bottom:16px;z-index:640;max-width:min(380px,52vw);
+/* ---------- 2. BOSS ORDER bar (collapsible, never blocks the game) ---------- */
+#v22-order{position:fixed;left:14px;bottom:16px;z-index:180;max-width:min(360px,46vw);
   display:none;gap:11px;align-items:center;padding:10px 13px;border-radius:16px;
   background:linear-gradient(150deg,rgba(16,20,12,.94),rgba(8,10,14,.94));
   border:1px solid rgba(143,212,30,.3);
   box-shadow:0 20px 48px -26px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.05);
-  backdrop-filter:blur(10px);font-family:'JetBrains Mono',monospace}
+  backdrop-filter:blur(10px);font-family:'JetBrains Mono',monospace;
+  transition:opacity .18s ease,transform .18s ease}
 #v22-order.on{display:flex}
+#v22-order.veil{opacity:0;transform:translateY(8px);pointer-events:none}
 #v22-order img{width:40px;height:40px;object-fit:contain;flex:0 0 auto;
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.7))}
 #v22-order .ob{min-width:0;display:flex;flex-direction:column;gap:3px}
@@ -9731,12 +9733,23 @@ body.v20 .coach-btn,body.v20 .tour-next{
   background:rgba(240,180,41,.08)}
 #v22-order .ostreak b{font-size:14px;color:#ffd76a;line-height:1}
 #v22-order .ostreak i{font-style:normal;font-size:7.5px;letter-spacing:.16em;color:#a6935f}
+#v22-order .ox{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.16);background:rgba(10,12,16,.96);color:#cfd6c6;
+  font-size:12px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+#v22-order .ox:hover{color:#fff;border-color:rgba(143,212,30,.5)}
 #v22-order.hit{animation:v22hit .7s ease}
+/* collapsed pill: crown + streak only, one tap re-opens */
+#v22-order.mini{max-width:none;padding:7px 11px;cursor:pointer;border-radius:99px}
+#v22-order.mini .ob,#v22-order.mini .ox{display:none}
+#v22-order.mini img{width:26px;height:26px}
+#v22-order.mini .ostreak{flex-direction:row;align-items:center;gap:6px;padding:3px 8px}
+#v22-order.mini .ostreak b{font-size:12px}
 @keyframes v22hit{0%{box-shadow:0 0 0 0 rgba(143,212,30,.5)}40%{box-shadow:0 0 0 8px rgba(143,212,30,0)}100%{box-shadow:0 20px 48px -26px rgba(0,0,0,.95)}}
 @media(max-width:900px){
-  #v22-order{left:10px;right:10px;max-width:none;bottom:calc(120px + env(safe-area-inset-bottom))}
+  #v22-order{left:10px;right:auto;max-width:min(78vw,340px);bottom:calc(120px + env(safe-area-inset-bottom))}
   #v22-order img{width:34px;height:34px}
 }
+
 
 </style>
 <script id="v22-js">
@@ -9813,15 +9826,42 @@ body.v20 .coach-btn,body.v20 .tour-next{
       el.innerHTML='<img src="'+(B.smug||B.head||'')+'" alt="">'+
         '<div class="ob"><div class="ok">BOSS ORDER</div>'+
         '<div class="ot"></div><div class="os"></div></div>'+
-        '<div class="ostreak"><b class="v22num">0</b><i>STREAK</i></div>';
+        '<div class="ostreak"><b class="v22num">0</b><i>STREAK</i></div>'+
+        '<button class="ox" type="button" title="Minimize">\u2715</button>';
       document.body.appendChild(el);
+      el.querySelector('.ox').addEventListener('click',function(e){
+        e.stopPropagation();el.classList.add('mini');
+        try{localStorage.setItem('tcfb_order_mini','1')}catch(_){}
+      });
+      el.addEventListener('click',function(){
+        if(!el.classList.contains('mini'))return;
+        el.classList.remove('mini');
+        try{localStorage.removeItem('tcfb_order_mini')}catch(_){}
+        clearTimeout(el._t);el._t=setTimeout(function(){el.classList.add('mini')},7000);
+      });
+      var m='0';try{m=localStorage.getItem('tcfb_order_mini')}catch(_){}
+      if(m==='1')el.classList.add('mini');
+      else el._t=setTimeout(function(){el.classList.add('mini')},9000);
     }
     return el;
+  }
+  /* never sit on top of a card, window or the start screen */
+  var VEIL=['event-overlay','presale-overlay','decision-overlay','settings-overlay',
+            'mini-overlay','tutorial-overlay','v17-sheet','v6m','dx-modal'];
+  function blocked(){
+    for(var i=0;i<VEIL.length;i++){
+      var n=$(VEIL[i]);if(!n)continue;
+      if(n.classList.contains('hidden'))continue;
+      var cs=getComputedStyle(n);
+      if(cs.display!=='none'&&cs.visibility!=='hidden'&&cs.opacity!=='0')return true;
+    }
+    return false;
   }
   function paint(){
     var s=S(),el=bar();
     var live=s&&!s._gameEnded&&$('game-screen')&&$('game-screen').style.display!=='none'&&!document.body.classList.contains('v20-start');
     el.classList.toggle('on',!!live);
+    el.classList.toggle('veil',!!live&&blocked());
     if(!live)return;
     var o=current(s)||pick(s);
     el.querySelector('.ot').textContent=o.t;
@@ -9844,6 +9884,7 @@ body.v20 .coach-btn,body.v20 .tour-next{
         say('smug','Order missed. I expected nothing else.','bad');
       }
     }
+
     /* streak: profitable months stack a multiplier, a liquidation breaks it */
     var prev=s._v22nw;
     var liqNow=s.liquidations||0;
