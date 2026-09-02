@@ -10348,8 +10348,73 @@ body.v17-mob.v23-ingame #v23-sound{display:inline-flex}
       });
   }
   setInterval(gloss,1200);
+
+  /* ---------------- 8. slim head: net worth + month, rest on demand ----
+     The phone header was 372px of a 844px screen before a single price
+     was visible. Figures, vitals, XP and the time controls move into two
+     wrappers that collapse on the phone behind a STATS chip. On desktop
+     the wrappers are display:contents, so the old layout is untouched. */
+  function slim(){
+    var head=document.querySelector('header');if(!head)return false;
+    var top=head.querySelector('.header-top');if(!top)return false;
+    if(!$('v23-statsA')){
+      var figs=top.querySelector('.hud-figs'),vit=top.querySelector('.hud-vitals');
+      if(!figs&&!vit)return false;
+      var a=document.createElement('div');a.id='v23-statsA';
+      top.insertBefore(a,figs||vit);
+      if(figs)a.appendChild(figs);
+      if(vit)a.appendChild(vit);
+    }
+    if(!$('v23-statsB')){
+      var xp=head.querySelector('.xp-wrap'),tc=head.querySelector('.time-controls');
+      if(xp||tc){
+        var bw=document.createElement('div');bw.id='v23-statsB';
+        head.insertBefore(bw,xp||tc);
+        if(xp)bw.appendChild(xp);
+        if(tc)bw.appendChild(tc);
+      }
+    }
+    if(!$('v23-statchip')){
+      var net=head.querySelector('.hud-net')||top;
+      var c=document.createElement('button');c.id='v23-statchip';c.type='button';
+      c.innerHTML='<span>STATS &amp; SPEED</span><i>\u25BE</i>';
+      c.addEventListener('click',function(){
+        document.body.classList.toggle('v23-open');
+        c.querySelector('i').textContent=document.body.classList.contains('v23-open')?'\u25B4':'\u25BE';
+        try{if(typeof playSound==='function')playSound('click')}catch(e){}
+      });
+      net.appendChild(c);
+    }
+    document.body.classList.add('v23-slim');
+    return true;
+  }
+  var lt=0,li=setInterval(function(){ if(slim()||++lt>80)clearInterval(li) },300);
 })();
 </script>
+
+<style id="v23-slimhead">
+/* desktop keeps the original header grid */
+#v23-statsA,#v23-statsB{display:contents}
+#v23-statchip{display:none}
+@media(max-width:820px){
+  body.v17-mob #v23-statchip{display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+    min-height:38px;padding:0 12px;border-radius:99px;cursor:pointer;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#b9c2d4;
+    font:800 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.14em}
+  body.v17-mob #v23-statchip i{font-style:normal;color:#8fd41e}
+  body.v17-mob.v23-slim #v23-statsA,body.v17-mob.v23-slim #v23-statsB{
+    display:block;max-height:0;overflow:hidden;opacity:0;transition:max-height .22s ease,opacity .18s ease}
+  body.v17-mob.v23-slim.v23-open #v23-statsA,body.v17-mob.v23-slim.v23-open #v23-statsB{
+    max-height:420px;opacity:1}
+  /* nothing in the head may clip sideways any more */
+  body.v17-mob .hud-figs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  body.v17-mob .hud-fig{width:auto!important;min-width:0!important}
+  body.v17-mob .hud-fig *{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body.v17-mob .hud-vitals{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+  body.v17-mob .time-controls{display:flex!important;flex-wrap:wrap!important;gap:6px!important}
+}
+</style>
+
 
 </body>
 </html>
