@@ -9155,7 +9155,7 @@ body.v20 .coach-btn,body.v20 .tour-next{color:#0a0d05!important}
 
   function startVis(){
     var st=document.getElementById('start-screen'), gs=document.getElementById('game-screen');
-    var on=!!(st&&getComputedStyle(st).display!=='none'&&(!gs||gs.style.display==='none'));
+    var on=!!(st&&getComputedStyle(st).display!=='none'&&(!gs||getComputedStyle(gs).display==='none'));
     document.body.classList.toggle('v20-start',on);
   }
   function boot(){
