@@ -241,12 +241,22 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         }
         const run = parsed.data;
 
-        if (!isPlausible(run)) {
+        const reason = implausibleReason(run);
+        if (reason) {
+          console.warn("leaderboard score rejected", {
+            reason,
+            months: run.months,
+            net: run.net,
+            xp: run.xp,
+            level: run.level,
+            trades: run.trades,
+            mode: run.mode,
+          });
           return Response.json({ error: "score rejected" }, { status: 422, headers: CORS });
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { error } = await supabaseAdmin.from("leaderboard_runs").insert({
+        const row = {
           player_name: sanitizeName(run.name),
           archetype: run.arch,
           country: run.country,
@@ -261,12 +271,20 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           trades: run.trades,
           survived: run.survived,
           avatar: run.avatar ?? null,
-        });
+        };
+
+        let { error } = await supabaseAdmin.from("leaderboard_runs").insert(row);
+        // PGRST303 / network blips: retry before telling a player their run is lost.
+        for (let attempt = 0; attempt < 3 && error; attempt++) {
+          await sleep(300 * (attempt + 1));
+          ({ error } = await supabaseAdmin.from("leaderboard_runs").insert(row));
+        }
 
         if (error) {
           console.error("leaderboard write failed", error);
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
+
 
         return Response.json({ ok: true, success: true }, { status: 201, headers: CORS });
       },
