@@ -9,6 +9,7 @@ import { CineVideo, CINE_TOTAL } from "./cine/CineVideo";
 import { BlitzVideo, BLITZ_TOTAL } from "./blitz/BlitzVideo";
 import { OnboardVideo, ONB_TOTAL } from "./onb/OnboardVideo";
 import { TokVideo, TOK_TOTAL } from "./tok/TokVideo";
+import { AdVideo, AD_TOTAL } from "./ad/AdVideo";
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -21,5 +22,6 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="blitz" component={BlitzVideo} durationInFrames={BLITZ_TOTAL} fps={30} width={1920} height={1080} />
     <Composition id="onboard" component={OnboardVideo} durationInFrames={ONB_TOTAL} fps={30} width={1920} height={1080} />
     <Composition id="tiktok" component={TokVideo} durationInFrames={TOK_TOTAL} fps={30} width={1080} height={1920} />
+    <Composition id="ad" component={AdVideo} durationInFrames={AD_TOTAL} fps={30} width={1080} height={1920} />
   </>
 );
