@@ -132,21 +132,30 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         const mode = url.searchParams.get("mode");
         const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
 
-        let query = supabaseAdmin
-          .from("leaderboard_runs")
-          .select(
-            "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at",
-          )
-          .order("created_at", { ascending: false })
-          .limit(500);
+        const runQuery = async () => {
+          let query = supabaseAdmin
+            .from("leaderboard_runs")
+            .select(
+              "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at",
+            )
+            .order("created_at", { ascending: false })
+            .limit(500);
 
-        if (mode && mode !== "all") query = query.eq("mode", mode);
+          if (mode && mode !== "all") query = query.eq("mode", mode);
+          return await query;
+        };
 
-        const { data, error } = await query;
+        let { data, error } = await runQuery();
+        // Transient auth/clock/network hiccups (e.g. PGRST303) should not hard-fail the board.
+        for (let attempt = 0; attempt < 2 && error; attempt++) {
+          await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
+          ({ data, error } = await runQuery());
+        }
         if (error) {
           console.error("leaderboard read failed", error);
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
+
 
         const rows = (data ?? [])
           .slice()
