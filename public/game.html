@@ -9192,8 +9192,10 @@ body.v20 .coach-btn,body.v20 .tour-next{color:#0a0d05!important}
   }
 
   function startVis(){
-    var st=document.getElementById('start-screen'), gs=document.getElementById('game-screen');
-    var on=!!(st&&getComputedStyle(st).display!=='none'&&(!gs||getComputedStyle(gs).display==='none'));
+    var st=document.getElementById('start-screen'), gs=document.getElementById('game-screen'), es=document.getElementById('end-screen');
+    var gameLive=!!(gs&&getComputedStyle(gs).display!=='none');
+    var endOn=!!(es&&!es.classList.contains('hidden')&&getComputedStyle(es).display!=='none');
+    var on=!gameLive&&(endOn||!!(st&&getComputedStyle(st).display!=='none'));
     document.body.classList.toggle('v20-start',on);
   }
   function boot(){
