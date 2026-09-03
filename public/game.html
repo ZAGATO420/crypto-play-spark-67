@@ -11176,3 +11176,227 @@ body.v26 .v26-body .end-sec:last-child{margin-bottom:0!important}
   window.v26Build=build;
 })();
 </script>
+
+<!-- ============================================================
+     V27 · GATE: from menu to arena
+     One CTA, profile chip, quiet text links, living throne room.
+     Start screen only — no gameplay, pricing, XP or API changes.
+     ============================================================ -->
+<style id="v27-gate">
+/* ---- 1. one entry: kill the button stack ---- */
+body.v27 #v23-gate-extra{gap:6px;margin-top:10px}
+body.v27 #v23-gate-extra .v23-cust{display:none!important}
+body.v27 #v23-gate-extra .v23-cont{width:min(420px,92vw);min-height:46px;
+  background:rgba(10,14,26,.82);border:1px solid rgba(143,212,30,.42);color:#d8ff8a;
+  font:900 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em}
+body.v27 #v24-preset{order:-1;margin:0 auto 12px;background:rgba(8,11,20,.72);
+  border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 12px;
+  font:700 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:#aab4c8;min-height:40px}
+body.v27 #v24-preset:hover{border-color:rgba(255,197,61,.5);color:#fff}
+body.v27 #v21-gate .g-sub{display:none}
+
+/* ---- boss taunt over the CTA ---- */
+#v27-taunt{position:relative;z-index:3;margin:14px auto 0;max-width:560px;
+  font:600 13px/1.4 Inter,system-ui,sans-serif;color:#e7ecf6;letter-spacing:.01em;
+  text-shadow:0 2px 18px rgba(0,0,0,.9);opacity:0;transform:translateY(6px);
+  animation:v27tin .7s ease-out .25s forwards}
+#v27-taunt b{color:var(--v21-acid,#a3e635)}
+@keyframes v27tin{to{opacity:1;transform:none}}
+
+/* ---- CTA gets weight + slow pulse ---- */
+body.v27 #v21-gate .g-cta{animation:v27pulse 2.8s ease-in-out infinite;
+  box-shadow:0 18px 44px -18px rgba(163,230,53,.85),0 0 0 1px rgba(163,230,53,.35) inset}
+body.v27 #v21-gate .g-cta:active{transform:translateY(3px) scale(.985);animation:none}
+@keyframes v27pulse{
+  0%,100%{box-shadow:0 18px 44px -18px rgba(163,230,53,.7),0 0 0 1px rgba(163,230,53,.3) inset}
+  50%{box-shadow:0 22px 62px -16px rgba(163,230,53,1),0 0 0 1px rgba(163,230,53,.55) inset}}
+
+/* ---- arena bar: live numbers instead of ad copy ---- */
+#v27-arena{position:relative;z-index:3;margin:12px auto 0;display:flex;gap:10px;
+  justify-content:center;flex-wrap:wrap;font:700 10px/1 'JetBrains Mono',monospace;
+  letter-spacing:.14em;color:#7f8aa2;text-transform:uppercase}
+#v27-arena b{color:#fff}
+#v27-arena .s{color:rgba(255,255,255,.18)}
+
+/* ---- 2. quiet text links instead of a pill grid ---- */
+body.v27 #v21-gate .g-links{gap:0 18px;padding-top:18px}
+body.v27 #v21-gate .g-links button{border:0!important;background:none!important;padding:6px 2px;
+  font:700 10px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#69738a}
+body.v27 #v21-gate .g-links button:hover{color:#d8ff8a}
+
+/* ---- 3. the throne room lives ---- */
+body.v27 #v21-gate .g-boss{will-change:transform;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+#v27-spot{position:absolute;inset:0;pointer-events:none;z-index:2;mix-blend-mode:screen;
+  background:radial-gradient(ellipse 46% 58% at 50% 42%,rgba(255,214,120,.16),transparent 70%);
+  animation:v27spot 13s ease-in-out infinite}
+@keyframes v27spot{0%,100%{transform:translateX(-7%) scale(1)}50%{transform:translateX(7%) scale(1.06)}}
+#v27-grain{position:absolute;inset:-50%;pointer-events:none;z-index:4;opacity:.055;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+  animation:v27grain .6s steps(3) infinite}
+@keyframes v27grain{0%{transform:translate(0,0)}33%{transform:translate(-3%,2%)}66%{transform:translate(2%,-3%)}}
+
+/* ---- cold open ---- */
+#v27-open{position:fixed;inset:0;z-index:9998;background:#000;display:flex;
+  align-items:center;justify-content:center;flex-direction:column;gap:14px;cursor:pointer}
+#v27-open .t{font:700 clamp(8px,2.1vw,11px)/1.5 'JetBrains Mono',monospace;letter-spacing:.18em;color:#4b5568;
+  max-width:92vw;text-align:center}
+
+#v27-open .t b{color:#a3e635;font-weight:700}
+#v27-open .k{font:700 9px/1 'JetBrains Mono',monospace;letter-spacing:.3em;color:#2c3340}
+#v27-open.out{opacity:0;transition:opacity .5s ease;pointer-events:none}
+body.v27-open #v21-gate .g-boss{transform:translateX(-50%) translateY(9%) scale(1.06);opacity:.25}
+body.v27-open #v21-gate .g-mid,body.v27-open #v21-gate .g-live,
+body.v27-open #v21-gate .g-links{opacity:0}
+body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links{
+  transition:opacity .6s ease .1s}
+
+@media (prefers-reduced-motion:reduce){
+  #v27-spot,#v27-grain{animation:none}
+  body.v27 #v21-gate .g-cta{animation:none}
+  #v27-taunt{animation:none;opacity:1;transform:none}
+}
+@media (max-width:820px){
+  #v27-taunt{font-size:12px;margin-top:10px}
+  #v27-arena{font-size:9px;gap:7px}
+}
+</style>
+<script>
+/* V27 gate — start screen only */
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var TAUNTS=[
+    'nobody has beaten me yet.',
+    '$5,000. 84 months. <b>one life.</b>',
+    'the last one lasted <b>19 months</b>.',
+    'everyone thinks they would have held.',
+    'january 2020. you know what happens. <b>prove it.</b>',
+    'i have watched better traders than you get liquidated.'
+  ];
+  var reduce=false;
+  try{reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches}catch(e){}
+
+  /* ---------- cold open (once per session) ---------- */
+  function coldOpen(){
+    var seen=false;
+    try{seen=sessionStorage.getItem('tcfb_open')==='1'}catch(e){}
+    if(seen||reduce)return;
+    try{sessionStorage.setItem('tcfb_open','1')}catch(e){}
+    var o=document.createElement('div');o.id='v27-open';
+    o.innerHTML='<div class="t">BTC $7,200 &middot; ETH $130 &middot; SOL <b>NOT LAUNCHED</b> &middot; JAN 2020</div>'+
+      '<div class="k">TAP TO SKIP</div>';
+    document.body.appendChild(o);
+    document.body.classList.add('v27-open');
+    var done=false;
+    function end(){
+      if(done)return;done=true;
+      o.classList.add('out');
+      document.body.classList.remove('v27-open');
+      setTimeout(function(){try{o.remove()}catch(e){}},600);
+    }
+    o.addEventListener('click',end);
+    setTimeout(end,1200);
+  }
+
+  /* ---------- parallax ---------- */
+  function parallax(gate){
+    if(reduce||gate.dataset.v27px)return;
+    gate.dataset.v27px='1';
+    var boss=gate.querySelector('.g-boss');if(!boss)return;
+    var raf=0,tx=0,ty=0;
+    function apply(){raf=0;boss.style.transform='translateX(-50%) translate3d('+tx+'px,'+ty+'px,0)'}
+    gate.addEventListener('pointermove',function(e){
+      var w=window.innerWidth||1,h=window.innerHeight||1;
+      tx=((e.clientX/w)-.5)*-14;ty=((e.clientY/h)-.5)*-8;
+      if(!raf)raf=requestAnimationFrame(apply);
+    },{passive:true});
+    window.addEventListener('deviceorientation',function(e){
+      if(e.gamma==null)return;
+      tx=Math.max(-8,Math.min(8,(e.gamma||0)/4));
+      ty=Math.max(-5,Math.min(5,((e.beta||0)-45)/9));
+      if(!raf)raf=requestAnimationFrame(apply);
+    },{passive:true});
+  }
+
+  /* ---------- live arena numbers ---------- */
+  var arenaDone=false;
+  function arena(mid){
+    var bar=$('v27-arena');
+    if(!bar){
+      bar=document.createElement('div');bar.id='v27-arena';
+      bar.innerHTML='<span><b id="v27-runs">—</b> RUNS LOGGED</span>'+
+        '<span class="s">&middot;</span><span>TOP <b id="v27-top">—</b></span>'+
+        '<span class="s">&middot;</span><span><b>0</b> SURVIVORS</span>';
+      mid.appendChild(bar);
+    }
+    if(arenaDone)return;arenaDone=true;
+    try{
+      fetch('/api/public/leaderboard',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+        var rows=Array.isArray(d)?d:((d&&(d.entries||d.scores||d.data))||[]);
+
+        if(!Array.isArray(rows)||!rows.length){arenaDone=false;return}
+        var n=rows.length,top=0,who='';
+        rows.forEach(function(r){
+          var v=Number(r.netWorth||r.net_worth||r.score||r.networth||0);
+          if(v>top){top=v;who=String(r.name||r.player_name||'').slice(0,14)}
+        });
+        countUp($('v27-runs'),n);
+        var te=$('v27-top');
+        if(te&&top)te.textContent='$'+Math.round(top).toLocaleString()+(who?' \u00B7 '+who.toUpperCase():'');
+      }).catch(function(){arenaDone=false});
+    }catch(e){arenaDone=false}
+
+  }
+  function countUp(el,to){
+    if(!el)return;
+    if(reduce||to<=0){el.textContent=String(to);return}
+    var t0=performance.now(),dur=700;
+    (function step(t){
+      var p=Math.min(1,(t-t0)/dur);
+      el.textContent=String(Math.round(to*(1-Math.pow(1-p,3))));
+      if(p<1)requestAnimationFrame(step);
+    })(t0);
+  }
+
+  /* ---------- build ---------- */
+  function build(){
+    var gate=$('v21-gate');if(!gate)return;
+    document.body.classList.add('v27');
+    if(!$('v27-spot')){
+      var s=document.createElement('div');s.id='v27-spot';
+      var g=document.createElement('div');g.id='v27-grain';
+      var vig=gate.querySelector('.g-vig');
+      gate.insertBefore(s,vig||gate.firstChild);
+      gate.appendChild(g);
+    }
+    parallax(gate);
+    var mid=gate.querySelector('.g-mid');if(!mid)return;
+    var cta=$('v21-enter');if(!cta)return;
+    if(cta.textContent!=='ENTER THE ARENA')cta.textContent='ENTER THE ARENA';
+
+    /* profile chip above the CTA, single entry below */
+    var chip=$('v24-preset');
+    if(chip&&chip.parentNode!==mid){mid.insertBefore(chip,cta);}
+    else if(chip&&chip.nextElementSibling!==cta&&chip.compareDocumentPosition(cta)&Node.DOCUMENT_POSITION_PRECEDING){
+      mid.insertBefore(chip,cta);
+    }
+    if(chip)chip.classList.add('on');
+
+    /* taunt line */
+    if(!$('v27-taunt')){
+      var t=document.createElement('div');t.id='v27-taunt';
+      var name='';
+      try{name=(localStorage.getItem('tfcb_last_name')||'').trim()}catch(e){}
+      t.innerHTML=name?('back for more, <b>'+name.replace(/[<>&]/g,'')+'</b>?')
+        :TAUNTS[Math.floor(Math.random()*TAUNTS.length)];
+      mid.insertBefore(t,chip||cta);
+    }
+    arena(mid);
+  }
+
+  function boot(){coldOpen();build()}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+  var n=0,iv=setInterval(function(){build();if(++n>60)clearInterval(iv)},250);
+})();
+</script>
