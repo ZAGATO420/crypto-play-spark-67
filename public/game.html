@@ -10098,7 +10098,7 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
     }catch(e){}
   }
   function instantStart(){
-    ensureDefaults();pickRandomAvatar();
+    ensureDefaults();
     try{document.body.classList.remove('v21-gate','v21-flow')}catch(e){}
     try{if(typeof initAudio==='function')initAudio()}catch(e){}
     try{startGame()}catch(e){ var b=$('start-btn'); if(b)b.click(); }
