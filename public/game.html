@@ -10713,11 +10713,12 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
    V25 — END SCREEN IS ALWAYS OPERABLE + LEADERBOARD SUBMIT NEVER LOST.
    Presentation / reliability only. No game maths, no score formula.
    ===================================================================== */
-body.v25-end{overflow:auto!important;overflow-y:auto!important;height:auto!important;
+html.v25-end,body.v25-end{overflow:hidden!important;height:100%!important;
   position:static!important;touch-action:auto!important}
-html:has(body.v25-end){overflow-y:auto!important}
-body.v25-end #end-screen{display:flex!important;overflow:visible;height:auto;
-  padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+body.v25-end #end-screen{display:flex!important;position:fixed!important;inset:0!important;
+  width:100%!important;height:100dvh!important;min-height:0!important;overflow-x:hidden!important;
+  overflow-y:auto!important;overscroll-behavior-y:contain;touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch;padding-bottom:calc(120px + env(safe-area-inset-bottom))}
 /* every run-time overlay/dock is dead once the run is over */
 body.v25-end #v23-coach,body.v25-end #v23-rotate,body.v25-end #v17-dock,
 body.v25-end #v17-sheet,body.v25-end #v21-sheet,body.v25-end #v6m,
@@ -10765,6 +10766,7 @@ body.v25-end #v25-jump.on{display:block}
     var es=$('end-screen');
     var on=!!(es&&!es.classList.contains('hidden')&&getComputedStyle(es).display!=='none');
     document.body.classList.toggle('v25-end',on);
+    document.documentElement.classList.toggle('v25-end',on);
     if(!on)return;
     document.body.classList.remove('v4-live','v21-gate','v21-flow','v23-ingame');
     document.body.removeAttribute('data-pane');
@@ -10776,8 +10778,8 @@ body.v25-end #v25-jump.on{display:block}
      'levelup-overlay','tutorial-overlay'].forEach(function(id){
       var o=$(id);if(o){o.classList.add('hidden');o.style.display='none'}
     });
-    document.documentElement.style.overflowY='auto';
-    document.body.style.overflow='';
+    document.documentElement.style.overflow='hidden';
+    document.body.style.overflow='hidden';
     document.body.style.position='';
     var jump=$('v25-jump');
     if(jump){
@@ -10791,15 +10793,24 @@ body.v25-end #v25-jump.on{display:block}
   window.addEventListener('scroll',freeEnd,{passive:true});
   document.addEventListener('DOMContentLoaded',freeEnd);
   freeEnd();
+  window.v25FreeEnd=freeEnd;
 
   /* move the submit block right under the share card */
   function reorder(){
     var area=$('global-submit-area'),hero=$('end-hero-card');
-    if(!area||!hero||area.dataset.v25)return;
-    area.dataset.v25='1';
-    hero.parentNode.insertBefore(area,hero.nextSibling);
+    if(!area||!hero)return;
+    if(!area.dataset.v25){
+      area.dataset.v25='1';
+      hero.parentNode.insertBefore(area,hero.nextSibling);
+    }
     if(!$('v25-msg')){
       var m=document.createElement('div');m.id='v25-msg';area.appendChild(m);
+    }
+    /* Keep the core action above the optional avatar gallery on short screens. */
+    var avatars=$('v24-lbav'),input=$('global-name-input'),btn=$('global-submit-btn');
+    if(avatars&&input&&btn){
+      area.insertBefore(input,avatars);
+      area.insertBefore(btn,avatars);
     }
   }
   function jumpBar(){
@@ -10807,8 +10818,11 @@ body.v25-end #v25-jump.on{display:block}
     var j=document.createElement('div');j.id='v25-jump';
     j.innerHTML='<button type="button">\uD83C\uDFC6 SUBMIT YOUR SCORE</button>';
     j.querySelector('button').addEventListener('click',function(){
-      var a=$('global-submit-area');
-      if(a)a.scrollIntoView({behavior:'smooth',block:'center'});
+      var a=$('global-submit-area'),es=$('end-screen');
+      if(a&&es){
+        var y=a.getBoundingClientRect().top-es.getBoundingClientRect().top+es.scrollTop-12;
+        es.scrollTo({top:y,behavior:'smooth'});
+      }
       setTimeout(function(){var i=$('global-name-input');if(i)i.focus()},450);
     });
     document.body.appendChild(j);
@@ -10929,6 +10943,16 @@ body.v25-end #v25-jump.on{display:block}
       var s=S();if(s&&s._gameEnded)return;
       if(document.body.classList.contains('v25-end'))return;
       return _coach.apply(this,arguments);
+    };
+  }
+  /* Enter the independent end-screen scroller in the same task as endGame. */
+  var _endGame=window.endGame;
+  if(typeof _endGame==='function'){
+    window.endGame=function(){
+      var r=_endGame.apply(this,arguments);
+      freeEnd();reorder();
+      var es=$('end-screen');if(es)es.scrollTop=0;
+      return r;
     };
   }
 })();
