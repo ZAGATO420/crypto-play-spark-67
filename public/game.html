@@ -10806,12 +10806,8 @@ body.v25-end #v25-jump.on{display:block}
     if(!$('v25-msg')){
       var m=document.createElement('div');m.id='v25-msg';area.appendChild(m);
     }
-    /* Keep the core action above the optional avatar gallery on short screens. */
-    var avatars=$('v24-lbav'),input=$('global-name-input'),btn=$('global-submit-btn');
-    if(avatars&&input&&btn){
-      area.insertBefore(input,avatars);
-      area.insertBefore(btn,avatars);
-    }
+    /* V26: ordering is handled once by the claim card; never reshuffle while
+       the player is typing (that used to steal focus every 600ms). */
   }
   function jumpBar(){
     if($('v25-jump'))return;
