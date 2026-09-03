@@ -73,8 +73,8 @@ export const AShot: React.FC<AShotProps> = ({
       <AbsoluteFill
         style={{
           background: top
-            ? "linear-gradient(180deg, rgba(3,5,3,.93) 0%, rgba(3,5,3,.55) 26%, transparent 48%)"
-            : "linear-gradient(0deg, rgba(3,5,3,.95) 0%, rgba(3,5,3,.6) 26%, transparent 52%)",
+            ? "linear-gradient(180deg, rgba(3,5,3,.97) 0%, rgba(3,5,3,.93) 22%, rgba(3,5,3,.7) 34%, transparent 56%)"
+            : "linear-gradient(0deg, rgba(3,5,3,.98) 0%, rgba(3,5,3,.93) 22%, rgba(3,5,3,.7) 34%, transparent 58%)",
         }}
       />
       <AbsoluteFill
