@@ -3893,7 +3893,10 @@ function endGame(win,reason=''){if(state&&state._gameEnded)return;try{stopMusic(
     if(area){
       if(state&&state._quit){area.classList.add('hidden');}else{area.classList.remove('hidden');}
       if(input){
-        input.value = localStorage.getItem('tfcb_last_name') || (state?state.name:'') || 'Malushina';
+        const _last = localStorage.getItem('tfcb_last_name') || '';
+        const _sn = (state && state.name) ? String(state.name).trim() : '';
+        const _auto = /^(anon|degen|player)$/i.test(_sn);
+        input.value = _last || (_auto ? '' : _sn);
       }
       if(scoreEl){
         scoreEl.textContent = fmt(finalNet()) + ' • ' + (state?state.month:0) + ' Months';
@@ -10806,12 +10809,8 @@ body.v25-end #v25-jump.on{display:block}
     if(!$('v25-msg')){
       var m=document.createElement('div');m.id='v25-msg';area.appendChild(m);
     }
-    /* Keep the core action above the optional avatar gallery on short screens. */
-    var avatars=$('v24-lbav'),input=$('global-name-input'),btn=$('global-submit-btn');
-    if(avatars&&input&&btn){
-      area.insertBefore(input,avatars);
-      area.insertBefore(btn,avatars);
-    }
+    /* V26: ordering is handled once by the claim card; never reshuffle while
+       the player is typing (that used to steal focus every 600ms). */
   }
   function jumpBar(){
     if($('v25-jump'))return;
@@ -10963,3 +10962,217 @@ body.v25-end #v25-jump.on{display:block}
 </html>
 
 
+
+<style id="v26-end">
+/* =====================================================================
+   V26 — END SCREEN REDESIGN. One clear flow: RESULT -> CLAIM -> details.
+   Presentation only. No game maths, no score formula, no ranking change.
+   ===================================================================== */
+body.v25-end #end-screen .end-card{max-width:640px;margin:0 auto;padding:14px 14px 40px}
+body.v25-end #end-screen .end-head{margin-top:14px!important}
+
+/* --- shared card look --- */
+body.v26 .v26-card{border:1px solid rgba(255,255,255,.10);border-radius:18px;
+  background:linear-gradient(170deg,rgba(16,20,28,.92),rgba(7,10,15,.94));
+  margin:12px 0;overflow:hidden}
+body.v26 .v26-sum{display:flex;align-items:center;gap:10px;width:100%;cursor:pointer;
+  padding:14px 15px;background:transparent;border:0;color:#eef3e6;text-align:left;
+  font:900 12px/1.2 Inter,system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase}
+body.v26 .v26-sum .v26-ic{font-size:15px;letter-spacing:0}
+body.v26 .v26-sum .v26-cr{margin-left:auto;font-size:11px;color:#9fb08c;letter-spacing:.06em}
+body.v26 .v26-body{padding:0 15px 15px;display:none}
+body.v26 .v26-card.open .v26-body{display:block}
+body.v26 .v26-card.open .v26-cr{transform:none;color:#b6ff2e}
+
+/* --- run setup info line --- */
+#v26-setup{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 2px}
+#v26-setup span{border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 10px;
+  background:rgba(255,255,255,.03);color:#c9d3bd;
+  font:800 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+
+/* --- claim card: the one action that matters --- */
+body.v25-end.v26 #global-submit-area{border:1px solid rgba(182,255,46,.55)!important;
+  border-radius:20px!important;padding:0!important;margin:14px 0 6px!important;
+  background:linear-gradient(165deg,rgba(182,255,46,.14),rgba(255,197,61,.07) 45%,rgba(7,10,15,.96))!important;
+  box-shadow:0 0 0 1px rgba(182,255,46,.12),0 22px 60px -30px rgba(182,255,46,.6)}
+#v26-claim-head{padding:15px 16px 0;text-align:center}
+#v26-claim-head .k{font:900 11px/1 Inter,system-ui,sans-serif;letter-spacing:.2em;color:#b6ff2e}
+#v26-claim-head .h{margin-top:7px;font:900 21px/1.1 Inter,system-ui,sans-serif;
+  letter-spacing:-.4px;color:#fff}
+#v26-claim-head .s{margin-top:6px;font:600 12px/1.5 Inter,system-ui,sans-serif;color:#bcc7b1}
+
+#v26-claim-body{padding:12px 16px 16px}
+#v26-lab{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 6px;
+  font:800 10.5px/1 Inter,system-ui,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#9fb08c}
+#v26-count{letter-spacing:.06em;color:#7f8c72}
+body.v25-end.v26 #global-name-input{min-height:54px!important;font-size:17px!important;
+  text-align:center!important;border:1px solid rgba(182,255,46,.45)!important;
+  background:#050810!important;border-radius:14px!important}
+body.v25-end.v26 #global-name-input:focus{outline:0;border-color:#b6ff2e!important;
+  box-shadow:0 0 0 3px rgba(182,255,46,.18)!important}
+body.v25-end.v26 #global-submit-btn{min-height:56px!important;font-size:15px!important;
+  border-radius:15px!important;margin-top:12px!important}
+body.v25-end.v26 #v24-lbav{margin:12px 0 2px!important}
+body.v25-end.v26 #v24-lbav .l-row{display:flex!important;gap:8px;overflow-x:auto;
+  padding-bottom:4px;scrollbar-width:none}
+body.v25-end.v26 #v24-lbav .l-row::-webkit-scrollbar{display:none}
+body.v25-end.v26 #v24-lbav .l-row button{flex:0 0 auto;width:46px;height:46px;min-height:46px}
+#v26-done{display:none;padding:18px 16px;text-align:center}
+body.v25-end.v26 #global-submit-area .v26-legacy{display:none!important}
+#global-submit-area.v26-sent #v26-claim-body,#global-submit-area.v26-sent #v26-claim-head{display:none!important}
+#global-submit-area.v26-sent #v26-done{display:block}
+#v26-done .b{font:900 22px/1.15 Inter,system-ui,sans-serif;color:#b6ff2e}
+#v26-done .c{margin-top:8px;font:600 12.5px/1.5 Inter,system-ui,sans-serif;color:#cfd8c4}
+
+/* keep the legacy blocks visually quiet inside collapsibles */
+body.v26 .v26-body .end-sec,body.v26 .v26-body .global-lb,
+body.v26 .v26-body .end-history,body.v26 .v26-body #pump-cta{
+  margin:0 0 10px!important;border:0!important;background:transparent!important;padding:0!important}
+body.v26 .v26-body .end-sec:last-child{margin-bottom:0!important}
+@media(max-width:520px){
+  #v26-claim-head .h{font-size:19px}
+  body.v25-end #end-screen .end-card{padding:10px 11px 46px}
+}
+</style>
+<script>
+/* V26 — end screen restructure: result, claim, then optional detail cards */
+(function(){
+  function $(id){return document.getElementById(id)}
+  function S(){try{return state}catch(e){return window.state||null}}
+  var CN={DE:'\u{1F1E9}\u{1F1EA} Germany',USA:'\u{1F1FA}\u{1F1F8} USA',CH:'\u{1F1E8}\u{1F1ED} Switzerland',
+          SG:'\u{1F1F8}\u{1F1EC} Singapore',PT:'\u{1F1F5}\u{1F1F9} Portugal',NG:'\u{1F1F3}\u{1F1EC} Nigeria'};
+
+  function card(id,icon,title,nodes,open){
+    var c=$(id);
+    if(!c){
+      c=document.createElement('section');c.className='v26-card';c.id=id;
+      c.innerHTML='<button type="button" class="v26-sum"><span class="v26-ic">'+icon+'</span>'+
+        '<span>'+title+'</span><span class="v26-cr">SHOW</span></button>'+
+        '<div class="v26-body"></div>';
+      c.querySelector('.v26-sum').addEventListener('click',function(){
+        var on=c.classList.toggle('open');
+        c.querySelector('.v26-cr').textContent=on?'HIDE':'SHOW';
+        try{if(typeof playSound==='function')playSound('click')}catch(e){}
+      });
+      if(open)c.classList.add('open'),c.querySelector('.v26-cr').textContent='HIDE';
+    }
+    var body=c.querySelector('.v26-body');
+    nodes.forEach(function(n){ if(n&&n.parentNode!==body)body.appendChild(n) });
+    return c;
+  }
+
+  function setupLine(host,hero){
+    var s=S();if(!s)return;
+    var el=$('v26-setup');
+    if(!el){el=document.createElement('div');el.id='v26-setup';}
+    el.innerHTML=['<span>'+(CN[s.country]||s.country||'')+'</span>',
+      '<span>'+(s.diff||'')+'</span>',
+      '<span>'+(s.arch||'')+'</span>',
+      '<span>'+((s.ironman?'IRONMAN \u00B7 ':'')+(s.pmode||'classic'))+'</span>'].join('');
+    if(el.parentNode!==host||el.previousElementSibling!==hero){
+      host.insertBefore(el,hero?hero.nextSibling:host.firstChild);
+    }
+  }
+
+  /* --- claim card ------------------------------------------------------- */
+  function claim(){
+    var area=$('global-submit-area');
+    if(!area||area.classList.contains('hidden'))return;
+    var input=$('global-name-input'),btn=$('global-submit-btn'),av=$('v24-lbav'),msg=$('v25-msg');
+    if(!input||!btn)return;
+    if(!$('v26-claim-head')){
+      /* Hide the legacy heading/score line instead of relying on :first-of-type:
+         the new heading is intentionally inserted before it. */
+      Array.prototype.forEach.call(area.children,function(child){
+        if(child.tagName==='DIV'&&/Submit to the Global Leaderboard/i.test(child.textContent||''))child.classList.add('v26-legacy');
+      });
+      var h=document.createElement('div');h.id='v26-claim-head';
+      h.innerHTML='<div class="k">STEP 1 \u00B7 DO THIS NOW</div>'+
+        '<div class="h">CLAIM YOUR RANK</div>'+
+        '<div class="s">Enter a name or your run stays invisible \u2014 it will not show up on the global leaderboard.</div>';
+      area.insertBefore(h,area.firstChild);
+      var b=document.createElement('div');b.id='v26-claim-body';
+      area.insertBefore(b,h.nextSibling);
+      var lab=document.createElement('div');lab.id='v26-lab';
+      lab.innerHTML='<span>Your board name</span><span id="v26-count">0/15</span>';
+      b.appendChild(lab);
+      var d=document.createElement('div');d.id='v26-done';
+      d.innerHTML='<div class="b">\uD83C\uDFC6 YOU ARE ON THE BOARD</div><div class="c" id="v26-done-c"></div>';
+      area.appendChild(d);
+      input.placeholder='Your name';
+      input.setAttribute('autocomplete','off');
+      input.addEventListener('focus',function(){ try{input.select()}catch(e){} });
+      input.addEventListener('input',function(){
+        var c=$('v26-count');if(c)c.textContent=(input.value||'').trim().length+'/15';
+      });
+      btn.textContent='SUBMIT TO GLOBAL BOARD';
+    }
+    var body=$('v26-claim-body');
+    /* one stable order: label -> input -> button -> status -> avatars */
+    if(document.activeElement===input)return;
+    [input,btn,msg,av].forEach(function(n){ if(n&&n.parentNode!==body)body.appendChild(n) });
+    if(av&&msg&&av.previousElementSibling!==msg)body.appendChild(av);
+    var c=$('v26-count');if(c)c.textContent=(input.value||'').trim().length+'/15';
+  }
+
+  /* success state comes from the V25 submit flow (localStorage name write) */
+  function watchSent(){
+    var m=$('v25-msg'),area=$('global-submit-area');
+    if(!m||!area)return;
+    if(m.classList.contains('good')&&/leaderboard/i.test(m.textContent||'')&&
+       !/sending|busy/i.test(m.textContent||'')){
+      area.classList.add('v26-sent');
+      var c=$('v26-done-c'),s=S();
+      if(c&&!c.textContent){
+        var nm=($('global-name-input')||{}).value||'';
+        c.textContent=nm.trim()+' \u00B7 '+(typeof fmt==='function'?fmt(finalNet()):'')+
+          ' \u00B7 '+((s&&s.month)||0)+' months. Scroll down for the global top 20.';
+      }
+    }
+  }
+
+  function build(){
+    var es=$('end-screen');
+    if(!es||es.classList.contains('hidden')||getComputedStyle(es).display==='none'){
+      document.body.classList.remove('v26');return;
+    }
+    document.body.classList.add('v26');
+    var host=es.querySelector('.end-card')||es;
+    var hero=$('end-hero-card');
+    setupLine(host,hero);
+    claim();watchSent();
+
+    var stats=$('end-stats'),badges=null,roast=$('death-roast'),xp=$('end-xp');
+    host.querySelectorAll('.end-sec').forEach(function(s){
+      if(s.querySelector('#end-badges'))badges=s;
+    });
+    var localRuns=null;
+    host.querySelectorAll('.end-sec').forEach(function(s){
+      if(s.querySelector('#end-local-list'))localRuns=s;
+    });
+    var glb=host.querySelector('.global-lb'),hist=$('end-history'),cta=$('pump-cta');
+    var actions=host.querySelector('.end-actions');
+
+    var c1=card('v26-c-stats','\uD83D\uDCCA','Run breakdown',[stats,xp,badges].filter(Boolean),false);
+    var c2=card('v26-c-board','\uD83C\uDFC6','Global top 20',[glb].filter(Boolean),false);
+    var c3=card('v26-c-hist','\uD83D\uDCDC','Your past runs',[localRuns,hist].filter(Boolean),false);
+    var c4=card('v26-c-share','\uD83D\uDCF8','Share & $TCFB',[cta].filter(Boolean),false);
+
+    var area=$('global-submit-area');
+    var order=[area,c1,c4,c2,c3];
+    var prev=area;
+    order.forEach(function(n){
+      if(!n)return;
+      if(n===area)return;
+      if(prev&&prev.nextElementSibling!==n)host.insertBefore(n,prev.nextSibling);
+      prev=n;
+    });
+    if(actions&&actions.parentNode===host&&host.lastElementChild!==actions)host.appendChild(actions);
+  }
+
+  setInterval(build,500);
+  document.addEventListener('DOMContentLoaded',build);
+  build();
+  window.v26Build=build;
+})();
+</script>
