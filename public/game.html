@@ -11331,7 +11331,8 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
     if(arenaDone)return;arenaDone=true;
     try{
       fetch('/api/public/leaderboard',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
-        var rows=(d&&(d.entries||d.scores||d.data||d))||[];
+        var rows=Array.isArray(d)?d:((d&&(d.entries||d.scores||d.data))||[]);
+
         if(!Array.isArray(rows)||!rows.length){arenaDone=false;return}
         var n=rows.length,top=0,who='';
         rows.forEach(function(r){
