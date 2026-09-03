@@ -121,6 +121,38 @@ function rankScore(r: {
   return score;
 }
 
+const SELECT_COLS =
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at";
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+// A publishable-key client for reads only. The service-role key is a JWT whose
+// `iat` can land in the future relative to the DB clock (PGRST303); the
+// publishable key is opaque and not subject to that validation, so it keeps the
+// public board readable during clock drift. Table has a public read policy.
+async function createReadFallbackClient() {
+  const { createClient } = await import("@supabase/supabase-js");
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
+  if (!url || !key) return null;
+  return createClient(url, key, {
+    global: {
+      fetch: (input, init) => {
+        const headers = new Headers(
+          typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
+        );
+        if (init?.headers) new Headers(init.headers).forEach((v, k) => headers.set(k, v));
+        if (headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+    },
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+}
+
 export const Route = createFileRoute("/api/public/leaderboard")({
   server: {
     handlers: {
@@ -132,29 +164,41 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         const mode = url.searchParams.get("mode");
         const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
 
-        const runQuery = async () => {
-          let query = supabaseAdmin
+        const runQuery = async (client: {
+          from: (t: string) => any;
+        }) => {
+          let query = client
             .from("leaderboard_runs")
-            .select(
-              "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at",
-            )
+            .select(SELECT_COLS)
             .order("created_at", { ascending: false })
             .limit(500);
 
           if (mode && mode !== "all") query = query.eq("mode", mode);
-          return await query;
+          return (await query) as { data: any[] | null; error: any };
         };
 
-        let { data, error } = await runQuery();
+        let { data, error } = await runQuery(supabaseAdmin);
         // Transient auth/clock/network hiccups (e.g. PGRST303) should not hard-fail the board.
-        for (let attempt = 0; attempt < 2 && error; attempt++) {
-          await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
-          ({ data, error } = await runQuery());
+        for (let attempt = 0; attempt < 3 && error; attempt++) {
+          await sleep(250 * (attempt + 1));
+          ({ data, error } = await runQuery(supabaseAdmin));
+        }
+        if (error) {
+          console.error("leaderboard read failed, trying publishable fallback", error);
+          const fallback = await createReadFallbackClient();
+          if (fallback) {
+            for (let attempt = 0; attempt < 2 && error; attempt++) {
+              ({ data, error } = await runQuery(fallback as any));
+              if (error) await sleep(250);
+            }
+          }
         }
         if (error) {
           console.error("leaderboard read failed", error);
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
+
+
 
 
         const rows = (data ?? [])
