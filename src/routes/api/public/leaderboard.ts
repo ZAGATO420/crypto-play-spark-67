@@ -80,17 +80,17 @@ function maxLevelForXp(xp: number): number {
 // Plausibility gate: a run cannot be richer than the game's own math allows.
 // Ceiling scales with how long the player actually played, so a "month 3,
 // one trillion dollars" payload is rejected before it ever reaches the table.
-function isPlausible(run: z.infer<typeof runSchema>): boolean {
-  // Airdrops/presales can multiply an early run hard, so keep a generous floor
-  // for short runs and let the ceiling grow with months played.
-  const monthCeiling = Math.max(5_000_000, 25_000 * Math.pow(1.85, Math.max(run.months, 1)));
-  if (run.net > Math.min(monthCeiling, 1e10)) return false;
+function implausibleReason(run: z.infer<typeof runSchema>): string | null {
+  // Airdrops/presales/50x perps can multiply an early run hard, so keep a very
+  // generous floor for short runs and let the ceiling grow with months played.
+  const monthCeiling = Math.max(50_000_000, 25_000 * Math.pow(2.1, Math.max(run.months, 1)));
+  if (run.net > Math.min(monthCeiling, 1e10)) return "net";
   // XP is earned per action; it cannot outrun the number of months by orders of magnitude.
-  if (run.xp > 20_000 + run.months * 30_000) return false;
-  if (run.trades > 40 + run.months * 60) return false;
+  if (run.xp > 60_000 + run.months * 40_000) return "xp";
+  if (run.trades > 120 + run.months * 120) return "trades";
   // Level must match the client's XP curve (allow +1 for rounding drift).
-  if (run.level > maxLevelForXp(run.xp) + 1) return false;
-  return true;
+  if (run.level > maxLevelForXp(run.xp) + 1) return "level";
+  return null;
 }
 
 function sanitizeName(name: string): string {
