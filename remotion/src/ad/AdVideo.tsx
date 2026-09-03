@@ -151,7 +151,9 @@ export const AdVideo: React.FC = () => (
           kick="// AIRDROPS · PRESALES · RUGS"
           line={<>FARM IT ALL.<br />TRUST NOBODY.</>}
           size={92}
-          fy={58}
+          fy={82}
+          from={1.0}
+          to={1.06}
           tint={AC.gold}
         />
       </TransitionSeries.Sequence>
