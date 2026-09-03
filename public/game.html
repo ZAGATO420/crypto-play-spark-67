@@ -3893,7 +3893,10 @@ function endGame(win,reason=''){if(state&&state._gameEnded)return;try{stopMusic(
     if(area){
       if(state&&state._quit){area.classList.add('hidden');}else{area.classList.remove('hidden');}
       if(input){
-        input.value = localStorage.getItem('tfcb_last_name') || (state?state.name:'') || 'Malushina';
+        const _last = localStorage.getItem('tfcb_last_name') || '';
+        const _sn = (state && state.name) ? String(state.name).trim() : '';
+        const _auto = /^(anon|degen|player)$/i.test(_sn);
+        input.value = _last || (_auto ? '' : _sn);
       }
       if(scoreEl){
         scoreEl.textContent = fmt(finalNet()) + ' • ' + (state?state.month:0) + ' Months';
