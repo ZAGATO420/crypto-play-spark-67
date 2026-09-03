@@ -11330,19 +11330,20 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
     }
     if(arenaDone)return;arenaDone=true;
     try{
-      fetch('/api/public/leaderboard').then(function(r){return r.json()}).then(function(d){
+      fetch('/api/public/leaderboard',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
         var rows=(d&&(d.entries||d.scores||d.data||d))||[];
-        if(!Array.isArray(rows))return;
+        if(!Array.isArray(rows)||!rows.length){arenaDone=false;return}
         var n=rows.length,top=0,who='';
         rows.forEach(function(r){
-          var v=Number(r.net_worth||r.score||r.networth||0);
+          var v=Number(r.netWorth||r.net_worth||r.score||r.networth||0);
           if(v>top){top=v;who=String(r.name||r.player_name||'').slice(0,14)}
         });
         countUp($('v27-runs'),n);
         var te=$('v27-top');
-        if(te&&top)te.textContent='$'+Math.round(top).toLocaleString()+(who?' · '+who.toUpperCase():'');
-      }).catch(function(){});
-    }catch(e){}
+        if(te&&top)te.textContent='$'+Math.round(top).toLocaleString()+(who?' \u00B7 '+who.toUpperCase():'');
+      }).catch(function(){arenaDone=false});
+    }catch(e){arenaDone=false}
+
   }
   function countUp(el,to){
     if(!el)return;
