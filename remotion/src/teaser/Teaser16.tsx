@@ -32,6 +32,7 @@ export const Teaser16: React.FC = () => (
           from={1.02}
           to={1.14}
           fy={42}
+          bright={1.2}
           tint={TC.gold}
         />
       </TransitionSeries.Sequence>
@@ -76,7 +77,7 @@ export const Teaser16: React.FC = () => (
           from={1.02}
           to={1.12}
           fy={38}
-          bright={1.16}
+          bright={1.5}
           tint={TC.acid}
         />
       </TransitionSeries.Sequence>
@@ -92,6 +93,7 @@ export const Teaser16: React.FC = () => (
           from={1.04}
           to={1.18}
           fy={40}
+          bright={1.45}
           tint={TC.red}
         />
       </TransitionSeries.Sequence>
