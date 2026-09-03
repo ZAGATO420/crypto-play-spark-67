@@ -11239,8 +11239,9 @@ body.v27 #v21-gate .g-boss{will-change:transform;
 /* ---- cold open ---- */
 #v27-open{position:fixed;inset:0;z-index:9998;background:#000;display:flex;
   align-items:center;justify-content:center;flex-direction:column;gap:14px;cursor:pointer}
-#v27-open .t{font:700 11px/1 'JetBrains Mono',monospace;letter-spacing:.3em;color:#4b5568;
-  white-space:nowrap;overflow:hidden}
+#v27-open .t{font:700 clamp(8px,2.1vw,11px)/1.5 'JetBrains Mono',monospace;letter-spacing:.18em;color:#4b5568;
+  max-width:92vw;text-align:center}
+
 #v27-open .t b{color:#a3e635;font-weight:700}
 #v27-open .k{font:700 9px/1 'JetBrains Mono',monospace;letter-spacing:.3em;color:#2c3340}
 #v27-open.out{opacity:0;transition:opacity .5s ease;pointer-events:none}
