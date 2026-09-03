@@ -10708,6 +10708,233 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
 })();
 </script>
 
+<style id="v25-end">
+/* =====================================================================
+   V25 — END SCREEN IS ALWAYS OPERABLE + LEADERBOARD SUBMIT NEVER LOST.
+   Presentation / reliability only. No game maths, no score formula.
+   ===================================================================== */
+body.v25-end{overflow:auto!important;overflow-y:auto!important;height:auto!important;
+  position:static!important;touch-action:auto!important}
+html:has(body.v25-end){overflow-y:auto!important}
+body.v25-end #end-screen{display:flex!important;overflow:visible;height:auto;
+  padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+/* every run-time overlay/dock is dead once the run is over */
+body.v25-end #v23-coach,body.v25-end #v23-rotate,body.v25-end #v17-dock,
+body.v25-end #v17-sheet,body.v25-end #v21-sheet,body.v25-end #v6m,
+body.v25-end #dx-modal,body.v25-end #v22-boss-chip,body.v25-end #event-overlay,
+body.v25-end #decision-overlay,body.v25-end #presale-overlay,body.v25-end #mini-overlay,
+body.v25-end #levelup-overlay,body.v25-end #tutorial-overlay,
+body.v25-end #v20-arena,body.v25-end #v21-gate{
+  display:none!important;pointer-events:none!important;visibility:hidden!important}
+
+/* submit block sits directly under the share card, not at the bottom */
+#global-submit-area{position:relative;z-index:6}
+body.v25-end #global-submit-area{border:1px solid rgba(182,255,46,.4);border-radius:18px;
+  background:linear-gradient(165deg,rgba(182,255,46,.09),rgba(8,12,18,.9));padding:16px;margin:16px 0 4px}
+body.v25-end #global-name-input{width:100%;min-height:48px;font-size:16px;border-radius:12px;
+  padding:0 12px;background:#070b13;border:1px solid rgba(255,255,255,.18);color:#fff;
+  font-weight:700;text-align:center}
+body.v25-end #global-submit-btn{width:100%;min-height:50px;margin-top:10px;border:0;cursor:pointer;
+  border-radius:13px;background:linear-gradient(120deg,#b6ff2e,#ffc53d);color:#08130a;
+  font:900 14px/1 Inter,system-ui,sans-serif;letter-spacing:.08em}
+body.v25-end #global-submit-btn[disabled]{opacity:.6;cursor:progress}
+#v25-msg{margin-top:9px;font:700 12px/1.45 Inter,system-ui,sans-serif;text-align:center;display:none}
+#v25-msg.bad{color:#ffb0a0}
+#v25-msg.good{color:#d8ff8a}
+#v25-msg.on{display:block}
+
+/* phone: a sticky jump-to-submit bar so nobody has to hunt for it */
+#v25-jump{position:fixed;left:0;right:0;bottom:0;z-index:120;display:none;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(5,7,13,0),rgba(5,7,13,.97) 42%)}
+#v25-jump button{width:100%;min-height:50px;border:0;border-radius:14px;cursor:pointer;
+  background:linear-gradient(120deg,#b6ff2e,#ffc53d);color:#08130a;
+  font:900 13.5px/1 Inter,system-ui,sans-serif;letter-spacing:.08em}
+body.v25-end #v25-jump.on{display:block}
+@media(min-width:821px){#v25-jump{display:none!important}}
+</style>
+<script>
+/* V25 — end-screen liberation + resilient leaderboard submit */
+(function(){
+  function $(id){return document.getElementById(id)}
+  function S(){try{return state}catch(e){return window.state||null}}
+  var PENDING='tcfb_pending_run_v1';
+
+  /* ---------------- 1. kill every run overlay once the run is over ------- */
+  function freeEnd(){
+    var es=$('end-screen');
+    var on=!!(es&&!es.classList.contains('hidden')&&getComputedStyle(es).display!=='none');
+    document.body.classList.toggle('v25-end',on);
+    if(!on)return;
+    document.body.classList.remove('v4-live','v21-gate','v21-flow','v23-ingame');
+    document.body.removeAttribute('data-pane');
+    var c=$('v23-coach');if(c)c.classList.remove('on');
+    ['dx-modal','v6m','v17-sheet','v21-sheet'].forEach(function(id){
+      var m=$(id);if(m)m.classList.remove('on');
+    });
+    ['event-overlay','decision-overlay','presale-overlay','mini-overlay',
+     'levelup-overlay','tutorial-overlay'].forEach(function(id){
+      var o=$(id);if(o){o.classList.add('hidden');o.style.display='none'}
+    });
+    document.documentElement.style.overflowY='auto';
+    document.body.style.overflow='';
+    document.body.style.position='';
+    var jump=$('v25-jump');
+    if(jump){
+      var area=$('global-submit-area');
+      var need=area&&!area.classList.contains('hidden')&&
+        area.getBoundingClientRect().top>window.innerHeight-40;
+      jump.classList.toggle('on',!!need);
+    }
+  }
+  setInterval(freeEnd,400);
+  window.addEventListener('scroll',freeEnd,{passive:true});
+  document.addEventListener('DOMContentLoaded',freeEnd);
+  freeEnd();
+
+  /* move the submit block right under the share card */
+  function reorder(){
+    var area=$('global-submit-area'),hero=$('end-hero-card');
+    if(!area||!hero||area.dataset.v25)return;
+    area.dataset.v25='1';
+    hero.parentNode.insertBefore(area,hero.nextSibling);
+    if(!$('v25-msg')){
+      var m=document.createElement('div');m.id='v25-msg';area.appendChild(m);
+    }
+  }
+  function jumpBar(){
+    if($('v25-jump'))return;
+    var j=document.createElement('div');j.id='v25-jump';
+    j.innerHTML='<button type="button">\uD83C\uDFC6 SUBMIT YOUR SCORE</button>';
+    j.querySelector('button').addEventListener('click',function(){
+      var a=$('global-submit-area');
+      if(a)a.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(function(){var i=$('global-name-input');if(i)i.focus()},450);
+    });
+    document.body.appendChild(j);
+  }
+  jumpBar();setInterval(reorder,600);reorder();
+
+  /* ---------------- 2. resilient submit --------------------------------- */
+  function msg(text,kind){
+    var m=$('v25-msg');if(!m)return;
+    m.textContent=text;m.className='on '+(kind||'');
+  }
+  function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+
+  function buildPayload(name){
+    var s=S();if(!s)return null;
+    var lvl=(typeof xpLevel==='function'?xpLevel(finalXP()):0)+1;
+    return {
+      name:name,
+      arch:s.arch||'trader',
+      country:s.country||'DE',
+      difficulty:s.diff||'BOSS',
+      mode:(s.ironman?'IRONMAN-':'')+(s.pmode||'classic'),
+      net:Math.round(finalNet()),
+      xp:Math.round(finalXP()),
+      level:Math.max(1,Math.min(50,lvl)),
+      rank:(typeof getRank==='function'?getRank(!!s._finalWin).title:''),
+      months:s.month||0,
+      achievements:(s.achievements||[]).length,
+      trades:(typeof tradeLog!=='undefined'?tradeLog.length:0),
+      survived:!!s._finalWin,
+      avatar:(s.avatar||'').trim()
+    };
+  }
+
+  /* one POST attempt -> {ok} | {retry} | {fatal, why} */
+  async function attempt(payload){
+    try{
+      var res=await fetch('/api/public/leaderboard',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      var j=null;try{j=await res.json()}catch(e){}
+      if(res.ok&&j&&(j.ok||j.success))return {ok:true};
+      if(res.status===422)return {fatal:true,why:'This run looked impossible to the server, so it was not ranked.'};
+      if(res.status===400)return {fatal:true,why:'That name or run data was rejected. Try a simpler name.'};
+      return {retry:true};
+    }catch(e){ return {retry:true} }
+  }
+
+  async function send(payload,tries){
+    var delays=[0,900,2200,4500,8000].slice(0,tries||5);
+    for(var i=0;i<delays.length;i++){
+      if(delays[i])await sleep(delays[i]);
+      var r=await attempt(payload);
+      if(r.ok)return {ok:true};
+      if(r.fatal)return r;
+      if(i<delays.length-1)msg('Leaderboard busy \u2014 retrying ('+(i+2)+'/'+delays.length+')\u2026','bad');
+    }
+    return {retry:true};
+  }
+
+  async function submit(){
+    var input=$('global-name-input'),btn=$('global-submit-btn');
+    if(!input)return;
+    var name=(input.value||'').trim();
+    if(name.length<2||name.length>15){msg('Pick a name with 2 to 15 characters.','bad');input.focus();return}
+    var payload=buildPayload(name);
+    if(!payload){msg('No finished run found to submit.','bad');return}
+    if(btn){btn.disabled=true;btn.textContent='SENDING\u2026'}
+    msg('Sending your run to the global board\u2026','good');
+    var r=await send(payload,5);
+    if(r.ok){
+      try{localStorage.setItem('tfcb_last_name',name)}catch(e){}
+      try{localStorage.removeItem(PENDING)}catch(e){}
+      msg('\uD83C\uDFC6 You are on the global leaderboard.','good');
+      if(btn){btn.textContent='SUBMITTED';btn.disabled=true}
+      var jump=$('v25-jump');if(jump)jump.classList.remove('on');
+      try{if(typeof toast==='function')toast('Score submitted \uD83D\uDE80','buy')}catch(e){}
+      try{await loadGlobalLeaderboard()}catch(e){}
+      setTimeout(function(){var a=$('global-submit-area');if(a)a.classList.add('hidden')},2600);
+      return;
+    }
+    if(r.fatal){
+      msg(r.why,'bad');
+      if(btn){btn.disabled=false;btn.textContent='TRY AGAIN'}
+      return;
+    }
+    /* server unreachable: keep the run and resend it automatically later */
+    try{localStorage.setItem(PENDING,JSON.stringify({p:payload,t:Date.now()}))}catch(e){}
+    msg('Board is offline right now. Your run is saved and will be sent automatically \u2014 or press TRY AGAIN.','bad');
+    if(btn){btn.disabled=false;btn.textContent='TRY AGAIN'}
+  }
+  window.submitGlobalScore=function(){submit()};
+
+  /* flush a queued run on the next visit / when the tab comes back */
+  async function flush(){
+    var raw=null;try{raw=localStorage.getItem(PENDING)}catch(e){}
+    if(!raw)return;
+    var q=null;try{q=JSON.parse(raw)}catch(e){}
+    if(!q||!q.p){try{localStorage.removeItem(PENDING)}catch(e){}return}
+    if(Date.now()-(q.t||0)>1000*60*60*72){try{localStorage.removeItem(PENDING)}catch(e){}return}
+    var r=await attempt(q.p);
+    if(r.ok||r.fatal){
+      try{localStorage.removeItem(PENDING)}catch(e){}
+      if(r.ok){
+        try{if(typeof toast==='function')toast('Saved run submitted to the board \uD83C\uDFC6','buy')}catch(e){}
+        try{await loadGlobalLeaderboard()}catch(e){}
+      }
+    }
+  }
+  setTimeout(flush,3000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)flush()});
+
+  /* ---------------- 3. never arm the phone tutorial after game over ----- */
+  var _coach=window.v23Coach;
+  if(typeof _coach==='function'){
+    window.v23Coach=function(){
+      var s=S();if(s&&s._gameEnded)return;
+      if(document.body.classList.contains('v25-end'))return;
+      return _coach.apply(this,arguments);
+    };
+  }
+})();
+</script>
+
+
 </body>
 </html>
 

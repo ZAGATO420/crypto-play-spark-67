@@ -80,17 +80,17 @@ function maxLevelForXp(xp: number): number {
 // Plausibility gate: a run cannot be richer than the game's own math allows.
 // Ceiling scales with how long the player actually played, so a "month 3,
 // one trillion dollars" payload is rejected before it ever reaches the table.
-function isPlausible(run: z.infer<typeof runSchema>): boolean {
-  // Airdrops/presales can multiply an early run hard, so keep a generous floor
-  // for short runs and let the ceiling grow with months played.
-  const monthCeiling = Math.max(5_000_000, 25_000 * Math.pow(1.85, Math.max(run.months, 1)));
-  if (run.net > Math.min(monthCeiling, 1e10)) return false;
+function implausibleReason(run: z.infer<typeof runSchema>): string | null {
+  // Airdrops/presales/50x perps can multiply an early run hard, so keep a very
+  // generous floor for short runs and let the ceiling grow with months played.
+  const monthCeiling = Math.max(50_000_000, 25_000 * Math.pow(2.1, Math.max(run.months, 1)));
+  if (run.net > Math.min(monthCeiling, 1e10)) return "net";
   // XP is earned per action; it cannot outrun the number of months by orders of magnitude.
-  if (run.xp > 20_000 + run.months * 30_000) return false;
-  if (run.trades > 40 + run.months * 60) return false;
+  if (run.xp > 60_000 + run.months * 40_000) return "xp";
+  if (run.trades > 120 + run.months * 120) return "trades";
   // Level must match the client's XP curve (allow +1 for rounding drift).
-  if (run.level > maxLevelForXp(run.xp) + 1) return false;
-  return true;
+  if (run.level > maxLevelForXp(run.xp) + 1) return "level";
+  return null;
 }
 
 function sanitizeName(name: string): string {
@@ -121,6 +121,38 @@ function rankScore(r: {
   return score;
 }
 
+const SELECT_COLS =
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at";
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+// A publishable-key client for reads only. The service-role key is a JWT whose
+// `iat` can land in the future relative to the DB clock (PGRST303); the
+// publishable key is opaque and not subject to that validation, so it keeps the
+// public board readable during clock drift. Table has a public read policy.
+async function createReadFallbackClient() {
+  const { createClient } = await import("@supabase/supabase-js");
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"] ?? process.env["SUPABASE_ANON_KEY"];
+  if (!url || !key) return null;
+  return createClient(url, key, {
+    global: {
+      fetch: (input, init) => {
+        const headers = new Headers(
+          typeof Request !== "undefined" && input instanceof Request ? input.headers : undefined,
+        );
+        if (init?.headers) new Headers(init.headers).forEach((v, k) => headers.set(k, v));
+        if (headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+    },
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+}
+
 export const Route = createFileRoute("/api/public/leaderboard")({
   server: {
     handlers: {
@@ -132,29 +164,41 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         const mode = url.searchParams.get("mode");
         const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
 
-        const runQuery = async () => {
-          let query = supabaseAdmin
+        const runQuery = async (client: {
+          from: (t: string) => any;
+        }) => {
+          let query = client
             .from("leaderboard_runs")
-            .select(
-              "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at",
-            )
+            .select(SELECT_COLS)
             .order("created_at", { ascending: false })
             .limit(500);
 
           if (mode && mode !== "all") query = query.eq("mode", mode);
-          return await query;
+          return (await query) as { data: any[] | null; error: any };
         };
 
-        let { data, error } = await runQuery();
+        let { data, error } = await runQuery(supabaseAdmin);
         // Transient auth/clock/network hiccups (e.g. PGRST303) should not hard-fail the board.
-        for (let attempt = 0; attempt < 2 && error; attempt++) {
-          await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
-          ({ data, error } = await runQuery());
+        for (let attempt = 0; attempt < 3 && error; attempt++) {
+          await sleep(250 * (attempt + 1));
+          ({ data, error } = await runQuery(supabaseAdmin));
+        }
+        if (error) {
+          console.error("leaderboard read failed, trying publishable fallback", error);
+          const fallback = await createReadFallbackClient();
+          if (fallback) {
+            for (let attempt = 0; attempt < 2 && error; attempt++) {
+              ({ data, error } = await runQuery(fallback as any));
+              if (error) await sleep(250);
+            }
+          }
         }
         if (error) {
           console.error("leaderboard read failed", error);
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
+
+
 
 
         const rows = (data ?? [])
@@ -197,12 +241,22 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         }
         const run = parsed.data;
 
-        if (!isPlausible(run)) {
+        const reason = implausibleReason(run);
+        if (reason) {
+          console.warn("leaderboard score rejected", {
+            reason,
+            months: run.months,
+            net: run.net,
+            xp: run.xp,
+            level: run.level,
+            trades: run.trades,
+            mode: run.mode,
+          });
           return Response.json({ error: "score rejected" }, { status: 422, headers: CORS });
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { error } = await supabaseAdmin.from("leaderboard_runs").insert({
+        const row = {
           player_name: sanitizeName(run.name),
           archetype: run.arch,
           country: run.country,
@@ -217,12 +271,20 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           trades: run.trades,
           survived: run.survived,
           avatar: run.avatar ?? null,
-        });
+        };
+
+        let { error } = await supabaseAdmin.from("leaderboard_runs").insert(row);
+        // PGRST303 / network blips: retry before telling a player their run is lost.
+        for (let attempt = 0; attempt < 3 && error; attempt++) {
+          await sleep(300 * (attempt + 1));
+          ({ error } = await supabaseAdmin.from("leaderboard_runs").insert(row));
+        }
 
         if (error) {
           console.error("leaderboard write failed", error);
           return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
         }
+
 
         return Response.json({ ok: true, success: true }, { status: 201, headers: CORS });
       },
