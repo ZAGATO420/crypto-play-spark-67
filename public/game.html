@@ -11080,6 +11080,11 @@ body.v26 .v26-body .end-sec:last-child{margin-bottom:0!important}
     var input=$('global-name-input'),btn=$('global-submit-btn'),av=$('v24-lbav'),msg=$('v25-msg');
     if(!input||!btn)return;
     if(!$('v26-claim-head')){
+      /* Hide the legacy heading/score line instead of relying on :first-of-type:
+         the new heading is intentionally inserted before it. */
+      Array.prototype.forEach.call(area.children,function(child){
+        if(child.tagName==='DIV'&&/Submit to the Global Leaderboard/i.test(child.textContent||''))child.classList.add('v26-legacy');
+      });
       var h=document.createElement('div');h.id='v26-claim-head';
       h.innerHTML='<div class="k">STEP 1 \u00B7 DO THIS NOW</div>'+
         '<div class="h">CLAIM YOUR RANK</div>'+
