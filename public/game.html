@@ -10306,16 +10306,33 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
     if(ci>=CO.length){endCoach();return}
     var step=CO[ci],node=null;
     step.sel.split(',').some(function(s){node=document.querySelector(s.trim());return !!node});
+    if(node&&!node.dataset.v23scrolled){
+      node.dataset.v23scrolled='1';
+      try{node.scrollIntoView({block:'center',behavior:'auto'})}catch(e){}
+      requestAnimationFrame(function(){requestAnimationFrame(paintCoach)});
+      return;
+    }
     var ring=c.querySelector('.c-ring'),box=c.querySelector('.c-box');
+    var vh=window.innerHeight,pad=12;
     if(node){
       var r=node.getBoundingClientRect();
+      /* keep the ring inside the screen so the coins stay visible */
+      var top=Math.max(pad,r.top-6),bot=Math.min(vh-pad,r.bottom+6);
+      if(bot-top<48)bot=Math.min(vh-pad,top+48);
       ring.style.display='block';
-      ring.style.left=(r.left-6)+'px';ring.style.top=(r.top-6)+'px';
-      ring.style.width=(r.width+12)+'px';ring.style.height=(r.height+12)+'px';
-      var below=r.bottom+14, tall=window.innerHeight-below>210;
-      box.style.top=(tall?below:Math.max(14,r.top-220))+'px';
+      ring.style.left=(r.left-6)+'px';ring.style.top=top+'px';
+      ring.style.width=(r.width+12)+'px';ring.style.height=(bot-top)+'px';
+      /* put the bubble in the roomier half, never on top of the target */
+      var spaceBelow=vh-bot,spaceAbove=top,bh=Math.min(230,vh*0.42);
+      box.style.maxHeight=Math.max(150,Math.max(spaceBelow,spaceAbove)-pad)+'px';
+      box.style.overflowY='auto';
+      if(spaceBelow>=spaceAbove){
+        box.style.top=Math.min(vh-bh-pad,bot+pad)+'px';
+      }else{
+        box.style.top=Math.max(pad,top-bh-pad)+'px';
+      }
     }else{
-      ring.style.display='none';box.style.top='24%';
+      ring.style.display='none';box.style.top='24%';box.style.maxHeight='';
     }
     c.querySelector('.c-k').textContent=step.k;
     c.querySelector('.c-t').textContent=step.t;
@@ -10323,6 +10340,7 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
     c.querySelector('.c-next').textContent=(ci===CO.length-1)?'START TRADING':'GOT IT';
     c.classList.add('on');
   }
+
   function armCoach(){
     if(!PHONE())return;
     try{if(localStorage.getItem('tcfb_coach_v23'))return}catch(e){}
@@ -11872,7 +11890,7 @@ body.v17-mob #v17-dock button[data-act="more"].dot:after{content:'';position:abs
     });
   }
   var HINTS=[
-    {sel:'#market-list .dxt,#market-list,#v17-market',
+    {sel:'#market-list,#v17-market',rows:3,
      t:'Tap a coin to trade it',
      d:'One window: buy, sell, or open leverage. Real prices from 2020 to 2026.'},
     {sel:'#v17-dock [data-act="month"],.v4-next,#mobile-next',
@@ -11897,18 +11915,35 @@ body.v17-mob #v17-dock button[data-act="more"].dot:after{content:'';position:abs
     s.sel.split(',').some(function(x){node=document.querySelector(x.trim());return !!node});
     var r=h.querySelector('.r'),box=h.querySelector('.x');
     if(node){
-      var b=node.getBoundingClientRect();
+      /* pull the target on screen first so the coins are actually visible */
+      if(!node.dataset.v29scroll){
+        node.dataset.v29scroll='1';
+        try{node.scrollIntoView({block:'center',behavior:'auto'})}catch(e){}
+        requestAnimationFrame(function(){requestAnimationFrame(paintHint)});
+        return;
+      }
+      var b=node.getBoundingClientRect(),vh=window.innerHeight,pad=12;
+      var top=Math.max(pad,b.top-6),bot=Math.min(vh-pad,b.bottom+6);
+      /* highlight the first few coin rows instead of a strip that runs off screen */
+      if(s.rows){
+        var kids=node.children,end=0,k;
+        for(k=0;k<Math.min(s.rows,kids.length);k++)end=kids[k].getBoundingClientRect().bottom;
+        if(end>top+40)bot=Math.min(bot,end+6);
+      }
+      if(bot-top<52)bot=Math.min(vh-pad,top+52);
       r.style.display='block';
-      r.style.left=(b.left-6)+'px';r.style.top=(b.top-6)+'px';
-      r.style.width=(b.width+12)+'px';r.style.height=(b.height+12)+'px';
-      var below=b.bottom+14;
-      box.style.top=(window.innerHeight-below>200?below:Math.max(14,b.top-210))+'px';
+      r.style.left=(b.left-6)+'px';r.style.top=top+'px';
+      r.style.width=(b.width+12)+'px';r.style.height=(bot-top)+'px';
+      /* bubble goes into the roomier half, never over the highlighted rows */
+      var bh=box.offsetHeight||180,spB=vh-bot-pad,spA=top-pad;
+      box.style.top=(spB>=spA?Math.min(vh-bh-pad,bot+pad):Math.max(pad,top-bh-pad))+'px';
     }else{r.style.display='none';box.style.top='26%'}
     h.querySelector('b').textContent=s.t;
     h.querySelector('span').textContent=s.d;
     h.querySelector('button').textContent=(hi===HINTS.length-1)?'START TRADING':'NEXT';
     h.classList.add('on');
   }
+
   window.v29Hints=function(){hi=0;paintHint()};
   (function(){
     /* suppress the old auto tour, arm the two hints once */
