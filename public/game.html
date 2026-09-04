@@ -11980,7 +11980,8 @@ body.v30 .hud-figs,body.v30 .hud-vitals{display:none!important}
   body.v30.v17-mob #v23-statsA,body.v30.v17-mob #v23-statsB{display:none!important}
 }
 @media(min-width:821px){
-  body.v30.v30-run #v30-bar{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+  body.v30.v30-run #v30-bar{grid-column:1/-1;grid-template-columns:repeat(8,minmax(0,1fr))}
+  body.v30 .header-top{align-items:start}
 }
 
 /* ---------- 3. bigger, calmer touch targets -------------------------- */
