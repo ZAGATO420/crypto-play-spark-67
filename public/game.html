@@ -11982,6 +11982,9 @@ body.v30 .hud-figs,body.v30 .hud-vitals{display:none!important}
 @media(min-width:821px){
   body.v30.v30-run #v30-bar{grid-column:1/-1;grid-template-columns:repeat(8,minmax(0,1fr))}
   body.v30 .header-top{align-items:start}
+  /* sound / settings / quit stay in the top right corner */
+  body.v30 header{position:relative}
+  body.v30 .hud-sys{position:absolute;top:10px;left:14px;display:flex;gap:8px;z-index:5}
 }
 
 /* ---------- 3. bigger, calmer touch targets -------------------------- */
