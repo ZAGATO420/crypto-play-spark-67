@@ -10306,16 +10306,33 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
     if(ci>=CO.length){endCoach();return}
     var step=CO[ci],node=null;
     step.sel.split(',').some(function(s){node=document.querySelector(s.trim());return !!node});
+    if(node&&!node.dataset.v23scrolled){
+      node.dataset.v23scrolled='1';
+      try{node.scrollIntoView({block:'center',behavior:'auto'})}catch(e){}
+      requestAnimationFrame(function(){requestAnimationFrame(paintCoach)});
+      return;
+    }
     var ring=c.querySelector('.c-ring'),box=c.querySelector('.c-box');
+    var vh=window.innerHeight,pad=12;
     if(node){
       var r=node.getBoundingClientRect();
+      /* keep the ring inside the screen so the coins stay visible */
+      var top=Math.max(pad,r.top-6),bot=Math.min(vh-pad,r.bottom+6);
+      if(bot-top<48)bot=Math.min(vh-pad,top+48);
       ring.style.display='block';
-      ring.style.left=(r.left-6)+'px';ring.style.top=(r.top-6)+'px';
-      ring.style.width=(r.width+12)+'px';ring.style.height=(r.height+12)+'px';
-      var below=r.bottom+14, tall=window.innerHeight-below>210;
-      box.style.top=(tall?below:Math.max(14,r.top-220))+'px';
+      ring.style.left=(r.left-6)+'px';ring.style.top=top+'px';
+      ring.style.width=(r.width+12)+'px';ring.style.height=(bot-top)+'px';
+      /* put the bubble in the roomier half, never on top of the target */
+      var spaceBelow=vh-bot,spaceAbove=top,bh=Math.min(230,vh*0.42);
+      box.style.maxHeight=Math.max(150,Math.max(spaceBelow,spaceAbove)-pad)+'px';
+      box.style.overflowY='auto';
+      if(spaceBelow>=spaceAbove){
+        box.style.top=Math.min(vh-bh-pad,bot+pad)+'px';
+      }else{
+        box.style.top=Math.max(pad,top-bh-pad)+'px';
+      }
     }else{
-      ring.style.display='none';box.style.top='24%';
+      ring.style.display='none';box.style.top='24%';box.style.maxHeight='';
     }
     c.querySelector('.c-k').textContent=step.k;
     c.querySelector('.c-t').textContent=step.t;
@@ -10323,6 +10340,7 @@ body.v17-mob .hud-sys .hud-ic-quit{border:1px solid rgba(255,92,92,.65);color:#f
     c.querySelector('.c-next').textContent=(ci===CO.length-1)?'START TRADING':'GOT IT';
     c.classList.add('on');
   }
+
   function armCoach(){
     if(!PHONE())return;
     try{if(localStorage.getItem('tcfb_coach_v23'))return}catch(e){}
