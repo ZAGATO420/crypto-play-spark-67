@@ -11974,11 +11974,13 @@ body.v30.v30-run #v30-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1
 #v30-bar button.c.crit .act{color:#ffc2c8}
 /* the old expandable chip and its drawers are gone for good */
 body.v30 #v23-statchip,body.v30 #v28-surv{display:none!important}
+/* the strip owns these numbers now — no second copy anywhere */
+body.v30 .hud-figs,body.v30 .hud-vitals{display:none!important}
 @media(max-width:820px){
   body.v30.v17-mob #v23-statsA,body.v30.v17-mob #v23-statsB{display:none!important}
 }
 @media(min-width:821px){
-  body.v30.v30-run #v30-bar{grid-template-columns:repeat(6,minmax(0,1fr))}
+  body.v30.v30-run #v30-bar{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
 }
 
 /* ---------- 3. bigger, calmer touch targets -------------------------- */
@@ -12021,6 +12023,8 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
       '<div class="c"><div class="l">THIS MONTH</div><span class="v30-v" id="v30-mo">$0</span></div>'+
       '<div class="c"><div class="l">PERP PNL</div><span class="v30-v" id="v30-perp">$0</span></div>'+
       '<div class="c"><div class="l">CASH</div><span class="v30-v" id="v30-cash">$0</span></div>'+
+      '<div class="c"><div class="l">COINS</div><span class="v30-v" id="v30-port">$0</span></div>'+
+      '<div class="c"><div class="l">RISK</div><span class="v30-v" id="v30-risk">0%</span></div>'+
       '<button type="button" class="c" data-i="food"><div class="l">HUNGER <b id="v30-hv">0%</b>'+
         '<span class="act">EAT</span></div><div class="bar"><i id="v30-hb"></i></div></button>'+
       '<button type="button" class="c" data-i="therapy"><div class="l">STRESS <b id="v30-sv">0%</b>'+
@@ -12069,15 +12073,19 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
     var nw=0;try{nw=netWorth()}catch(e){}
     var start=(s.netHistory&&s.netHistory.length)?s.netHistory[0]:nw;
     var d=nw-start, pct=start?(d/start*100):0;
-    setVal('v30-pnl',(d>=0?'+':'-')+money(Math.abs(d))+' ('+(d>=0?'+':'')+pct.toFixed(1)+'%)',d>=0?'up':'dn');
+    var wide=window.innerWidth>=821;
+    setVal('v30-pnl',(d>=0?'+':'-')+money(Math.abs(d))+(wide?' ('+(d>=0?'+':'')+pct.toFixed(1)+'%)':''),d>=0?'up':'dn');
     var prev=(s._v30MonthBase===undefined)?nw:s._v30MonthBase;
     if(s._v30Month!==s.month){s._v30Month=s.month;s._v30MonthBase=nw;prev=nw}
     var md=nw-prev;
     setVal('v30-mo',(md>=0?'+':'-')+money(Math.abs(md)),md>=0?'up':'dn');
     var pp=0,open=0;
     try{(s.perps||[]).forEach(function(p){pp+=perpPnl(p);open++})}catch(e){}
-    setVal('v30-perp',open?((pp>=0?'+':'-')+money(Math.abs(pp))+' · '+open+' open'):'no positions',open?(pp>=0?'up':'dn'):'');
+    setVal('v30-perp',open?((pp>=0?'+':'-')+money(Math.abs(pp))+' ('+open+')'):'none',open?(pp>=0?'up':'dn'):'');
     setVal('v30-cash',money(s.cash||0),'');
+    var pv=0;try{pv=portValue()}catch(e){}
+    setVal('v30-port',money(pv),'');
+    setVal('v30-risk',Math.round(s.risk||0)+'%','');
     var hv=Math.round(s.hunger||0),sv=Math.round(s.stress||0),price='';
     var hb=$('v30-hb'),sb=$('v30-sb');
     if($('v30-hv'))$('v30-hv').textContent=hv+'%';
