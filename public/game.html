@@ -12054,7 +12054,8 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
   function paint(){
     var s=S();if(!s)return;
     if(!$('v30-bar'))return;
-    document.body.classList.toggle('v23-ingame',true);
+    var gs=document.getElementById('game-screen');
+    if(gs&&gs.style.display==='none')return;
     var nw=0;try{nw=netWorth()}catch(e){}
     var start=(s.netHistory&&s.netHistory.length)?s.netHistory[0]:nw;
     var d=nw-start, pct=start?(d/start*100):0;
