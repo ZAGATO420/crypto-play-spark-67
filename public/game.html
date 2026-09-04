@@ -12206,3 +12206,184 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
   setInterval(function(){if(!document.hidden)paint()},600);
 })();
 </script>
+<style id="v31">
+/* =====================================================================
+   V31 — exchange feeling: header slots, footer without overlap,
+   market as a real price list, numbers that always move.
+   Presentation only. No prices, no XP, no perp math.
+   ===================================================================== */
+
+/* ---------- 1. sound / settings / quit own a slot, never a value ----- */
+body.v30 .hud-sys{position:static!important;left:auto!important;top:auto!important;
+  transform:none!important;z-index:6}
+body.v30 .hud-ic{min-width:38px;min-height:38px;display:inline-flex!important;
+  align-items:center;justify-content:center}
+@media(min-width:821px){
+  body.v30 .header-top{display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important}
+  body.v30 .hud-sys{order:98;margin-left:auto;align-self:flex-start}
+  body.v30.v30-run #v30-bar{order:99;flex:1 1 100%;width:100%;
+    grid-template-columns:repeat(8,minmax(0,1fr))}
+}
+@media(max-width:820px){
+  body.v30.v17-mob .hud-sys{position:absolute!important;top:calc(6px + env(safe-area-inset-top));
+    right:8px;z-index:70}
+  body.v30.v17-mob .hud-ic{min-width:44px;min-height:44px}
+}
+
+/* ---------- 2. footer: nothing sits on the month bar ---------------- */
+@media(min-width:821px){
+  #v22-order{bottom:calc(var(--v31-foot,84px) + 14px)!important;z-index:118!important;
+    max-width:min(320px,34vw)!important}
+}
+@media(max-width:820px){
+  body.v17-mob #v22-order{bottom:calc(var(--v31-mfoot,66px) + 8px)!important}
+}
+
+/* ---------- 3. the market is a price list, like a real exchange ----- */
+body.v30 #market-list.dexgrid{grid-template-columns:1fr!important;gap:3px!important}
+body.v30 .dxt{display:grid!important;grid-template-columns:minmax(0,1fr) auto 82px;
+  align-items:center;gap:10px;min-height:52px;padding:9px 12px!important;
+  border-radius:10px!important;background:rgba(255,255,255,.026)!important;
+  border:1px solid transparent!important;border-bottom:1px solid var(--v30-line)!important;
+  box-shadow:none!important;transform:none!important;transition:background .15s ease}
+body.v30 .dxt:hover{transform:none!important;box-shadow:none!important;
+  background:rgba(143,212,30,.08)!important;border-color:transparent!important;
+  border-bottom-color:rgba(143,212,30,.4)!important}
+body.v30 .dxt.held{background:rgba(65,224,138,.07)!important}
+body.v30 .dxt .dxh{grid-column:1;grid-row:1;min-width:0}
+body.v30 .dxt .dxs{font-size:13.5px!important}
+body.v30 .dxt .dxp{grid-column:2;grid-row:1;margin:0!important;text-align:right;
+  font-size:15px!important;color:var(--v30-txt)}
+body.v30 .dxt .dxc{grid-column:3;grid-row:1;margin:0!important;text-align:right;font-size:11.5px!important}
+body.v30 .dxt .dxpos{grid-column:1/-1;grid-row:2;margin-top:5px!important;padding-top:5px!important;
+  font-size:10.5px!important}
+body.v30 .dxt .dxtag{display:none!important}
+body.v30 .dxt.v31-up{background:rgba(65,224,138,.16)!important}
+body.v30 .dxt.v31-dn{background:rgba(255,96,112,.16)!important}
+@media(min-width:1100px){
+  body.v30 #market-list.dexgrid{grid-template-columns:1fr 1fr!important;gap:3px 14px!important}
+}
+@media(prefers-reduced-motion:reduce){body.v30 .dxt{transition:none}}
+
+/* ---------- 4. chart gets a tape line ------------------------------- */
+#v31-cs{display:flex;gap:12px;align-items:center;margin-left:auto;
+  font:800 10px/1 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--v30-dim)}
+#v31-cs b{font-weight:800;color:var(--v30-txt)}
+#v31-cs .up{color:var(--v30-up)}#v31-cs .dn{color:var(--v30-dn)}
+@media(max-width:820px){#v31-cs span.hidem{display:none}}
+</style>
+<script>
+/* =====================================================================
+   V31 runtime — placement guards, live price list, counting numbers
+   ===================================================================== */
+(function(){
+  function $(id){return document.getElementById(id)}
+  function S(){return (typeof state!=='undefined'&&state)?state:null}
+
+  /* ---------- A. keep the floating boss chip off the footer ---------- */
+  function foot(){
+    var bar=$('v4-bar');
+    if(bar){
+      var h=Math.round(bar.getBoundingClientRect().height)||84;
+      document.documentElement.style.setProperty('--v31-foot',h+'px');
+    }
+    var dock=$('v17-dock');
+    if(dock){
+      var dh=Math.round(dock.getBoundingClientRect().height)||66;
+      document.documentElement.style.setProperty('--v31-mfoot',dh+'px');
+    }
+  }
+
+  /* ---------- B. the price list ticks like a tape -------------------- */
+  var seen={};
+  function tape(){
+    var list=$('market-list');if(!list)return;
+    var rows=list.querySelectorAll('.dxt');
+    for(var i=0;i<rows.length;i++){
+      var p=rows[i].querySelector('.dxp');if(!p)return;
+      var id=p.id||('r'+i),txt=p.textContent||'';
+      if(seen[id]!==undefined&&seen[id]!==txt){
+        var a=parseFloat(String(seen[id]).replace(/[^0-9.\-]/g,''))||0;
+        var b=parseFloat(txt.replace(/[^0-9.\-]/g,''))||0;
+        var cls=b>=a?'v31-up':'v31-dn',row=rows[i];
+        row.classList.remove('v31-up','v31-dn');
+        void row.offsetWidth;row.classList.add(cls);
+        setTimeout(function(r){return function(){r.classList.remove('v31-up','v31-dn')}}(row),650);
+      }
+      seen[id]=txt;
+    }
+  }
+
+  /* ---------- C. chart tape line: high / low / change ---------------- */
+  function csBuild(){
+    if($('v31-cs'))return true;
+    var main=document.querySelector('main');if(!main)return false;
+    var t=Array.prototype.filter.call(main.querySelectorAll('.panel-title'),function(x){
+      return (x.textContent||'').toUpperCase().indexOf('CHART')>-1;
+    })[0];
+    if(!t)return false;
+    var d=document.createElement('div');d.id='v31-cs';
+    d.innerHTML='<span class="hidem">HIGH <b id="v31-hi">$0</b></span>'+
+      '<span class="hidem">LOW <b id="v31-lo">$0</b></span>'+
+      '<span>CHG <b id="v31-chg">0%</b></span>';
+    t.appendChild(d);return true;
+  }
+  function csPaint(){
+    var s=S();if(!s||!$('v31-hi'))return;
+    var h=(s.liveHistory&&s.liveHistory.length)?s.liveHistory:(s.netHistory||[]);
+    if(!h.length)return;
+    var hi=Math.max.apply(null,h),lo=Math.min.apply(null,h);
+    var first=h[0],last=h[h.length-1],pct=first?((last-first)/first*100):0;
+    function m(v){try{return fmt(v)}catch(e){return '$'+Math.round(v)}}
+    $('v31-hi').textContent=m(hi);$('v31-lo').textContent=m(lo);
+    var c=$('v31-chg');
+    c.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';
+    c.className=pct>=0?'up':'dn';
+  }
+
+  /* ---------- D. numbers count instead of jumping ------------------- */
+  var IDS=['v30-pnl','v30-mo','v30-perp','v30-cash','v30-port'];
+  var tw={};
+  function num(t){var m=String(t).match(/-?[\d.,]*\d/);return m?parseFloat(m[0].replace(/,/g,'')):null}
+  function reflow(el,tpl,value){
+    var s=tpl.replace('\u0000',Math.round(value).toLocaleString('en-US'));
+    el.__v31last=s;el.textContent=s;
+  }
+  function watch(id){
+    var el=$(id);if(!el||el.__v31)return;
+    el.__v31=true;
+    var mo=new MutationObserver(function(){
+      var txt=el.textContent||'';
+      if(txt===el.__v31last)return;            /* our own tween frame */
+      if(id==='v30-perp'&&txt==='none'){el.__v31last='$0';el.textContent='$0';return}
+      var to=num(txt);if(to===null)return;
+      var st=tw[id];
+      var from=(st&&typeof st.cur==='number')?st.cur:to;
+      var tpl=txt.replace(/-?[\d.,]*\d/,'\u0000');
+      if(st&&st.raf)cancelAnimationFrame(st.raf);
+      if(Math.abs(to-from)<1||document.hidden){tw[id]={cur:to};reflow(el,tpl,to);return}
+      var t0=performance.now(),dur=420;
+      tw[id]={cur:from};
+      (function step(now){
+        var k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+        var v=from+(to-from)*e;
+        tw[id].cur=v;reflow(el,tpl,v);
+        if(k<1)tw[id].raf=requestAnimationFrame(step);else tw[id]={cur:to};
+      })(t0);
+    });
+    mo.observe(el,{childList:true,characterData:true,subtree:true});
+  }
+
+
+  /* ---------- boot ---------- */
+  function tick(){
+    foot();
+    try{csBuild();csPaint()}catch(e){}
+    try{tape()}catch(e){}
+    IDS.forEach(watch);
+  }
+  setInterval(function(){if(!document.hidden)tick()},600);
+  setTimeout(tick,900);
+  window.addEventListener('resize',foot);
+})();
+</script>
