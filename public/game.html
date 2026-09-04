@@ -12535,12 +12535,13 @@ body.v30 #market-list .v7more{display:none!important}
 <script>
 /* ===== V32 — leverage market picker: all 8 perp coins, nothing hidden ===== */
 (function(){
-  function S(){return (window.state&&!state._gameEnded)?state:null}
+  function S(){try{var st=(typeof state!=='undefined')?state:window.state;return (st&&!st._gameEnded)?st:null}catch(e){return null}}
   function icon(sym){try{return (window.COIN_ICON||{})[sym]||''}catch(e){return ''}}
   function px(v){try{return priceStr(v)}catch(e){return String(v)}}
   function launchYear(sym){
     try{
-      var c=(window.COINS||[]).find(function(x){return x.s===sym});
+      var CO=(typeof COINS!=='undefined')?COINS:(window.COINS||[]);
+      var c=CO.find(function(x){return x.s===sym});
       if(!c)return '';
       return 2020+Math.floor((c.launch||0)/12);
     }catch(e){return ''}
@@ -12560,7 +12561,8 @@ body.v30 #market-list .v7more{display:none!important}
   }
   function rowHtml(sym,live){
     var s=S();if(!s)return '';
-    var c=(window.COINS||[]).find(function(x){return x.s===sym})||{s:sym,n:sym};
+    var CO=(typeof COINS!=='undefined')?COINS:(window.COINS||[]);
+    var c=CO.find(function(x){return x.s===sym})||{s:sym,n:sym};
     var price=s.prices[sym]||0,chg=0;
     try{var prev=(typeof getHistPrice==='function')?getHistPrice(sym,s.month-1):0;
       chg=prev>0?((price-prev)/prev*100):0}catch(e){}
@@ -12578,7 +12580,7 @@ body.v30 #market-list .v7more{display:none!important}
   }
   function paint(){
     var s=S();if(!s)return;
-    var set=(window.PERP_SET||['BTC','ETH','SOL']);
+    var set=(typeof PERP_SET!=='undefined')?PERP_SET:(window.PERP_SET||['BTC','ETH','SOL']);
     var h='';
     set.forEach(function(sym){h+=rowHtml(sym,(s.prices[sym]||0)>0)});
     sheet().querySelector('.b').innerHTML=h;
@@ -12593,7 +12595,7 @@ body.v30 #market-list .v7more{display:none!important}
     if(a==='x'){hide();return}
     if(a==='go'){
       var sym=b.getAttribute('data-s');
-      try{if(window.state)state._perpDir=b.getAttribute('data-d')}catch(err){}
+      try{var st=S();if(st)st._perpDir=b.getAttribute('data-d')}catch(err){}
       hide();
       try{(window.v6Perp||function(){})(sym)}catch(err){}
     }
