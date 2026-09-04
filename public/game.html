@@ -12057,7 +12057,13 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
     var gs=document.getElementById('game-screen');
     var live=!!gs&&gs.style.display!=='none';
     document.body.classList.toggle('v30-run',live);
-    if(!live)return;
+    if(!live){
+      /* nothing may speak over the end card */
+      var hint=document.getElementById('v29-hint');if(hint)hint.classList.remove('on');
+      var ts=document.getElementById('toast-stack');if(ts)ts.innerHTML='';
+      var rc=document.getElementById('v20-react');if(rc)rc.classList.remove('on');
+      return;
+    }
     var nw=0;try{nw=netWorth()}catch(e){}
     var start=(s.netHistory&&s.netHistory.length)?s.netHistory[0]:nw;
     var d=nw-start, pct=start?(d/start*100):0;
