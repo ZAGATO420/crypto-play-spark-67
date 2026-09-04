@@ -12693,3 +12693,24 @@ body.v30 #market-list .v7more{display:none!important}
   setTimeout(decorate,600);setTimeout(decorate,1800);
 })();
 </script>
+
+<style id="v33-boss">
+/* the masked trader stands taller and clean-cut */
+#v21-gate .g-boss{height:min(64vh,760px);bottom:-2%;
+  mask-image:linear-gradient(#000 88%,transparent 100%);-webkit-mask-image:linear-gradient(#000 88%,transparent 100%)}
+@media(max-width:760px){#v21-gate .g-boss{height:min(50vh,470px);bottom:8%}}
+</style>
+<script id="v33-boss-js">
+(function(){
+  var SRC='/__l5e/assets-v1/c62038b7-5808-4afd-8060-7ebd9c15f44c/boss-masked.webp';
+  function swap(){
+    var im=document.querySelector('#v21-gate .g-boss');
+    if(im&&im.getAttribute('src')!==SRC)im.setAttribute('src',SRC);
+    var t=document.querySelector('#start-screen .title-ape');
+    if(t&&t.getAttribute('src')!==SRC){t.setAttribute('src',SRC);t.setAttribute('alt','The Crypto Final Boss')}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',swap);else swap();
+  [200,700,1600,3000].forEach(function(t){setTimeout(swap,t)});
+  try{new MutationObserver(swap).observe(document.documentElement,{subtree:true,childList:true})}catch(e){}
+})();
+</script>
