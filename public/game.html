@@ -12604,3 +12604,92 @@ body.v30 #market-list .v7more{display:none!important}
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide()});
 })();
 </script>
+
+<style id="v33-gate">
+/* ============ V33 — the arena gets light ============ */
+#v21-gate{background:
+  radial-gradient(120% 70% at 50% -6%,rgba(182,255,46,.16) 0%,rgba(182,255,46,0) 46%),
+  radial-gradient(90% 60% at 50% 106%,rgba(255,197,61,.16) 0%,rgba(255,197,61,0) 55%),
+  radial-gradient(120% 90% at 50% 10%,#1b2740 0%,#111b30 46%,#0a1120 78%,#070c16 100%)!important}
+#v21-gate .g-grid{opacity:.22}
+#v21-gate .g-beam{opacity:.85;
+  background:conic-gradient(from 200deg at 50% 0%,transparent 0deg,rgba(182,255,46,.20) 22deg,rgba(255,197,61,.10) 40deg,transparent 56deg)}
+#v21-gate .g-vig{box-shadow:inset 0 0 200px 40px rgba(4,8,18,.55);
+  background:linear-gradient(180deg,rgba(6,11,22,.18) 0%,rgba(6,11,22,0) 30%,rgba(6,11,22,0) 62%,rgba(6,11,22,.42) 86%,rgba(5,9,18,.82) 100%)}
+#v21-gate .g-boss{filter:drop-shadow(0 28px 70px rgba(0,0,0,.7)) drop-shadow(0 0 46px rgba(182,255,46,.22))
+  contrast(1.08) saturate(1.12) brightness(1.14)}
+#v21-gate .g-mid::before{background:radial-gradient(60% 58% at 50% 48%,rgba(6,11,22,.72) 0%,rgba(6,11,22,.34) 54%,rgba(6,11,22,0) 82%)}
+#v21-gate .g-mark .a{color:#dfe7f5}
+#v21-gate .g-tag{color:#b3c0d4}
+#v21-gate .g-live{color:#a8b6cb}
+#v21-gate .g-sub{color:#8b9ab1}
+#v21-gate .g-links button{border-color:rgba(255,255,255,.2);color:#b8c4d6}
+
+/* light rays sweeping behind the boss */
+#v21-gate .v33-rays{position:absolute;left:50%;bottom:0;width:min(140vw,1400px);height:82%;
+  transform:translateX(-50%);pointer-events:none;opacity:.5;mix-blend-mode:screen;
+  background:conic-gradient(from 168deg at 50% 100%,
+    transparent 0deg,rgba(182,255,46,.16) 6deg,transparent 12deg,
+    transparent 20deg,rgba(255,197,61,.13) 26deg,transparent 32deg,
+    transparent 40deg,rgba(182,255,46,.10) 46deg,transparent 52deg);
+  animation:v33rays 22s linear infinite}
+@keyframes v33rays{0%{transform:translateX(-50%) rotate(-4deg)}50%{transform:translateX(-50%) rotate(4deg)}100%{transform:translateX(-50%) rotate(-4deg)}}
+
+/* coin rain */
+#v21-gate .v33-rain{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+#v21-gate .v33-rain i{position:absolute;top:-8%;width:22px;height:22px;border-radius:50%;
+  background:radial-gradient(circle at 34% 26%,#fff3c9,#ffc53d 52%,#a9741a 100%);
+  box-shadow:0 0 14px rgba(255,197,61,.55),inset 0 -2px 4px rgba(0,0,0,.35);
+  opacity:.85;animation:v33fall linear infinite}
+@keyframes v33fall{0%{transform:translateY(-10vh) rotate(0)}100%{transform:translateY(112vh) rotate(420deg)}}
+
+/* live ticker under the badges */
+#v21-gate .v33-tape{position:relative;z-index:3;width:100%;max-width:640px;margin:8px auto 0;
+  overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+#v21-gate .v33-tape div{display:inline-flex;gap:22px;white-space:nowrap;
+  font:700 10px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#9db0c8;
+  animation:v33tape 26s linear infinite}
+#v21-gate .v33-tape b{color:#d6ff8a}
+#v21-gate .v33-tape s{text-decoration:none;color:#ff8f8f}
+@keyframes v33tape{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){
+  #v21-gate .v33-rain,#v21-gate .v33-rays{display:none}
+  #v21-gate .v33-tape div{animation:none}
+}
+</style>
+<script id="v33-js">
+(function(){
+  var TAPE=[['BTC','+128%'],['ETH','+96%'],['SOL','+1,940%'],['DOGE','+380%'],['LUNA','-100%'],
+            ['FTT','-99%'],['PEPE','+2,100%'],['WIF','+640%'],['TIA','+310%'],['$TCFB','SOON']];
+  function tapeHtml(){
+    var one=TAPE.map(function(t){
+      var neg=String(t[1]).charAt(0)==='-';
+      return t[0]+' '+(neg?'<s>':'<b>')+t[1]+(neg?'</s>':'</b>');
+    }).join('<span style="opacity:.35">/</span>');
+    return '<div>'+one+'<span style="opacity:.35">/</span>'+one+'</div>';
+  }
+  function decorate(){
+    var gate=document.getElementById('v21-gate');if(!gate||gate.__v33)return;
+    gate.__v33=true;
+    var rays=document.createElement('div');rays.className='v33-rays';
+    gate.insertBefore(rays,gate.firstChild);
+    var rain=document.createElement('div');rain.className='v33-rain';
+    var h='';
+    for(var i=0;i<14;i++){
+      var l=(3+Math.random()*94).toFixed(1),d=(7+Math.random()*9).toFixed(1),
+          de=(-Math.random()*14).toFixed(1),z=(11+Math.random()*15).toFixed(0),o=(.35+Math.random()*.5).toFixed(2);
+      h+='<i style="left:'+l+'%;width:'+z+'px;height:'+z+'px;opacity:'+o+
+         ';animation-duration:'+d+'s;animation-delay:'+de+'s"></i>';
+    }
+    rain.innerHTML=h;gate.appendChild(rain);
+    var live=gate.querySelector('.g-live');
+    var tape=document.createElement('div');tape.className='v33-tape';tape.innerHTML=tapeHtml();
+    if(live&&live.parentNode)live.parentNode.insertBefore(tape,live.nextSibling);
+    else gate.appendChild(tape);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',decorate);
+  else decorate();
+  setTimeout(decorate,600);setTimeout(decorate,1800);
+})();
+</script>
