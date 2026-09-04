@@ -12402,3 +12402,80 @@ body.v30 .dxt.v31-dn{background:rgba(255,96,112,.16)!important}
   if(!boot()){var n=0,iv=setInterval(function(){if(boot()||++n>40)clearInterval(iv)},250)}
 })();
 </script>
+<style id="v31c">
+/* the market is a full price list with its own scroll — it never folds away */
+.v31-guard{display:none!important}
+@media(min-width:1100px){
+  body.v30 .chart-box{max-height:210px}
+  body.v30 #market-list{max-height:none!important}
+  body.v30 #market-list.dexgrid{grid-template-columns:1fr 1fr!important}
+}
+body.v30 .v7wrap{overflow-y:auto!important}
+body.v30 #market-list .v7more{display:none!important}
+</style>
+<script>
+/* V31c — stop the desktop market from collapsing into "OPEN ALL MARKETS" */
+(function(){
+  function guard(){
+    var l=document.getElementById('market-list');if(!l)return false;
+    if(!l.querySelector('.v31-guard')){
+      var i=document.createElement('i');i.className='v7more v31-guard';i.setAttribute('aria-hidden','true');
+      l.appendChild(i);
+    }
+    /* remove the collapsed launcher the old layer may have left behind */
+    Array.prototype.forEach.call(l.querySelectorAll('.v7more:not(.v31-guard)'),function(b){b.remove()});
+    return true;
+  }
+  function boot(){
+    var l=document.getElementById('market-list');if(!l)return false;
+    new MutationObserver(function(){setTimeout(guard,0)}).observe(l,{childList:true});
+    guard();return true;
+  }
+  if(!boot()){var n=0,iv=setInterval(function(){if(boot()||++n>60)clearInterval(iv)},250)}
+  setInterval(guard,1200);
+})();
+</script>
+<style id="v31d">
+/* =====================================================================
+   V31d — desktop: a compact head and a market that fills the screen.
+   ===================================================================== */
+@media(min-width:1100px){
+  body.v30 header{padding:6px 16px 4px!important}
+  body.v30 .hud-net{padding:8px 14px 9px!important}
+  body.v30 .hud-net-val{font-size:25px!important;line-height:1.05!important}
+  body.v30 #v24-profchip{margin-top:0!important;margin-left:10px!important;min-height:30px;
+    padding:0 10px;font-size:9.5px}
+  body.v30 #v29-pos{margin-top:6px!important}
+  body.v30 #v29-pos .v29-card,body.v30 #v29-pos .v29-empty{min-height:42px!important;padding:6px 10px!important}
+  body.v30 #v29-pos .v29-dots{margin-top:3px}
+  body.v30.v30-run #v30-bar{margin-top:6px!important;gap:5px}
+  body.v30 #v30-bar .c{padding:5px 9px}
+  body.v30 #v30-bar button.c{min-height:44px}
+  body.v30 .xp-wrap{margin-top:4px!important}
+  body.v30 .news-ticker,body.v30 .sentiment-wrap{margin:3px 0 0!important}
+  body.v30 .news-ticker-inner,body.v30 .sentiment{padding:5px 12px!important}
+
+  /* centre column: small chart on top, the price list owns the rest */
+  body.v30.v4-live main>div:nth-child(2)>#v7-top{
+    flex:0 0 auto!important;height:auto!important;min-height:0!important}
+  body.v30 .chart-box{height:168px!important;max-height:168px}
+  body.v30.v4-live main>div:nth-child(2)>.panel:last-child{
+    flex:1 1 auto!important;min-height:220px!important;overflow:hidden}
+  body.v30.v4-live main>div:nth-child(2)>.panel:last-child>div:last-child{
+    overflow-y:auto!important;min-height:0}
+  body.v30.v4-live main>div:nth-child(2)>.panel:last-child>.market-grid,
+  body.v30 #market-list{max-height:none!important;overflow:visible!important}
+}
+</style>
+<style id="v31e">
+@media(min-width:1100px){
+  /* identity already stands in the net-worth line and in the PLAYER card */
+  body.v30 #v24-profchip{display:none!important}
+  body.v30 .hud-net{padding:7px 14px 8px!important}
+}
+@media(min-width:1100px) and (max-height:900px){
+  body.v30 .chart-box{height:132px!important;max-height:132px}
+  body.v30.v4-live main>div:nth-child(2)>.panel:last-child{min-height:270px!important}
+  body.v30 .news-ticker{display:none!important}
+}
+</style>
