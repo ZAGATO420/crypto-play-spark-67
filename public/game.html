@@ -11955,7 +11955,7 @@ body.v30 .dxp,body.v30 .hud-net-val,body.v30 .v29-pnl,body.v30 .v30-v{
 
 /* ---------- 2. permanent metric strip, no expanding ------------------ */
 #v30-bar{display:none}
-body.v30.v23-ingame #v30-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+body.v30.v30-run #v30-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
   gap:6px;margin-top:8px}
 #v30-bar .c{min-width:0;padding:7px 9px;border-radius:12px;background:var(--v30-card);
   border:1px solid var(--v30-line)}
@@ -11978,7 +11978,7 @@ body.v30 #v23-statchip,body.v30 #v28-surv{display:none!important}
   body.v30.v17-mob #v23-statsA,body.v30.v17-mob #v23-statsB{display:none!important}
 }
 @media(min-width:821px){
-  body.v30.v23-ingame #v30-bar{grid-template-columns:repeat(6,minmax(0,1fr))}
+  body.v30.v30-run #v30-bar{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
 /* ---------- 3. bigger, calmer touch targets -------------------------- */
@@ -12055,7 +12055,9 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
     var s=S();if(!s)return;
     if(!$('v30-bar'))return;
     var gs=document.getElementById('game-screen');
-    if(gs&&gs.style.display==='none')return;
+    var live=!!gs&&gs.style.display!=='none';
+    document.body.classList.toggle('v30-run',live);
+    if(!live)return;
     var nw=0;try{nw=netWorth()}catch(e){}
     var start=(s.netHistory&&s.netHistory.length)?s.netHistory[0]:nw;
     var d=nw-start, pct=start?(d/start*100):0;
