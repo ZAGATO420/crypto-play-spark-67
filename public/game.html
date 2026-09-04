@@ -11734,8 +11734,8 @@ body.v17-mob #v17-dock button[data-act="more"].dot:after{content:'';position:abs
     if(a==='half'){try{closePerp(+b.getAttribute('data-i'),false,0.5)}catch(err){}lastSig='';paint();return}
     if(a==='trade'){try{(window.v6Trade||window.dxOpen)(b.getAttribute('data-s'))}catch(err){}return}
     if(a==='newperp'){
-      var sym='BTC';try{if(window.state&&state.prices&&!(state.prices.BTC>0))sym='ETH'}catch(err){}
-      try{(window.v6Perp||function(){})(sym)}catch(err){}
+      if(window.perpPicker){window.perpPicker();return}
+      try{(window.v6Perp||function(){})('BTC')}catch(err){}
       return;
     }
     if(a==='positions'){openPositions();return}
@@ -12499,3 +12499,105 @@ body.v30 #market-list .v7more{display:none!important}
   body.v30 #v24-profchip{display:none!important}
 }
 </style>
+
+<style id="v32-perp">
+#v32-pick{position:fixed;inset:0;z-index:9600;display:none;background:rgba(4,8,16,.86);
+  backdrop-filter:blur(8px);align-items:flex-end;justify-content:center}
+#v32-pick.on{display:flex}
+#v32-pick .w{width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#0d1526,#080d18);border:1px solid rgba(182,255,46,.24);
+  border-radius:20px 20px 0 0;box-shadow:0 -18px 60px rgba(0,0,0,.6);overflow:hidden}
+@media(min-width:821px){#v32-pick{align-items:center}#v32-pick .w{border-radius:20px}}
+#v32-pick .h{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
+#v32-pick .h b{font-size:15px;letter-spacing:.06em;color:#eaf3ff}
+#v32-pick .h i{font-style:normal;font-size:11px;letter-spacing:.08em;color:#7f93ae}
+#v32-pick .h button{margin-left:auto;min-width:40px;min-height:40px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#eaf3ff;font-size:15px;cursor:pointer}
+#v32-pick .b{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 10px 6px;display:grid;gap:6px}
+#v32-pick .r{display:grid;grid-template-columns:30px minmax(0,1fr) auto auto;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+#v32-pick .r img{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.06)}
+#v32-pick .r .s{font-weight:800;font-size:14px;color:#eaf3ff;letter-spacing:.04em}
+#v32-pick .r .n{font-size:10.5px;letter-spacing:.06em;color:#7f93ae}
+#v32-pick .r .p{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:#eaf3ff;text-align:right}
+#v32-pick .r .c{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;text-align:right;white-space:nowrap}
+#v32-pick .r .c.up{color:#34d399}#v32-pick .r .c.dn{color:#f87171}#v32-pick .r .c.flat{color:#7f93ae}
+#v32-pick .r .a{display:flex;gap:6px}
+#v32-pick .r .a button{min-width:62px;min-height:44px;border-radius:11px;font-weight:800;font-size:12px;
+  letter-spacing:.06em;cursor:pointer;border:1px solid transparent}
+#v32-pick .r .a .L{background:rgba(52,211,153,.16);border-color:rgba(52,211,153,.42);color:#8df3c8}
+#v32-pick .r .a .S{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#ffb2b2}
+#v32-pick .r.off{opacity:.5}
+#v32-pick .r.off .lock{font-size:11px;letter-spacing:.06em;color:#9aa9bd;grid-column:3/-1;text-align:right}
+#v32-pick .f{padding:9px 14px 14px;border-top:1px solid rgba(255,255,255,.08);
+  font-size:11px;line-height:1.55;letter-spacing:.04em;color:#8ea0b8}
+</style>
+<script>
+/* ===== V32 — leverage market picker: all 8 perp coins, nothing hidden ===== */
+(function(){
+  function S(){return (window.state&&!state._gameEnded)?state:null}
+  function icon(sym){try{return (window.COIN_ICON||{})[sym]||''}catch(e){return ''}}
+  function px(v){try{return priceStr(v)}catch(e){return String(v)}}
+  function launchYear(sym){
+    try{
+      var c=(window.COINS||[]).find(function(x){return x.s===sym});
+      if(!c)return '';
+      return 2020+Math.floor((c.launch||0)/12);
+    }catch(e){return ''}
+  }
+  function sheet(){
+    var el=document.getElementById('v32-pick');
+    if(el)return el;
+    el=document.createElement('div');el.id='v32-pick';
+    el.innerHTML='<div class="w"><div class="h"><b>LEVERAGE MARKETS</b><i>PICK A COIN \u00b7 LONG OR SHORT</i>'+
+      '<button type="button" data-v32="x" aria-label="Close">\u2715</button></div>'+
+      '<div class="b"></div>'+
+      '<div class="f">Leverage multiplies profit and loss. Liquidation wipes the margin. Max 3 open positions. '+
+      'All other coins stay spot only.</div></div>';
+    document.body.appendChild(el);
+    el.addEventListener('click',function(e){if(e.target===el)hide()});
+    return el;
+  }
+  function rowHtml(sym,live){
+    var s=S();if(!s)return '';
+    var c=(window.COINS||[]).find(function(x){return x.s===sym})||{s:sym,n:sym};
+    var price=s.prices[sym]||0,chg=0;
+    try{var prev=(typeof getHistPrice==='function')?getHistPrice(sym,s.month-1):0;
+      chg=prev>0?((price-prev)/prev*100):0}catch(e){}
+    var cc=chg>0.05?'up':chg<-0.05?'dn':'flat';
+    var ic=icon(sym);
+    var left='<img src="'+ic+'" alt="" onerror="this.style.visibility=\'hidden\'">'+
+      '<div style="min-width:0"><div class="s">'+sym+'-PERP</div><div class="n">'+(c.n||sym)+'</div></div>';
+    if(!live){
+      return '<div class="r off">'+left+'<div class="lock">NOT LISTED YET \u00b7 '+launchYear(sym)+'</div></div>';
+    }
+    return '<div class="r">'+left+
+      '<div><div class="p">$'+px(price)+'</div><div class="c '+cc+'">'+(chg>=0?'+':'')+chg.toFixed(1)+'% MO</div></div>'+
+      '<div class="a"><button class="L" data-v32="go" data-s="'+sym+'" data-d="long">LONG</button>'+
+      '<button class="S" data-v32="go" data-s="'+sym+'" data-d="short">SHORT</button></div></div>';
+  }
+  function paint(){
+    var s=S();if(!s)return;
+    var set=(window.PERP_SET||['BTC','ETH','SOL']);
+    var h='';
+    set.forEach(function(sym){h+=rowHtml(sym,(s.prices[sym]||0)>0)});
+    sheet().querySelector('.b').innerHTML=h;
+  }
+  function show(){if(!S())return;paint();sheet().classList.add('on');try{playSound('click')}catch(e){}}
+  function hide(){var el=document.getElementById('v32-pick');if(el)el.classList.remove('on')}
+  window.perpPicker=show;
+  window.closePerpPicker=hide;
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-v32]');if(!b)return;
+    var a=b.getAttribute('data-v32');
+    if(a==='x'){hide();return}
+    if(a==='go'){
+      var sym=b.getAttribute('data-s');
+      try{if(window.state)state._perpDir=b.getAttribute('data-d')}catch(err){}
+      hide();
+      try{(window.v6Perp||function(){})(sym)}catch(err){}
+    }
+  },true);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')hide()});
+})();
+</script>
