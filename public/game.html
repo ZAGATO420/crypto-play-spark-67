@@ -12052,10 +12052,9 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
   function col(v){return v>70?'#ff6070':v>40?'#facc15':'#41e08a'}
 
   function paint(){
-    var s=S();if(!s)return;
-    if(!$('v30-bar'))return;
     var gs=document.getElementById('game-screen');
-    var live=!!gs&&gs.style.display!=='none';
+    var ended=(typeof state!=='undefined'&&state&&state._gameEnded);
+    var live=!!gs&&gs.style.display!=='none'&&!ended;
     document.body.classList.toggle('v30-run',live);
     if(!live){
       /* nothing may speak over the end card */
@@ -12064,6 +12063,9 @@ body.v30.v30-quake #game-screen{animation:v30shake .42s ease-in-out}
       var rc=document.getElementById('v20-react');if(rc)rc.classList.remove('on');
       return;
     }
+    var s=S();if(!s)return;
+    if(!$('v30-bar'))return;
+
     var nw=0;try{nw=netWorth()}catch(e){}
     var start=(s.netHistory&&s.netHistory.length)?s.netHistory[0]:nw;
     var d=nw-start, pct=start?(d/start*100):0;
