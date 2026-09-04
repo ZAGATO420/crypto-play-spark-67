@@ -4261,7 +4261,10 @@ function processLaunches(){
 }
 
 /* ---------- PERPS / LEVERAGE ---------- */
-function perpSyms(){return ['BTC','ETH','SOL'].filter(s=>(state.prices[s]||0)>0)}
+var PERP_SET=['BTC','ETH','SOL','DOGE','AVAX','LINK','ADA','DOT'];
+function perpable(sym){return PERP_SET.indexOf(sym)>-1}
+function perpSyms(){return PERP_SET.filter(s=>(state.prices[s]||0)>0)}
+function perpLocked(){return PERP_SET.filter(s=>!((state.prices[s]||0)>0))}
 function openPerp(sym,dir,marginArg,levArg){
   if(!state||state._gameEnded)return;
   if(!((state.prices[sym]||0)>0)){toast(sym+' is not tradable yet','sell');return}
@@ -5984,7 +5987,7 @@ main .cf-rows.v6-fold{display:none}
     const s=S();if(!s||M.kind!=='spot')return;
     const c=(typeof COINS!=='undefined'?COINS.find(x=>x.s===M.sym):null)||{s:M.sym,n:M.sym,tags:[]};
     head(c.n,M.sym+(c.tags&&c.tags.length?' \u00b7 '+c.tags.join(' / '):''));
-    const perp=['BTC','ETH','SOL'].indexOf(M.sym)>-1;
+    const perp=(typeof perpable==='function')?perpable(M.sym):false;
     $('v6-body').innerHTML=
       '<div class="v6price" id="v6-price">$'+psx(s.prices[M.sym]||0)+'</div>'+
       '<div id="v6-pos"></div>'+
@@ -5997,7 +6000,8 @@ main .cf-rows.v6-fold{display:none}
         '<button onclick="v6Pct(.75)">75%</button><button onclick="v6Pct(1)">MAX</button></div>'+
       '<div class="v6sum" id="v6-sum"></div>'+
       '<button class="v6go '+(M.mode==='buy'?'b':'s')+'" id="v6-go" onclick="v6Exec()"></button>'+
-      (perp?'<button class="v6ghost" onclick="v6Perp(\''+M.sym+'\')">\u26a1 TRADE '+M.sym+' PERPS (LEVERAGE)</button>':'');
+      (perp?'<button class="v6ghost" onclick="v6Perp(\''+M.sym+'\')">\u26a1 TRADE '+M.sym+' PERPS (LEVERAGE)</button>'
+           :'<div class="v6note" style="margin-top:8px">SPOT ONLY \u00b7 no leverage on '+M.sym+'. Leverage: '+(typeof PERP_SET!=='undefined'?PERP_SET.join(' \u00b7 '):'')+'</div>');
     const n=$('v6-amt'),r=$('v6-rng');
     n.addEventListener('input',e=>setAmt(e.target.value,'num'));
     r.addEventListener('input',e=>setAmt(e.target.value,'rng'));
