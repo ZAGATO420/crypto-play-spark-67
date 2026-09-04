@@ -12387,3 +12387,18 @@ body.v30 .dxt.v31-dn{background:rgba(255,96,112,.16)!important}
   window.addEventListener('resize',foot);
 })();
 </script>
+<script>
+/* V31b — one message at a time, never a wall of toasts */
+(function(){
+  var st=document.getElementById('toast-stack');
+  var mo=new MutationObserver(function(){
+    var s=document.getElementById('toast-stack');if(!s)return;
+    while(s.children.length>1)s.removeChild(s.firstElementChild);
+  });
+  function boot(){
+    var s=document.getElementById('toast-stack');if(!s)return false;
+    mo.observe(s,{childList:true});return true;
+  }
+  if(!boot()){var n=0,iv=setInterval(function(){if(boot()||++n>40)clearInterval(iv)},250)}
+})();
+</script>
