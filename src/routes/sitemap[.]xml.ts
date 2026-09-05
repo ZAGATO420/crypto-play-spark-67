@@ -3,8 +3,12 @@ import type {} from "@tanstack/react-start";
 
 const BASE_URL = "https://thecryptofinalboss.app";
 
-// Only the public game route is indexable; /content is marked noindex.
-const ENTRIES = [{ path: "/", changefreq: "weekly", priority: "1.0" }] as const;
+// Only public routes are indexable; /content is marked noindex.
+const ENTRIES = [
+  { path: "/", changefreq: "weekly", priority: "1.0" },
+  { path: "/trailer", changefreq: "monthly", priority: "0.8" },
+] as const;
+
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
