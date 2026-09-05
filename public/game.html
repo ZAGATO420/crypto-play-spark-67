@@ -11348,7 +11348,7 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
       bar=document.createElement('div');bar.id='v27-arena';
       bar.innerHTML='<span><b id="v27-runs">—</b> RUNS LOGGED</span>'+
         '<span class="s">&middot;</span><span>TOP <b id="v27-top">—</b></span>'+
-        '<span class="s">&middot;</span><span><b id="v27-surv">—</b> SURVIVORS</span>';
+        '<span class="s">&middot;</span><span><b id="v27-surv">—</b> <i id="v27-survl" style="font-style:normal">SURVIVORS</i></span>';
 
       mid.appendChild(bar);
     }
@@ -11366,6 +11366,7 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
         });
         countUp($('v27-runs'),n);
         countUp($('v27-surv'),surv);
+        var sl=$('v27-survl');if(sl)sl.textContent=surv===1?'SURVIVOR':'SURVIVORS';
         var te=$('v27-top');
         if(te&&top)te.textContent='$'+Math.round(top).toLocaleString()+(who?' \u00B7 '+who.toUpperCase():'');
 
