@@ -25,6 +25,60 @@ type Quote = { sym: string; price: number; chg24h: number };
 let cache: { at: number; rows: Quote[] } | null = null;
 const TTL = 60_000;
 
+async function fromBinance(): Promise<Quote[]> {
+  const syms = Object.keys(IDS).map((s) => `"${s === "BTC" ? "BTC" : s}USDT"`).join(",");
+  const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=[${syms}]`;
+  const res = await fetch(url, { headers: { accept: "application/json" } });
+  if (!res.ok) throw new Error("binance " + res.status);
+  const json = (await res.json()) as Array<{ symbol: string; lastPrice: string; priceChangePercent: string }>;
+  const rows: Quote[] = [];
+  for (const sym of Object.keys(IDS)) {
+    const r = json.find((x) => x.symbol === `${sym}USDT`);
+    if (!r) continue;
+    const price = Number(r.lastPrice);
+    if (!Number.isFinite(price) || price <= 0) continue;
+    rows.push({ sym, price, chg24h: Number(r.priceChangePercent) || 0 });
+  }
+  if (rows.length < 4) throw new Error("binance thin");
+  return rows;
+}
+
+const KRAKEN: Record<string, string> = {
+  BTC: "XBTUSD",
+  ETH: "ETHUSD",
+  SOL: "SOLUSD",
+  DOGE: "XDGUSD",
+  AVAX: "AVAXUSD",
+  LINK: "LINKUSD",
+  ADA: "ADAUSD",
+  DOT: "DOTUSD",
+};
+
+async function fromKraken(): Promise<Quote[]> {
+  const url = "https://api.kraken.com/0/public/Ticker?pair=" + Object.values(KRAKEN).join(",");
+  const res = await fetch(url, { headers: { accept: "application/json" } });
+  if (!res.ok) throw new Error("kraken " + res.status);
+  const json = (await res.json()) as { result?: Record<string, { c?: string[]; o?: string }> };
+  const result = json.result ?? {};
+  const keys = Object.keys(result);
+  const rows: Quote[] = [];
+  for (const [sym, pair] of Object.entries(KRAKEN)) {
+    const base = pair.replace("USD", "");
+    const key =
+      keys.find((k) => k === pair) ??
+      keys.find((k) => k.includes(base) && k.endsWith("USD")) ??
+      keys.find((k) => k.includes(base) && k.includes("ZUSD"));
+    const t = key ? result[key] : undefined;
+    const price = Number(t?.c?.[0]);
+    const open = Number(t?.o);
+    if (!Number.isFinite(price) || price <= 0) continue;
+    const chg = Number.isFinite(open) && open > 0 ? ((price - open) / open) * 100 : 0;
+    rows.push({ sym, price, chg24h: chg });
+  }
+  if (rows.length < 4) throw new Error("kraken thin");
+  return rows;
+}
+
 async function fromCoinGecko(): Promise<Quote[]> {
   const url =
     "https://api.coingecko.com/api/v3/simple/price?ids=" +
@@ -42,6 +96,19 @@ async function fromCoinGecko(): Promise<Quote[]> {
   if (!rows.length) throw new Error("empty");
   return rows;
 }
+
+async function fetchQuotes(): Promise<Quote[]> {
+  const errs: string[] = [];
+  for (const src of [fromBinance, fromKraken, fromCoinGecko]) {
+    try {
+      return await src();
+    } catch (e) {
+      errs.push(String(e));
+    }
+  }
+  throw new Error(errs.join(" | "));
+}
+
 
 export const Route = createFileRoute("/api/public/prices")({
   server: {
