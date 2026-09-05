@@ -120,7 +120,8 @@ export const Route = createFileRoute("/api/public/prices")({
           return Response.json({ rows: cache.rows, cached: true }, { headers: CORS });
         }
         try {
-          const rows = await fromCoinGecko();
+          const rows = await fetchQuotes();
+
           cache = { at: now, rows };
           return Response.json({ rows, cached: false }, { headers: CORS });
         } catch (err) {
