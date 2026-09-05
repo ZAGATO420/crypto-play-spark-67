@@ -11348,7 +11348,7 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
       bar=document.createElement('div');bar.id='v27-arena';
       bar.innerHTML='<span><b id="v27-runs">—</b> RUNS LOGGED</span>'+
         '<span class="s">&middot;</span><span>TOP <b id="v27-top">—</b></span>'+
-        '<span class="s">&middot;</span><span><b id="v27-surv">—</b> SURVIVORS</span>';
+        '<span class="s">&middot;</span><span><b id="v27-surv">—</b> <i id="v27-survl" style="font-style:normal">SURVIVORS</i></span>';
 
       mid.appendChild(bar);
     }
@@ -11366,6 +11366,7 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
         });
         countUp($('v27-runs'),n);
         countUp($('v27-surv'),surv);
+        var sl=$('v27-survl');if(sl)sl.textContent=surv===1?'SURVIVOR':'SURVIVORS';
         var te=$('v27-top');
         if(te&&top)te.textContent='$'+Math.round(top).toLocaleString()+(who?' \u00B7 '+who.toUpperCase():'');
 
@@ -12751,3 +12752,163 @@ body.v30 #market-list .v7more{display:none!important}
   -webkit-text-fill-color:transparent!important;color:transparent!important;
   filter:drop-shadow(0 2px 0 rgba(0,0,0,.45)) drop-shadow(0 0 26px rgba(255,197,61,.28))}
 </style>
+
+<style id="v34">
+/* ============ V34 — real quotes, sharing, phone fit ============ */
+
+/* live tape carries real prices now: give it room and colour coding */
+#v21-gate .v33-tape div{gap:18px}
+#v21-gate .v33-tape em{font-style:normal;color:#e8f1ff;font-weight:800}
+#v21-gate .v33-tape .up{color:#8df3c8}
+#v21-gate .v33-tape .dn{color:#ff9d9d}
+#v21-gate .v33-tape .soon{color:#ffd76b}
+
+/* share row */
+#v34-share{position:relative;z-index:4;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  margin:14px auto 0;max-width:520px}
+#v34-share button{min-height:44px;padding:0 14px;border-radius:999px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;font:800 11px/1 'JetBrains Mono',ui-monospace,monospace;
+  letter-spacing:.12em;color:#cfdaea;background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.16);transition:border-color .18s,color .18s,transform .12s}
+#v34-share button:hover{color:#fff;border-color:rgba(182,255,46,.5)}
+#v34-share button:active{transform:translateY(1px)}
+#v34-share button.acid{color:#0d1a08;background:linear-gradient(180deg,#d6ff8a,#b6ff2e 60%,#93d520);
+  border-color:transparent}
+#v34-share .ok{color:#b6ff2e!important}
+@media(max-width:430px){
+  #v34-share{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:320px;padding:0 8px}
+  #v34-share button{min-height:42px;padding:0 8px;font-size:10px;letter-spacing:.06em;justify-content:center}
+  #v21-gate .v33-tape div{font-size:9.5px;gap:14px}
+}
+@media(max-height:700px){
+  #v34-share{margin-top:10px}
+  #v34-share button{min-height:40px}
+}
+
+/* ---- phone fit: leverage picker never needs a second look ---- */
+@media(max-width:430px){
+  #v32-pick .w{max-height:92vh}
+  #v32-pick .b{padding:6px 8px 4px;gap:5px}
+  #v32-pick .r{grid-template-columns:22px minmax(0,1fr) auto auto;gap:6px;padding:7px 8px}
+  #v32-pick .r img{width:24px;height:24px}
+  #v32-pick .r .s{font-size:13px}
+  #v32-pick .r .n{font-size:9.5px}
+  #v32-pick .r .p{font-size:13px}
+  #v32-pick .r .c{font-size:9.5px}
+  #v32-pick .r .a{gap:5px}
+  #v32-pick .r .a button{min-width:52px;min-height:44px;font-size:11px;letter-spacing:.04em;padding:0 4px}
+  #v32-pick .r img{width:22px;height:22px}
+  #v32-pick .r .p{font-size:12px}
+  #v32-pick .f{font-size:10px;line-height:1.5;padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+}
+/* ---- phone fit: the market list shows more coins without scrolling ---- */
+@media(max-width:430px){
+  body.v30 .v30-row,body.v31 .v30-row{padding-top:7px!important;padding-bottom:7px!important}
+}
+</style>
+<script id="v34-js">
+/* ===== V34 — real live quotes on the tape + share buttons ===== */
+(function(){
+  var SYMS=['BTC','ETH','SOL','DOGE','AVAX','LINK','ADA','DOT'];
+
+  /* ---------- 1. real prices for the start-screen tape ---------- */
+  function fmt(p){
+    if(p>=1000)return '$'+Math.round(p).toLocaleString('en-US');
+    if(p>=1)return '$'+p.toFixed(2);
+    return '$'+p.toFixed(4);
+  }
+  function items(rows){
+    var out=rows.map(function(r){
+      var c=Number(r.chg24h||0),cls=c>=0?'up':'dn',sign=c>=0?'+':'';
+      return r.sym+' <em>'+fmt(Number(r.price))+'</em> <span class="'+cls+'">'+
+             sign+c.toFixed(1)+'%</span>';
+    });
+    out.push('$TCFB <span class="soon">SOON</span>');
+    return out.join('<span style="opacity:.35">/</span>');
+  }
+  function paint(rows){
+    var tape=document.querySelector('#v21-gate .v33-tape');
+    if(!tape||!rows||!rows.length)return;
+    var one=items(rows);
+    tape.innerHTML='<div>'+one+'<span style="opacity:.35">/</span>'+one+'</div>';
+    tape.setAttribute('data-live','1');
+  }
+  var last=null;
+  function load(){
+    fetch('/api/public/prices',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var rows=(d&&d.rows)||[];
+      rows=rows.filter(function(r){return SYMS.indexOf(r.sym)>=0&&Number(r.price)>0});
+      if(!rows.length)return;
+      last=rows;paint(rows);
+    }).catch(function(){});
+  }
+  function repaint(){if(last)paint(last)}
+
+  /* ---------- 2. share buttons ---------- */
+  var TXT='84 months. $10k start. one life. 97% get rekt — think you can beat THE CRYPTO FINAL BOSS?';
+  function site(){
+    try{
+      var o=(window.top&&window.top.location&&window.top.location.origin)||location.origin;
+      return o.replace(/\/$/,'');
+    }catch(e){return 'https://thecryptofinalboss.app'}
+  }
+  function open_(u){try{window.open(u,'_blank','noopener')}catch(e){location.href=u}}
+  function flash(btn,label){
+    var old=btn.getAttribute('data-label')||btn.textContent;
+    btn.setAttribute('data-label',old);
+    btn.textContent=label;btn.classList.add('ok');
+    setTimeout(function(){btn.textContent=old;btn.classList.remove('ok')},1600);
+  }
+  function copy(txt,btn){
+    var done=function(){flash(btn,'COPIED')};
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(done,function(){fallback()});return;
+      }
+    }catch(e){}
+    fallback();
+    function fallback(){
+      try{
+        var t=document.createElement('textarea');t.value=txt;t.style.position='fixed';t.style.opacity='0';
+        document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);done();
+      }catch(err){}
+    }
+  }
+  function row(gate){
+    if(gate.querySelector('#v34-share'))return;
+    var url=site();
+    var wrap=document.createElement('div');wrap.id='v34-share';
+    wrap.innerHTML=
+      '<button type="button" class="acid" data-v34="x">SHARE ON X</button>'+
+      '<button type="button" data-v34="tg">TELEGRAM</button>'+
+      '<button type="button" data-v34="tr">TRAILER</button>'+
+      '<button type="button" data-v34="cp">COPY LINK</button>';
+    wrap.addEventListener('click',function(e){
+      var b=e.target.closest('button[data-v34]');if(!b)return;
+      e.preventDefault();e.stopPropagation();
+      var k=b.getAttribute('data-v34');
+      if(k==='x')open_('https://twitter.com/intent/tweet?text='+encodeURIComponent(TXT)+'&url='+encodeURIComponent(url+'/'));
+      else if(k==='tg')open_('https://t.me/share/url?url='+encodeURIComponent(url+'/')+'&text='+encodeURIComponent(TXT));
+      else if(k==='tr'){
+        var t=url+'/trailer';
+        if(navigator.share){navigator.share({title:'THE CRYPTO FINAL BOSS',text:TXT,url:t}).catch(function(){open_(t)});}
+        else open_(t);
+      }
+      else if(k==='cp')copy(url+'/',b);
+    },true);
+    var arena=document.getElementById('v27-arena'),links=gate.querySelector('.g-links');
+    if(arena&&arena.parentNode)arena.parentNode.insertBefore(wrap,arena.nextSibling);
+    else if(links&&links.parentNode)links.parentNode.insertBefore(wrap,links);
+    else gate.appendChild(wrap);
+  }
+
+  function boot(){
+    var gate=document.getElementById('v21-gate');
+    if(!gate)return;
+    row(gate);repaint();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  setTimeout(boot,700);setTimeout(boot,2000);
+  load();setInterval(function(){if(!document.hidden)load()},60000);
+})();
+</script>
