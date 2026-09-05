@@ -11348,7 +11348,8 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
       bar=document.createElement('div');bar.id='v27-arena';
       bar.innerHTML='<span><b id="v27-runs">—</b> RUNS LOGGED</span>'+
         '<span class="s">&middot;</span><span>TOP <b id="v27-top">—</b></span>'+
-        '<span class="s">&middot;</span><span><b>0</b> SURVIVORS</span>';
+        '<span class="s">&middot;</span><span><b id="v27-surv">—</b> SURVIVORS</span>';
+
       mid.appendChild(bar);
     }
     if(arenaDone)return;arenaDone=true;
@@ -11357,14 +11358,17 @@ body.v27 #v21-gate .g-mid,body.v27 #v21-gate .g-live,body.v27 #v21-gate .g-links
         var rows=Array.isArray(d)?d:((d&&(d.entries||d.scores||d.data))||[]);
 
         if(!Array.isArray(rows)||!rows.length){arenaDone=false;return}
-        var n=rows.length,top=0,who='';
+        var n=rows.length,top=0,who='',surv=0;
         rows.forEach(function(r){
           var v=Number(r.netWorth||r.net_worth||r.score||r.networth||0);
           if(v>top){top=v;who=String(r.name||r.player_name||'').slice(0,14)}
+          if(r.survived===true||r.survived==='true'||Number(r.months||r.months_survived||0)>=84)surv++;
         });
         countUp($('v27-runs'),n);
+        countUp($('v27-surv'),surv);
         var te=$('v27-top');
         if(te&&top)te.textContent='$'+Math.round(top).toLocaleString()+(who?' \u00B7 '+who.toUpperCase():'');
+
       }).catch(function(){arenaDone=false});
     }catch(e){arenaDone=false}
 
