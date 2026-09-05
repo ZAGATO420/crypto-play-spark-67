@@ -12935,11 +12935,12 @@ body.v30 #market-list .v7more{display:none!important}
 #v21-gate .v33-tape{z-index:5;order:-1;max-width:none;margin:4px 0 0;padding:6px 0;border-block:1px solid rgba(255,255,255,.09);background:rgba(3,13,18,.38)}
 #v21-gate .g-mid{z-index:5;margin-top:auto;padding:0 0 4px;display:flex;flex-direction:column;align-items:center}
 #v21-gate .g-mid::before{inset:-22% -12% -10%;background:linear-gradient(180deg,transparent,rgba(2,9,12,.64) 35%,rgba(2,9,12,.92) 100%)}
+#v21-gate .g-tag{display:none!important}
 #v21-gate .g-mark{order:1}
 #v21-gate .g-mark .a{font-size:clamp(13px,2.8vw,24px);letter-spacing:.32em}
 #v21-gate .g-mark .b{font-size:clamp(42px,8.5vw,96px)}
 #v27-taunt{order:2;margin:8px auto 0;color:#e9f2f3}
-body.v27 #v24-preset{position:absolute;z-index:7;top:calc(52px + env(safe-area-inset-top));right:12px;order:0;margin:0;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(3,14,18,.64);backdrop-filter:blur(9px);border-color:rgba(239,195,91,.32);color:#d8e1e4}
+body.v27 #v24-preset{position:fixed;z-index:7;top:calc(52px + env(safe-area-inset-top));right:12px;order:0;margin:0;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(3,14,18,.64);backdrop-filter:blur(9px);border-color:rgba(239,195,91,.32);color:#d8e1e4}
 #v21-gate .g-cta{order:3;margin:12px auto 0;border-radius:8px;background:linear-gradient(180deg,#e6ff70,#9edb25);box-shadow:0 0 0 1px rgba(217,255,92,.46),0 18px 50px -14px rgba(173,230,53,.76)}
 #v27-arena{order:4;width:100%;margin:9px auto 0;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;color:#9bacb3}
 #v34-share{display:none!important}
@@ -12952,6 +12953,7 @@ body.v27 #v24-preset{position:absolute;z-index:7;top:calc(52px + env(safe-area-i
 #v35-menu .head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:5px 4px 12px;color:#f4d475;font:900 12px/1 'JetBrains Mono',monospace;letter-spacing:.16em}
 #v35-menu .close{width:44px;height:44px;border:1px solid rgba(255,255,255,.14);border-radius:6px;background:transparent;color:#dce7e9;font-size:18px;cursor:pointer}
 #v35-menu .items{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#v35-menu #v34-share{display:contents!important}
 #v35-menu .items button{min-width:0;min-height:48px;padding:0 10px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:rgba(255,255,255,.045);color:#dce7e9;cursor:pointer;font:800 10px/1.15 'JetBrains Mono',monospace;letter-spacing:.08em}
 #v35-menu .items button:hover{border-color:rgba(230,255,112,.5);color:#e6ff70}
 @media(max-width:760px){
@@ -12994,7 +12996,7 @@ body.v27 #v24-preset{position:absolute;z-index:7;top:calc(52px + env(safe-area-i
     menu.innerHTML='<div class="panel" role="dialog" aria-modal="true" aria-label="More options"><div class="head"><span>MORE OPTIONS</span><button class="close" type="button" aria-label="Close">×</button></div><div class="items"></div></div>';
     gate.appendChild(menu);
     var items=menu.querySelector('.items');
-    var share=document.getElementById('v34-share');if(share)Array.prototype.slice.call(share.children).forEach(function(b){items.appendChild(b)});
+    var share=document.getElementById('v34-share');if(share)items.appendChild(share);
     var links=gate.querySelector('.g-links');if(links)Array.prototype.slice.call(links.children).forEach(function(b){items.appendChild(b)});
     function set(open){menu.classList.toggle('on',open);menu.setAttribute('aria-hidden',open?'false':'true');if(open){var b=items.querySelector('button');if(b)b.focus()}else more.focus()}
     more.addEventListener('click',function(){set(true)});
