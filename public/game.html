@@ -12881,7 +12881,7 @@ body.v30 #market-list .v7more{display:none!important}
     wrap.innerHTML=
       '<button type="button" class="acid" data-v34="x">SHARE ON X</button>'+
       '<button type="button" data-v34="tg">TELEGRAM</button>'+
-      '<button type="button" data-v34="tr">TRAILER</button>'+
+      '<button type="button" data-v34="tr">WATCH TRAILER</button>'+
       '<button type="button" data-v34="cp">COPY LINK</button>';
     wrap.addEventListener('click',function(e){
       var b=e.target.closest('button[data-v34]');if(!b)return;
@@ -12890,10 +12890,9 @@ body.v30 #market-list .v7more{display:none!important}
       if(k==='x')open_('https://twitter.com/intent/tweet?text='+encodeURIComponent(TXT)+'&url='+encodeURIComponent(url+'/'));
       else if(k==='tg')open_('https://t.me/share/url?url='+encodeURIComponent(url+'/')+'&text='+encodeURIComponent(TXT));
       else if(k==='tr'){
-        var t=url+'/trailer';
-        if(navigator.share){navigator.share({title:'THE CRYPTO FINAL BOSS',text:TXT,url:t}).catch(function(){open_(t)});}
-        else open_(t);
+        try{window.location.href=url+'/trailer';}catch(err){open_(url+'/trailer');}
       }
+
       else if(k==='cp')copy(url+'/',b);
     },true);
     var arena=document.getElementById('v27-arena'),links=gate.querySelector('.g-links');
