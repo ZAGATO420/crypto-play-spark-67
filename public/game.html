@@ -14670,6 +14670,8 @@ body.v40-live .presale-result .sub{font:700 11px/1.4 'Hind',sans-serif!important
     var done=false;
     function go(){if(done)return;done=true;render(list)}
     try{pqEnqueue('presale',go,7)}catch(_){go();return}
+    /* Results are gameplay-critical: never let an older popup queue hide them. */
+    setTimeout(go,350);
     /* safety net: if the popup queue is blocked, still show the moment */
     var tries=0;
     var t=setInterval(function(){
