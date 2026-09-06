@@ -13400,17 +13400,26 @@ body.v38-shake{animation:v38shake .42s ease}
       (OBJ[s.month]?'<div class="obj">'+OBJ[s.month]+'</div>':'')+
       '<div class="prog"><i style="width:'+Math.min(100,Math.round(s.month/84*100))+'%"></i></div>';
   }
-  var _next=window.nextMonth;
-  window.nextMonth=function(){
-    var s=S();
-    var pre=0,before={};
-    try{ if(s){pre=netWorth(); for(var k in s.prices)before[k]=s.prices[k];} }catch(e){}
-    MR.on=true; MR.lines=[];
-    var r;
-    try{ r=_next.apply(this,arguments); } finally { MR.on=false; }
-    try{ mrFlush(pre,before); }catch(e){ console.warn('v38 recap',e) }
-    return r;
-  };
+  /* installed as the outermost wrapper, and re-installed if a later layer
+     (V22 rollover, V30 re-entry guard) wraps nextMonth after us. */
+  function installRecap(){
+    var _next=window.nextMonth;
+    if(typeof _next!=='function'||_next.__v38)return;
+    var w=function(){
+      var s=S();
+      var pre=0,before={};
+      try{ if(s){pre=netWorth(); for(var k in s.prices)before[k]=s.prices[k];} }catch(e){}
+      MR.on=true; MR.lines=[];
+      var r;
+      try{ r=_next.apply(this,arguments); } finally { MR.on=false; }
+      try{ mrFlush(pre,before); }catch(e){ console.warn('v38 recap',e) }
+      return r;
+    };
+    w.__v38=true; w.__v30=true; window.nextMonth=w;
+  }
+  installRecap();
+  setInterval(installRecap,1500);
+
   /* ---------- 2. one card per month, everything else goes to the log ------- */
   function budget(){
     var s=S(); if(!s)return false;
