@@ -1185,6 +1185,7 @@ function PriceTape() {
   return (
     <div className="price-tape" aria-label="Live crypto prices">
       <div className="price-tape-track">
+        <span className="tcfb-pill"><b>$TCFB</b> <i>SOON</i></span>
         {row.map((q, i) => (
           <span key={`${q.sym}-${i}`} className={q.chg24h >= 0 ? "is-up" : "is-down"}>
             <b>{q.sym}</b> {q.price >= 1 ? formatMoney(q.price) : `$${q.price.toFixed(4)}`} <i>{q.chg24h >= 0 ? "+" : ""}{q.chg24h.toFixed(1)}%</i>
