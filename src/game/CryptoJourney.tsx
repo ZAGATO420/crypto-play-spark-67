@@ -199,7 +199,7 @@ export function CryptoJourney() {
     setRound({ buys: 0, sells: 0, netStart: valueOf(nextState) });
     const alive = nextHunger < 100 && nextStress < 100 && valueOf(nextState) > 0;
     if (!alive) return setScreen("end");
-    if (monthEvent || Math.random() < 0.45) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
+    if (monthEvent || Math.random() < 0.6) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
   };
 
   const recover = (kind: "eat" | "calm") => {
