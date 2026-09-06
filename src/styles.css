@@ -263,3 +263,5 @@
   .market-grid { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
   .trade-bar, .call-bar { flex-direction: column; align-items: stretch; }
 }
+
+.journey-stage > .mission-strip, .journey-stage > .market-grid, .journey-stage > .trade-bar, .journey-stage > .call-bar, .journey-stage > .journey-card { flex: 0 0 auto; align-self: stretch; }

@@ -33,8 +33,13 @@ const diffOf = (id: Difficulty) => DIFFICULTIES.find((d) => d.id === id) ?? DIFF
 const modeOf = (id: BaseMode) => MODES.find((m) => m.id === id) ?? MODES[0]!;
 
 const makeNoise = (mode: BaseMode) => {
-  const spread = mode === "historical" ? 0 : mode === "chaos" ? 0.32 : 0.09;
-  return Array.from({ length: 84 }, () => 1 + (Math.random() * 2 - 1) * spread);
+  const step = mode === "historical" ? 0 : mode === "chaos" ? 0.05 : 0.018;
+  const cap = mode === "chaos" ? 0.4 : 0.12;
+  let drift = 0;
+  return Array.from({ length: 84 }, () => {
+    drift = Math.max(-cap, Math.min(cap, drift + (Math.random() * 2 - 1) * step));
+    return 1 + drift;
+  });
 };
 
 const freshState = (config: Config): GameState => ({
