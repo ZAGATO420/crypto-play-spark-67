@@ -36,3 +36,49 @@ export const formatMoney = (value: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: Math.abs(value) < 1 ? 4 : 0 }).format(value);
 
 export const levelFor = (xp: number) => Math.max(1, XP_LEVELS.filter((threshold) => xp >= threshold).length);
+export type Archetype = "degen" | "trader" | "influencer" | "hodler";
+export type Difficulty = "EASY" | "NORMAL" | "BOSS";
+export type BaseMode = "classic" | "chaos" | "historical";
+
+export const ARCHETYPES: { id: Archetype; name: string; cash: number; blurb: string; risk: number; xp: number }[] = [
+  { id: "degen", name: "DEGEN", cash: 6000, blurb: "Thin bankroll, fat payouts. Launch cards pay 40% more — and rug you harder.", risk: 1.25, xp: 1.1 },
+  { id: "trader", name: "TRADER", cash: 10000, blurb: "Balanced stack, cheaper trades, calmer nerves. The professional route.", risk: 1, xp: 1 },
+  { id: "influencer", name: "INFLUENCER", cash: 7500, blurb: "The crowd follows you. More XP per move, but stress builds fast.", risk: 1.1, xp: 1.25 },
+  { id: "hodler", name: "HODLER", cash: 12000, blurb: "Deep pockets, iron stomach. Hunger and stress grow slower.", risk: 0.85, xp: 0.9 },
+];
+
+export const DIFFICULTIES: { id: Difficulty; name: string; blurb: string; cost: number; risk: number }[] = [
+  { id: "EASY", name: "EASY", blurb: "Cheap living, forgiving markets.", cost: 0.8, risk: 0.85 },
+  { id: "NORMAL", name: "NORMAL", blurb: "The honest run.", cost: 1, risk: 1 },
+  { id: "BOSS", name: "BOSS", blurb: "Costs bite, rugs are everywhere.", cost: 1.4, risk: 1.3 },
+];
+
+export const MODES: { id: BaseMode; name: string; blurb: string; xpLabel: string }[] = [
+  { id: "classic", name: "CLASSIC", blurb: "Real history with a little noise.", xpLabel: "1.00x XP" },
+  { id: "historical", name: "HISTORICAL", blurb: "Exact timeline. Knowledge pays less.", xpLabel: "0.75x XP" },
+  { id: "chaos", name: "CHAOS", blurb: "Prices swing wild. Highest reward.", xpLabel: "1.25x XP" },
+];
+
+export const COUNTRIES = ["DE", "USA", "CH", "SG", "PT", "NG"] as const;
+export type Country = (typeof COUNTRIES)[number];
+
+export type ChanceKind = "launch" | "airdrop" | "perp" | "tax";
+export type Chance = { kind: ChanceKind; title: string; body: string; stake: number; actionLabel: string };
+
+export const CHANCES: Chance[] = [
+  { kind: "launch", title: "STEALTH LAUNCH", body: "An unaudited token opens for 60 seconds. The chart could 10x — or the deployer takes everything.", stake: 0.2, actionLabel: "SNIPE 20%" },
+  { kind: "launch", title: "PRESALE WHITELIST", body: "You got a whitelist spot nobody can verify. Fill it or walk away.", stake: 0.15, actionLabel: "FILL 15%" },
+  { kind: "airdrop", title: "AIRDROP FARM", body: "Bridge and farm this chain for a season. Costs gas now, might print later.", stake: 0.08, actionLabel: "FARM 8%" },
+  { kind: "perp", title: "LEVERAGE DESK", body: "10x perps are open. One clean candle doubles your stake, one wick liquidates it.", stake: 0.12, actionLabel: "LONG 10x" },
+  { kind: "tax", title: "THE BOSS COLLECTS", body: "The Boss demands tribute this month. Pay him, or take the stress of refusing.", stake: 0.06, actionLabel: "PAY TRIBUTE" },
+];
+
+export const RANK_TITLES = ["Early Rekt", "Certified Rekt", "Late Game Rekt", "Solid Survivor", "Top 8% Survivor", "Top 3% Diamond Hands", "Final Boss Material"] as const;
+
+export const rankTitle = (net: number, months: number, survived: boolean) => {
+  if (!survived) return months < 18 ? "Early Rekt" : months < 54 ? "Certified Rekt" : "Late Game Rekt";
+  if (net > 5_000_000) return "Final Boss Material";
+  if (net > 1_000_000) return "Top 3% Diamond Hands";
+  if (net > 250_000) return "Top 8% Survivor";
+  return "Solid Survivor";
+};
