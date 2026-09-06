@@ -4207,10 +4207,10 @@ function refreshLaunches(){
   });
 }
 function auditLaunch(id){
-  if(!state||state._gameEnded)return;
-  const o=(state.launchOffers||[]).find(x=>x.id===id); if(!o)return;
+  if(!state||state._gameEnded){toast('This run is over – start a new one','sell');return}
+  const o=(state.launchOffers||[]).find(x=>x.id===id); if(!o){toast('That launch is gone – it already closed this month','sell');return}
   const cost=Math.round(150*(1+state.month*0.05));
-  if(state.cash<cost){toast('Not enough cash for audit','sell');return}
+  if(state.cash<cost){toast('Audit costs '+fmt(cost)+' – you only have '+fmt(state.cash),'sell');return}
   state.cash-=cost; o.audited=true;
   o.report=Math.random()<0.82?o.type:(['rug','honeypot','slow','moon'][Math.floor(Math.random()*4)]);
   playSound('click'); awardXP(35,'CONTRACT AUDIT');
