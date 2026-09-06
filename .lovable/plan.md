@@ -35,3 +35,16 @@ Auf der Bestenliste steht heute nur Name, Flagge und Archetyp als Text. Neu:
 - `src/game/CryptoJourney.tsx`: `setTrack` bei Screen-Wechsel, `playSfx` an bestehenden Stellen (Trade, Level-Up, Crash, Liquidation, Auswahl), Sound-Toggle im Header.
 - Bestenliste: in `BoardScreen` (~Zeile 1158) `AVATARS`-Lookup über `r.avatar`, `<img>` in der `board-row`; `.board-row` in `src/styles.css` um Avatar-Spalte erweitern.
 - Keine Änderung an Spiel-Logik, Preisen, XP, Boss-Score oder Board-API.
+
+## 5. "Continue Run" nach beendetem Run entfernen
+
+Nach dem Ende eines Runs wird der Speicherstand zwar gelöscht, der Knopf bleibt aber stehen und führt ins Leere. Neu: sobald ein Run zu Ende ist (oder abgebrochen wird), verschwindet CONTINUE RUN vom Startbild — er erscheint nur, wenn wirklich ein laufender Run zum Weiterspielen existiert.
+
+## 6. Live-Ticker oben auf dem Startbild
+
+Eine schmale, laufende Zeile mit echten aktuellen Kursen (BTC, ETH, SOL, DOGE, AVAX, LINK, ADA, DOT) inklusive 24-h-Veränderung in Grün/Rot. Die Kurs-Schnittstelle dafür gibt es schon; sie wird nur wieder angezeigt, aktualisiert sich jede Minute und blendet sich bei Ausfall einfach aus (kein Fehler, keine Platzhalterzahlen). Hinweis: das Spiel selbst läuft weiter auf den historischen Kursen 2020–2026 — der Ticker ist Atmosphäre.
+
+## Technische Notizen (Ergänzung)
+
+- `CryptoJourney.tsx`: `setResume(false)` beim Runde-Ende und in `begin()`; Speicherstand-Prüfung nach jedem Screen-Wechsel zum Startbild.
+- Neue Komponente `PriceTape` im `StartScreen`, liest `/api/public/prices` (bereits vorhanden, 60 s Cache) über `useQuery`, CSS-Marquee in `src/styles.css`; bei Fehler wird nichts gerendert.
