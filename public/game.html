@@ -14317,8 +14317,11 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
     font:400 13px/1 'Archivo Black','Hind',sans-serif;cursor:pointer}
   .v42-month:active{transform:translateY(1px)}
 }
-@media(max-width:820px){#v42-surv{margin:0 7px;padding:6px 8px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
-  .v42-btn{min-width:0;width:100%}
+@media(max-width:820px){#v42-surv{margin:0 7px;padding:5px 8px;gap:6px;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto}
+  .v42-btn{min-width:0;padding:0 9px;font-size:9px}
+  .v42-btn span{font-size:8px}
+  .v42-m small{font-size:7.5px}
 }
 @media(prefers-reduced-motion:reduce){#v42-surv.warn .v42-bar.hot i{animation:none!important}}
 </style>
