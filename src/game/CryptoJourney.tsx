@@ -175,9 +175,9 @@ export function CryptoJourney() {
     const nextPulse = pct(priceAt("BTC", next, state.noise), priceAt("BTC", state.month, state.noise));
     const callRight = call === "up" ? nextPulse >= 0 : nextPulse < 0;
     const combo = callRight ? state.streak + 1 : 0;
-    const cost = Math.round((140 + Math.floor(next / 12) * 25) * diff.cost);
-    const nextHunger = Math.min(100, state.hunger + Math.round(9 * arch.risk));
-    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 4 : 12) * arch.risk));
+    const cost = Math.round((260 + Math.floor(next / 12) * 90) * diff.cost);
+    const nextHunger = Math.min(100, state.hunger + Math.round(13 * arch.risk));
+    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 6 : 17) * arch.risk));
 
     const preview: GameState = { ...state, month: next };
     const netEnd = valueOf(preview);
