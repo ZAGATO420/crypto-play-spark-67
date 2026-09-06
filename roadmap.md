@@ -11,3 +11,4 @@
 - [x] Sarcastic death-screen punchlines for every failed ending
 - [x] Run badges shown on the end screen and leaderboard
 - [x] Competition audit: mobile values, exact trade cash flows, country validation, queued/idempotent score submits
+- [x] Harder survival: care costs a move, is capped and gets pricier; NIGHTMARE mode; private life events; critical states cost a move; CASH OUT ends a run as SELLOUT

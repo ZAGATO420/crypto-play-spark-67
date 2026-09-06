@@ -37,7 +37,7 @@ export const formatMoney = (value: number) =>
 
 export const levelFor = (xp: number) => Math.max(1, XP_LEVELS.filter((threshold) => xp >= threshold).length);
 export type Archetype = "degen" | "trader" | "influencer" | "hodler";
-export type Difficulty = "EASY" | "NORMAL" | "BOSS";
+export type Difficulty = "EASY" | "NORMAL" | "BOSS" | "NIGHTMARE";
 export type BaseMode = "classic" | "chaos" | "historical";
 
 export const ARCHETYPES: { id: Archetype; name: string; cash: number; blurb: string; risk: number; xp: number }[] = [
@@ -47,11 +47,36 @@ export const ARCHETYPES: { id: Archetype; name: string; cash: number; blurb: str
   { id: "hodler", name: "HODLER", cash: 12000, blurb: "Deep pockets, iron stomach. Hunger and stress grow slower.", risk: 0.85, xp: 0.9 },
 ];
 
-export const DIFFICULTIES: { id: Difficulty; name: string; blurb: string; cost: number; risk: number }[] = [
-  { id: "EASY", name: "EASY", blurb: "Cheap living, forgiving markets.", cost: 0.8, risk: 0.85 },
-  { id: "NORMAL", name: "NORMAL", blurb: "The honest run.", cost: 1, risk: 1 },
-  { id: "BOSS", name: "BOSS", blurb: "Costs bite, rugs are everywhere.", cost: 1.4, risk: 1.3 },
+export const DIFFICULTIES: {
+  id: Difficulty; name: string; blurb: string; cost: number; risk: number;
+  hunger: number; stress: number; care: number; careCost: number; rug: number; caps: number;
+}[] = [
+  { id: "EASY", name: "EASY", blurb: "Cheap living, forgiving markets, food is never the problem.", cost: 0.8, risk: 0.85, hunger: 0.8, stress: 0.8, care: 1, careCost: 0.8, rug: 0.85, caps: 3 },
+  { id: "NORMAL", name: "NORMAL", blurb: "The honest run. Eating costs a move like everything else.", cost: 1, risk: 1, hunger: 1, stress: 1, care: 0.85, careCost: 1, rug: 1, caps: 2 },
+  { id: "BOSS", name: "BOSS", blurb: "Costs bite, rugs everywhere, hunger and nerves climb fast.", cost: 1.4, risk: 1.3, hunger: 1.35, stress: 1.35, care: 0.7, careCost: 1.5, rug: 1.25, caps: 2 },
+  { id: "NIGHTMARE", name: "NIGHTMARE", blurb: "Expensive life, constant crises, food and calm barely help. One mistake ends it.", cost: 1.9, risk: 1.6, hunger: 1.7, stress: 1.7, care: 0.5, careCost: 2.2, rug: 1.5, caps: 1 },
 ];
+
+/** Private life hits the run whether the chart cares or not. */
+export const LIFE_EVENTS: { label: string; line: string; cash: number; hunger?: number; stress?: number; weight: number }[] = [
+  { label: "Emergency dentist", line: "A molar cracked at 3am while you were watching funding rates.", cash: -900, stress: 8, weight: 3 },
+  { label: "Car broke down", line: "The gearbox died. The mechanic does not accept altcoins.", cash: -1400, stress: 10, weight: 3 },
+  { label: "Friend needs a loan", line: "Your cousin heard you are 'in crypto'. He is not asking politely.", cash: -1200, stress: 12, weight: 2 },
+  { label: "Phone stolen", line: "Someone took your phone. Your 2FA lived there. It cost you.", cash: -750, stress: 14, weight: 2 },
+  { label: "Laid off", line: "Your team was restructured. You are now a full-time chart watcher.", cash: -600, stress: 18, weight: 2 },
+  { label: "Tax refund", line: "The state overcharged you last year and quietly paid it back.", cash: 1100, stress: -6, weight: 2 },
+  { label: "Freelance gig", line: "Someone paid you real money to explain wallets to their boss.", cash: 1600, stress: 4, weight: 2 },
+  { label: "Family dinner", line: "You ate properly for once. Someone else even paid.", cash: -120, hunger: -14, stress: -8, weight: 2 },
+  { label: "Sleepless month", line: "You watched Asian hours every night. Your body sent an invoice.", cash: -260, hunger: 8, stress: 16, weight: 3 },
+  { label: "Rent hike", line: "Your landlord read about crypto and drew conclusions.", cash: -1000, stress: 9, weight: 2 },
+];
+
+export const pickLifeEvent = (roll: number) => {
+  const total = LIFE_EVENTS.reduce((s, e) => s + e.weight, 0);
+  let cursor = roll * total;
+  for (const e of LIFE_EVENTS) { cursor -= e.weight; if (cursor <= 0) return e; }
+  return LIFE_EVENTS[0]!;
+};
 
 export const MODES: { id: BaseMode; name: string; blurb: string; xpLabel: string }[] = [
   { id: "classic", name: "CLASSIC", blurb: "Real history with a little noise.", xpLabel: "1.00x XP" },
@@ -325,6 +350,13 @@ export const CHAPTER_WARNINGS: Record<number, string> = {
   22: "The casino is open 24/7 and the house still wins.",
   24: "Six figures on the board. Leverage at record highs.",
   26: "Final stretch. The Boss is already writing your rank.",
+};
+
+/** Food and calm get more expensive over the years and per difficulty. */
+export const careCost = (kind: "eat" | "calm", chapter: number, diff: Difficulty) => {
+  const d = DIFFICULTIES.find((x) => x.id === diff) ?? DIFFICULTIES[1]!;
+  const base = kind === "eat" ? 180 : 320;
+  return Math.round(base * (1 + chapter * 0.09) * d.careCost);
 };
 
 export const ENDINGS = {

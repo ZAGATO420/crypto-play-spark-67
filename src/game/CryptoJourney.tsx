@@ -14,7 +14,7 @@ import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
   ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
-  bossScore, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, presaleFor, situationFor, xpProgress,
+  bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, pickLifeEvent, presaleFor, situationFor, xpProgress,
   type Archetype, type BaseMode, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
 } from "./journey-data";
 import { COIN_LOGO } from "./coin-logos";
@@ -33,7 +33,7 @@ type Config = { name: string; avatar: string; arch: Archetype; difficulty: Diffi
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
   hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
-  custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number;
+  custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; config: Config;
 };
 type Phase = "brief" | "act" | "resolve";
@@ -51,6 +51,7 @@ type Dialog =
   | { k: "presale"; card: Presale }
   | { k: "launchResult"; res: LaunchResult }
   | { k: "survive" }
+  | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
   | { k: "crash"; chapter: number }
@@ -117,7 +118,7 @@ const makeNoise = (mode: BaseMode) => {
 const freshRun = (config: Config): Run => ({
   chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
   hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0,
+  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
   ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
 });
 
@@ -363,17 +364,53 @@ export function CryptoJourney() {
 
   const recover = (kind: "eat" | "calm") => {
     setDialog(null);
-    playSfx("care");
-    const cost = Math.round((kind === "eat" ? 90 : 130) * diff.cost);
+    if (ap <= 0) return say("Eating costs a move like everything else. None left this quarter.", "pink");
+    if (run.cares >= diff.caps) return say(`You already looked after yourself ${run.cares}x this quarter. That is the limit.`, "pink");
+    const cost = careCost(kind, run.chapter, cfg.difficulty);
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
+    playSfx("care");
+    // second helping does far less: you cannot buy your way out of survival
+    const relief = Math.round(42 * diff.care * (run.cares === 0 ? 1 : run.cares === 1 ? 0.55 : 0.3));
+    spend();
     setRun((r) => book({
-      ...r, cash: r.cash - cost,
-      hunger: kind === "eat" ? clamp(r.hunger - 46) : r.hunger,
-      stress: kind === "calm" ? clamp(r.stress - 46) : r.stress,
+      ...r, cash: r.cash - cost, cares: r.cares + 1,
+      hunger: kind === "eat" ? clamp(r.hunger - relief) : r.hunger,
+      stress: kind === "calm" ? clamp(r.stress - relief) : r.stress,
     }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
-    say(kind === "eat" ? "Fed. Hunger down 46." : "Head cleared. Stress down 46.", "cyan");
+    say(kind === "eat" ? `Fed. Hunger down ${relief}. That was a move you did not trade.` : `Head cleared. Stress down ${relief}.`, "cyan");
     grantXp(XP.survive, "STILL ALIVE");
   };
+
+  /** Walk away mid-run: everything sells at today's price, then the books close. */
+  const cashOut = () => {
+    setDialog(null);
+    playSfx("sell");
+    let cash = run.cash;
+    let realized = run.realized;
+    const ledger: Entry[] = [];
+    for (const p of run.positions) {
+      const cust = custodyOf(p.where);
+      const price = priceAt(p.symbol, run.chapter, run.noise);
+      const gross = Math.round(valueOf(p, price) * 0.96);
+      const fee = Math.round(gross * cust.fee);
+      cash += gross - fee;
+      realized += gross - fee - p.margin;
+      ledger.push({ chapter: run.chapter, label: `Exit ${p.symbol}`, amount: gross - fee });
+    }
+    if (realized > 0) {
+      const bill = Math.round(realized * TAX_RATE);
+      cash -= bill;
+      ledger.push({ chapter: run.chapter, label: `Exit tax on ${formatMoney(realized)}`, amount: -bill });
+    }
+    if (run.taxDebt > 0) {
+      const paid = Math.min(Math.max(0, cash), run.taxDebt);
+      cash -= paid;
+      ledger.push({ chapter: run.chapter, label: "Outstanding tax debt", amount: -paid });
+    }
+    setRun((r) => ({ ...r, cash: Math.max(0, Math.round(cash)), positions: [], taxDebt: 0, realized: 0, ledger: [...ledger, ...r.ledger].slice(0, 60) }));
+    finish("SELLOUT");
+  };
+
 
   /** Moving the bag is the most important button in the game. */
   const setCustody = (id: CustodyId) => {
@@ -509,6 +546,8 @@ export function CryptoJourney() {
     let crises = run.crises;
     let taxDebt = run.taxDebt;
     let realized = run.realized;
+    let lifeHunger = 0;
+    let lifeStress = 0;
     const survivors: Pos[] = [];
     for (const p of run.positions) {
       const price = priceAt(p.symbol, next, run.noise);
@@ -595,14 +634,36 @@ export function CryptoJourney() {
     if (taxDebt > 0 && !isTaxChapter(next)) taxDebt = Math.round(taxDebt * 1.05);
     cash = Math.max(0, cash);
 
+    // a private life happens whether the chart cares or not
+    if (next > 1 && Math.random() < 0.42) {
+      const ev = pickLifeEvent(Math.random());
+      if (ev.cash < 0) { cash = Math.max(0, cash + ev.cash); spendOn(ev.label, -ev.cash); }
+      else { cash += ev.cash; earnFrom(ev.label, ev.cash); }
+      lines.push(`${ev.label}: ${ev.line}`);
+      lifeHunger = ev.hunger ?? 0;
+      lifeStress = ev.stress ?? 0;
+    }
+
     // doing nothing is a choice, and it costs
     const idle = run.moves === 0;
-    const hunger = clamp(run.hunger + Math.round(7 * arch.risk) + (idle ? 6 : 0));
-    const stress = clamp(run.stress + Math.round(5 * arch.risk) + (idle ? 9 : 0) + Math.round(job.stress * 0.5) - house.calm);
+    // leverage does not only cost money, it costs sleep
+    const notional = positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev, 0);
+    const levered = Math.min(18, Math.round((notional / Math.max(1, startNet)) * 12));
+    const hunger = clamp(run.hunger + Math.round((8 + Math.floor(next / 6)) * arch.risk * diff.hunger) + (idle ? 7 : 0) + lifeHunger);
+    const redQuarter = netOf({ ...run, chapter: next, cash, positions, taxDebt }) < startNet;
+    const stress = clamp(
+      run.stress + Math.round((6 + Math.floor(next / 7)) * arch.risk * diff.stress) + (idle ? 10 : 0)
+      + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress,
+    );
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
+    if (levered >= 8) lines.push("Your leverage kept you awake. Stress climbed with the notional.");
+
+    const critical = hunger >= 80 || stress >= 80;
+    const criticals = run.criticals + (critical ? 1 : 0);
+    if (critical) lines.push("You are running on empty. Shaking hands cost you a move next quarter.");
 
     const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
-    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0 };
+    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
@@ -615,15 +676,16 @@ export function CryptoJourney() {
     setRun(nextRun);
     setResolution({ title, detail, tone, delta, move, lines, inflow, outflow });
     setPhase("resolve");
-    setAp(Math.min(AP_CAP, AP_BASE + job.ap + ap));
+    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
+    if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
 
     const finalNet = netOf(nextRun);
     if (hunger >= 100) return finish("STARVED");
     if (stress >= 100) return finish("BROKEN");
     if (finalNet <= 0) return finish(positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
-    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 40 && crises >= 5 ? "LEGEND" : "SURVIVOR");
+    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
   };
 
   const openChapterCards = (chapter: number) => {
@@ -757,7 +819,8 @@ export function CryptoJourney() {
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield /><strong>CUSTODY · {custodyOf(run.custody).short}</strong><small>Exchange · hot wallet · Ledger</small></button>
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "life" })}><Home /><strong>LIFE</strong><small>{jobOf(run.job).name} · {housingOf(run.housing).name}</small></button>
                 <button className="cy-act" onClick={() => setDialog({ k: "ledger" })}><Receipt /><strong>THE BOOKS</strong><small>Every dollar in and out</small></button>
-                <button className="cy-act" onClick={() => setDialog({ k: "survive" })}><HeartPulse /><strong>SURVIVE</strong><small>Eat · calm down</small></button>
+                <button className="cy-act" onClick={() => setDialog({ k: "survive" })}><HeartPulse /><strong>SURVIVE</strong><small>Eat · calm down · costs a move</small></button>
+                <button className="cy-act is-exit" onClick={() => setDialog({ k: "cashout" })}><Skull /><strong>CASH OUT</strong><small>End the run, take the bag</small></button>
                 <button className="cy-act" onClick={bank}><History /><strong>WAIT</strong><small>Bank a move, lose stress</small></button>
                 <button className="cy-act is-go" onClick={endChapter}><ChevronRight /><strong>END QUARTER</strong><small>Let the market answer</small></button>
               </div>
@@ -819,13 +882,14 @@ export function CryptoJourney() {
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
           {dialog.k === "launchResult" && <LaunchResultSheet res={dialog.res} onClose={nextInQueue} />}
-          {dialog.k === "survive" && <SurviveSheet run={run} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
+          {dialog.k === "survive" && <SurviveSheet run={run} difficulty={cfg.difficulty} caps={diff.caps} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
+          {dialog.k === "cashout" && <CashOutSheet run={run} net={net} score={score} onConfirm={cashOut} onClose={() => setDialog(null)} />}
           {dialog.k === "crash" && <CrashSheet chapter={dialog.chapter} onPanic={() => setDialog({ k: "mini", kind: "panic", pending: { t: "crash", chapter: dialog.chapter } })} onClose={nextInQueue} />}
           {dialog.k === "failure" && <FailureSheet chapter={dialog.chapter} run={run} onClose={nextInQueue} />}
           {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
           {dialog.k === "life" && <LifeSheet run={run} onPick={setLife} />}
           {dialog.k === "ledger" && <LedgerSheet run={run} onClose={() => setDialog(null)} />}
-          {dialog.k === "mini" && <Minigame kind={dialog.kind} hard={cfg.difficulty !== "EASY"} onResult={(res) => finishMini(dialog.pending, res)} />}
+          {dialog.k === "mini" && <Minigame kind={dialog.kind} hard={cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80} onResult={(res) => finishMini(dialog.pending, res)} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
         </Sheet>
@@ -1176,19 +1240,45 @@ function LedgerSheet({ run, onClose }: { run: Run; onClose: () => void }) {
 
 
 
-function SurviveSheet({ run, cost, onEat, onCalm }: { run: Run; cost: number; onEat: () => void; onCalm: () => void }) {
+function CashOutSheet({ run, net, score, onConfirm, onClose }: { run: Run; net: number; score: number; onConfirm: () => void; onClose: () => void }) {
+  const early = run.chapter < CHAPTERS - 1;
   return (
     <>
-      <p className="journey-kicker"><HeartPulse /> STAY IN THE GAME · FREE MOVE</p>
-      <h2>SURVIVAL</h2>
-      <div className="cy-survive">
-        <div><Activity /><span><small>HUNGER</small><strong>{run.hunger}%</strong></span><Button onClick={onEat}>EAT · {formatMoney(Math.round(90 * cost))}</Button></div>
-        <div><HeartPulse /><span><small>STRESS</small><strong>{run.stress}%</strong></span><Button onClick={onCalm}>CALM · {formatMoney(Math.round(130 * cost))}</Button></div>
+      <p className="journey-kicker"><Skull /> {chapterLabel(run.chapter)} · WALK AWAY</p>
+      <h2>CASH OUT NOW?</h2>
+      <p className="cy-lead">
+        Every position sells at today&apos;s price minus fees, tax on your profit and any debt comes off the top, and the run ends here.
+        {early ? " Leaving early stamps you SELLOUT — safe, respectable, never top of the board." : " You are close to the end. Finishing pays more."}
+      </p>
+      <div className="cy-facts">
+        <span><small>OPEN POSITIONS</small><strong>{run.positions.length}</strong></span>
+        <span><small>NET WORTH NOW</small><strong>{formatMoney(net)}</strong></span>
+        <span><small>TAX DEBT</small><strong>{formatMoney(run.taxDebt)}</strong></span>
+        <span><small>SCORE SO FAR</small><strong>{score.toLocaleString("en-US")}</strong></span>
       </div>
-      <small className="cy-note">Either one at 100% ends the run. Both climb every quarter.</small>
+      <div className="cy-decide">
+        <button onClick={onConfirm}><strong>TAKE THE BAG AND LEAVE</strong><small>Sell everything, close the books, submit the score</small></button>
+        <button onClick={onClose}><strong>KEEP PLAYING</strong><small>The Boss expected nothing less</small></button>
+      </div>
     </>
   );
 }
+
+function SurviveSheet({ run, difficulty, caps, onEat, onCalm }: { run: Run; difficulty: Difficulty; caps: number; onEat: () => void; onCalm: () => void }) {
+  const left = Math.max(0, caps - run.cares);
+  return (
+    <>
+      <p className="journey-kicker"><HeartPulse /> STAY IN THE GAME · COSTS A MOVE</p>
+      <h2>SURVIVAL</h2>
+      <div className="cy-survive">
+        <div><Activity /><span><small>HUNGER</small><strong>{run.hunger}%</strong></span><Button disabled={!left} onClick={onEat}>EAT · {formatMoney(careCost("eat", run.chapter, difficulty))}</Button></div>
+        <div><HeartPulse /><span><small>STRESS</small><strong>{run.stress}%</strong></span><Button disabled={!left} onClick={onCalm}>CALM · {formatMoney(careCost("calm", run.chapter, difficulty))}</Button></div>
+      </div>
+      <small className="cy-note">{left ? `${left} care action${left === 1 ? "" : "s"} left this quarter. Each one burns a move, and the second helps far less.` : "You are done looking after yourself this quarter. Survive on what you have."}</small>
+    </>
+  );
+}
+
 
 function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (o: DecisionOption) => void }) {
   return (
