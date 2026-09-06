@@ -35,14 +35,6 @@ Auf der Bestenliste steht heute nur Name, Flagge und Archetyp als Text. Neu:
 - Läuft ohne Datenänderung: der Avatar wird beim Eintragen schon mitgesendet und von der Bestenliste zurückgegeben; er wird nur nicht angezeigt.
 - Fallback: fehlt der Avatar bei alten Einträgen, erscheint ein neutrales Boss-Symbol statt eines leeren Kreises.
 
-## Technische Notizen
-
-- Musik: zwei Loops via ElevenLabs Music erzeugt, als `lovable-assets`-Pointer eingebunden (nicht im Repo), abgespielt über `<audio loop>` plus GainNode-Bus; kein Laufzeit-API-Call.
-- Neue Datei `src/game/audio.ts`: `initAudio()` (mit `ctx.resume()` beim ersten `pointerdown`), `setTrack("menu"|"run")` mit Crossfade, `playSfx(name)`, Lautstärke in `localStorage`.
-- `src/game/CryptoJourney.tsx`: `setTrack` bei Screen-Wechsel, `playSfx` an bestehenden Stellen (Trade, Level-Up, Crash, Liquidation, Auswahl), Sound-Toggle im Header.
-- Bestenliste: in `BoardScreen` (~Zeile 1158) `AVATARS`-Lookup über `r.avatar`, `<img>` in der `board-row`; `.board-row` in `src/styles.css` um Avatar-Spalte erweitern.
-- Keine Änderung an Spiel-Logik, Preisen, XP, Boss-Score oder Board-API.
-
 ## 5. "Continue Run" nach beendetem Run entfernen
 
 Nach dem Ende eines Runs wird der Speicherstand zwar gelöscht, der Knopf bleibt aber stehen und führt ins Leere. Neu: sobald ein Run zu Ende ist (oder abgebrochen wird), verschwindet CONTINUE RUN vom Startbild — er erscheint nur, wenn wirklich ein laufender Run zum Weiterspielen existiert.
@@ -51,7 +43,12 @@ Nach dem Ende eines Runs wird der Speicherstand zwar gelöscht, der Knopf bleibt
 
 Eine schmale, laufende Zeile mit echten aktuellen Kursen (BTC, ETH, SOL, DOGE, AVAX, LINK, ADA, DOT) inklusive 24-h-Veränderung in Grün/Rot. Die Kurs-Schnittstelle dafür gibt es schon; sie wird nur wieder angezeigt, aktualisiert sich jede Minute und blendet sich bei Ausfall einfach aus (kein Fehler, keine Platzhalterzahlen). Hinweis: das Spiel selbst läuft weiter auf den historischen Kursen 2020–2026 — der Ticker ist Atmosphäre.
 
-## Technische Notizen (Ergänzung)
+## Technische Notizen
 
-- `CryptoJourney.tsx`: `setResume(false)` beim Runde-Ende und in `begin()`; Speicherstand-Prüfung nach jedem Screen-Wechsel zum Startbild.
+- Musik: zwei Hip-Hop-Loops via ElevenLabs Music erzeugt (44.1 kHz MP3, sauberer Loop-Punkt); Effekte einmalig via ElevenLabs Sound Effects generiert. Alle Audiodateien als `lovable-assets`-Pointer eingebunden (nicht im Repo), kein Laufzeit-API-Call und keine Kosten pro Spieler.
+- Neue Datei `src/game/audio.ts`: `initAudio()` (mit `ctx.resume()` beim ersten `pointerdown`), `setTrack("menu"|"run")` mit Crossfade über GainNodes, `playSfx(name)` aus vorgeladenen AudioBuffern, Lautstärken in `localStorage`. Effekte werden erst geladen, wenn Ton aktiv ist.
+- `src/game/CryptoJourney.tsx`: `setTrack` bei Screen-Wechsel, `playSfx` an bestehenden Stellen (Trade, Level-Up, Crash, Liquidation, Minigame, Auswahl), Sound-Toggle im Header; `setResume(false)` beim Runde-Ende und in `begin()`.
+- Bestenliste: in `BoardScreen` (~Zeile 1158) `AVATARS`-Lookup über `r.avatar`, `<img>` in der `board-row`; `.board-row` in `src/styles.css` um Avatar-Spalte erweitern.
 - Neue Komponente `PriceTape` im `StartScreen`, liest `/api/public/prices` (bereits vorhanden, 60 s Cache) über `useQuery`, CSS-Marquee in `src/styles.css`; bei Fehler wird nichts gerendert.
+- Keine Änderung an Spiel-Logik, Preisen, XP, Boss-Score oder Board-API.
+
