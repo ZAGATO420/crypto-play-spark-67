@@ -317,7 +317,7 @@ export function CryptoJourney() {
       ...r,
       cash: r.cash + back - fee,
       trades: r.trades + 1,
-      realized: r.realized + Math.max(0, gain),
+      realized: r.realized + gain,
       risk: pos.kind === "perp" ? clamp(r.risk - pos.lev * 4 * fraction) : r.risk,
       positions: fraction >= 1
         ? r.positions.filter((p) => p.id !== id)
@@ -344,7 +344,7 @@ export function CryptoJourney() {
     const back = Math.round(size * multi);
     setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
-      realized: r.realized + Math.max(0, back - size),
+      realized: r.realized + back - size,
       risk: clamp(r.risk + 10), stress: clamp(r.stress + (rugged ? 12 : 4)),
       statuses: rugged ? Array.from(new Set([...r.statuses, "RUG VICTIM"])) : Array.from(new Set([...r.statuses, "EARLY BUYER"])),
     }, `${card.name} ticket`, -size), `${card.name} payout`, back));
@@ -385,6 +385,7 @@ export function CryptoJourney() {
     const moved = run.positions.filter((p) => p.kind === "spot");
     const value = moved.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, run.chapter, run.noise)), 0);
     const fee = Math.round(value * 0.004);
+    if (run.cash < fee) return say(`Moving these bags costs ${formatMoney(fee)}. Keep enough cash for the network.`, "pink");
     setRun((r) => book({
       ...r, custody: id, cash: r.cash - fee,
       positions: r.positions.map((p) => (p.kind === "spot" ? { ...p, where: id } : p)),
@@ -560,10 +561,17 @@ export function CryptoJourney() {
       lines.push(`A malicious approval drained ${formatMoney(bite)} from your hot wallet.`);
     }
 
-    // life: income in, rent and food out
+    // life: income in, old tax debt serviced, then rent and food out
     const job = jobOf(run.job);
     const house = housingOf(run.housing);
     if (job.income > 0) { cash += job.income; earnFrom(`${job.name} income`, job.income); }
+    if (taxDebt > 0 && cash > 0) {
+      const paid = Math.min(cash, taxDebt);
+      cash -= paid;
+      taxDebt -= paid;
+      spendOn("Tax debt payment", paid);
+      lines.push(`Tax debt payment: ${formatMoney(paid)}.`);
+    }
     const rent = Math.round(house.rent * diff.cost);
     const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
     cash -= rent + food;
@@ -574,8 +582,14 @@ export function CryptoJourney() {
     // tax once a year on what you actually realised
     if (isTaxChapter(next) && realized > 0) {
       const bill = Math.round(realized * TAX_RATE);
-      if (cash >= bill) { cash -= bill; spendOn(`Tax on ${formatMoney(realized)} realised`, bill); lines.push(`Tax bill paid: ${formatMoney(bill)}.`); }
-      else { taxDebt += Math.round(bill * 1.2); lines.push(`Tax bill ${formatMoney(bill)} unpaid — it grows 20% and follows you.`); }
+      const paid = Math.min(cash, bill);
+      cash -= paid;
+      if (paid > 0) spendOn(`Tax on ${formatMoney(realized)} net profit`, paid);
+      if (paid < bill) {
+        const unpaid = Math.round((bill - paid) * 1.2);
+        taxDebt += unpaid;
+        lines.push(`Tax bill ${formatMoney(bill)} · ${formatMoney(paid)} paid · ${formatMoney(unpaid)} debt after penalty.`);
+      } else lines.push(`Tax bill paid: ${formatMoney(bill)}.`);
       realized = 0;
     }
     if (taxDebt > 0 && !isTaxChapter(next)) taxDebt = Math.round(taxDebt * 1.05);
@@ -921,6 +935,7 @@ function ScoreSheet({ net, chapters, diff, crises, streak, score, onClose }: { n
       <p className="journey-kicker"><Trophy /> LEADERBOARD MATH</p>
       <h2>BOSS SCORE</h2>
       <ul className="cy-lines">
+        <li>Formula · (net worth × survival × difficulty + crises) × streak</li>
         <li>Net worth · {formatMoney(net)}</li>
         <li>Chapters survived · {chapters}/{CHAPTERS} = x{(Math.max(0.1, Math.min(1, chapters / CHAPTERS))).toFixed(2)}</li>
         <li>Difficulty {d.name} · x{d.cost.toFixed(2)}</li>
