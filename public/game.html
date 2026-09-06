@@ -14252,7 +14252,9 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       var cur=s.prices[c.s]||0,avg=s.avg[c.s]||0,val=h*cur,pc=avg?((cur-avg)/avg*100):0,gain=avg?(cur-avg)*h:0;
       risk+=val;pnl+=gain;
       gain=clean(gain);pc=clean(pc);
+      syms.push(c.s);
       out.push('<div class="v41-row" data-v41-pos="spot" data-v41-sym="'+c.s+'"><div class="v41-r1">'+mark(c.s)+
+
         '<b>'+c.s+' <i>SPOT · '+(typeof fmtAmt==='function'?fmtAmt(h):h.toFixed(4))+' COINS</i></b><strong class="'+(gain>=0?'v40-up':'v40-down')+'">'+signed(gain)+'<small style="display:block;margin-top:4px">'+signed(pc,'pct')+'</small></strong></div>'+
         '<div class="v41-grid"><div><small>VALUE</small><b>'+money(val)+'</b></div><div><small>AVG ENTRY</small><b>$'+px(avg)+'</b></div><div><small>MARK</small><b>$'+px(cur)+'</b></div><div><small>UNREALISED</small><b>'+signed(gain)+'</b></div></div>'+
         '<div class="v41-card-actions"><button class="hot" data-v41-buy="'+c.s+'">BUY MORE</button><button class="danger" data-v41-sell="'+c.s+'">SELL</button><button data-v41-spot="'+c.s+'">OPEN TRADE</button></div></div>');
