@@ -283,7 +283,7 @@ export function CryptoJourney() {
                   const owned = (state.holdings[c.symbol] ?? 0) * p;
                   return (
                     <button role="listitem" key={c.symbol} className={`market-tile tone-${c.color} ${i === coinIndex ? "is-on" : ""} ${p ? "" : "is-off"}`} onClick={() => { setCoinIndex(i); setResult(null); }}>
-                      <b>{c.symbol}</b>
+                      <b><CoinMark symbol={c.symbol} size={20} />{c.symbol}</b>
                       <span>{p ? formatMoney(p) : "—"}</span>
                       <em className={ch >= 0 ? "positive" : "negative"}>{p ? `${ch >= 0 ? "+" : ""}${ch.toFixed(1)}%` : "not live"}</em>
                       {owned > 0 && <i>{formatMoney(owned)}</i>}
