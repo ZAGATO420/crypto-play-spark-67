@@ -79,6 +79,7 @@ export function CryptoJourney() {
   const [ap, setAp] = useState(AP_MAX);
   const [call, setCall] = useState<"up" | "down" | null>(null);
   const [round, setRound] = useState({ buys: 0, sells: 0, netStart: 0 });
+  const [howTo, setHowTo] = useState(false);
 
   const coin = COINS[coinIndex] ?? COINS[0]!;
   const price = priceAt(coin.symbol, state.month, state.noise);
