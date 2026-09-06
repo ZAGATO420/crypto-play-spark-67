@@ -212,10 +212,10 @@ export function CryptoJourney() {
   };
 
   const bank = () => {
-    if (ap <= 0) return say("Nothing left to bank. End the quarter.", "pink");
-    setAp((a) => Math.min(AP_CAP, a - 1) + 1 <= AP_CAP ? a - 1 : a);
-    setRun((r) => ({ ...r, stress: clamp(r.stress - 4) }));
-    say("Move banked. Patience is a position.", "cyan");
+    if (ap <= 0) return say("No moves left. End the quarter.", "pink");
+    spend();
+    setRun((r) => ({ ...r, stress: clamp(r.stress - 6) }));
+    say("You sat on your hands. Stress down 6. Patience is a position.", "cyan");
   };
 
   const resolveDecision = (option: DecisionOption) => {
