@@ -526,12 +526,15 @@
 
 .board-face { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,0.06); flex: none; }
 
-.price-tape { position: relative; z-index: 3; width: 100%; max-width: 100%; overflow: hidden; border-block: 1px solid rgba(255,255,255,0.12); background: rgba(6,10,18,0.72); backdrop-filter: blur(6px); padding: 0.4rem 0; }
+.price-tape { position: absolute; top: 0; left: 0; right: 0; z-index: 4; width: 100%; max-width: 100%; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.12); background: rgba(6,10,18,0.82); backdrop-filter: blur(6px); padding: 0.42rem 0; padding-top: max(0.42rem, env(safe-area-inset-top)); }
 .price-tape-track { display: inline-flex; gap: 1.6rem; white-space: nowrap; animation: tape 42s linear infinite; will-change: transform; }
 .price-tape-track span { font-size: 0.7rem; letter-spacing: 0.1em; font-variant-numeric: tabular-nums; opacity: 0.92; }
 .price-tape-track b { letter-spacing: 0.16em; }
 .price-tape-track .is-up i { color: #34d399; font-style: normal; }
 .price-tape-track .is-down i { color: #fb7185; font-style: normal; }
+.price-tape-track .tcfb-pill { display: inline-flex; gap: 0.35rem; align-items: baseline; padding: 0.12rem 0.5rem; border-radius: 4px; background: color-mix(in oklab, var(--journey-yellow) 22%, transparent); }
+.price-tape-track .tcfb-pill b { color: var(--journey-yellow); }
+.price-tape-track .tcfb-pill i { color: var(--journey-yellow); font-style: normal; font-weight: 700; opacity: 0.85; }
 @keyframes tape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .price-tape-track { animation: none; } }
 
