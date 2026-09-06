@@ -13428,12 +13428,19 @@ body.v38-shake{animation:v38shake .42s ease}
     if(s._v38cardM!==s.month){s._v38cardM=s.month;s._v38cardN=0}
     return s._v38cardN>=1;
   }
+  var DROPPABLE={event:1,presale:1};
   var _pq=window.pqEnqueue;
   window.pqEnqueue=function(kind,run,prio){
     var s=S();
-    if(s){ if(s._v38cardM!==s.month){s._v38cardM=s.month;s._v38cardN=0} s._v38cardN++ }
+    if(s){
+      if(s._v38cardM!==s.month){s._v38cardM=s.month;s._v38cardN=0}
+      /* one full-screen card per month: pure info cards become log lines */
+      if(s._v38cardN>=1&&DROPPABLE[kind])return;
+      s._v38cardN++;
+    }
     return _pq.apply(null,arguments);
   };
+
   var _se=window.showEvent;
   window.showEvent=function(title,type,flavor){
     if(budget()){
