@@ -4741,6 +4741,26 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
 }
 @media(min-width:821px){.v40-bottom{display:none}.v40-mobile-only{display:none!important}}
 @media(prefers-reduced-motion:reduce){#v40-shell *{animation:none!important;transition:none!important}}
+/* --- V40.1 : coin marks, acid accent, reactive boss --- */
+:root{--v40-acid:#c8ff3d}
+#v40-shell .v40-mark{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#071426;box-shadow:0 0 0 1px rgba(255,255,255,.14);flex:0 0 auto}
+#v40-shell span.v40-mark{display:grid;place-items:center;font:800 8px/1 monospace;color:var(--v40-gold)}
+#v40-shell .v40-mark.lg{width:34px;height:34px;margin-right:9px;vertical-align:-8px}
+#v40-shell .v40-symbol{display:flex;align-items:center;gap:2px}
+#v40-shell .v40-coin{grid-template-columns:26px minmax(0,1fr) auto}
+#v40-shell .v40-pos-card b{display:flex;align-items:center;gap:7px}
+#v40-shell .v40-pos-card .v40-mark{width:20px;height:20px}
+#v40-shell .v40-action.buy{background:linear-gradient(180deg,var(--v40-acid),#9fe016);border-color:#e2ff9a;color:#08170a;box-shadow:0 0 22px rgba(200,255,61,.28)}
+#v40-shell .v40-nav.month{background:linear-gradient(180deg,var(--v40-acid),#8ed914);border-color:#e2ff9a;color:#08170a;box-shadow:0 0 20px rgba(200,255,61,.26)}
+#v40-shell .v40-survive button{border-color:rgba(200,255,61,.42);color:var(--v40-acid);background:#111f14}
+#v40-shell .v40-stat.hero strong{text-shadow:0 0 18px rgba(226,190,98,.35)}
+#v40-shell .v40-order{transition:border-color .25s,box-shadow .25s}
+#v40-shell[data-mood="enraged"] .v40-order,#v40-shell[data-mood="broken"] .v40-order{border-color:rgba(255,112,124,.62);box-shadow:inset 0 0 26px rgba(255,112,124,.14)}
+#v40-shell[data-mood="crowned"] .v40-order,#v40-shell[data-mood="smug"] .v40-order{border-color:rgba(200,255,61,.5);box-shadow:inset 0 0 26px rgba(200,255,61,.12)}
+#v40-shell[data-mood="enraged"] .v40-boss,#v40-shell[data-mood="broken"] .v40-boss{border-color:rgba(255,112,124,.7)}
+#v40-shell .v40-boss,#v40-shell .v40-order img{transition:filter .3s}
+#v40-shell[data-mood="crowned"] .v40-boss{box-shadow:0 0 18px rgba(226,190,98,.5)}
+@media(max-width:820px){#v40-shell .v40-order img{width:44px;height:44px}#v40-shell .v40-order{grid-template-columns:44px minmax(0,1fr) auto}}
 </style>
 <script id="v40-terminal-rebuild-js">
 (function(){
