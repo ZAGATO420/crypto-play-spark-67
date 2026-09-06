@@ -21,6 +21,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
+import { getVolumes, initAudio, isMuted, playSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 
 /* ------------------------------------------------------------------ types */
 
@@ -59,6 +60,7 @@ type Dialog =
   | { k: "ledger" }
   | { k: "mini"; kind: MiniKind; pending: Pending }
   | { k: "score" }
+  | { k: "sound" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
 type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[]; inflow: Entry[]; outflow: Entry[] };
@@ -133,6 +135,9 @@ export function CryptoJourney() {
   const [resume, setResume] = useState(false);
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
+  const [muted, setMutedState] = useState(false);
+  const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
+  useEffect(() => { wireAudio(); initAudio(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
   const [netPulse, setNetPulse] = useState<"up" | "down" | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
@@ -150,6 +155,7 @@ export function CryptoJourney() {
   const xpBar = xpProgress(run.xp);
 
   useEffect(() => { if (localStorage.getItem(SAVE_KEY)) setResume(true); }, []);
+  useEffect(() => { void setTrack(screen === "run" ? "run" : "menu"); }, [screen]);
   useEffect(() => {
     if (screen !== "run" || cfg.ironman) return;
     localStorage.setItem(SAVE_KEY, JSON.stringify({ run, phase, ap }));
@@ -185,6 +191,7 @@ export function CryptoJourney() {
       const next = r.xp + gain;
       if (levelFor(next) > levelFor(r.xp)) {
         setLevelUp(levelFor(next));
+        playSfx("level");
         window.setTimeout(() => setLevelUp(null), 2200);
       }
       return { ...r, xp: next };
@@ -192,7 +199,7 @@ export function CryptoJourney() {
     pop(`+${gain} XP${label ? ` · ${label}` : ""}`, "xp");
   };
 
-  const rumble = () => { setShake(true); window.setTimeout(() => setShake(false), 520); };
+  const rumble = () => { playSfx("crash"); setShake(true); window.setTimeout(() => setShake(false), 520); };
 
   const spend = (cost = 1) => { setAp((a) => Math.max(0, a - cost)); setRun((r) => ({ ...r, moves: r.moves + 1 })); };
 
@@ -217,6 +224,7 @@ export function CryptoJourney() {
     }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee));
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
+    playSfx("buy");
     grantXp(XP.trade, "TRADE");
   };
 
@@ -234,6 +242,7 @@ export function CryptoJourney() {
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
+    playSfx("buy");
     grantXp(XP.trade + lev * 8, `${lev}x`);
   };
 
@@ -247,6 +256,7 @@ export function CryptoJourney() {
 
   const closePosition = (id: number, fraction: number, quality: number) => {
     setDialog(null);
+    playSfx("sell");
     const pos = run.positions.find((p) => p.id === id);
     if (!pos) return;
     const cust = custodyOf(pos.where);
@@ -308,6 +318,7 @@ export function CryptoJourney() {
 
   const recover = (kind: "eat" | "calm") => {
     setDialog(null);
+    playSfx("care");
     const cost = Math.round((kind === "eat" ? 90 : 130) * diff.cost);
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
     setRun((r) => book({
@@ -322,6 +333,7 @@ export function CryptoJourney() {
   /** Moving the bag is the most important button in the game. */
   const setCustody = (id: CustodyId) => {
     setDialog(null);
+    playSfx("vault");
     if (id === run.custody) return say(`Everything already sits in your ${custodyOf(id).short}.`, "cyan");
     if (ap <= 0) return say("Moving coins costs a move. None left this quarter.", "pink");
     spend();
@@ -357,6 +369,7 @@ export function CryptoJourney() {
   };
 
   const resolveDecision = (option: DecisionOption, crisis = true) => {
+    playSfx("click");
     const status = STATUS_BY_CHOICE[option.label];
     setRun((r) => {
       const positions = r.positions.map((p) => (option.bagMul !== undefined ? { ...p, margin: p.margin * option.bagMul, qty: p.qty * option.bagMul } : p));
@@ -414,6 +427,7 @@ export function CryptoJourney() {
   };
 
   const finishMini = (pending: Pending, res: MiniResult) => {
+    playSfx("hit");
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
@@ -433,6 +447,7 @@ export function CryptoJourney() {
 
 
   const endChapter = () => {
+    playSfx("quarter");
     const from = run.chapter;
     const next = from + 1;
     const startNet = netOf(run);
@@ -569,10 +584,11 @@ export function CryptoJourney() {
     openChapterCards(run.chapter);
   };
 
-  const finish = (key: EndingKey) => { setEnding(key); setScreen("end"); };
+  const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
 
   const begin = (config: Config) => {
     localStorage.removeItem(SAVE_KEY);
+    setResume(false);
     setRun(freshRun(config));
     setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null); setQueue([]);
     setScreen("run");
@@ -610,7 +626,7 @@ export function CryptoJourney() {
         <div className="cy-top-right">
           <button className="cy-score" onClick={() => setDialog({ k: "score" })}><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></button>
           <div className="cy-ap" aria-label={`${ap} moves left`}>{Array.from({ length: AP_CAP }, (_, i) => <i key={i} className={i < ap ? "is-on" : ""} />)}</div>
-          <Button variant="ghost" size="icon" aria-label={run.muted ? "Sound on" : "Mute"} onClick={() => setRun({ ...run, muted: !run.muted })}>{run.muted ? <VolumeX /> : <Volume2 />}</Button>
+          <Button variant="ghost" size="icon" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => setDialog({ k: "sound" })}>{muted ? <VolumeX /> : <Volume2 />}</Button>
         </div>
       </header>
 
@@ -727,6 +743,12 @@ export function CryptoJourney() {
       {dialog && (
         <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
+          {dialog.k === "sound" && <SoundSheet
+            muted={muted} vols={vols}
+            onMute={(v) => { setMuted(v); setMutedState(v); }}
+            onMusic={(v) => { setMusicVol(v); setVols(getVolumes()); }}
+            onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
+            onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
           {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => setDialog({ k: "trade", symbol: s })} />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
@@ -812,6 +834,32 @@ function Rules({ onClose }: { onClose: () => void }) {
         <li><b>5</b><span>Hunger or stress at 100 ends the run. So does zero. Only the Boss Score counts on the board.</span></li>
       </ol>
       <Button className="cy-primary" onClick={onClose}>LET ME TRADE</Button>
+    </>
+  );
+}
+
+function SoundSheet({ muted, vols, onMute, onMusic, onSfx, onClose }: { muted: boolean; vols: { musicVol: number; sfxVol: number }; onMute: (v: boolean) => void; onMusic: (v: number) => void; onSfx: (v: number) => void; onClose: () => void }) {
+  return (
+    <>
+      <p className="journey-kicker"><Volume2 /> AUDIO</p>
+      <h2>SOUND</h2>
+      <p className="cy-lead">Two produced hip-hop loops and clean action sounds. Set it once, it stays.</p>
+      <div className="sound-rows">
+        <label className="sound-row">
+          <span>MUSIC</span>
+          <input type="range" min={0} max={1} step={0.05} value={vols.musicVol} onChange={(e) => onMusic(Number(e.target.value))} aria-label="Music volume" />
+          <b>{Math.round(vols.musicVol * 100)}%</b>
+        </label>
+        <label className="sound-row">
+          <span>EFFECTS</span>
+          <input type="range" min={0} max={1} step={0.05} value={vols.sfxVol} onChange={(e) => onSfx(Number(e.target.value))} aria-label="Effect volume" />
+          <b>{Math.round(vols.sfxVol * 100)}%</b>
+        </label>
+      </div>
+      <div className="cy-sound-actions">
+        <Button variant={muted ? "default" : "outline"} onClick={() => onMute(!muted)}>{muted ? <><Volume2 />SOUND ON</> : <><VolumeX />MUTE ALL</>}</Button>
+        <Button onClick={onClose}>DONE</Button>
+      </div>
     </>
   );
 }
@@ -1095,11 +1143,46 @@ function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (
 
 /* ---------------------------------------------------------------- screens */
 
+type Quote = { sym: string; price: number; chg24h: number };
+
+function PriceTape() {
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  useEffect(() => {
+    let alive = true;
+    const pull = async () => {
+      try {
+        const res = await fetch("/api/public/prices");
+        if (!res.ok) return;
+        const data = (await res.json()) as { rows?: Quote[] };
+        const list = data.rows ?? [];
+        if (alive && list.length) setQuotes(list);
+      } catch { /* atmosphere only — silence is fine */ }
+    };
+    void pull();
+    const id = window.setInterval(pull, 60_000);
+    return () => { alive = false; window.clearInterval(id); };
+  }, []);
+  if (!quotes.length) return null;
+  const row = [...quotes, ...quotes];
+  return (
+    <div className="price-tape" aria-label="Live crypto prices">
+      <div className="price-tape-track">
+        {row.map((q, i) => (
+          <span key={`${q.sym}-${i}`} className={q.chg24h >= 0 ? "is-up" : "is-down"}>
+            <b>{q.sym}</b> {q.price >= 1 ? formatMoney(q.price) : `$${q.price.toFixed(4)}`} <i>{q.chg24h >= 0 ? "+" : ""}{q.chg24h.toFixed(1)}%</i>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: () => void; onResume: () => void; onBoard: () => void }) {
   return (
     <main className="journey-start">
       <img src={crownedBoss.url} alt="The crowned Crypto Final Boss" />
       <div className="start-vignette" />
+      <PriceTape />
       <section>
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
@@ -1157,6 +1240,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
           {rows.map((r) => (
             <div className="board-row" key={`${r.pos}-${r.name}`}>
               <b>#{r.pos}</b>
+              <img className="board-face" src={AVATARS.find((a) => a.id === r.avatar)?.url ?? AVATARS[0]!.url} alt="" loading="lazy" />
               <Flag code={r.country} size={22} />
               <span><strong>{r.name}</strong><small>{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
               <i>{(r.score ?? 0).toLocaleString("en-US")}</i>

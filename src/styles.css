@@ -509,3 +509,22 @@
 .setup-summary span { display: grid; gap: 2px; min-width: 0 }
 .setup-summary strong { display: flex; align-items: center; gap: 6px; font: 400 15px/1 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .setup-summary small { font-size: 10px; letter-spacing: .08em; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+
+/* ---------------------------------------- audio, live tape, board faces */
+.cy-sound-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+.cy-sound-actions > * { flex: 1 1 8rem; }
+.sound-rows { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.sound-row { display: grid; grid-template-columns: 5.5rem 1fr 3rem; align-items: center; gap: 0.75rem; font-size: 0.72rem; letter-spacing: 0.14em; }
+.sound-row input[type="range"] { width: 100%; accent-color: var(--cy-cyan, #22d3ee); }
+.sound-row b { text-align: right; font-variant-numeric: tabular-nums; }
+
+.board-face { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,0.06); flex: none; }
+
+.price-tape { position: relative; z-index: 3; width: 100%; max-width: 100%; overflow: hidden; border-block: 1px solid rgba(255,255,255,0.12); background: rgba(6,10,18,0.72); backdrop-filter: blur(6px); padding: 0.4rem 0; }
+.price-tape-track { display: inline-flex; gap: 1.6rem; white-space: nowrap; animation: tape 42s linear infinite; will-change: transform; }
+.price-tape-track span { font-size: 0.7rem; letter-spacing: 0.1em; font-variant-numeric: tabular-nums; opacity: 0.92; }
+.price-tape-track b { letter-spacing: 0.16em; }
+.price-tape-track .is-up i { color: #34d399; font-style: normal; }
+.price-tape-track .is-down i { color: #fb7185; font-style: normal; }
+@keyframes tape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .price-tape-track { animation: none; } }
