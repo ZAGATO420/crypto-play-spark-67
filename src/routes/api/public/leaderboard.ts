@@ -97,11 +97,18 @@ function implausibleReason(run: z.infer<typeof runSchema>): string | null {
   if (run.trades > 120 + run.months * 120) return "trades";
   // Level must match the client's XP curve (allow +1 for rounding drift).
   if (run.level > maxLevelForXp(run.xp) + 1) return "level";
-  // Boss Score = net worth x chapter factor x difficulty + crisis bonus, streak-boosted.
-  // It can never run far ahead of the net worth the run actually finished with.
-  if (run.score > run.net * 8 + 250_000) return "score";
+  // Boss Score is no longer a rejection reason: an inflated score is simply
+  // clamped on write (see scoreCeiling), so a legitimate run never loses its
+  // leaderboard entry over a score formula mismatch.
   return null;
 }
+
+// Boss Score = net worth x chapter factor x difficulty + crisis bonus, streak-boosted.
+// It can never run far ahead of the net worth the run actually finished with.
+function scoreCeiling(run: z.infer<typeof runSchema>): number {
+  return run.net * 8 + 250_000;
+}
+
 
 function sanitizeName(name: string): string {
   return name.replace(/[^\p{L}\p{N} _.\-]/gu, "").slice(0, 18) || "anon";
