@@ -14084,34 +14084,60 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
  .v41-title{max-width:92px}
  #v41-live{margin:0 8px 6px}.v41-lbody{max-height:none}
  .v41-row{padding:8px}.v41-card-actions button{min-height:44px}
- body.v40-live[data-v40-stage="market"] .v40-visual{min-height:88px!important;height:auto!important;flex:1 1 88px!important}
- body.v40-live[data-v40-stage="market"] #v41-live{min-height:0;display:flex;flex-direction:column;flex:0 0 auto!important}
- body.v40-live[data-v40-stage="market"] #v41-live.empty{display:none}
- body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:none!important;overflow:visible!important;flex:0 0 auto}
- body.v40-live[data-v40-stage="market"] .v40-order,body.v40-live[data-v40-stage="market"] .v40-mobile-tape,
- body.v40-live[data-v40-stage="market"] .v40-stage-head,body.v40-live[data-v40-stage="market"] .v40-actions{flex:0 0 auto!important}
  .v41-mfeed{display:none}
- body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:none!important;overflow:visible!important}
- body.v40-live[data-v40-stage="chart"] #v41-live{display:none}
- body.v40-live[data-v40-stage="positions"] #v41-live{display:block;margin:8px}
+ /* ---------- V43: MARKET is the exchange ---------- */
+ body.v40-live[data-v40-stage="market"] #v41-live{display:none!important}
+ body.v40-live[data-v40-stage="market"] #v43-cstat{display:none!important}
+ body.v40-live[data-v40-stage="market"] .v40-order{display:none!important}
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:96px!important;height:auto!important;flex:0 0 96px!important;margin-bottom:6px}
+ body.v40-live[data-v40-stage="market"] .v40-stage-head{padding:8px 11px 4px;flex:0 0 auto!important}
+ body.v40-live[data-v40-stage="market"] .v40-actions{flex:0 0 auto!important}
+ body.v40-live[data-v40-stage="market"] #v43-mbar{display:grid!important;flex:0 0 auto!important}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape{display:block!important;flex:1 1 auto!important;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 8px 6px}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin{display:grid!important;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;flex:none;min-height:48px;margin-bottom:5px;padding:7px 9px;text-align:left;border:1px solid rgba(88,196,255,.2);background:#07172b}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin.on{border-color:var(--v40-cyan);background:#0b2542;box-shadow:inset 2px 0 var(--v40-cyan)}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin>span:nth-child(2){min-width:0;text-align:left}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin b{display:block;font:400 12px/1 'Archivo Black','Hind',sans-serif}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin small{display:block!important;margin-top:3px;font:700 7.5px/1 'Hind',sans-serif;color:var(--v40-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin .q{display:block!important;text-align:right;font:700 11px/1 monospace;color:var(--v40-ink);white-space:nowrap}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-coin .q i{display:block;margin-top:4px;font-style:normal;font-size:9px}
+ body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-mark,body.v40-live[data-v40-stage="market"] .v40-mobile-tape .v40-token{width:26px;height:26px}
+ /* ---------- V43: CHART is pure price analysis ---------- */
+ body.v40-live[data-v40-stage="chart"] #v41-live,body.v40-live[data-v40-stage="chart"] #v43-mbar{display:none!important}
+ body.v40-live[data-v40-stage="chart"] .v40-order{display:none!important}
+ body.v40-live[data-v40-stage="chart"] .v40-mobile-tape{display:flex!important;flex:0 0 auto!important;gap:5px;overflow-x:auto;padding:0 8px 6px}
+ body.v40-live[data-v40-stage="chart"] .v40-mobile-tape .v40-coin{flex:0 0 62px;min-height:34px;padding:5px}
+ body.v40-live[data-v40-stage="chart"] .v40-mobile-tape .v40-coin small,body.v40-live[data-v40-stage="chart"] .v40-mobile-tape .q{display:none}
+ body.v40-live[data-v40-stage="chart"] .v40-visual{flex:1 1 auto!important;min-height:200px!important;margin-bottom:6px}
+ body.v40-live[data-v40-stage="chart"] #v43-cstat{display:grid!important;flex:0 0 auto!important}
+ /* ---------- V43: POSITIONS owns open trades ---------- */
+ body.v40-live[data-v40-stage="positions"] #v41-live{display:block!important;margin:8px}
  body.v40-live[data-v40-stage="positions"] #v41-live .v41-lbody{max-height:none}
+ body.v40-live[data-v40-stage="positions"] #v43-mbar,body.v40-live[data-v40-stage="positions"] #v43-cstat{display:none!important}
  body.v40-live[data-v40-stage="positions"] .v41-mfeed{display:block}
  body.v40-live[data-v40-stage="positions"] .v40-mobile-only .v40-label:first-child,
  body.v40-live[data-v40-stage="positions"] #v40-mobile-pos{display:none}
 }
 @media(max-width:820px) and (max-height:720px){
- body.v40-live[data-v40-stage="market"] .v40-order{display:none!important}
- body.v40-live[data-v40-stage="market"] .v40-stage-head{padding-top:6px;padding-bottom:4px}
- body.v40-live[data-v40-stage="market"] .v40-mobile-tape{padding-bottom:4px}
- body.v40-live[data-v40-stage="market"] .v40-visual{min-height:52px!important;flex:1 1 52px!important;margin-bottom:5px}
-  body.v40-live.v43-has-pos[data-v40-stage="market"] .v40-visual{display:none!important}
-  body.v40-live.v43-has-pos[data-v40-stage="market"] .v40-stage-head,
-  body.v40-live.v43-has-pos[data-v40-stage="market"] .v40-mobile-tape{display:none!important}
-  body.v40-live[data-v40-stage="market"] #v41-live{margin-bottom:5px}
-  body.v40-live[data-v40-stage="market"] .v41-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  body.v40-live[data-v40-stage="market"] .v41-grid div{padding:4px 6px}
-  body.v40-live[data-v40-stage="market"] .v41-card-actions button{min-height:44px}
+ body.v40-live[data-v40-stage="market"] .v40-stage-head{padding-top:6px;padding-bottom:3px}
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:70px!important;flex:0 0 70px!important;margin-bottom:5px}
+ body.v40-live[data-v40-stage="chart"] .v40-visual{min-height:150px!important}
+ body.v40-live[data-v40-stage="positions"] .v41-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.v40-live[data-v40-stage="positions"] .v41-grid div{padding:4px 6px}
 }
+/* V43 market summary strip + chart stat row */
+#v43-mbar{display:none;width:calc(100% - 16px);margin:0 8px 6px;padding:8px 10px;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;
+ border:1px solid rgba(88,196,255,.34);background:linear-gradient(90deg,#0b2542,#071628);color:var(--v40-ink);text-align:left;min-height:48px}
+#v43-mbar .k{font:400 9.5px/1.15 'Archivo Black','Hind',sans-serif;color:var(--v40-cyan)}
+#v43-mbar .v{display:block;margin-top:4px;font:700 8px/1 'Hind',sans-serif;color:var(--v40-muted)}
+#v43-mbar .p{font:700 15px/1 monospace}
+#v43-mbar .go{font:700 8px/1 'Hind',sans-serif;color:var(--v40-gold)}
+#v43-cstat{display:none;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;margin:0 8px 6px;border:1px solid rgba(88,196,255,.18);background:rgba(88,196,255,.14)}
+#v43-cstat div{min-width:0;padding:6px;background:#07172b;text-align:center}
+#v43-cstat small{display:block;font:700 7px/1 'Hind',sans-serif;color:var(--v40-muted)}
+#v43-cstat b{display:block;margin-top:4px;font:700 9.5px/1 monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:821px){#v43-mbar{display:none!important}#v43-cstat{display:grid}}
+
 /* value reactions */
 .v41-hit{animation:v41Hit .45s ease-out}
 @keyframes v41Hit{0%{transform:scale(1)}35%{transform:scale(1.12);filter:brightness(1.35)}100%{transform:scale(1)}}
