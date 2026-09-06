@@ -10,3 +10,4 @@
 - [x] Default menu audio starts above zero and persists explicit sound settings
 - [x] Sarcastic death-screen punchlines for every failed ending
 - [x] Run badges shown on the end screen and leaderboard
+- [x] Competition audit: mobile values, exact trade cash flows, country validation, queued/idempotent score submits

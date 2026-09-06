@@ -20,7 +20,7 @@ import {
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
-import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
+import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 
 /* ------------------------------------------------------------------ types */
@@ -68,6 +68,7 @@ type Pop = { id: number; text: string; tone: "xp" | "up" | "down" };
 
 
 const SAVE_KEY = "tcfb_cycle_v2";
+const PENDING_SUBMIT_KEY = "tcfb_pending_score_v1";
 const AP_BASE = 2;
 const AP_CAP = 4;
 const LEVERAGE = [2, 5, 10] as const;
@@ -137,6 +138,21 @@ const custodySplit = (r: Run) => {
   return { totals, sum };
 };
 
+const readPendingSubmission = (): RunSubmission | null => {
+  try { return JSON.parse(localStorage.getItem(PENDING_SUBMIT_KEY) ?? "null") as RunSubmission | null; }
+  catch { return null; }
+};
+const savePendingSubmission = (submission: RunSubmission) => localStorage.setItem(PENDING_SUBMIT_KEY, JSON.stringify(submission));
+const clearPendingSubmission = (clientHash: string) => {
+  if (readPendingSubmission()?.clientHash === clientHash) localStorage.removeItem(PENDING_SUBMIT_KEY);
+};
+const retryPendingSubmission = async () => {
+  const pending = readPendingSubmission();
+  if (!pending) return;
+  try { await submitRun(pending); clearPendingSubmission(pending.clientHash); }
+  catch (error) { if (error instanceof SubmitRunError && error.kind === "rejected") clearPendingSubmission(pending.clientHash); }
+};
+
 
 /* ------------------------------------------------------------------- shell */
 
@@ -172,7 +188,13 @@ export function CryptoJourney() {
   const presale = presaleFor(run.chapter);
   const xpBar = xpProgress(run.xp);
 
-  useEffect(() => { if (localStorage.getItem(SAVE_KEY)) setResume(true); }, []);
+  useEffect(() => {
+    if (localStorage.getItem(SAVE_KEY)) setResume(true);
+    void retryPendingSubmission();
+    const retry = () => { void retryPendingSubmission(); };
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, []);
   useEffect(() => { void setTrack(screen === "run" ? "run" : "menu"); }, [screen]);
   useEffect(() => {
     if (screen !== "run" || cfg.ironman) return;
@@ -230,16 +252,20 @@ export function CryptoJourney() {
     const price = priceAt(symbol, run.chapter, run.noise);
     setDialog(null);
     if (!price) return say(`${symbol} does not exist yet. Time travel has rules.`, "pink");
-    const size = Math.floor(run.cash * fraction);
-    if (size < 50) return say("Under $50. The Boss has more in his couch cushions.", "pink");
     const cust = custodyOf(run.custody);
+    const budget = Math.floor(run.cash * fraction);
+    const size = Math.floor(budget / (1 + cust.fee));
+    if (size < 50) return say("Under $50. The Boss has more in his couch cushions.", "pink");
     const fee = Math.round(size * cust.fee);
     spend();
-    setRun((r) => book(book({
-      ...r, cash: r.cash - size - fee, trades: r.trades + 1,
-      positions: [...r.positions, { id: r.nextId, symbol, kind: "spot", dir: 1, lev: 1, margin: size, entry: price, qty: size / price, where: r.custody }],
-      nextId: r.nextId + 1,
-    }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee));
+    setRun((r) => {
+      if (r.cash < size + fee) return r;
+      return book(book({
+        ...r, cash: r.cash - size - fee, trades: r.trades + 1,
+        positions: [...r.positions, { id: r.nextId, symbol, kind: "spot", dir: 1, lev: 1, margin: size, entry: price, qty: size / price, where: r.custody }],
+        nextId: r.nextId + 1,
+      }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee);
+    });
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
     playSfx("buy");
@@ -291,7 +317,7 @@ export function CryptoJourney() {
       ...r,
       cash: r.cash + back - fee,
       trades: r.trades + 1,
-      realized: r.realized + Math.max(0, gain),
+      realized: r.realized + gain,
       risk: pos.kind === "perp" ? clamp(r.risk - pos.lev * 4 * fraction) : r.risk,
       positions: fraction >= 1
         ? r.positions.filter((p) => p.id !== id)
@@ -308,7 +334,8 @@ export function CryptoJourney() {
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
     if (quality < 0.2) {
-      setRun((r) => book({ ...r, stress: clamp(r.stress + 10) }, `${card.name} · missed mint (gas)`, -Math.round(size * 0.06)));
+      const gas = Math.round(size * 0.06);
+      setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} · missed mint (gas)`, -gas));
       log({ chapter: run.chapter, title: `MISSED · ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
       return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
     }
@@ -317,7 +344,7 @@ export function CryptoJourney() {
     const back = Math.round(size * multi);
     setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
-      realized: r.realized + Math.max(0, back - size),
+      realized: r.realized + back - size,
       risk: clamp(r.risk + 10), stress: clamp(r.stress + (rugged ? 12 : 4)),
       statuses: rugged ? Array.from(new Set([...r.statuses, "RUG VICTIM"])) : Array.from(new Set([...r.statuses, "EARLY BUYER"])),
     }, `${card.name} ticket`, -size), `${card.name} payout`, back));
@@ -358,6 +385,7 @@ export function CryptoJourney() {
     const moved = run.positions.filter((p) => p.kind === "spot");
     const value = moved.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, run.chapter, run.noise)), 0);
     const fee = Math.round(value * 0.004);
+    if (run.cash < fee) return say(`Moving these bags costs ${formatMoney(fee)}. Keep enough cash for the network.`, "pink");
     setRun((r) => book({
       ...r, custody: id, cash: r.cash - fee,
       positions: r.positions.map((p) => (p.kind === "spot" ? { ...p, where: id } : p)),
@@ -434,7 +462,7 @@ export function CryptoJourney() {
       say("Seed recovered word for word. Cold storage intact.", "yellow");
       grantXp(XP_EXTRA.escape, "KEYS SECURED");
     } else if (quality >= 0.5) {
-      setRun((r) => book({ ...r, stress: clamp(r.stress + 8) }, "Recovery service", -400));
+      setRun((r) => book({ ...r, cash: Math.max(0, r.cash - 400), stress: clamp(r.stress + 8) }, "Recovery service", -400));
       say("You needed help to recover it. Embarrassing, survivable.", "cyan");
     } else {
       setRun((r) => ({ ...r, positions: r.positions.map((p) => (p.where === "cold" ? { ...p, margin: p.margin * 0.5, qty: p.qty * 0.5 } : p)), stress: clamp(r.stress + 22) }));
@@ -494,7 +522,12 @@ export function CryptoJourney() {
       survivors.push(p);
     }
     if (run.risk >= 95 && survivors.some((p) => p.kind === "perp")) {
-      for (const p of survivors.filter((p) => p.kind === "perp")) lines.push(`Risk overheated: ${p.symbol} ${p.lev}x force-closed.`);
+      for (const p of survivors.filter((p) => p.kind === "perp")) {
+        const returned = Math.round(valueOf(p, priceAt(p.symbol, next, run.noise)));
+        cash += returned;
+        earnFrom(`${p.symbol} ${p.lev}x force-close`, returned);
+        lines.push(`Risk overheated: ${p.symbol} ${p.lev}x force-closed · ${formatMoney(returned)} returned.`);
+      }
     }
     let positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
     if (run.risk >= 95) risk = 40;
@@ -528,10 +561,17 @@ export function CryptoJourney() {
       lines.push(`A malicious approval drained ${formatMoney(bite)} from your hot wallet.`);
     }
 
-    // life: income in, rent and food out
+    // life: income in, old tax debt serviced, then rent and food out
     const job = jobOf(run.job);
     const house = housingOf(run.housing);
     if (job.income > 0) { cash += job.income; earnFrom(`${job.name} income`, job.income); }
+    if (taxDebt > 0 && cash > 0) {
+      const paid = Math.min(cash, taxDebt);
+      cash -= paid;
+      taxDebt -= paid;
+      spendOn("Tax debt payment", paid);
+      lines.push(`Tax debt payment: ${formatMoney(paid)}.`);
+    }
     const rent = Math.round(house.rent * diff.cost);
     const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
     cash -= rent + food;
@@ -542,8 +582,14 @@ export function CryptoJourney() {
     // tax once a year on what you actually realised
     if (isTaxChapter(next) && realized > 0) {
       const bill = Math.round(realized * TAX_RATE);
-      if (cash >= bill) { cash -= bill; spendOn(`Tax on ${formatMoney(realized)} realised`, bill); lines.push(`Tax bill paid: ${formatMoney(bill)}.`); }
-      else { taxDebt += Math.round(bill * 1.2); lines.push(`Tax bill ${formatMoney(bill)} unpaid — it grows 20% and follows you.`); }
+      const paid = Math.min(cash, bill);
+      cash -= paid;
+      if (paid > 0) spendOn(`Tax on ${formatMoney(realized)} net profit`, paid);
+      if (paid < bill) {
+        const unpaid = Math.round((bill - paid) * 1.2);
+        taxDebt += unpaid;
+        lines.push(`Tax bill ${formatMoney(bill)} · ${formatMoney(paid)} paid · ${formatMoney(unpaid)} debt after penalty.`);
+      } else lines.push(`Tax bill paid: ${formatMoney(bill)}.`);
       realized = 0;
     }
     if (taxDebt > 0 && !isTaxChapter(next)) taxDebt = Math.round(taxDebt * 1.05);
@@ -889,6 +935,7 @@ function ScoreSheet({ net, chapters, diff, crises, streak, score, onClose }: { n
       <p className="journey-kicker"><Trophy /> LEADERBOARD MATH</p>
       <h2>BOSS SCORE</h2>
       <ul className="cy-lines">
+        <li>Formula · (net worth × survival × difficulty + crises) × streak</li>
         <li>Net worth · {formatMoney(net)}</li>
         <li>Chapters survived · {chapters}/{CHAPTERS} = x{(Math.max(0.1, Math.min(1, chapters / CHAPTERS))).toFixed(2)}</li>
         <li>Difficulty {d.name} · x{d.cost.toFixed(2)}</li>
@@ -1275,7 +1322,7 @@ function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config
 function BoardScreen({ onBack }: { onBack: () => void }) {
   const [rows, setRows] = useState<BoardRow[] | null>(null);
   const [error, setError] = useState(false);
-  useEffect(() => { loadBoard(25).then(setRows).catch(() => setError(true)); }, []);
+  useEffect(() => { retryPendingSubmission().finally(() => loadBoard(25).then(setRows).catch(() => setError(true))); }, []);
   return (
     <main className="journey-setup">
       <header><div><p className="journey-kicker">BOSS SCORE · SEASON 1</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
@@ -1297,10 +1344,17 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 }
 
 function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onBoard: () => void }) {
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
   const badge = badgeFor(run, ending, net);
+  const submission = useMemo<RunSubmission>(() => ({
+    clientHash: crypto.randomUUID(),
+    name: run.config.name || "anon", arch: run.config.arch, country: run.config.country,
+    difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(net),
+    score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
+    trades: run.trades, survived: won, avatar: run.config.avatar,
+  }), [badge, net, run, score, won]);
   const punchline = useMemo(() => {
     if (won) return null;
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
@@ -1308,15 +1362,17 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
   }, [ending, run.chapter, run.moves, run.trades, won]);
   const send = async () => {
     setStatus("sending");
+    savePendingSubmission(submission);
     try {
-      await submitRun({
-        name: run.config.name || "anon", arch: run.config.arch, country: run.config.country,
-        difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(Math.max(0, net)),
-        score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
-        trades: run.trades, survived: won, avatar: run.config.avatar,
-      });
+      await submitRun(submission);
+      clearPendingSubmission(submission.clientHash);
       setStatus("done");
-    } catch { setStatus("error"); }
+    } catch (error) {
+      if (error instanceof SubmitRunError && error.kind === "rejected") {
+        clearPendingSubmission(submission.clientHash);
+        setStatus("rejected");
+      } else setStatus("queued");
+    }
   };
   return (
     <main className={`journey-end ${won ? "won" : "lost"}`}>
@@ -1336,11 +1392,12 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
         </div>
         {run.statuses.length > 0 && <div className="cy-status-row">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
         <div className="start-actions">
-          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "error" ? "TRY AGAIN" : "CLAIM YOUR RANK"}</Button>
-          <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
-          <Button variant="secondary" onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
+          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
+          <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
+          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
         </div>
-        {status === "error" && <small>The board did not answer. Tap TRY AGAIN — your result stays right here.</small>}
+        {status === "queued" && <small>The board is unavailable. Your result is saved and will retry automatically.</small>}
+        {status === "rejected" && <small>This result failed the board's integrity checks and cannot be submitted.</small>}
 
       </section>
     </main>
