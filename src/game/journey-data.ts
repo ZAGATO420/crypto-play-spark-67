@@ -1,4 +1,4 @@
-export type CoinSymbol = "BTC" | "ETH" | "SOL" | "DOGE";
+export type CoinSymbol = "BTC" | "ETH" | "SOL" | "DOGE" | "BNB" | "LINK" | "ADA" | "AVAX" | "SHIB" | "PEPE";
 
 export type Coin = {
   symbol: CoinSymbol;
