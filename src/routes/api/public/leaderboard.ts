@@ -91,7 +91,9 @@ function implausibleReason(run: z.infer<typeof runSchema>): string | null {
   if (run.trades > 120 + run.months * 120) return "trades";
   // Level must match the client's XP curve (allow +1 for rounding drift).
   if (run.level > maxLevelForXp(run.xp) + 1) return "level";
-  if (run.score > Math.min(monthCeiling * 2, 2e10)) return "score";
+  // Boss Score = net worth x chapter factor x difficulty + crisis bonus, streak-boosted.
+  // It can never run far ahead of the net worth the run actually finished with.
+  if (run.score > run.net * 8 + 250_000) return "score";
   return null;
 }
 
