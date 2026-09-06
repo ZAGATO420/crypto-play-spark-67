@@ -840,9 +840,10 @@ function Rules({ onClose }: { onClose: () => void }) {
 
 function SoundSheet({ muted, vols, onMute, onMusic, onSfx, onClose }: { muted: boolean; vols: { musicVol: number; sfxVol: number }; onMute: (v: boolean) => void; onMusic: (v: number) => void; onSfx: (v: number) => void; onClose: () => void }) {
   return (
-    <div className="sheet-body">
-      <h3 className="sheet-title">SOUND</h3>
-      <p className="sheet-note">Two produced hip-hop loops and clean action sounds. Set it once, it stays.</p>
+    <>
+      <p className="journey-kicker"><Volume2 /> AUDIO</p>
+      <h2>SOUND</h2>
+      <p className="cy-lead">Two produced hip-hop loops and clean action sounds. Set it once, it stays.</p>
       <div className="sound-rows">
         <label className="sound-row">
           <span>MUSIC</span>
@@ -855,11 +856,11 @@ function SoundSheet({ muted, vols, onMute, onMusic, onSfx, onClose }: { muted: b
           <b>{Math.round(vols.sfxVol * 100)}%</b>
         </label>
       </div>
-      <div className="sheet-actions">
+      <div className="cy-sound-actions">
         <Button variant={muted ? "default" : "outline"} onClick={() => onMute(!muted)}>{muted ? <><Volume2 />SOUND ON</> : <><VolumeX />MUTE ALL</>}</Button>
         <Button onClick={onClose}>DONE</Button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -1142,11 +1143,46 @@ function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (
 
 /* ---------------------------------------------------------------- screens */
 
+type Quote = { symbol: string; price: number; change: number };
+
+function PriceTape() {
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  useEffect(() => {
+    let alive = true;
+    const pull = async () => {
+      try {
+        const res = await fetch("/api/public/prices");
+        if (!res.ok) return;
+        const data = (await res.json()) as { prices?: Quote[] } | Quote[];
+        const list = Array.isArray(data) ? data : (data.prices ?? []);
+        if (alive && list.length) setQuotes(list);
+      } catch { /* atmosphere only — silence is fine */ }
+    };
+    void pull();
+    const id = window.setInterval(pull, 60_000);
+    return () => { alive = false; window.clearInterval(id); };
+  }, []);
+  if (!quotes.length) return null;
+  const row = [...quotes, ...quotes];
+  return (
+    <div className="price-tape" aria-label="Live crypto prices">
+      <div className="price-tape-track">
+        {row.map((q, i) => (
+          <span key={`${q.symbol}-${i}`} className={q.change >= 0 ? "is-up" : "is-down"}>
+            <b>{q.symbol}</b> {formatMoney(q.price)} <i>{q.change >= 0 ? "+" : ""}{q.change.toFixed(1)}%</i>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: () => void; onResume: () => void; onBoard: () => void }) {
   return (
     <main className="journey-start">
       <img src={crownedBoss.url} alt="The crowned Crypto Final Boss" />
       <div className="start-vignette" />
+      <PriceTape />
       <section>
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
