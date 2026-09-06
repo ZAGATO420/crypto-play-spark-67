@@ -144,9 +144,16 @@ async function buffer(id: SfxId) {
   return job;
 }
 
+export function preloadSfx() {
+  if (!s.ctx) return;
+  for (const id of Object.keys(SFX) as SfxId[]) void buffer(id);
+}
+
 export function playSfx(id: SfxId) {
-  if (muted || !s.ctx || !s.sfxBus) return;
+  const ctx = s.ctx;
+  if (muted || !ctx || !s.sfxBus) return;
   void (async () => {
+    if (ctx.state === "suspended") await ctx.resume().catch(() => {});
     const buf = await buffer(id);
     if (!buf || !s.ctx || !s.sfxBus || muted) return;
     const src = s.ctx.createBufferSource();
@@ -185,7 +192,15 @@ export function wireAudio() {
   if (wired || typeof window === "undefined") return;
   wired = true;
   readSettings();
-  const unlock = () => { initAudio(); window.removeEventListener("pointerdown", unlock); window.removeEventListener("keydown", unlock); };
+  const unlock = () => {
+    initAudio();
+    preloadSfx();
+    if (!s.track) void setTrack("menu");
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("keydown", unlock);
+    window.removeEventListener("touchstart", unlock);
+  };
+  window.addEventListener("touchstart", unlock, { once: false });
   window.addEventListener("pointerdown", unlock, { once: false });
   window.addEventListener("keydown", unlock, { once: false });
   document.addEventListener("visibilitychange", () => {

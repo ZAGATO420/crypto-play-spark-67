@@ -21,7 +21,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 
 /* ------------------------------------------------------------------ types */
 
@@ -137,7 +137,7 @@ export function CryptoJourney() {
   const [shake, setShake] = useState(false);
   const [muted, setMutedState] = useState(false);
   const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
-  useEffect(() => { wireAudio(); initAudio(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
+  useEffect(() => { wireAudio(); initAudio(); preloadSfx(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
   const [netPulse, setNetPulse] = useState<"up" | "down" | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
@@ -1177,20 +1177,45 @@ function PriceTape() {
   );
 }
 
+function MenuSound() {
+  const [open, setOpen] = useState(false);
+  const [muted, setMutedState] = useState(false);
+  const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
+  useEffect(() => { setMutedState(isMuted()); setVols(getVolumes()); }, [open]);
+  return (
+    <>
+      <button className="menu-sound" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => { initAudio(); preloadSfx(); playSfx("click"); setOpen(true); }}>
+        {muted ? <VolumeX /> : <Volume2 />}
+      </button>
+      {open && (
+        <Sheet onClose={() => setOpen(false)}>
+          <SoundSheet
+            muted={muted} vols={vols}
+            onMute={(v) => { setMuted(v); setMutedState(v); if (!v) playSfx("click"); }}
+            onMusic={(v) => { setMusicVol(v); setVols(getVolumes()); }}
+            onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
+            onClose={() => setOpen(false)} />
+        </Sheet>
+      )}
+    </>
+  );
+}
+
 function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: () => void; onResume: () => void; onBoard: () => void }) {
   return (
     <main className="journey-start">
       <img src={crownedBoss.url} alt="The crowned Crypto Final Boss" />
       <div className="start-vignette" />
       <PriceTape />
+      <MenuSound />
       <section>
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
         <p>Trade the whole cycle from 2020 to 2026. Spot, perps, launches and the crashes that ate everyone else. Survive all 84 months and beat the Boss Score.</p>
         <div className="start-actions">
-          <Button onClick={onStart}>ENTER THE ARENA <ChevronRight /></Button>
-          {resume && <Button variant="outline" onClick={onResume}>CONTINUE RUN</Button>}
-          <Button variant="outline" onClick={onBoard}><Trophy />LEADERBOARD</Button>
+          <Button onClick={() => { playSfx("win"); onStart(); }}>ENTER THE ARENA <ChevronRight /></Button>
+          {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
+          <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
         </div>
         <small>84 MONTHS · NO WALLET · FREE TO PLAY</small>
       </section>
@@ -1200,10 +1225,10 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
 
 function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config: Config) => void }) {
   const [config, setConfig] = useState<Config>(defaultConfig);
-  const set = <K extends keyof Config>(key: K, value: Config[K]) => setConfig((c) => ({ ...c, [key]: value }));
+  const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">BUILD YOUR PLAYER</p><h1>CHOOSE YOUR RUN</h1></div><Button variant="ghost" size="icon" aria-label="Back" onClick={onBack}><X /></Button></header>
+      <header><div><p className="journey-kicker">BUILD YOUR PLAYER</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       <section className="setup-block"><p className="journey-kicker">NAME & AVATAR</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
@@ -1222,7 +1247,7 @@ function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config
             <small>{archOf(config.arch).name} · {formatMoney(archOf(config.arch).cash)} · {config.difficulty}{config.ironman ? " · IRONMAN" : ""}</small>
           </span>
         </div>
-        <Button onClick={() => onStart({ ...config, name: config.name.trim() || "anon" })}><Rocket />START Q1 2020</Button>
+        <Button onClick={() => { playSfx("win"); onStart({ ...config, name: config.name.trim() || "anon" }); }}><Rocket />START Q1 2020</Button>
       </div>
     </main>
   );
@@ -1234,7 +1259,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
   useEffect(() => { loadBoard(25).then(setRows).catch(() => setError(true)); }, []);
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">BOSS SCORE · SEASON 1</p><h1>LEADERBOARD</h1></div><Button variant="ghost" size="icon" aria-label="Back" onClick={onBack}><X /></Button></header>
+      <header><div><p className="journey-kicker">BOSS SCORE · SEASON 1</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">No runs yet. Yours can be first.</p> : (
         <div className="board-list">
           {rows.map((r) => (
@@ -1284,9 +1309,9 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
         </div>
         {run.statuses.length > 0 && <div className="cy-status-row">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
         <div className="start-actions">
-          <Button onClick={send} disabled={status === "sending" || status === "done"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : "CLAIM YOUR RANK"}</Button>
-          <Button variant="outline" onClick={onBoard}>LEADERBOARD</Button>
-          <Button variant="secondary" onClick={onRestart}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
+          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : "CLAIM YOUR RANK"}</Button>
+          <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
+          <Button variant="secondary" onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
         </div>
         {status === "error" && <small>The board rejected this run. Your local result still stands.</small>}
       </section>

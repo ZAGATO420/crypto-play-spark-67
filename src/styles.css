@@ -528,3 +528,9 @@
 .price-tape-track .is-down i { color: #fb7185; font-style: normal; }
 @keyframes tape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .price-tape-track { animation: none; } }
+
+/* sound control on menu screens */
+.menu-sound { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 14px; z-index: 6; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 82%, transparent); color: var(--foreground); backdrop-filter: blur(6px); }
+.menu-sound:hover { border-color: var(--journey-yellow); color: var(--journey-yellow); }
+.journey-setup header { position: relative; }
+.journey-setup header .menu-sound { position: static; }
