@@ -13452,7 +13452,10 @@ body.v38-shake{animation:v38shake .42s ease}
     var big=false; try{ big=!!(window.EVENTS&&EVENTS[s.month]) }catch(e){}
     if(s.month<2)return;
     if(s.month<s._v38tm&&!big)return;
+    /* never stack the moment behind a story card — take the next month */
+    if(budget()&&!big){ s._v38tm=s.month+1; return }
     s._v38tm=s.month+(big?3:2+Math.floor(Math.random()*2));
+
     if(sqTickets()<=0)s.sqTickets=1;
     setTimeout(function(){ var st=S(); if(st&&!st._gameEnded)startMinigame(true) },520);
   };
