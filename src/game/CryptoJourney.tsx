@@ -1240,6 +1240,30 @@ function LedgerSheet({ run, onClose }: { run: Run; onClose: () => void }) {
 
 
 
+function CashOutSheet({ run, net, score, onConfirm, onClose }: { run: Run; net: number; score: number; onConfirm: () => void; onClose: () => void }) {
+  const early = run.chapter < CHAPTERS - 1;
+  return (
+    <>
+      <p className="journey-kicker"><Skull /> {chapterLabel(run.chapter)} · WALK AWAY</p>
+      <h2>CASH OUT NOW?</h2>
+      <p className="cy-lead">
+        Every position sells at today&apos;s price minus fees, tax on your profit and any debt comes off the top, and the run ends here.
+        {early ? " Leaving early stamps you SELLOUT — safe, respectable, never top of the board." : " You are close to the end. Finishing pays more."}
+      </p>
+      <div className="cy-facts">
+        <span><small>OPEN POSITIONS</small><strong>{run.positions.length}</strong></span>
+        <span><small>NET WORTH NOW</small><strong>{formatMoney(net)}</strong></span>
+        <span><small>TAX DEBT</small><strong>{formatMoney(run.taxDebt)}</strong></span>
+        <span><small>SCORE SO FAR</small><strong>{score.toLocaleString("en-US")}</strong></span>
+      </div>
+      <div className="cy-decide">
+        <button onClick={onConfirm}><strong>TAKE THE BAG AND LEAVE</strong><small>Sell everything, close the books, submit the score</small></button>
+        <button onClick={onClose}><strong>KEEP PLAYING</strong><small>The Boss expected nothing less</small></button>
+      </div>
+    </>
+  );
+}
+
 function SurviveSheet({ run, difficulty, caps, onEat, onCalm }: { run: Run; difficulty: Difficulty; caps: number; onEat: () => void; onCalm: () => void }) {
   const left = Math.max(0, caps - run.cares);
   return (
