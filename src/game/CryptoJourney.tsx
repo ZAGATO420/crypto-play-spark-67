@@ -51,6 +51,8 @@ const valueOf = (s: GameState) => COINS.reduce((sum, c) => sum + (s.holdings[c.s
 const pct = (a: number, b: number) => (b ? (a / b - 1) * 100 : 0);
 const modeId = (c: Config) => (c.ironman ? `IRONMAN-${c.mode}` : c.mode);
 
+const AP_MAX = 3;
+
 export function CryptoJourney() {
   const [screen, setScreen] = useState<Screen>("start");
   const [state, setState] = useState<GameState>(() => freshState(defaultConfig));
@@ -58,6 +60,9 @@ export function CryptoJourney() {
   const [result, setResult] = useState<Log | null>(null);
   const [chance, setChance] = useState<Chance | null>(null);
   const [resume, setResume] = useState(false);
+  const [ap, setAp] = useState(AP_MAX);
+  const [call, setCall] = useState<"up" | "down" | null>(null);
+  const [round, setRound] = useState({ buys: 0, sells: 0, netStart: 0 });
 
   const coin = COINS[coinIndex] ?? COINS[0]!;
   const price = priceAt(coin.symbol, state.month, state.noise);
@@ -71,6 +76,7 @@ export function CryptoJourney() {
   const cfg = state.config;
   const arch = archOf(cfg.arch);
   const diff = diffOf(cfg.difficulty);
+  const mission = missionFor(state.month);
 
   useEffect(() => { if (localStorage.getItem(SAVE_KEY)) setResume(true); }, []);
   useEffect(() => {
@@ -79,8 +85,13 @@ export function CryptoJourney() {
   }, [screen, state]);
 
   const mood = result?.tone === "pink" || state.hunger > 75 || state.stress > 75 ? enragedBoss.url : result?.tone === "yellow" ? smugBoss.url : crownedBoss.url;
-  const bossLine = result?.detail ?? chance?.body ?? event?.body ?? (change > 10 ? "Momentum is loud. Your decision must be louder." : change < -10 ? "Red candles reveal who came without a plan." : "Every month is a card. Play the one in front of you.");
+  const bossLine = result?.detail ?? chance?.body ?? event?.body ?? `MISSION: ${mission.text}`;
   const positions = useMemo(() => COINS.filter((c) => (state.holdings[c.symbol] ?? 0) > 0), [state.holdings]);
+  const marketPulse = useMemo(() => {
+    const btc = priceAt("BTC", state.month, state.noise);
+    const prev = priceAt("BTC", state.month - 1, state.noise);
+    return pct(btc, prev);
+  }, [state.month, state.noise]);
 
   const feedback = (title: string, detail: string, tone: Log["tone"], patch: Partial<GameState> = {}) => {
     const entry = { month: state.month, title, detail, tone };
@@ -88,17 +99,25 @@ export function CryptoJourney() {
     setState((cur) => ({ ...cur, ...patch, logs: [entry, ...cur.logs].slice(0, 14) }));
   };
 
-  const buy = () => {
-    if (!price) return feedback("NOT LAUNCHED", `${coin.name} is not tradable yet.`, "pink");
-    const spend = Math.floor(state.cash * 0.25);
+  const spendAp = () => setAp((a) => Math.max(0, a - 1));
+
+  const buy = (fraction: number) => {
+    if (ap <= 0) return feedback("NO MOVES LEFT", "You used all 3 moves. Call the market and close the month.", "pink");
+    if (!price) return feedback("NOT LAUNCHED", `${coin.name} does not trade in ${date}.`, "pink");
+    const spend = Math.floor(state.cash * fraction);
     if (spend < 25) return feedback("BUY BLOCKED", "You need at least $25 cash.", "pink");
-    feedback("POSITION OPENED", `${formatMoney(spend)} moved into ${coin.symbol}.`, "cyan", { cash: state.cash - spend, holdings: { ...state.holdings, [coin.symbol]: (state.holdings[coin.symbol] ?? 0) + spend / price }, xp: state.xp + Math.round(90 * arch.xp), trades: state.trades + 1 });
+    spendAp();
+    setRound((r) => ({ ...r, buys: r.buys + 1 }));
+    feedback("POSITION OPENED", `${formatMoney(spend)} into ${coin.symbol} at ${formatMoney(price)}.`, "cyan", { cash: state.cash - spend, holdings: { ...state.holdings, [coin.symbol]: (state.holdings[coin.symbol] ?? 0) + spend / price }, xp: state.xp + Math.round(90 * arch.xp), trades: state.trades + 1 });
   };
 
   const sell = () => {
+    if (ap <= 0) return feedback("NO MOVES LEFT", "You used all 3 moves this month.", "pink");
     const qty = state.holdings[coin.symbol] ?? 0;
-    if (!qty) return feedback("NOTHING TO SELL", `You do not own ${coin.symbol} yet.`, "pink");
+    if (!qty) return feedback("NOTHING TO SELL", `You do not own ${coin.symbol}.`, "pink");
     const proceeds = qty * price;
+    spendAp();
+    setRound((r) => ({ ...r, sells: r.sells + 1 }));
     feedback("POSITION CLOSED", `${coin.symbol} returned ${formatMoney(proceeds)} to cash.`, proceeds >= 2500 ? "yellow" : "cyan", { cash: state.cash + proceeds, holdings: { ...state.holdings, [coin.symbol]: 0 }, xp: state.xp + Math.round(70 * arch.xp), trades: state.trades + 1 });
   };
 
@@ -132,21 +151,38 @@ export function CryptoJourney() {
   const nextMonth = () => {
     if (state.paused) return feedback("RUN PAUSED", "Resume the clock before moving forward.", "pink");
     if (chance) return feedback("DECIDE FIRST", `${chance.title} is still on the table. Take it or pass.`, "pink");
+    if (!call) return feedback("CALL THE MARKET", "Say where crypto goes next month: PUMP or DUMP. No spectators.", "yellow");
     if (state.month >= 83) return setScreen("end");
     const next = state.month + 1;
+    const netStart = round.netStart || net;
+    const nextPulse = pct(priceAt("BTC", next, state.noise), priceAt("BTC", state.month, state.noise));
+    const callRight = call === "up" ? nextPulse >= 0 : nextPulse < 0;
+    const combo = callRight ? state.streak + 1 : 0;
     const cost = Math.round((140 + Math.floor(next / 12) * 25) * diff.cost);
     const nextHunger = Math.min(100, state.hunger + Math.round(9 * arch.risk));
-    const nextStress = Math.min(100, state.stress + Math.round((Math.abs(change) > 15 ? 12 : 7) * arch.risk));
+    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 4 : 12) * arch.risk));
+
+    const preview: GameState = { ...state, month: next };
+    const netEnd = valueOf(preview);
+    const markets = COINS.filter((c) => (state.holdings[c.symbol] ?? 0) > 0).length;
+    const missionOk = mission.check({ netStart, netEnd, buys: round.buys, sells: round.sells, markets, spent: 0, called: true, callRight });
+    const bonus = (missionOk ? mission.reward : 0) + (callRight ? 200 * Math.min(5, combo) : 0);
+    const xpGain = Math.round((120 + (callRight ? 250 + combo * 60 : 0) + (missionOk ? 300 : 0)) * arch.xp);
+
     const monthEvent = EVENTS[next];
-    const title = monthEvent?.title ?? (change >= 0 ? "MONTH SURVIVED" : "DRAWDOWN SURVIVED");
-    const detail = monthEvent?.body ?? `${date} closes at ${change >= 0 ? "+" : ""}${change.toFixed(1)}%. Living cost: ${formatMoney(cost)}.`;
-    const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : monthEvent?.tone === "boss" ? "yellow" : "cyan";
-    const nextState: GameState = { ...state, month: next, cash: state.cash - cost, hunger: nextHunger, stress: nextStress, xp: state.xp + Math.round(120 * arch.xp), streak: change >= 0 ? state.streak + 1 : 0, logs: [{ month: next, title, detail, tone }, ...state.logs].slice(0, 14) };
+    const title = monthEvent?.title ?? (callRight ? `CALL HIT · COMBO x${combo}` : "CALL MISSED");
+    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callRight ? "Your read paid." : "The tape punished you."} ${missionOk ? `Mission cleared: +${formatMoney(mission.reward)}.` : "Mission failed."} Living cost ${formatMoney(cost)}.`;
+    const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : callRight || missionOk ? "yellow" : "pink";
+
+    const nextState: GameState = { ...state, month: next, cash: state.cash - cost + bonus, hunger: nextHunger, stress: nextStress, xp: state.xp + xpGain, streak: combo, wins: state.wins + (missionOk ? 1 : 0), logs: [{ month: next, title, detail, tone }, ...state.logs].slice(0, 14) };
     setState(nextState);
     setResult({ month: next, title, detail, tone });
+    setAp(AP_MAX);
+    setCall(null);
+    setRound({ buys: 0, sells: 0, netStart: valueOf(nextState) });
     const alive = nextHunger < 100 && nextStress < 100 && valueOf(nextState) > 0;
     if (!alive) return setScreen("end");
-    if (Math.random() < 0.6) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
+    if (monthEvent || Math.random() < 0.45) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
   };
 
   const recover = (kind: "eat" | "calm") => {
@@ -158,8 +194,11 @@ export function CryptoJourney() {
 
   const begin = (config: Config) => {
     localStorage.removeItem(SAVE_KEY);
-    setState(freshState(config));
-    setResult(null); setChance(null); setCoinIndex(0); setScreen("journey");
+    const fresh = freshState(config);
+    setState(fresh);
+    setResult(null); setChance(null); setCoinIndex(0); setAp(AP_MAX); setCall(null);
+    setRound({ buys: 0, sells: 0, netStart: valueOf(fresh) });
+    setScreen("journey");
   };
 
   const restore = () => {
@@ -167,17 +206,13 @@ export function CryptoJourney() {
       const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? "{}");
       setState({ ...freshState(saved.config ?? defaultConfig), ...saved });
     } catch { setState(freshState(defaultConfig)); }
-    setResult(null); setChance(null); setScreen("journey");
+    setResult(null); setChance(null); setAp(AP_MAX); setCall(null); setRound({ buys: 0, sells: 0, netStart: 0 }); setScreen("journey");
   };
 
   if (screen === "start") return <StartScreen resume={resume} onStart={() => setScreen("setup")} onResume={restore} onBoard={() => setScreen("board")} />;
   if (screen === "setup") return <SetupScreen onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return <EndScreen state={state} net={net} onRestart={() => setScreen("setup")} onBoard={() => setScreen("board")} />;
-
-  const actions = chance
-    ? [{ label: "PASS", run: () => resolveChance(false), variant: "outline" as const }, { label: "DETAILS", run: () => setScreen("portfolio"), variant: "secondary" as const }, { label: chance.actionLabel, run: () => resolveChance(true), variant: "default" as const }]
-    : [{ label: "SELL", run: sell, variant: "outline" as const }, { label: result ? "CONTINUE" : "HOLD", run: nextMonth, variant: "secondary" as const }, { label: "BUY 25%", run: buy, variant: "default" as const }];
 
   return (
     <main className="journey-shell">
@@ -187,6 +222,7 @@ export function CryptoJourney() {
           <h1 className="truncate">{formatMoney(net)}</h1>
         </div>
         <div className="journey-head-actions">
+          <div className="ap-dots" aria-label={`${ap} of ${AP_MAX} moves left`}>{Array.from({ length: AP_MAX }, (_, i) => <i key={i} className={i < ap ? "is-on" : ""} />)}</div>
           <Button variant="ghost" size="icon" aria-label={state.paused ? "Resume game" : "Pause game"} onClick={() => setState({ ...state, paused: !state.paused })}>{state.paused ? <Play /> : <Pause />}</Button>
           <Button variant="ghost" size="icon" aria-label={state.muted ? "Turn sound on" : "Mute sound"} onClick={() => setState({ ...state, muted: !state.muted })}>{state.muted ? <VolumeX /> : <Volume2 />}</Button>
         </div>
@@ -194,6 +230,7 @@ export function CryptoJourney() {
 
       <section className="journey-meters" aria-label="Run status">
         <Meter label={`LVL ${level}`} value={Math.min(100, (state.xp / nextLevel) * 100)} icon={<Trophy />} tone="yellow" detail={`${state.xp} XP`} />
+        <Meter label="COMBO" value={Math.min(100, state.streak * 20)} icon={<Zap />} tone={state.streak > 0 ? "yellow" : "cyan"} detail={`x${state.streak}`} />
         <Meter label="HUNGER" value={state.hunger} icon={<Activity />} tone={state.hunger > 70 ? "pink" : "cyan"} detail={`${state.hunger}%`} />
         <Meter label="STRESS" value={state.stress} icon={<HeartPulse />} tone={state.stress > 70 ? "pink" : "cyan"} detail={`${state.stress}%`} />
       </section>
@@ -207,45 +244,76 @@ export function CryptoJourney() {
         <section className="journey-stage" aria-live="polite">
           {screen === "portfolio" ? <Portfolio state={state} onClose={() => setScreen("journey")} onSelect={(i) => { setCoinIndex(i); setScreen("journey"); }} /> : screen === "survival" ? <Survival state={state} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} onClose={() => setScreen("journey")} /> : (
             <>
-              <div className="card-stack" aria-hidden="true" />
-              <article className={`journey-card tone-${chance ? "pink" : result?.tone ?? coin.color}`}>
-                <div className="journey-card-top">
-                  <button className="coin-step" aria-label="Previous market" onClick={() => { setCoinIndex((coinIndex + COINS.length - 1) % COINS.length); setResult(null); }}><ChevronLeft /></button>
-                  <div className={`coin-mark tone-${chance ? "pink" : coin.color}`}>{chance ? <Zap /> : coin.symbol === "BTC" ? "₿" : coin.symbol.slice(0, 1)}</div>
-                  <button className="coin-step" aria-label="Next market" onClick={() => { setCoinIndex((coinIndex + 1) % COINS.length); setResult(null); }}><ChevronRight /></button>
-                </div>
-                <div className="journey-card-copy">
-                  <p className="journey-kicker">{chance ? "RISK CARD · DECIDE NOW" : result ? "ACTION RESULT" : event ? "HISTORICAL EVENT" : "MARKET CARD"}</p>
-                  <h2>{chance?.title ?? result?.title ?? event?.title ?? `${coin.name} Market`}</h2>
-                  <p>{chance?.body ?? result?.detail ?? event?.body ?? `${coin.symbol} is ${change >= 0 ? "up" : "down"} this month. Choose your move, then face the next page of crypto history.`}</p>
-                </div>
-                <div className="price-orbit">
-                  <span>{chance ? formatMoney(Math.max(50, Math.floor(state.cash * chance.stake))) : price ? formatMoney(price) : "NOT LIVE"}</span>
-                  <strong className={chance ? "negative" : change >= 0 ? "positive" : "negative"}>{chance ? "AT RISK" : `${change >= 0 ? "+" : ""}${change.toFixed(1)}%`}</strong>
-                </div>
-                <div className="card-stats">
-                  <span><small>CASH</small>{formatMoney(state.cash)}</span>
-                  <span><small>OWNED</small>{(state.holdings[coin.symbol] ?? 0).toFixed(4)}</span>
-                  <span><small>STREAK</small>{state.streak}M</span>
-                </div>
-              </article>
-              <div className="journey-actions">
-                {actions.map((a) => <Button key={a.label} variant={a.variant} onClick={a.run}>{a.label}</Button>)}
+              <div className={`mission-strip ${state.wins ? "has-wins" : ""}`}>
+                <span className="journey-kicker"><Crown /> BOSS ORDER · {formatMoney(mission.reward)}</span>
+                <strong>{mission.text}</strong>
               </div>
+
+              <div className="market-grid" role="list">
+                {COINS.map((c, i) => {
+                  const p = priceAt(c.symbol, state.month, state.noise);
+                  const pv = priceAt(c.symbol, state.month - 1, state.noise);
+                  const ch = pct(p, pv);
+                  const owned = (state.holdings[c.symbol] ?? 0) * p;
+                  return (
+                    <button role="listitem" key={c.symbol} className={`market-tile tone-${c.color} ${i === coinIndex ? "is-on" : ""} ${p ? "" : "is-off"}`} onClick={() => { setCoinIndex(i); setResult(null); }}>
+                      <b>{c.symbol}</b>
+                      <span>{p ? formatMoney(p) : "—"}</span>
+                      <em className={ch >= 0 ? "positive" : "negative"}>{p ? `${ch >= 0 ? "+" : ""}${ch.toFixed(1)}%` : "not live"}</em>
+                      {owned > 0 && <i>{formatMoney(owned)}</i>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="trade-bar">
+                <div className="trade-focus"><span className={`coin-mark tone-${coin.color}`}>{coin.symbol === "BTC" ? "₿" : coin.symbol[0]}</span><span><strong>{coin.symbol}</strong><small>{price ? formatMoney(price) : "not live"} · {change >= 0 ? "+" : ""}{change.toFixed(1)}%</small></span></div>
+                <div className="trade-buttons">
+                  <Button variant="secondary" disabled={ap <= 0} onClick={() => buy(0.25)}>BUY 25%</Button>
+                  <Button disabled={ap <= 0} onClick={() => buy(0.5)}>BUY 50%</Button>
+                  <Button variant="outline" disabled={ap <= 0} onClick={sell}>SELL ALL</Button>
+                </div>
+              </div>
+
+              <div className="call-bar">
+                <div><p className="journey-kicker">CALL THE MARKET · {date} CLOSE {marketPulse >= 0 ? "+" : ""}{marketPulse.toFixed(1)}%</p><small>Right call = combo, XP and cash. Wrong call = stress.</small></div>
+                <div className="call-buttons">
+                  <Button variant={call === "up" ? "default" : "outline"} onClick={() => setCall("up")}>PUMP</Button>
+                  <Button variant={call === "down" ? "default" : "outline"} onClick={() => setCall("down")}>DUMP</Button>
+                </div>
+              </div>
+
+              {(chance || result) && (
+                <article className={`journey-card tone-${chance ? "pink" : result?.tone ?? "cyan"}`}>
+                  <div className="journey-card-copy">
+                    <p className="journey-kicker">{chance ? "RISK CARD · DECIDE NOW" : "MONTH REPORT"}</p>
+                    <h2>{chance?.title ?? result?.title}</h2>
+                    <p>{chance?.body ?? result?.detail}</p>
+                  </div>
+                  {chance ? (
+                    <div className="journey-actions">
+                      <Button variant="outline" onClick={() => resolveChance(false)}>PASS</Button>
+                      <Button onClick={() => resolveChance(true)}>{chance.actionLabel} · {formatMoney(Math.max(50, Math.floor(state.cash * chance.stake)))}</Button>
+                    </div>
+                  ) : (
+                    <div className="journey-actions"><Button variant="secondary" onClick={() => setResult(null)}>GOT IT</Button></div>
+                  )}
+                </article>
+              )}
             </>
           )}
         </section>
 
         <aside className="journey-trail">
           <div className="trail-title"><History /><span>YOUR JOURNEY</span></div>
-          {state.logs.length ? state.logs.slice(0, 5).map((log, i) => <div className={`trail-entry tone-${log.tone}`} key={`${log.month}-${i}`}><span>{MONTHS[log.month % 12]} {2020 + Math.floor(log.month / 12)}</span><strong>{log.title}</strong></div>) : <p className="trail-empty">Your wins, mistakes and close calls will land here.</p>}
+          {state.logs.length ? state.logs.slice(0, 5).map((log, i) => <div className={`trail-entry tone-${log.tone}`} key={`${log.month}-${i}`}><span>{MONTHS[log.month % 12]} {2020 + Math.floor(log.month / 12)}</span><strong>{log.title}</strong></div>) : <p className="trail-empty">Your calls, missions and close calls land here.</p>}
         </aside>
       </div>
 
       <nav className="journey-nav" aria-label="Game actions">
         <Button variant={screen === "portfolio" ? "default" : "ghost"} onClick={() => setScreen(screen === "portfolio" ? "journey" : "portfolio")}><WalletCards />POSITIONS <span>{positions.length}</span></Button>
         <Button variant={screen === "survival" ? "default" : "ghost"} onClick={() => setScreen(screen === "survival" ? "journey" : "survival")}><HeartPulse />SURVIVE</Button>
-        <Button onClick={nextMonth}>NEXT MONTH<ChevronRight /></Button>
+        <Button onClick={nextMonth} className={call ? "is-ready" : ""}>{call ? "LOCK IN MONTH" : "CALL FIRST"}<ChevronRight /></Button>
       </nav>
     </main>
   );
