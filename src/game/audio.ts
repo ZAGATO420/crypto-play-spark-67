@@ -192,7 +192,15 @@ export function wireAudio() {
   if (wired || typeof window === "undefined") return;
   wired = true;
   readSettings();
-  const unlock = () => { initAudio(); window.removeEventListener("pointerdown", unlock); window.removeEventListener("keydown", unlock); };
+  const unlock = () => {
+    initAudio();
+    preloadSfx();
+    if (!s.track) void setTrack("menu");
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("keydown", unlock);
+    window.removeEventListener("touchstart", unlock);
+  };
+  window.addEventListener("touchstart", unlock, { once: false });
   window.addEventListener("pointerdown", unlock, { once: false });
   window.addEventListener("keydown", unlock, { once: false });
   document.addEventListener("visibilitychange", () => {
