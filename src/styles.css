@@ -265,3 +265,14 @@
 }
 
 .journey-stage > .mission-strip, .journey-stage > .market-grid, .journey-stage > .trade-bar, .journey-stage > .call-bar, .journey-stage > .journey-card { flex: 0 0 auto; align-self: stretch; }
+
+.start-actions { flex-wrap: wrap; }
+.journey-meters { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+@media (max-width: 640px) {
+  .journey-start section, .journey-end section { max-width: 100%; }
+  .start-actions { flex-direction: column; align-items: stretch; }
+  .start-actions button, .journey-end section > button { width: 100%; padding-inline: 12px; }
+  .journey-meters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.journey-start, .journey-end { grid-template-columns: minmax(0, 1fr); }
+.journey-start section, .journey-end section { min-width: 0; }
