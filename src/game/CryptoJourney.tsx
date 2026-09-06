@@ -1143,7 +1143,7 @@ function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (
 
 /* ---------------------------------------------------------------- screens */
 
-type Quote = { symbol: string; price: number; change: number };
+type Quote = { sym: string; price: number; chg24h: number };
 
 function PriceTape() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -1153,8 +1153,8 @@ function PriceTape() {
       try {
         const res = await fetch("/api/public/prices");
         if (!res.ok) return;
-        const data = (await res.json()) as { prices?: Quote[] } | Quote[];
-        const list = Array.isArray(data) ? data : (data.prices ?? []);
+        const data = (await res.json()) as { rows?: Quote[] };
+        const list = data.rows ?? [];
         if (alive && list.length) setQuotes(list);
       } catch { /* atmosphere only — silence is fine */ }
     };
@@ -1168,8 +1168,8 @@ function PriceTape() {
     <div className="price-tape" aria-label="Live crypto prices">
       <div className="price-tape-track">
         {row.map((q, i) => (
-          <span key={`${q.symbol}-${i}`} className={q.change >= 0 ? "is-up" : "is-down"}>
-            <b>{q.symbol}</b> {formatMoney(q.price)} <i>{q.change >= 0 ? "+" : ""}{q.change.toFixed(1)}%</i>
+          <span key={`${q.sym}-${i}`} className={q.chg24h >= 0 ? "is-up" : "is-down"}>
+            <b>{q.sym}</b> {q.price >= 1 ? formatMoney(q.price) : `$${q.price.toFixed(4)}`} <i>{q.chg24h >= 0 ? "+" : ""}{q.chg24h.toFixed(1)}%</i>
           </span>
         ))}
       </div>
