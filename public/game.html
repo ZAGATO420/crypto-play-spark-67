@@ -4218,10 +4218,10 @@ function auditLaunch(id){
   updateSidePanels();
 }
 function snipeLaunch(id){
-  if(!state||state._gameEnded)return;
-  const o=(state.launchOffers||[]).find(x=>x.id===id); if(!o)return;
+  if(!state||state._gameEnded){toast('This run is over – start a new one','sell');return}
+  const o=(state.launchOffers||[]).find(x=>x.id===id); if(!o){toast('That launch is gone – it already closed this month','sell');return}
   const size=Math.max(50,Math.floor(Math.min(state.cash*0.15,2500*(1+state.month*0.2))));
-  if(state.cash<size){toast('Not enough cash to snipe','sell');return}
+  if(state.cash<size){toast('Snipe needs '+fmt(size)+' – you only have '+fmt(state.cash),'sell');return}
   state.cash-=size;
   state.risk=Math.min(99,state.risk+4*state.riskMult);
   state.bags=state.bags||[];
