@@ -85,6 +85,24 @@ const modeOf = (id: BaseMode) => MODES.find((m) => m.id === id) ?? MODES[0]!;
 const modeId = (c: Config) => (c.ironman ? `IRONMAN-${c.mode}` : c.mode);
 const clamp = (v: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 
+const badgeFor = (run: Run, ending: EndingKey, net: number) => {
+  if (ending === "LEGEND") return "FINAL BOSS";
+  if (ending === "CASINO") return "EXIT LIQUIDITY";
+  if (ending === "BROKE") return run.trades >= 10 ? "CERTIFIED DEGEN" : "PAPER HANDS";
+  if (ending === "STARVED" || ending === "BROKEN") return "CHART ADDICT";
+  if (ending === "SELLOUT") return "PROFIT TAKER";
+  if (run.crises >= 5 && net >= archOf(run.config.arch).cash * 8) return "DIAMOND HANDS";
+  if (run.trades <= 3) return "HODL SURVIVOR";
+  return "CYCLE SURVIVOR";
+};
+
+const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLOUT">, string[]> = {
+  CASINO: ["The liquidation engine sends its regards.", "You called it conviction. The exchange called it collateral.", "10x confidence. 0x account."],
+  STARVED: ["You fed the bags. The bags did not feed you.", "Great portfolio. Shame about the human holding it.", "The candles were green. Your fridge was not."],
+  BROKEN: ["The market stayed irrational longer than you stayed functional.", "You survived the volatility. Your nervous system did not.", "Touching grass was always free."],
+  BROKE: ["Your portfolio has successfully become a tax deduction.", "Seven years of alpha, distilled into zero.", "The Boss thanks you for providing exit liquidity."],
+};
+
 const makeNoise = (mode: BaseMode) => {
   const step = mode === "historical" ? 0 : mode === "chaos" ? 0.05 : 0.018;
   const cap = mode === "chaos" ? 0.4 : 0.12;
@@ -1267,7 +1285,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
               <b>#{r.pos}</b>
               <img className="board-face" src={AVATARS.find((a) => a.id === r.avatar)?.url ?? AVATARS[0]!.url} alt="" loading="lazy" />
               <Flag code={r.country} size={22} />
-              <span><strong>{r.name}</strong><small>{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
+              <span><strong>{r.name}</strong><small>{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
               <i>{(r.score ?? 0).toLocaleString("en-US")}</i>
             </div>
           ))}
@@ -1281,13 +1299,19 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
   const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
+  const badge = badgeFor(run, ending, net);
+  const punchline = useMemo(() => {
+    if (won) return null;
+    const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
+    return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length];
+  }, [ending, run.chapter, run.moves, run.trades, won]);
   const send = async () => {
     setStatus("sending");
     try {
       await submitRun({
         name: run.config.name || "anon", arch: run.config.arch, country: run.config.country,
         difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(Math.max(0, net)),
-        score, xp: run.xp, level: levelFor(run.xp), rank: end.title, months: monthsSurvived(run.chapter), achievements: run.crises,
+        score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
         trades: run.trades, survived: won, avatar: run.config.avatar,
       });
       setStatus("done");
@@ -1300,6 +1324,8 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
         <p className="journey-kicker">{won ? "THE CYCLE IS COMPLETE" : "YOUR RUN IS OVER"}</p>
         <h1>{end.title}</h1>
         <p>{end.line}</p>
+        <div className="end-badge"><Crown /><span><small>RANK UNLOCKED</small><strong>{badge}</strong></span></div>
+        {punchline && <blockquote className="death-punchline">“{punchline}”</blockquote>}
         <div className="end-score">
           <span><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></span>
           <span><small>NET WORTH</small><strong>{formatMoney(net)}</strong></span>

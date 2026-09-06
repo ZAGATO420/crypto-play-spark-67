@@ -46,7 +46,9 @@ const s: State = { ctx: null, musicBus: null, sfxBus: null, players: {}, buffers
 
 const num = (key: string, fallback: number) => {
   if (typeof localStorage === "undefined") return fallback;
-  const raw = Number(localStorage.getItem(key));
+  const stored = localStorage.getItem(key);
+  if (stored === null || stored === "") return fallback;
+  const raw = Number(stored);
   return Number.isFinite(raw) && raw >= 0 && raw <= 1 ? raw : fallback;
 };
 
