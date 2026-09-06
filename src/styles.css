@@ -224,7 +224,7 @@
 .iron-toggle small { color: var(--muted-foreground); font-size: 12px; }
 .iron-toggle.is-on { border-color: var(--journey-pink); background: color-mix(in oklab, var(--journey-pink) 14%, var(--muted)); }
 .iron-toggle.is-on svg { color: var(--journey-pink); }
-.setup-cta { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 20px), 500px); padding: 6px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, oklch(0.2 0.022 286) 96%, transparent); }
+.setup-cta { display: grid; gap: 8px; position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 20px), 500px); padding: 6px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, oklch(0.2 0.022 286) 96%, transparent); }
 .setup-cta button { width: 100%; height: 56px; background: var(--journey-cyan); color: oklch(0.16 0.018 290); font: 400 14px/1 var(--font-display); }
 .board-list { width: min(100%, 900px); margin: 0 auto; display: grid; gap: 7px; }
 .board-row { display: grid; grid-template-columns: 38px 24px minmax(0,1fr) auto; align-items: center; gap: 10px; min-height: 62px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--journey-yellow); border-radius: 6px; background: var(--card); }
@@ -504,3 +504,8 @@
 .mg-seed { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; margin: 4px 0 }
 .mg-seed button { min-height: 48px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: inherit; font: 400 15px/1 var(--font-display); cursor: pointer }
 .mg-seed button:not(:disabled):hover { border-color: var(--journey-cyan) }
+.setup-summary { display: flex; align-items: center; gap: 10px; min-width: 0 }
+.setup-summary img { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--journey-cyan); object-fit: cover; flex: none }
+.setup-summary span { display: grid; gap: 2px; min-width: 0 }
+.setup-summary strong { display: flex; align-items: center; gap: 6px; font: 400 15px/1 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.setup-summary small { font-size: 10px; letter-spacing: .08em; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }

@@ -312,10 +312,10 @@ export function CryptoJourney() {
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
     setRun((r) => book({
       ...r, cash: r.cash - cost,
-      hunger: kind === "eat" ? clamp(r.hunger - 38) : r.hunger,
-      stress: kind === "calm" ? clamp(r.stress - 38) : r.stress,
+      hunger: kind === "eat" ? clamp(r.hunger - 46) : r.hunger,
+      stress: kind === "calm" ? clamp(r.stress - 46) : r.stress,
     }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
-    say(kind === "eat" ? "Fed. Hunger down 38." : "Head cleared. Stress down 38.", "cyan");
+    say(kind === "eat" ? "Fed. Hunger down 46." : "Head cleared. Stress down 46.", "cyan");
     grantXp(XP.survive, "STILL ALIVE");
   };
 
@@ -365,7 +365,7 @@ export function CryptoJourney() {
         ...r,
         cash: cashAfter,
         positions,
-        stress: clamp(r.stress + Math.round((option.stress ?? 0) * arch.risk)),
+        stress: clamp(r.stress + Math.round((option.stress ?? 0) * arch.risk * 0.55)),
         hunger: clamp(r.hunger + (option.hunger ?? 0)),
         crises: crisis ? r.crises + 1 : r.crises,
         statuses: status ? Array.from(new Set([...r.statuses, status])) : r.statuses,
@@ -518,8 +518,8 @@ export function CryptoJourney() {
 
     // doing nothing is a choice, and it costs
     const idle = run.moves === 0;
-    const hunger = clamp(run.hunger + Math.round(9 * arch.risk) + (idle ? 6 : 0));
-    const stress = clamp(run.stress + Math.round(7 * arch.risk) + (idle ? 12 : 0) + job.stress - house.calm);
+    const hunger = clamp(run.hunger + Math.round(7 * arch.risk) + (idle ? 6 : 0));
+    const stress = clamp(run.stress + Math.round(5 * arch.risk) + (idle ? 9 : 0) + Math.round(job.stress * 0.5) - house.calm);
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
 
     const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
@@ -1131,7 +1131,16 @@ function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config
       <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
         <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
       </section>
-      <div className="setup-cta"><Button onClick={() => onStart({ ...config, name: config.name.trim() || "anon" })}><Rocket />START Q1 2020</Button></div>
+      <div className="setup-cta">
+        <div className="setup-summary">
+          <img src={AVATARS.find((a) => a.id === config.avatar)?.url} alt="" />
+          <span>
+            <strong>{config.name.trim() || "anon"} <Flag code={config.country} size={14} /></strong>
+            <small>{archOf(config.arch).name} · {formatMoney(archOf(config.arch).cash)} · {config.difficulty}{config.ironman ? " · IRONMAN" : ""}</small>
+          </span>
+        </div>
+        <Button onClick={() => onStart({ ...config, name: config.name.trim() || "anon" })}><Rocket />START Q1 2020</Button>
+      </div>
     </main>
   );
 }
