@@ -312,10 +312,10 @@ export function CryptoJourney() {
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
     setRun((r) => book({
       ...r, cash: r.cash - cost,
-      hunger: kind === "eat" ? clamp(r.hunger - 38) : r.hunger,
-      stress: kind === "calm" ? clamp(r.stress - 38) : r.stress,
+      hunger: kind === "eat" ? clamp(r.hunger - 46) : r.hunger,
+      stress: kind === "calm" ? clamp(r.stress - 46) : r.stress,
     }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
-    say(kind === "eat" ? "Fed. Hunger down 38." : "Head cleared. Stress down 38.", "cyan");
+    say(kind === "eat" ? "Fed. Hunger down 46." : "Head cleared. Stress down 46.", "cyan");
     grantXp(XP.survive, "STILL ALIVE");
   };
 
