@@ -220,3 +220,92 @@ export const DECISIONS: Decision[] = [
 ];
 
 export const decisionFor = (month: number) => DECISIONS.find((d) => d.month === month);
+
+// ---- THE CYCLE: chapters, presales, statuses, endings -----------------------
+export const CHAPTERS = 28; // 2020 Q1 -> 2026 Q4
+export const chapterMonth = (ch: number) => Math.min(83, Math.max(0, ch * 3 + 2));
+export const chapterLabel = (ch: number) => `Q${(ch % 4) + 1} ${2020 + Math.floor(ch / 4)}`;
+export const chapterOfMonth = (m: number) => Math.floor(m / 3);
+
+export type Presale = {
+  chapter: number;
+  name: string;
+  tag: "PRESALE" | "FAIR LAUNCH" | "ICO";
+  blurb: string;
+  min: number;
+  rug: number;          // probability the whole thing is a rug
+  upside: [number, number]; // multiplier range when it works
+};
+
+export const PRESALES: Presale[] = [
+  { chapter: 1, name: "YAM FINANCE", tag: "FAIR LAUNCH", blurb: "Elastic supply, no audit, a rebase bug nobody found yet.", min: 300, rug: 0.6, upside: [2, 9] },
+  { chapter: 3, name: "SUSHI VAMPIRE", tag: "FAIR LAUNCH", blurb: "A masked dev drains a bigger exchange live. Yields are absurd.", min: 400, rug: 0.45, upside: [2.5, 7] },
+  { chapter: 5, name: "SAFEMOON", tag: "PRESALE", blurb: "10% tax on every sell. The chart only goes up until it doesn't.", min: 350, rug: 0.62, upside: [3, 14] },
+  { chapter: 7, name: "AXIE LAND SALE", tag: "ICO", blurb: "Play to earn is printing money in Manila. Land is finite, they say.", min: 600, rug: 0.4, upside: [2, 8] },
+  { chapter: 9, name: "ANCHOR 19.5%", tag: "ICO", blurb: "Risk-free yield on a stablecoin. Nothing has ever gone wrong with that sentence.", min: 500, rug: 0.55, upside: [1.4, 2.2] },
+  { chapter: 12, name: "APTOS AIRDROP", tag: "PRESALE", blurb: "VC chain, huge valuation, tokens nobody can price yet.", min: 450, rug: 0.42, upside: [1.8, 5] },
+  { chapter: 14, name: "BLUR SEASON 2", tag: "FAIR LAUNCH", blurb: "Farm bids on dead NFTs for a token that may or may not exist.", min: 300, rug: 0.45, upside: [2, 6] },
+  { chapter: 16, name: "PEPE STEALTH", tag: "FAIR LAUNCH", blurb: "No roadmap, no team, one frog. Sixty seconds to decide.", min: 250, rug: 0.6, upside: [4, 22] },
+  { chapter: 18, name: "JITO DROP", tag: "PRESALE", blurb: "Solana MEV rewards for people who never left. Loyalty pays sometimes.", min: 500, rug: 0.3, upside: [2, 6] },
+  { chapter: 20, name: "EIGENLAYER POINTS", tag: "PRESALE", blurb: "Points for a token with no date. The whole market is farming it anyway.", min: 550, rug: 0.4, upside: [1.8, 5.5] },
+  { chapter: 22, name: "PUMP.FUN ROULETTE", tag: "FAIR LAUNCH", blurb: "20,000 launches a day. 97% rug inside an hour. You only need one.", min: 200, rug: 0.72, upside: [5, 35] },
+  { chapter: 24, name: "TRUMP COIN", tag: "FAIR LAUNCH", blurb: "A president launches a memecoin at 2am. Liquidity is thin and loud.", min: 400, rug: 0.55, upside: [3, 16] },
+  { chapter: 26, name: "$TCFB GENESIS", tag: "PRESALE", blurb: "The Boss launches his own token and lets you in first. Suspicious. Tempting.", min: 600, rug: 0.35, upside: [3, 12] },
+];
+
+export const presaleFor = (chapter: number) => PRESALES.find((p) => p.chapter === chapter);
+
+export const STATUS_BY_CHOICE: Record<string, string> = {
+  "SELL EVERYTHING": "PANIC SELLER",
+  "BUY THE PANIC": "DIAMOND HANDS",
+  "HOLD AND PRAY": "DIAMOND HANDS",
+  "SELL THE TOP": "TOP SELLER",
+  "IT GOES TO $100K": "BAG HOLDER",
+  "BUY LUNA AT $1": "KNIFE CATCHER",
+  "KEEP EARNING 9%": "EXCHANGE VICTIM",
+  "BELIEVE THE TWEETS": "EXCHANGE VICTIM",
+  "WITHDRAW NOW": "SELF CUSTODY",
+  "WITHDRAW EVERYTHING": "SELF CUSTODY",
+  "APE THE FROG": "CASINO DEGEN",
+  "FARM THE CASINO": "CASINO DEGEN",
+  "MAX LONG": "LEVERAGE JUNKIE",
+  "BUY THE WICK": "COLD BLOODED",
+  "GO FOR THE LEADERBOARD": "ALL IN",
+  "PROTECT THE BAG": "CAPITAL PRESERVER",
+};
+
+export const CHAPTER_WARNINGS: Record<number, string> = {
+  0: "Nobody outside crypto is watching. That is the whole edge.",
+  1: "Free money farms are everywhere. So are unaudited contracts.",
+  3: "Retail is waking up. Leverage is getting cheap.",
+  4: "Everyone on your feed is suddenly a genius.",
+  5: "Euphoria. Exits get expensive from here.",
+  7: "The top is somewhere in this room and nobody rings a bell.",
+  9: "Yields that cannot exist are being marketed as safe.",
+  10: "Contagion season. Counterparties matter more than charts.",
+  11: "Trust is about to become the scarcest asset in crypto.",
+  13: "Nothing moves. Boredom kills more runs than crashes.",
+  16: "Memes are outperforming everything with a whitepaper.",
+  19: "Wall Street is at the door with a very large bid.",
+  22: "The casino is open 24/7 and the house still wins.",
+  24: "Six figures on the board. Leverage at record highs.",
+  26: "Final stretch. The Boss is already writing your rank.",
+};
+
+export const ENDINGS = {
+  LEGEND: { title: "LEGEND", line: "You walked through every crash, every rug, every euphoric top — and left richer than the Boss." },
+  SURVIVOR: { title: "SURVIVOR", line: "Seven years, still standing, still solvent. Most people did not make it this far." },
+  CASINO: { title: "CASINO CASUALTY", line: "Leverage found you. It always finds the ones who like it most." },
+  STARVED: { title: "STARVED OUT", line: "You watched charts until your own life ran out of runway. The Boss finds this hilarious." },
+  BROKEN: { title: "BURNED OUT", line: "Stress hit the ceiling. The market kept going without you, as it always does." },
+  BROKE: { title: "REKT", line: "Zero. No cash, no bags, no excuses left." },
+  SELLOUT: { title: "SELLOUT", line: "You cashed out early and walked away with the bag. Safe. Boring. Respectable." },
+} as const;
+export type EndingKey = keyof typeof ENDINGS;
+
+export const bossScore = (input: { net: number; chapters: number; difficulty: Difficulty; crises: number; streak: number }) => {
+  const diff = DIFFICULTIES.find((d) => d.id === input.difficulty)?.cost ?? 1;
+  const chapterFactor = Math.max(0.1, Math.min(1, input.chapters / CHAPTERS));
+  const streakMul = 1 + Math.min(0.5, input.streak * 0.05);
+  return Math.round((Math.max(0, input.net) * chapterFactor * diff + input.crises * 500) * streakMul);
+};

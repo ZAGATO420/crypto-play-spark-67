@@ -60,6 +60,7 @@ const runSchema = z.object({
   achievements: z.number().int().min(0).max(200),
   trades: z.number().int().min(0).max(20_000),
   survived: z.boolean().default(false),
+  score: z.number().finite().min(0).max(1e12).default(0),
   avatar: z.string().trim().max(12).optional(),
 });
 
@@ -90,6 +91,9 @@ function implausibleReason(run: z.infer<typeof runSchema>): string | null {
   if (run.trades > 120 + run.months * 120) return "trades";
   // Level must match the client's XP curve (allow +1 for rounding drift).
   if (run.level > maxLevelForXp(run.xp) + 1) return "level";
+  // Boss Score = net worth x chapter factor x difficulty + crisis bonus, streak-boosted.
+  // It can never run far ahead of the net worth the run actually finished with.
+  if (run.score > run.net * 8 + 250_000) return "score";
   return null;
 }
 
@@ -107,7 +111,10 @@ function rankScore(r: {
   achievements: number;
   survived: boolean;
   mode?: string | null;
+  score?: number | string | null;
 }): number {
+  const stored = Number((r as { score?: number | string }).score) || 0;
+  if (stored > 0) return stored;
   const net = Number(r.net_worth) || 0;
   let score = net + r.xp * 10 + r.months_survived * 500 + r.achievements * 250;
   if (r.survived) score += 25_000;
@@ -122,7 +129,7 @@ function rankScore(r: {
 }
 
 const SELECT_COLS =
-  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, created_at";
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at";
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -270,6 +277,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           achievements: run.achievements,
           trades: run.trades,
           survived: run.survived,
+          score: Math.round(run.score),
           avatar: run.avatar ?? null,
         };
 

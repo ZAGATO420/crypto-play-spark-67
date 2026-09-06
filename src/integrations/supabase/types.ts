@@ -30,6 +30,7 @@ export type Database = {
           net_worth: number
           player_name: string
           rank_title: string
+          score: number
           survived: boolean
           trades: number
           xp: number
@@ -49,6 +50,7 @@ export type Database = {
           net_worth: number
           player_name: string
           rank_title?: string
+          score?: number
           survived?: boolean
           trades?: number
           xp?: number
@@ -68,6 +70,7 @@ export type Database = {
           net_worth?: number
           player_name?: string
           rank_title?: string
+          score?: number
           survived?: boolean
           trades?: number
           xp?: number
