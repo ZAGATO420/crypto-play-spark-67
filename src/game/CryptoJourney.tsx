@@ -327,14 +327,25 @@ export function CryptoJourney() {
               </div>
 
               <div className="call-bar">
-                <div><p className="journey-kicker">CALL THE MARKET · {date} CLOSE {marketPulse >= 0 ? "+" : ""}{marketPulse.toFixed(1)}%</p><small>Right call = combo, XP and cash. Wrong call = stress.</small></div>
+                <div><p className="journey-kicker">SIDE BET · OPTIONAL · {date} CLOSE {marketPulse >= 0 ? "+" : ""}{marketPulse.toFixed(1)}%</p><small>Right call = combo, XP and cash. Wrong call = stress. Skip it and just lock in.</small></div>
                 <div className="call-buttons">
-                  <Button variant={call === "up" ? "default" : "outline"} onClick={() => setCall("up")}>PUMP</Button>
-                  <Button variant={call === "down" ? "default" : "outline"} onClick={() => setCall("down")}>DUMP</Button>
+                  <Button variant={call === "up" ? "default" : "outline"} onClick={() => setCall(call === "up" ? null : "up")}>PUMP</Button>
+                  <Button variant={call === "down" ? "default" : "outline"} onClick={() => setCall(call === "down" ? null : "down")}>DUMP</Button>
                 </div>
               </div>
 
-              {(chance || result) && (
+              {decision ? (
+                <article className="journey-card tone-yellow is-history">
+                  <div className="journey-card-copy">
+                    <p className="journey-kicker"><History /> {decision.kicker}</p>
+                    <h2>{decision.title}</h2>
+                    <p>{decision.body}</p>
+                  </div>
+                  <div className="journey-actions">
+                    {decision.options.map((o) => <Button key={o.label} variant={o.tone === "danger" ? "outline" : "default"} onClick={() => resolveDecision(o)}>{o.label}</Button>)}
+                  </div>
+                </article>
+              ) : (chance || result) ? (
                 <article className={`journey-card tone-${chance ? "pink" : result?.tone ?? "cyan"}`}>
                   <div className="journey-card-copy">
                     <p className="journey-kicker">{chance ? "RISK CARD · DECIDE NOW" : "MONTH REPORT"}</p>
@@ -350,7 +361,7 @@ export function CryptoJourney() {
                     <div className="journey-actions"><Button variant="secondary" onClick={() => setResult(null)}>GOT IT</Button></div>
                   )}
                 </article>
-              )}
+              ) : null}
             </>
           )}
         </section>
