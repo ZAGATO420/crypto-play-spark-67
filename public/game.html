@@ -14075,13 +14075,21 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto minmax(0,1fr) auto!im
 .v41-mfeed summary::-webkit-details-marker{display:none}
 .v41-mfeed .v41-feed{max-height:150px}
 @media(max-width:820px){
- #v41-prog{margin:0 7px;padding:6px 8px;grid-template-columns:auto minmax(0,1fr);gap:8px}
+ #v41-prog{margin:0 7px;padding:5px 8px;grid-template-columns:auto minmax(0,1fr);gap:7px}
  .v41-chips{grid-column:1/-1;justify-content:space-between}
+ .v41-chip{padding:3px 6px}.v41-chip strong{font-size:10px}
  .v41-title{max-width:92px}
- #v41-live{margin:0 8px 6px}.v41-lbody{max-height:104px}
- .v41-mfeed{display:block}
- body.v40-live[data-v40-stage="chart"] #v41-live,body.v40-live[data-v40-stage="chart"] .v41-mfeed{display:none}
- body.v40-live[data-v40-stage="positions"] #v41-live{display:none}
+ #v41-live{margin:0 8px 6px}.v41-lbody{max-height:78px}
+ .v41-row{padding:6px 8px}
+ body.v40-live[data-v40-stage="market"] #v41-live:not(.empty)~.v40-visual,
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:104px}
+ .v41-mfeed{display:none}
+ body.v40-live[data-v40-stage="chart"] #v41-live{display:none}
+ body.v40-live[data-v40-stage="positions"] #v41-live{display:block;margin:8px}
+ body.v40-live[data-v40-stage="positions"] #v41-live .v41-lbody{max-height:none}
+ body.v40-live[data-v40-stage="positions"] .v41-mfeed{display:block}
+ body.v40-live[data-v40-stage="positions"] .v40-mobile-only .v40-label:first-child,
+ body.v40-live[data-v40-stage="positions"] #v40-mobile-pos{display:none}
 }
 /* value reactions */
 .v41-hit{animation:v41Hit .45s ease-out}
