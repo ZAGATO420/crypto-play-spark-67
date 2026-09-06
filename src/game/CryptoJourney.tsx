@@ -13,7 +13,18 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import { ARCHETYPES, CHANCES, COINS, COUNTRIES, DIFFICULTIES, EVENTS, MODES, MONTHS, missionFor, XP_LEVELS, formatMoney, levelFor, rankTitle, type Archetype, type BaseMode, type Chance, type CoinSymbol, type Country, type Difficulty } from "./journey-data";
+import { COIN_LOGO } from "./coin-logos";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
+
+const CoinMark = ({ symbol, size = 34 }: { symbol: string; size?: number }) => (
+  <img className="coin-logo" src={COIN_LOGO[symbol]} alt={`${symbol} logo`} width={size} height={size} loading="lazy" />
+);
+
+const HOW_TO = [
+  "Tap a market. Real prices, 2020 to 2026. No hindsight, no excuses.",
+  "You get 3 moves a month. BUY 25%, BUY 50%, SELL ALL. Spend them like they matter, because they do.",
+  "Call the next month: PUMP or DUMP. Then LOCK IN. Rent, food and stress get paid whether you were right or not.",
+];
 
 type Holding = Partial<Record<CoinSymbol, number>>;
 type Log = { month: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
