@@ -289,7 +289,7 @@ export function CryptoJourney() {
               <div className="step-bar">
                 <span className={coinIndex >= 0 ? "is-done" : ""}>1 · PICK</span>
                 <span className={ap < AP_MAX ? "is-done" : ""}>2 · TRADE ({ap} left)</span>
-                <span className={call ? "is-done" : ""}>3 · CALL</span>
+                <span className={call ? "is-done" : ""}>3 · CALL (OPTIONAL)</span>
                 <span>4 · LOCK IN</span>
                 <button onClick={() => setHowTo(true)}>RULES</button>
               </div>
