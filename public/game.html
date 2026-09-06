@@ -4802,7 +4802,7 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
     var list=COINS.filter(function(x){return s.month>=x.launch&&(s.prices[x.s]||0)>0}).slice(0,12);var tape=list.map(function(x){var z=change(x.s,s),held=(s.holdings[x.s]||0)>0;return '<button class="v40-coin '+(x.s===active?'on':'')+'" data-v40-coin="'+x.s+'">'+logo(x.s,'v40-mark')+'<span><b>'+x.s+'</b><small>'+(held?'POSITION OPEN':x.n)+'</small></span><span class="q">$'+price(s.prices[x.s])+'<i class="'+(z>=0?'v40-up':'v40-down')+'">'+(z>=0?'+':'')+z.toFixed(1)+'%</i></span></button>'}).join('');$('v40-tape').innerHTML=tape;$('v40-mobile-tape').innerHTML=tape;
     chart(active,s);var ph=positions(s),vh=vitals(s);$('v40-pos').innerHTML=ph;$('v40-mobile-pos').innerHTML=ph;$('v40-vitals').innerHTML=vh;$('v40-mobile-vitals').innerHTML=vh;
   }
-  function sync(){build();var on=visible();document.body.classList.toggle('v40-live',on);if(on){document.body.setAttribute('data-v40-view',view);paint(false)}}
+  function sync(){build();var on=visible();document.body.classList.toggle('v40-live',on);if(on){document.body.setAttribute('data-v40-stage',view);paint(false)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();setInterval(sync,220);setTimeout(sync,80);
 })();
 </script>
