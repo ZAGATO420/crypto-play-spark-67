@@ -14214,7 +14214,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       var col=dist<25?'var(--v40-down)':dist<55?'var(--v40-gold)':'var(--v40-acid)';
       out.push('<div class="v41-row'+(dist<25?' danger':'')+'"><div class="v41-r1">'+mark(p.sym)+
         '<b>'+p.sym+' <i>'+p.lev+'x '+p.dir.toUpperCase()+'</i></b>'+
-        '<strong class="'+(pl>=0?'v40-up':'v40-down')+'">'+(pl>=0?'+':'')+money(pl)+'</strong>'+
+        '<strong class="'+(pl>=0?'v40-up':'v40-down')+'">'+(pl>=0?'+':'-')+money(Math.abs(pl))+'</strong>'+
         '<button class="v41-close" data-v41-close="'+i+'">CLOSE</button></div>'+
         '<div class="v41-liq"><i style="width:'+dist.toFixed(0)+'%;background:'+col+'"></i></div>'+
         '<div class="v41-sub">margin '+money(p.margin)+' · liq $'+px(perpLiq(p.entry,p.dir,p.lev))+' · '+dist.toFixed(0)+'% room</div></div>');
@@ -14226,7 +14226,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       out.push('<div class="v41-row"><div class="v41-r1">'+mark(c.s)+
         '<b>'+c.s+' <i>SPOT</i></b><strong class="'+(pc>=0?'v40-up':'v40-down')+'">'+(pc>=0?'+':'')+pc.toFixed(1)+'%</strong>'+
         '<span class="v41-sub" style="margin:0">'+money(val)+'</span></div>'+
-        '<div class="v41-sub">avg $'+px(avg)+' · unreal '+(gain>=0?'+':'')+money(gain)+'</div></div>');
+        '<div class="v41-sub">avg $'+px(avg)+' · unreal '+(gain>=0?'+':'-')+money(Math.abs(gain))+'</div></div>');
     })}catch(_){}
     return {html:out.join(''),n:out.length,pnl:pnl,risk:risk};
   }
