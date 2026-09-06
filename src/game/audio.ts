@@ -144,9 +144,15 @@ async function buffer(id: SfxId) {
   return job;
 }
 
+export function preloadSfx() {
+  if (!s.ctx) return;
+  for (const id of Object.keys(SFX) as SfxId[]) void buffer(id);
+}
+
 export function playSfx(id: SfxId) {
   if (muted || !s.ctx || !s.sfxBus) return;
   void (async () => {
+    if (s.ctx.state === "suspended") await s.ctx.resume().catch(() => {});
     const buf = await buffer(id);
     if (!buf || !s.ctx || !s.sfxBus || muted) return;
     const src = s.ctx.createBufferSource();
