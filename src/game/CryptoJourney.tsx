@@ -518,8 +518,8 @@ export function CryptoJourney() {
 
     // doing nothing is a choice, and it costs
     const idle = run.moves === 0;
-    const hunger = clamp(run.hunger + Math.round(9 * arch.risk) + (idle ? 6 : 0));
-    const stress = clamp(run.stress + Math.round(7 * arch.risk) + (idle ? 12 : 0) + job.stress - house.calm);
+    const hunger = clamp(run.hunger + Math.round(7 * arch.risk) + (idle ? 6 : 0));
+    const stress = clamp(run.stress + Math.round(5 * arch.risk) + (idle ? 9 : 0) + Math.round(job.stress * 0.5) - house.calm);
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
 
     const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
