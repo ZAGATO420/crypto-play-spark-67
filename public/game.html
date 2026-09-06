@@ -4684,6 +4684,265 @@ updateSidePanels=function(){const r=_origUSP.apply(this,arguments);try{renderDeg
 function shareScore(){const txt=(state&&state._bossWin)?`I just BEAT THE CRYPTO FINAL BOSS on BOSS difficulty. 84 months, ${fmt(finalNet())}, ${getRank(true).title}.\n\nMost of you wouldn’t last 12 months.\n\nWho’s next?\n🎮 thecryptofinalboss.app\n\n#Crypto #Degen #TCFB`:`I just ${(state&&state._finalWin)?'survived':'got rekt in'} THE CRYPTO FINAL BOSS with ${fmt(finalNet())} (${getRank(!!(state&&state._finalWin)).title}) after ${state?state.month:0} months.\n\nMost of you wouldn’t last 12 months.\n\nWho’s next?\n🎮 thecryptofinalboss.app\n\n#Crypto #Degen #TCFB`;navigator.clipboard.writeText(txt).then(()=>toast('Score copied!','buy')).catch(()=>alert(txt))}
 
 </script>
+<style id="v39-command-deck">
+/* =====================================================================
+   V39 — TACTICAL COMMAND DECK
+   One final presentation system for the live terminal. Existing engine,
+   IDs, dialogs and actions remain untouched.
+   ===================================================================== */
+body.v39.v30-run{
+  --v39-bg:#04100f;--v39-deep:#020908;--v39-panel:#071715;
+  --v39-panel2:#0a211e;--v39-line:rgba(215,182,92,.18);
+  --v39-line-strong:rgba(215,182,92,.42);--v39-gold:#d7b65c;
+  --v39-gold2:#f3d983;--v39-acid:#b7f34a;--v39-text:#e9f3ed;
+  --v39-muted:#829a91;--v39-up:#55e59b;--v39-down:#ff6b72;
+  background:var(--v39-bg)!important;color:var(--v39-text);
+  font-family:'Hind','Inter',system-ui,sans-serif;
+}
+body.v39.v30-run #game-screen{
+  min-height:100dvh;background:
+    linear-gradient(rgba(183,243,74,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(183,243,74,.018) 1px,transparent 1px),
+    radial-gradient(900px 440px at 52% 0%,rgba(14,58,54,.72),transparent 72%),
+    linear-gradient(180deg,var(--v39-bg),var(--v39-deep))!important;
+  background-size:32px 32px,32px 32px,auto,auto;
+}
+body.v39.v30-run header{
+  background:rgba(3,13,12,.96)!important;border-bottom:1px solid var(--v39-line)!important;
+  box-shadow:0 18px 45px rgba(0,0,0,.26);position:relative;z-index:20;
+}
+body.v39.v30-run .hud-net{
+  border-radius:6px!important;border:1px solid var(--v39-line-strong)!important;
+  background:linear-gradient(125deg,rgba(215,182,92,.12),rgba(7,23,21,.9))!important;
+  box-shadow:inset 3px 0 0 var(--v39-gold),0 14px 34px rgba(0,0,0,.24)!important;
+}
+body.v39.v30-run .hud-net::before{display:none!important}
+body.v39.v30-run .hud-net-label,body.v39.v30-run .panel-title,
+body.v39.v30-run .term-title,body.v39.v30-run .v17-rail-t{
+  font-family:'Archivo Black','Hind',sans-serif!important;letter-spacing:0!important;
+  text-transform:uppercase;color:var(--v39-gold)!important;
+}
+body.v39.v30-run .hud-net-val{color:var(--v39-gold2)!important;text-shadow:0 0 24px rgba(215,182,92,.28)!important}
+body.v39.v30-run .hud-meta{color:var(--v39-muted)!important}
+body.v39.v30-run .hud-ic{
+  border-radius:6px!important;border-color:var(--v39-line)!important;
+  background:rgba(255,255,255,.035)!important;color:var(--v39-text)!important;
+}
+body.v39.v30-run .hud-ic:hover{border-color:var(--v39-gold)!important;background:rgba(215,182,92,.1)!important}
+body.v39.v30-run .hud-ic-quit{color:var(--v39-down)!important;border-color:rgba(255,107,114,.32)!important}
+
+/* Score ribbon: one continuous instrument strip, not eight cards. */
+body.v39.v30-run #v30-bar{
+  gap:0!important;border:1px solid var(--v39-line)!important;border-radius:6px!important;
+  overflow:hidden;background:rgba(6,24,21,.84)!important;box-shadow:0 12px 30px rgba(0,0,0,.2);
+}
+body.v39.v30-run #v30-bar .c{
+  border:0!important;border-right:1px solid var(--v39-line)!important;border-radius:0!important;
+  background:transparent!important;padding:7px 10px!important;
+}
+body.v39.v30-run #v30-bar .c:last-child{border-right:0!important}
+body.v39.v30-run #v30-bar .l{font-family:'Hind',sans-serif!important;color:var(--v39-muted)!important;letter-spacing:0!important;font-size:9px!important}
+body.v39.v30-run #v30-bar .v30-v{color:var(--v39-text);font-size:13px!important}
+body.v39.v30-run #v30-bar .up{color:var(--v39-up)!important}
+body.v39.v30-run #v30-bar .dn{color:var(--v39-down)!important}
+body.v39.v30-run #v30-bar .bar{height:3px!important;background:rgba(255,255,255,.08)!important}
+body.v39.v30-run #v30-bar .act{color:var(--v39-acid)!important;letter-spacing:0!important}
+body.v39.v30-run .xp-wrap,body.v39.v30-run .time-controls{
+  border-color:var(--v39-line)!important;background:rgba(6,24,21,.5)!important;
+}
+body.v39.v30-run .xp-fill,body.v39.v30-run .timeline-fill{background:linear-gradient(90deg,var(--v39-gold),var(--v39-acid))!important}
+body.v39.v30-run .news-ticker-inner,body.v39.v30-run .sentiment{
+  border-color:var(--v39-line)!important;background:rgba(6,24,21,.5)!important;border-radius:4px!important;
+}
+
+/* Command-deck surfaces. */
+body.v39.v30-run main{gap:10px!important;max-width:1540px;margin-inline:auto}
+body.v39.v30-run .panel,body.v39.v30-run #v17-rail{
+  border-radius:6px!important;border:1px solid var(--v39-line)!important;
+  background:linear-gradient(180deg,rgba(10,33,30,.92),rgba(4,17,15,.94))!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.24)!important;
+}
+body.v39.v30-run .panel-title{border-bottom:1px solid var(--v39-line);padding-bottom:8px}
+body.v39.v30-run #v17-market{
+  border-color:var(--v39-line-strong)!important;box-shadow:0 20px 54px rgba(0,0,0,.36),inset 0 1px rgba(255,255,255,.03)!important;
+}
+body.v39.v30-run #v17-market .term-head{
+  min-height:48px;padding:8px 12px!important;border-bottom:1px solid var(--v39-line)!important;
+  background:linear-gradient(90deg,rgba(215,182,92,.09),transparent 58%)!important;
+}
+body.v39.v30-run #v17-market .term-title::before{content:'MARKET COMBAT  /  ' ;color:var(--v39-text)}
+body.v39.v30-run .tc-btn,body.v39.v30-run .filter-btn{
+  border-radius:5px!important;border-color:var(--v39-line)!important;background:rgba(255,255,255,.025)!important;
+  color:var(--v39-muted)!important;font-family:'Hind',sans-serif!important;font-weight:700!important;letter-spacing:0!important;
+}
+body.v39.v30-run .tc-btn.active,body.v39.v30-run .filter-btn.active{
+  color:var(--v39-acid)!important;border-color:rgba(183,243,74,.46)!important;background:rgba(183,243,74,.08)!important;
+  box-shadow:inset 0 -2px 0 var(--v39-acid)!important;
+}
+body.v39.v30-run .chart-box{
+  border-radius:4px!important;border-color:var(--v39-line)!important;
+  background:linear-gradient(rgba(183,243,74,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(183,243,74,.035) 1px,transparent 1px),#03110f!important;
+  background-size:34px 34px!important;
+}
+body.v39.v30-run #v31-cs{color:var(--v39-muted)!important;letter-spacing:0!important}
+body.v39.v30-run #v31-cs b{color:var(--v39-text)!important}
+
+/* Exchange tape. */
+body.v39.v30-run #market-list.dexgrid{gap:0!important;border:1px solid rgba(215,182,92,.1);border-radius:4px;overflow:hidden!important}
+body.v39.v30-run .dxt{
+  min-height:52px!important;border:0!important;border-bottom:1px solid rgba(215,182,92,.1)!important;
+  border-radius:0!important;background:rgba(255,255,255,.014)!important;
+}
+body.v39.v30-run .dxt:nth-child(even){background:rgba(14,58,54,.12)!important}
+body.v39.v30-run .dxt:hover{background:rgba(183,243,74,.075)!important;box-shadow:inset 3px 0 var(--v39-acid)!important}
+body.v39.v30-run .dxt.held{background:rgba(85,229,155,.07)!important;box-shadow:inset 3px 0 var(--v39-up)!important}
+body.v39.v30-run .dxt .dxs{font-family:'Archivo Black','Hind',sans-serif!important;letter-spacing:0!important;color:var(--v39-text)!important}
+body.v39.v30-run .dxt .dxp{color:var(--v39-text)!important}
+body.v39.v30-run .dxt .dxc.up{color:var(--v39-up)!important}
+body.v39.v30-run .dxt .dxc.dn{color:var(--v39-down)!important}
+
+/* Right command rail and live positions. */
+body.v39.v30-run #v17-rail{padding:10px!important}
+body.v39.v30-run #v17-rail .v17-tiles{grid-template-columns:1fr 1fr;gap:5px}
+body.v39.v30-run .v17-tile{
+  min-height:64px;border-radius:5px!important;border-color:rgba(215,182,92,.13)!important;
+  background:rgba(255,255,255,.02)!important;padding:9px!important;
+}
+body.v39.v30-run .v17-tile:hover{border-color:var(--v39-line-strong)!important;background:rgba(215,182,92,.08)!important}
+body.v39.v30-run .v17-tile .tt{font-family:'Hind',sans-serif!important;letter-spacing:0!important;color:var(--v39-muted)}
+body.v39.v30-run .v17-tile .ti{color:var(--v39-gold)!important}
+body.v39.v30-run #v29-pos{border-top:1px solid var(--v39-line);padding-top:8px}
+body.v39.v30-run #v29-pos::before{content:'LIVE POSITIONS';display:block;margin-bottom:6px;color:var(--v39-gold);font-family:'Archivo Black','Hind',sans-serif;font-size:9px}
+body.v39.v30-run #v29-pos .v29-card,body.v39.v30-run #v29-pos .v29-empty{
+  border-radius:5px!important;border-color:var(--v39-line)!important;background:rgba(255,255,255,.025)!important;
+}
+
+/* Non-blocking mission line replaces the old tutorial overlay. */
+body.v39 #v23-coach,body.v39 #v29-hint{display:none!important}
+#v39-mission{display:flex;align-items:center;gap:9px;padding:7px 10px;margin:0 10px 8px;border-left:3px solid var(--v39-acid);
+  background:rgba(183,243,74,.055);color:var(--v39-muted);font:600 11px/1.25 'Hind',sans-serif}
+#v39-mission b{color:var(--v39-acid);font-family:'Archivo Black','Hind',sans-serif;font-size:9px;white-space:nowrap}
+#v39-mission span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Dialogs inherit the deck instead of looking like another app. */
+body.v39 #v17-sheet,body.v39 #v29-sheet,body.v39 #v32-pick{background:rgba(1,8,7,.8)!important}
+body.v39 #v17-sheet .v17-win,body.v39 #v29-sheet .w,body.v39 #v32-pick .w{
+  border-radius:7px!important;border-color:var(--v39-line-strong)!important;
+  background:linear-gradient(180deg,var(--v39-panel2),var(--v39-deep))!important;
+}
+body.v39 #v17-sheet .v17-head,body.v39 #v29-sheet .h,body.v39 #v32-pick .h{border-color:var(--v39-line)!important}
+body.v39 #v17-sheet .v17-head .ht,body.v39 #v29-sheet .h b,body.v39 #v32-pick .h b{font-family:'Archivo Black','Hind',sans-serif!important;color:var(--v39-gold2)!important;letter-spacing:0!important}
+
+/* Result strip becomes part of the terminal, not another floating card. */
+body.v39 #v38-strip{border-radius:4px!important;border-color:var(--v39-line-strong)!important;
+  background:linear-gradient(90deg,rgba(14,58,54,.95),rgba(5,20,18,.96))!important;box-shadow:none!important}
+body.v39 #v38-strip .obj{border-radius:4px;background:var(--v39-acid)!important}
+
+@media(min-width:821px){
+  body.v39.v30-run header{padding:7px 16px 5px!important}
+  body.v39.v30-run .header-top{display:grid!important;grid-template-columns:minmax(240px,400px) minmax(0,1fr) auto!important;gap:8px!important}
+  body.v39.v30-run .hud-net{grid-column:1;grid-row:1;padding:8px 14px!important}
+  body.v39.v30-run .hud-net-val{font-size:27px!important}
+  body.v39.v30-run .hud-sys{grid-column:3;grid-row:1;margin:0!important}
+  body.v39.v30-run #v30-bar{grid-column:1/-1;grid-row:2;grid-template-columns:1.15fr 1fr 1fr 1fr 1fr .8fr 1.15fr 1.15fr!important}
+  body.v39.v30-run .xp-wrap{grid-column:1/-1;margin-top:0!important;border-radius:4px!important}
+  body.v39.v30-run main{grid-template-columns:minmax(200px,242px) minmax(520px,1fr) minmax(190px,224px)!important;padding:9px 14px 90px!important}
+  body.v39.v30-run main>div:first-child{gap:8px!important}
+  body.v39.v30-run main>div:nth-child(2){gap:8px!important}
+  body.v39.v30-run main>div:last-child{gap:8px!important}
+  body.v39.v30-run #v7-top{height:196px!important;max-height:196px!important;flex:0 0 196px!important}
+  body.v39.v30-run .chart-box{height:146px!important;max-height:146px!important}
+  body.v39.v30-run #v17-market{min-height:300px!important}
+  body.v39.v30-run #market-list.dexgrid{grid-template-columns:1fr 1fr!important}
+  body.v39.v30-run #v17-rail .v17-tiles{grid-template-columns:1fr 1fr!important}
+}
+
+/* Mobile is its own command deck: one stage, a strong central month key. */
+@media(max-width:820px){
+  body.v39.v30-run header{padding:6px 8px 5px!important}
+  body.v39.v30-run .header-top{display:grid!important;grid-template-columns:1fr auto!important;gap:6px!important}
+  body.v39.v30-run .hud-net{grid-column:1/-1;padding:8px 142px 8px 11px!important;min-height:62px}
+  body.v39.v30-run .hud-net-val{font-size:22px!important}
+  body.v39.v30-run .hud-sys{top:9px!important;right:10px!important;gap:4px!important}
+  body.v39.v30-run .hud-sys .hud-ic{min-width:40px!important;min-height:40px!important;width:40px!important;height:40px!important}
+  body.v39.v30-run #v30-bar{grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  body.v39.v30-run #v30-bar .c{min-height:43px!important;padding:5px 7px!important}
+  body.v39.v30-run #v30-bar .c:nth-child(4),body.v39.v30-run #v30-bar .c:nth-child(5){display:none!important}
+  body.v39.v30-run #v30-bar .v30-v{font-size:11.5px!important}
+  body.v39.v30-run #v30-bar .l{font-size:8px!important}
+  body.v39.v30-run .xp-wrap{margin-top:5px!important;border-radius:4px!important;padding:5px 7px!important}
+  body.v39.v30-run .time-controls,body.v39.v30-run .news-ticker{display:none!important}
+  body.v39.v30-run .sentiment-wrap{padding:0 8px!important;margin-top:4px!important}
+  body.v39.v30-run main{padding:7px 7px calc(88px + env(safe-area-inset-bottom))!important}
+  body.v39.v30-run #v17-market{border-radius:6px!important;height:100%!important;min-height:0!important}
+  body.v39.v30-run #v17-market>div:last-child{padding:6px!important}
+  body.v39.v30-run #v17-market .term-head{padding:6px 8px!important;min-height:44px;gap:6px;overflow-x:auto}
+  body.v39.v30-run #v17-market .term-title::before{content:'MARKET  /  '}
+  body.v39.v30-run #v17-market .tc-btn{min-height:36px!important;padding:6px 9px!important}
+  body.v39.v30-run .dxt{min-height:57px!important;padding:8px 9px!important;grid-template-columns:minmax(0,1fr) auto 78px!important}
+  body.v39.v30-run #v7-top{height:auto!important;max-height:none!important}
+  body.v39.v30-run .chart-box{height:240px!important;max-height:240px!important}
+  #v39-mission{margin:0 6px 6px;padding:6px 8px}
+  body.v39 #v38-strip{margin:5px 7px 0!important}
+  body.v39 #v38-strip .r2,body.v39 #v38-strip .tag{display:none}
+
+  body.v39 #v17-dock{
+    left:7px!important;right:7px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;
+    grid-template-columns:1fr 1fr 1.18fr 1fr 1fr!important;gap:3px!important;
+    padding:5px!important;border:1px solid var(--v39-line-strong)!important;border-radius:9px!important;
+    background:rgba(3,14,13,.96)!important;box-shadow:0 20px 48px rgba(0,0,0,.65)!important;
+  }
+  body.v39 #v17-dock button{
+    min-height:54px!important;border-radius:6px!important;font-family:'Hind',sans-serif!important;
+    font-size:8.5px!important;letter-spacing:0!important;color:var(--v39-muted)!important;
+  }
+  body.v39 #v17-dock button .di{font-size:17px!important}
+  body.v39 #v17-dock button.on{color:var(--v39-gold2)!important;border-color:var(--v39-line-strong)!important;background:rgba(215,182,92,.08)!important}
+  body.v39 #v17-dock button.month{
+    order:3;color:#07100a!important;background:linear-gradient(145deg,var(--v39-acid),#d5ff69)!important;
+    border:1px solid rgba(233,243,237,.34)!important;box-shadow:0 0 22px rgba(183,243,74,.22)!important;
+    transform:translateY(-5px);font-family:'Archivo Black','Hind',sans-serif!important;
+  }
+  body.v39 #v17-dock [data-view="market"]{order:1}
+  body.v39 #v17-dock [data-view="chart"]{order:2}
+  body.v39 #v17-dock [data-act="positions29"]{order:4}
+  body.v39 #v17-dock [data-act="more29"]{order:5}
+}
+@media(prefers-reduced-motion:reduce){body.v39 *{scroll-behavior:auto!important}}
+</style>
+<script id="v39-command-deck-js">
+(function(){
+  document.body.classList.add('v39');
+  function $(id){return document.getElementById(id)}
+  function mission(){
+    var market=$('v17-market');if(!market||$('v39-mission'))return false;
+    var m=document.createElement('div');m.id='v39-mission';
+    m.innerHTML='<b>ACTIVE MISSION</b><span>Choose a market, build your position, then advance the month.</span>';
+    var body=market.lastElementChild;if(body)market.insertBefore(m,body);else market.appendChild(m);
+    return true;
+  }
+  function dock(){
+    var d=$('v17-dock');if(!d)return false;
+    var month=d.querySelector('[data-act="month"]');
+    if(month)month.innerHTML='<span class="di">▶</span>MONTH';
+    var market=d.querySelector('[data-view="market"]');if(market)market.innerHTML='<span class="di">⌁</span>MARKET';
+    var chart=d.querySelector('[data-view="chart"]');if(chart)chart.innerHTML='<span class="di">⌁</span>CHART';
+    var pos=d.querySelector('[data-act="positions29"]');if(pos)pos.innerHTML='<span class="di">▥</span>POSITIONS';
+    var more=d.querySelector('[data-act="more29"]');if(more)more.innerHTML='<span class="di">＋</span>MORE';
+    return true;
+  }
+  function clearLegacyHints(){
+    try{localStorage.setItem('tcfb_hint_v29','1');localStorage.setItem('tcfb_coach_v23','1')}catch(e){}
+    var h=$('v29-hint');if(h)h.classList.remove('on');
+    var c=$('v23-coach');if(c)c.classList.remove('on');
+  }
+  var n=0,iv=setInterval(function(){
+    mission();dock();clearLegacyHints();
+    if(++n>80)clearInterval(iv);
+  },250);
+  setTimeout(function(){mission();dock();clearLegacyHints()},100);
+})();
+</script>
 
 <div id="tutorial-overlay" class="hidden"><div class="tut-card"><div class="tut-step active" data-step="0"><div class="tut-num">Step 1 / 3 &bull; The Basics</div><div class="tut-title">Trade or die trying</div><div class="tut-text">You start in January 2020 with a small stack and 84 months to survive. Pick a coin, set the amount with the slider, then <b>BUY</b>. Sell when it pumps.</div><ul class="tut-list"><li><span class="ic">&#128200;</span><span>Every open position raises your <b>RISK</b>. At 100% you get liquidated and lose the bag.</span></li><li><span class="ic">&#128176;</span><span>Never put everything into one coin &mdash; one rug can end the run.</span></li><li><span class="ic">&#9889;</span><span>Each month costs you rent, food and taxes. Doing nothing is also a way to die.</span></li></ul></div><div class="tut-step" data-step="1"><div class="tut-num">Step 2 / 3 &bull; Choices Matter</div><div class="tut-title">Your setup decides your fate</div><div class="tut-text">Before you start you choose a country, a job and where your coins live. These are not cosmetics &mdash; they follow you for 7 years.</div><ul class="tut-list"><li><span class="ic">&#128274;</span><span><b>Ledger</b> costs $120 once and protects you from wallet drains and exchange freezes. On an exchange, FTX eats 35% of your bag in Nov 2022.</span></li><li><span class="ic">&#128188;</span><span><b>Job</b> gives steady cash but less freedom. Full degen means zero income &mdash; your bills stay.</span></li><li><span class="ic">&#127758;</span><span>Your <b>country</b> sets rent and tax. Cheap living, high taxes &mdash; pick your poison.</span></li></ul></div><div class="tut-step" data-step="2"><div class="tut-num">Step 3 / 3 &bull; 2020 &rarr; 2027</div><div class="tut-title">Real history hits back</div><div class="tut-text">All prices are historical. Black Thursday, Luna, FTX, the halvings, the ETF &mdash; they all come, whether you are ready or not.</div><ul class="tut-list"><li><span class="ic">&#127869;</span><span><b>Hunger</b> and <b>Stress</b> climb every month. Over 100 and your run is over. Buy food, therapy, gym.</span></li><li><span class="ic">&#127919;</span><span>Airdrops, presales, snipes, perps and side quests pay well &mdash; and can wipe you out.</span></li><li><span class="ic">&#11088;</span><span>Months survived, profits and achievements give <b>XP</b>. Top 3 scores earn a $TCFB airdrop.</span></li></ul></div><div class="tut-actions"><button class="tut-btn skip" onclick="closeTutorial(true)">Skip</button><button class="tut-btn next" id="tut-next" onclick="nextTutorial()">Next &rarr;</button></div><div style="text-align:center;margin-top:14px"><span id="tut-dots">●○○</span></div></div></div>
 
