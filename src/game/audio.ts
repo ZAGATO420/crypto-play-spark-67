@@ -150,9 +150,10 @@ export function preloadSfx() {
 }
 
 export function playSfx(id: SfxId) {
-  if (muted || !s.ctx || !s.sfxBus) return;
+  const ctx = s.ctx;
+  if (muted || !ctx || !s.sfxBus) return;
   void (async () => {
-    if (s.ctx.state === "suspended") await s.ctx.resume().catch(() => {});
+    if (ctx.state === "suspended") await ctx.resume().catch(() => {});
     const buf = await buffer(id);
     if (!buf || !s.ctx || !s.sfxBus || muted) return;
     const src = s.ctx.createBufferSource();
