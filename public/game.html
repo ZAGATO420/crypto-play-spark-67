@@ -14019,7 +14019,7 @@ body.v40-live .v40-label{font-size:10px!important;letter-spacing:.12em}
 body.v40-live #toast-stack{z-index:180!important}
 @media(max-width:820px){
  body.v40-live #toast-stack{left:10px!important;right:10px!important;transform:none!important;max-width:none!important;
-   bottom:calc(148px + env(safe-area-inset-bottom))!important;align-items:stretch!important}
+   bottom:auto!important;top:calc(58% - 40px)!important;align-items:stretch!important}
  body.v40-live #toast-stack .toast{border-radius:8px!important;font-size:12px!important;padding:10px 12px!important;
    border:1px solid rgba(96,178,255,.3)!important;box-shadow:0 10px 26px rgba(0,0,0,.5)!important}
 }
@@ -14079,20 +14079,27 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
  .v41-chips{grid-column:1/-1;justify-content:space-between}
  .v41-chip{padding:3px 6px}.v41-chip strong{font-size:10px}
  .v41-title{max-width:92px}
- #v41-live{margin:0 8px 6px}.v41-lbody{max-height:78px}
+ #v41-live{margin:0 8px 6px}.v41-lbody{max-height:none}
  .v41-row{padding:6px 8px}
- body.v40-live[data-v40-stage="market"] .v40-stage{grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto auto}
- body.v40-live[data-v40-stage="market"] .v40-visual{min-height:0;height:148px}
- body.v40-live[data-v40-stage="market"] #v41-live{min-height:0;display:flex;flex-direction:column}
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:88px!important;height:auto!important;flex:1 1 88px!important}
+ body.v40-live[data-v40-stage="market"] #v41-live{min-height:0;display:flex;flex-direction:column;flex:0 0 auto!important}
  body.v40-live[data-v40-stage="market"] #v41-live.empty{display:none}
- body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:none;flex:1}
+ body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:none!important;overflow:visible!important;flex:0 0 auto}
+ body.v40-live[data-v40-stage="market"] .v40-order,body.v40-live[data-v40-stage="market"] .v40-mobile-tape,
+ body.v40-live[data-v40-stage="market"] .v40-stage-head,body.v40-live[data-v40-stage="market"] .v40-actions{flex:0 0 auto!important}
  .v41-mfeed{display:none}
+ body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:clamp(96px,30vh,230px)!important;overflow:auto!important}
  body.v40-live[data-v40-stage="chart"] #v41-live{display:none}
  body.v40-live[data-v40-stage="positions"] #v41-live{display:block;margin:8px}
  body.v40-live[data-v40-stage="positions"] #v41-live .v41-lbody{max-height:none}
  body.v40-live[data-v40-stage="positions"] .v41-mfeed{display:block}
  body.v40-live[data-v40-stage="positions"] .v40-mobile-only .v40-label:first-child,
  body.v40-live[data-v40-stage="positions"] #v40-mobile-pos{display:none}
+}
+@media(max-width:820px) and (max-height:720px){
+ body.v40-live[data-v40-stage="market"] .v40-order{display:none!important}
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:74px!important;flex:1 1 74px!important}
+ body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:104px!important}
 }
 /* value reactions */
 .v41-hit{animation:v41Hit .45s ease-out}
@@ -14207,7 +14214,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       var col=dist<25?'var(--v40-down)':dist<55?'var(--v40-gold)':'var(--v40-acid)';
       out.push('<div class="v41-row'+(dist<25?' danger':'')+'"><div class="v41-r1">'+mark(p.sym)+
         '<b>'+p.sym+' <i>'+p.lev+'x '+p.dir.toUpperCase()+'</i></b>'+
-        '<strong class="'+(pl>=0?'v40-up':'v40-down')+'">'+(pl>=0?'+':'')+money(pl)+'</strong>'+
+        '<strong class="'+(pl>=0?'v40-up':'v40-down')+'">'+(pl>=0?'+':'-')+money(Math.abs(pl))+'</strong>'+
         '<button class="v41-close" data-v41-close="'+i+'">CLOSE</button></div>'+
         '<div class="v41-liq"><i style="width:'+dist.toFixed(0)+'%;background:'+col+'"></i></div>'+
         '<div class="v41-sub">margin '+money(p.margin)+' · liq $'+px(perpLiq(p.entry,p.dir,p.lev))+' · '+dist.toFixed(0)+'% room</div></div>');
@@ -14219,7 +14226,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       out.push('<div class="v41-row"><div class="v41-r1">'+mark(c.s)+
         '<b>'+c.s+' <i>SPOT</i></b><strong class="'+(pc>=0?'v40-up':'v40-down')+'">'+(pc>=0?'+':'')+pc.toFixed(1)+'%</strong>'+
         '<span class="v41-sub" style="margin:0">'+money(val)+'</span></div>'+
-        '<div class="v41-sub">avg $'+px(avg)+' · unreal '+(gain>=0?'+':'')+money(gain)+'</div></div>');
+        '<div class="v41-sub">avg $'+px(avg)+' · unreal '+(gain>=0?'+':'-')+money(Math.abs(gain))+'</div></div>');
     })}catch(_){}
     return {html:out.join(''),n:out.length,pnl:pnl,risk:risk};
   }
