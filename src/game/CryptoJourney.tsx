@@ -1467,27 +1467,36 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
   return (
     <main className={`journey-end ${won ? "won" : "lost"}`}>
       <img src={won ? smugBoss.url : enragedBoss.url} alt={won ? "The Boss respects your run" : "The Boss ends your run"} />
-      <section>
-        <p className="journey-kicker">{won ? "THE CYCLE IS COMPLETE" : "YOUR RUN IS OVER"}</p>
-        <h1>{end.title}</h1>
-        <p>{end.line}</p>
-        <div className="end-badge"><Crown /><span><small>RANK UNLOCKED</small><strong>{badge}</strong></span></div>
-        {punchline && <blockquote className="death-punchline">“{punchline}”</blockquote>}
-        <div className="end-score">
-          <span><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></span>
-          <span><small>NET WORTH</small><strong>{formatMoney(net)}</strong></span>
-          <span><small>MONTHS</small><strong>{monthsSurvived(run.chapter)}/{TOTAL_MONTHS}</strong></span>
-          <span><small>LEVEL · XP</small><strong>{levelFor(run.xp)} · {run.xp.toLocaleString("en-US")}</strong></span>
-          <span><small>CRISES</small><strong>{run.crises}</strong></span>
+      <section className="end-stage">
+        <header className="end-header">
+          <p className="journey-kicker">{won ? "THE CYCLE IS COMPLETE" : "YOUR RUN IS OVER"}</p>
+          <h1>{end.title}</h1>
+          <div className="end-divider" />
+          <p>{end.line}</p>
+          {punchline && <blockquote className="death-punchline">“{punchline}”</blockquote>}
+        </header>
+
+        <div className="end-glass">
+          <div className="end-worth">
+            <span><small>FINAL NET WORTH</small><strong>{formatMoney(net)}</strong></span>
+            <div className="end-badge"><Crown /><span><small>RANK UNLOCKED</small><strong>{badge}</strong></span></div>
+          </div>
+          <div className="end-scoreline">
+            <span><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></span>
+            <span><small>MONTHS</small><strong>{monthsSurvived(run.chapter)}/{TOTAL_MONTHS}</strong></span>
+            <span><small>LEVEL · XP</small><strong>{levelFor(run.xp)} · {run.xp.toLocaleString("en-US")}</strong></span>
+            <span><small>CRISES</small><strong>{run.crises}</strong></span>
+          </div>
+          {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
         </div>
-        {run.statuses.length > 0 && <div className="cy-status-row">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
-        <div className="start-actions">
+
+        <div className="start-actions end-actions">
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
         </div>
-        {status === "queued" && <small>The board is unavailable. Your result is saved and will retry automatically.</small>}
-        {status === "rejected" && <small>This result failed the board's integrity checks and cannot be submitted.</small>}
+        {status === "queued" && <small className="end-message">The board is unavailable. Your result is saved and will retry automatically.</small>}
+        {status === "rejected" && <small className="end-message">This result failed the board's integrity checks and cannot be submitted.</small>}
 
       </section>
     </main>

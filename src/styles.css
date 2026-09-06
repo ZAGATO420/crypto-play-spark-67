@@ -196,6 +196,64 @@
 .end-badge strong { font: 400 17px/1 var(--font-display); }
 .death-punchline { max-width: 560px; margin: 14px auto 0; color: var(--journey-pink); font: 400 clamp(16px,4vw,22px)/1.25 var(--font-display); }
 
+/* Cinematic Glass endscreen */
+.journey-end {
+  --end-petrol: oklch(0.16 0.03 192);
+  --end-petrol-raised: oklch(0.25 0.045 192);
+  --end-gold: oklch(0.75 0.15 82);
+  --end-acid: oklch(0.92 0.19 112);
+  align-items: end;
+  min-height: 100dvh;
+  padding: clamp(24px, 5vh, 64px) 18px max(28px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background: var(--end-petrol);
+}
+.journey-end > img { object-position: 50% 18%; filter: contrast(1.12) saturate(.82) brightness(.7); transform: scale(1.015); }
+.journey-end::after { background: linear-gradient(180deg, color-mix(in oklab, var(--end-petrol) 22%, transparent) 0%, color-mix(in oklab, var(--end-petrol) 48%, transparent) 34%, color-mix(in oklab, var(--end-petrol) 86%, transparent) 68%, var(--end-petrol) 100%); }
+.journey-end.lost::after { background: linear-gradient(180deg, color-mix(in oklab, var(--journey-pink) 10%, transparent) 0%, color-mix(in oklab, var(--end-petrol) 62%, transparent) 42%, var(--end-petrol) 100%); }
+.journey-end .end-stage { display: grid; gap: 16px; width: min(100%, 760px); }
+.end-header { text-align: center; }
+.journey-end .end-header h1 { margin: 8px 0 0; overflow-wrap: anywhere; text-shadow: 0 12px 44px color-mix(in oklab, var(--end-petrol) 90%, transparent); }
+.journey-end.won .end-header h1 { color: var(--end-gold); }
+.end-divider { width: 128px; height: 1px; margin: 17px auto; background: linear-gradient(90deg, transparent, var(--end-gold), transparent); }
+.journey-end .end-header > p:last-child { color: var(--foreground); }
+.journey-end .death-punchline { margin-top: 10px; color: color-mix(in oklab, var(--journey-pink) 78%, var(--foreground)); }
+.end-glass { overflow: hidden; border: 1px solid color-mix(in oklab, var(--end-gold) 28%, transparent); border-radius: 8px; background: color-mix(in oklab, var(--end-petrol-raised) 62%, transparent); box-shadow: 0 22px 60px color-mix(in oklab, var(--end-petrol) 70%, transparent), inset 0 1px color-mix(in oklab, var(--foreground) 10%, transparent); backdrop-filter: blur(18px); }
+.end-worth { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 20px; background: linear-gradient(125deg, color-mix(in oklab, var(--end-gold) 16%, transparent), transparent 66%); }
+.end-worth > span { min-width: 0; text-align: left; }
+.end-worth > span small, .end-scoreline small { display: block; margin-bottom: 5px; color: color-mix(in oklab, var(--end-gold) 78%, var(--foreground)); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.end-worth > span strong { display: block; color: var(--end-gold); font: 400 clamp(32px, 9vw, 58px)/.95 var(--font-display); overflow-wrap: anywhere; text-shadow: 0 0 30px color-mix(in oklab, var(--end-gold) 18%, transparent); }
+.journey-end .end-badge { flex: none; margin: 0; background: color-mix(in oklab, var(--end-petrol) 72%, transparent); border-color: color-mix(in oklab, var(--end-gold) 58%, transparent); color: var(--end-gold); }
+.end-scoreline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); }
+.end-scoreline > span { min-width: 0; padding: 14px 16px; text-align: left; }
+.end-scoreline > span + span { border-left: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); }
+.end-scoreline strong { display: block; font: 400 clamp(15px, 3vw, 21px)/1.1 var(--font-display); overflow-wrap: anywhere; }
+.end-statuses { margin: 0; padding: 0 16px 16px; justify-content: flex-start; }
+.end-actions { display: grid; grid-template-columns: 1fr 1fr; margin: 0; }
+.journey-end .end-actions button { width: 100%; min-width: 0; }
+.journey-end .end-actions button:first-child { grid-column: 1 / -1; background: var(--end-acid); color: var(--end-petrol); box-shadow: 0 10px 30px color-mix(in oklab, var(--end-acid) 18%, transparent); }
+.journey-end .end-actions button:nth-child(2), .journey-end .end-actions button:nth-child(3) { background: color-mix(in oklab, var(--end-petrol-raised) 72%, transparent); color: var(--foreground); border-color: color-mix(in oklab, var(--foreground) 18%, transparent); backdrop-filter: blur(12px); }
+.end-message { color: var(--muted-foreground); text-align: center; }
+
+@media (max-width: 520px) {
+  .journey-end { place-items: end center; padding-inline: 14px; }
+  .journey-end .end-stage { gap: 11px; }
+  .journey-end .end-header h1 { font-size: clamp(38px, 13vw, 58px); }
+  .journey-end .end-header > p:last-child { font-size: 14px; }
+  .end-divider { margin-block: 12px; }
+  .end-worth { align-items: flex-end; padding: 16px; }
+  .end-worth > span strong { font-size: clamp(30px, 10.5vw, 44px); }
+  .journey-end .end-badge { padding: 7px 9px; }
+  .journey-end .end-badge svg { display: none; }
+  .journey-end .end-badge strong { font-size: 13px; }
+  .end-scoreline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .end-scoreline > span { padding: 10px 12px; }
+  .end-scoreline > span:nth-child(3) { border-left: 0; }
+  .end-scoreline > span:nth-child(n+3) { border-top: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent); }
+  .end-actions { gap: 7px; }
+  .journey-end .end-actions button { height: 52px; padding-inline: 10px; font-size: 11px; }
+}
+
 @media (max-width: 840px) {
   .journey-layout { grid-template-columns:minmax(0,520px); align-items:start; }.journey-trail { display:none; }.boss-panel { display:grid; grid-template-columns:74px minmax(0,1fr); align-items:center; margin-bottom:8px; }.boss-panel img { width:74px; height:74px; aspect-ratio:1; }.boss-panel div { padding:9px 12px; }.boss-panel div>p:last-child { margin-top:5px; font-size:12px; }.journey-card { min-height:min(455px,calc(100dvh - 275px)); padding:18px; }.journey-card-copy h2 { font-size:clamp(25px,8vw,36px); }.journey-card-copy>p:last-child{font-size:14px}.coin-mark{width:64px;height:64px;font-size:30px}.journey-actions{position:relative}.journey-sheet{min-height:min(455px,calc(100dvh - 275px))}
 }
