@@ -545,6 +545,8 @@ export function CryptoJourney() {
     let crises = run.crises;
     let taxDebt = run.taxDebt;
     let realized = run.realized;
+    let lifeHunger = 0;
+    let lifeStress = 0;
     const survivors: Pos[] = [];
     for (const p of run.positions) {
       const price = priceAt(p.symbol, next, run.noise);
