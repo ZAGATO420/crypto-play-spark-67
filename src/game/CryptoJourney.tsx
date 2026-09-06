@@ -13,11 +13,12 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, DIFFICULTIES, ENDINGS, MODES, PRESALES, STATUS_BY_CHOICE,
-  bossScore, chapterLabel, chapterMonth, chapterOfMonth, decisionFor, formatMoney, presaleFor,
-  type Archetype, type BaseMode, type CoinSymbol, type Country, type Decision, type DecisionOption, type Difficulty, type EndingKey, type Presale,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, DIFFICULTIES, ENDINGS, MODES, PRESALES, STATUS_BY_CHOICE, TOTAL_MONTHS, XP,
+  bossScore, chapterLabel, chapterMonth, crashFor, decisionForChapter, formatMoney, levelFor, levelPerk, monthRangeLabel, monthsSurvived, presaleFor, situationFor, xpProgress,
+  type Archetype, type BaseMode, type CoinSymbol, type Country, type Decision, type DecisionOption, type Difficulty, type EndingKey, type Presale, type Situation,
 } from "./journey-data";
 import { COIN_LOGO } from "./coin-logos";
+import { Flag } from "./flags";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
 
 /* ------------------------------------------------------------------ types */
@@ -28,22 +29,28 @@ type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pin
 type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
-  hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number;
+  hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
   statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; config: Config;
 };
 type Phase = "brief" | "act" | "resolve";
+type LaunchResult = { name: string; tag: string; size: number; back: number; multi: number; rugged: boolean; line: string };
 type Dialog =
   | { k: "rules" }
   | { k: "market" }
   | { k: "trade"; symbol: CoinSymbol }
   | { k: "position"; id: number }
   | { k: "presale"; card: Presale }
+  | { k: "launchResult"; res: LaunchResult }
   | { k: "survive" }
   | { k: "decision"; card: Decision }
+  | { k: "situation"; card: Situation }
+  | { k: "crash"; chapter: number }
   | { k: "score" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
 type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[] };
+type Pop = { id: number; text: string; tone: "xp" | "up" | "down" };
+
 
 const SAVE_KEY = "tcfb_cycle_v1";
 const AP_BASE = 2;
@@ -74,7 +81,7 @@ const makeNoise = (mode: BaseMode) => {
 
 const freshRun = (config: Config): Run => ({
   chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
-  hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0,
+  hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
   statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
 });
 
@@ -87,6 +94,7 @@ const pnlOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price - p.
 const valueOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price : Math.max(0, p.margin + pnlOf(p, price)));
 const liqPct = (p: Pos, price: number) => (p.kind === "spot" ? 100 : clamp(100 + (pnlOf(p, price) / p.margin) * 100, 0, 100));
 const netOf = (r: Run) => r.positions.reduce((sum, p) => sum + valueOf(p, priceAt(p.symbol, r.chapter, r.noise)), r.cash);
+const XP_MODE: Record<BaseMode, number> = { classic: 1, historical: 0.75, chaos: 1.25 };
 
 /* ------------------------------------------------------------------- shell */
 
@@ -96,11 +104,18 @@ export function CryptoJourney() {
   const [phase, setPhase] = useState<Phase>("brief");
   const [ap, setAp] = useState(AP_BASE);
   const [dialog, setDialog] = useState<Dialog>(null);
+  const [queue, setQueue] = useState<Dialog[]>([]);
   const [flash, setFlash] = useState<{ text: string; tone: Log["tone"] } | null>(null);
   const [resolution, setResolution] = useState<Resolution | null>(null);
   const [ending, setEnding] = useState<EndingKey>("SURVIVOR");
   const [resume, setResume] = useState(false);
+  const [pops, setPops] = useState<Pop[]>([]);
+  const [shake, setShake] = useState(false);
+  const [netPulse, setNetPulse] = useState<"up" | "down" | null>(null);
+  const [levelUp, setLevelUp] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
+  const popId = useRef(1);
+  const lastNet = useRef(0);
 
   const cfg = run.config;
   const arch = archOf(cfg.arch);
@@ -110,12 +125,24 @@ export function CryptoJourney() {
   const btcMove = pctMove("BTC", run);
   const warning = CHAPTER_WARNINGS[run.chapter] ?? "The market never announces what it is about to do.";
   const presale = presaleFor(run.chapter);
+  const xpBar = xpProgress(run.xp);
 
   useEffect(() => { if (localStorage.getItem(SAVE_KEY)) setResume(true); }, []);
   useEffect(() => {
     if (screen !== "run" || cfg.ironman) return;
     localStorage.setItem(SAVE_KEY, JSON.stringify({ run, phase, ap }));
   }, [screen, run, phase, ap, cfg.ironman]);
+
+  // net worth pulses green or red whenever money actually moves
+  useEffect(() => {
+    if (screen !== "run") { lastNet.current = net; return; }
+    const before = lastNet.current;
+    lastNet.current = net;
+    if (!before || Math.abs(net - before) < Math.max(20, before * 0.001)) return;
+    setNetPulse(net > before ? "up" : "down");
+    const t = window.setTimeout(() => setNetPulse(null), 700);
+    return () => window.clearTimeout(t);
+  }, [net, screen]);
 
   const say = (text: string, tone: Log["tone"] = "cyan") => {
     setFlash({ text, tone });
@@ -124,7 +151,30 @@ export function CryptoJourney() {
   };
   const log = (entry: Log) => setRun((r) => ({ ...r, logs: [entry, ...r.logs].slice(0, 12) }));
 
+  const pop = (text: string, tone: Pop["tone"]) => {
+    const id = popId.current++;
+    setPops((p) => [...p, { id, text, tone }].slice(-5));
+    window.setTimeout(() => setPops((p) => p.filter((x) => x.id !== id)), 1400);
+  };
+
+  const grantXp = (amount: number, label?: string) => {
+    const gain = Math.max(1, Math.round(amount * arch.xp * XP_MODE[cfg.mode]));
+    setRun((r) => {
+      const next = r.xp + gain;
+      if (levelFor(next) > levelFor(r.xp)) {
+        setLevelUp(levelFor(next));
+        window.setTimeout(() => setLevelUp(null), 2200);
+      }
+      return { ...r, xp: next };
+    });
+    pop(`+${gain} XP${label ? ` · ${label}` : ""}`, "xp");
+  };
+
+  const rumble = () => { setShake(true); window.setTimeout(() => setShake(false), 520); };
+
   const spend = (cost = 1) => setAp((a) => Math.max(0, a - cost));
+
+
 
   /* ---------------------------------------------------------- run actions */
 
@@ -142,6 +192,7 @@ export function CryptoJourney() {
     }));
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}. Bag opened.`, "cyan");
+    grantXp(XP.trade, "TRADE");
   };
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
@@ -158,6 +209,7 @@ export function CryptoJourney() {
     }));
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Risk meter noticed.`, "yellow");
+    grantXp(XP.trade + lev * 8, `${lev}x`);
   };
 
   const closePosition = (id: number, fraction: number) => {
@@ -180,23 +232,33 @@ export function CryptoJourney() {
     }));
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
+    pop(`${gain >= 0 ? "+" : "−"}${formatMoney(Math.abs(gain))}`, gain >= 0 ? "up" : "down");
+    grantXp(gain >= 0 ? XP.closeWin : XP.closeLoss, gain >= 0 ? "PROFIT TAKEN" : "LESSON");
+    if (gain < 0) rumble();
   };
 
   const takePresale = (card: Presale, size: number) => {
-    setDialog(null);
-    if (run.cash < size) return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink");
+    if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
-    const rugged = Math.random() < card.rug / (arch.risk * diff.risk === 0 ? 1 : arch.risk);
+    const rugged = Math.random() < card.rug / (arch.risk || 1);
     const multi = rugged ? 0.08 : card.upside[0] + Math.random() * (card.upside[1] - card.upside[0]);
     const back = Math.round(size * multi);
     setRun((r) => ({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
       risk: clamp(r.risk + 10), stress: clamp(r.stress + (rugged ? 12 : 4)),
-      statuses: rugged ? r.statuses : Array.from(new Set([...r.statuses, "EARLY BUYER"])),
+      statuses: rugged ? Array.from(new Set([...r.statuses, "RUG VICTIM"])) : Array.from(new Set([...r.statuses, "EARLY BUYER"])),
     }));
     const title = rugged ? "RUGGED." : multi > 6 ? "MOONSHOT" : "IT PAID";
+    const line = rugged
+      ? "The liquidity left before you did. The Boss has seen this exact face before."
+      : multi > 6
+        ? "That is the one you will tell people about for years. Loudly."
+        : "Not life changing, but green is green.";
     log({ chapter: run.chapter, title: `${title} · ${card.name}`, detail: `${formatMoney(size)} in · ${formatMoney(back)} out.`, tone: rugged ? "pink" : "yellow" });
-    say(rugged ? `${card.name} rugged. ${formatMoney(size - back)} gone.` : `${card.name} returned ${formatMoney(back)} (${multi.toFixed(1)}x).`, rugged ? "pink" : "yellow");
+    pop(`${back >= size ? "+" : "−"}${formatMoney(Math.abs(back - size))}`, back >= size ? "up" : "down");
+    grantXp(rugged ? XP.presaleRug : XP.presaleHit, rugged ? "RUG SURVIVED" : "LAUNCH HIT");
+    if (rugged) rumble();
+    setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size, back, multi, rugged, line } });
   };
 
   const recover = (kind: "eat" | "calm") => {
@@ -209,6 +271,7 @@ export function CryptoJourney() {
       stress: kind === "calm" ? clamp(r.stress - 38) : r.stress,
     }));
     say(kind === "eat" ? "Fed. Hunger down 38." : "Head cleared. Stress down 38.", "cyan");
+    grantXp(XP.survive, "STILL ALIVE");
   };
 
   const bank = () => {
@@ -218,8 +281,7 @@ export function CryptoJourney() {
     say("You sat on your hands. Stress down 6. Patience is a position.", "cyan");
   };
 
-  const resolveDecision = (option: DecisionOption) => {
-    setDialog(null);
+  const resolveDecision = (option: DecisionOption, crisis = true) => {
     const status = STATUS_BY_CHOICE[option.label];
     setRun((r) => {
       const positions = r.positions.map((p) => (option.bagMul !== undefined ? { ...p, margin: p.margin * option.bagMul, qty: p.qty * option.bagMul } : p));
@@ -229,13 +291,27 @@ export function CryptoJourney() {
         positions,
         stress: clamp(r.stress + Math.round((option.stress ?? 0) * arch.risk)),
         hunger: clamp(r.hunger + (option.hunger ?? 0)),
-        crises: r.crises + 1,
+        crises: crisis ? r.crises + 1 : r.crises,
         statuses: status ? Array.from(new Set([...r.statuses, status])) : r.statuses,
         logs: [{ chapter: r.chapter, title: option.label, detail: option.result, tone: option.tone === "win" ? "yellow" : option.tone === "danger" ? "pink" : "cyan" } as Log, ...r.logs].slice(0, 12),
       };
     });
     say(option.result, option.tone === "danger" ? "pink" : option.tone === "win" ? "yellow" : "cyan");
+    grantXp(option.xp ?? (crisis ? XP.crisis : 200), option.tone === "win" ? "GOOD CALL" : "SURVIVED IT");
+    if (option.tone === "danger") rumble();
+    nextInQueue();
   };
+
+  // one card at a time: crash report, then the historical decision, then the small moment
+  const nextInQueue = () => {
+    const head = queue[0] ?? null;
+    setDialog(head);
+    setQueue(queue.slice(1));
+    if (!head) setPhase("brief");
+  };
+
+
+
 
   const endChapter = () => {
     const from = run.chapter;
@@ -264,9 +340,9 @@ export function CryptoJourney() {
     const positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
     if (run.risk >= 95) risk = 40;
 
-    const cost = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost);
+    const cost = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
     cash = Math.max(0, cash - cost);
-    lines.push(`Living costs: ${formatMoney(cost)}.`);
+    lines.push(`Living costs: ${formatMoney(cost)} (level ${levelFor(run.xp)} discount applied).`);
     const hunger = clamp(run.hunger + Math.round(9 * arch.risk));
     const stress = clamp(run.stress + Math.round(7 * arch.risk));
 
@@ -276,7 +352,7 @@ export function CryptoJourney() {
     const streak = delta > 0 ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
     const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
-    const detail = `${chapterLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
+    const detail = `${chapterLabel(next)} · ${monthRangeLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
     const tone: Log["tone"] = delta >= 0 ? (streak >= 3 ? "yellow" : "cyan") : "pink";
 
     const nextRun: Run = { ...draft, streak, logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12) };
@@ -284,6 +360,8 @@ export function CryptoJourney() {
     setResolution({ title, detail, tone, delta, move, lines });
     setPhase("resolve");
     setAp(Math.min(AP_CAP, AP_BASE + ap));
+    grantXp(XP.chapter + (delta >= 0 ? XP.greenQuarter : 0) + streak * XP.streakStep, delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
+    if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
 
     const finalNet = netOf(nextRun);
     if (hunger >= 100) return finish("STARVED");
@@ -292,12 +370,22 @@ export function CryptoJourney() {
     if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 25 ? "LEGEND" : "SURVIVOR");
   };
 
+  const openChapterCards = (chapter: number) => {
+    const cards: Dialog[] = [];
+    if (crashFor(chapter)) cards.push({ k: "crash", chapter });
+    const decision = decisionForChapter(chapter);
+    if (decision) cards.push({ k: "decision", card: decision });
+    const situation = situationFor(chapter);
+    if (situation) cards.push({ k: "situation", card: situation });
+    if (!cards.length) { setDialog(null); setPhase("brief"); return; }
+    setPhase("act");
+    setDialog(cards[0]!);
+    setQueue(cards.slice(1));
+  };
+
   const continueChapter = () => {
     setResolution(null);
-    const card = [decisionFor(chapterMonth(run.chapter)), decisionFor(chapterMonth(run.chapter) - 1), decisionFor(chapterMonth(run.chapter) - 2)]
-      .find((d) => d && chapterOfMonth(d.month) === run.chapter);
-    if (card) { setDialog({ k: "decision", card }); setPhase("act"); return; }
-    setPhase("brief");
+    openChapterCards(run.chapter);
   };
 
   const finish = (key: EndingKey) => { setEnding(key); setScreen("end"); };
@@ -305,9 +393,10 @@ export function CryptoJourney() {
   const begin = (config: Config) => {
     localStorage.removeItem(SAVE_KEY);
     setRun(freshRun(config));
-    setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null);
+    setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null); setQueue([]);
     setScreen("run");
   };
+
 
   const restore = () => {
     try {
@@ -326,11 +415,16 @@ export function CryptoJourney() {
   const bossLine = phase === "brief" ? warning : phase === "resolve" ? resolution?.detail ?? warning : "Two moves. Make them count, or bank one and wait for blood.";
 
   return (
-    <main className="cy-shell">
+    <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{chapterLabel(run.chapter)} · CHAPTER {run.chapter + 1}/{CHAPTERS} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}</p>
-          <h1 className="cy-net"><Count value={net} /></h1>
+          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}</p>
+          <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
+          <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
+            <span className="cy-level">LVL {xpBar.level}</span>
+            <div className="cy-xp-track"><i style={{ width: `${xpBar.pct}%` }} /></div>
+            <span className="cy-xp-num">{run.xp.toLocaleString("en-US")} XP</span>
+          </div>
         </div>
         <div className="cy-top-right">
           <button className="cy-score" onClick={() => setDialog({ k: "score" })}><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></button>
@@ -345,6 +439,7 @@ export function CryptoJourney() {
         <Meter label="STRESS" value={run.stress} tone={run.stress > 70 ? "pink" : "cyan"} detail={`${run.stress}%`} icon={<HeartPulse />} />
         <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
       </section>
+
 
       <section className="cy-positions" aria-label="Open positions">
         <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK · {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
@@ -427,18 +522,27 @@ export function CryptoJourney() {
 
       {flash && <div className={`cy-flash tone-${flash.tone}`} role="status">{flash.text}</div>}
 
+      <div className="cy-pops" aria-live="polite">
+        {pops.map((p) => <span key={p.id} className={`cy-pop tone-${p.tone}`}>{p.text}</span>)}
+      </div>
+      {levelUp !== null && <div className="cy-levelup" role="status">LEVEL {levelUp}<small>The Boss raised an eyebrow.</small></div>}
+
       {dialog && (
-        <Sheet onClose={dialog.k === "decision" ? undefined : () => setDialog(null)}>
-          {dialog.k === "rules" && <Rules onClose={() => setDialog(null)} />}
+        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" ? undefined : () => (dialog.k === "crash" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
+          {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
           {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => setDialog({ k: "trade", symbol: s })} />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => closePosition(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => takePresale(dialog.card, size)} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
+          {dialog.k === "launchResult" && <LaunchResultSheet res={dialog.res} onClose={nextInQueue} />}
           {dialog.k === "survive" && <SurviveSheet run={run} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
-          {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={resolveDecision} />}
+          {dialog.k === "crash" && <CrashSheet chapter={dialog.chapter} onClose={nextInQueue} />}
+          {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
+          {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
         </Sheet>
       )}
+
     </main>
   );
 }
@@ -608,7 +712,12 @@ function PositionSheet({ run, id, onClose }: { run: Run; id: number; onClose: (f
 }
 
 function PresaleSheet({ card, cash, onTake, onPass }: { card: Presale; cash: number; onTake: (size: number) => void; onPass: () => void }) {
-  const sizes = [card.min, Math.max(card.min, Math.floor(cash * 0.15)), Math.max(card.min, Math.floor(cash * 0.35))];
+  // never offer the same ticket twice: min, a quarter of cash, half of cash
+  const sizes = Array.from(new Set([card.min, Math.floor(cash * 0.25), Math.floor(cash * 0.5)]
+    .map((s) => Math.max(card.min, s))
+    .filter((s) => s <= Math.max(card.min, cash))))
+    .sort((a, b) => a - b);
+  const labels = ["MIN TICKET", "25% OF CASH", "HALF YOUR CASH"];
   return (
     <>
       <p className="journey-kicker"><Rocket /> {card.tag} · ONE SHOT</p>
@@ -617,15 +726,51 @@ function PresaleSheet({ card, cash, onTake, onPass }: { card: Presale; cash: num
       <ul className="cy-lines">
         <li>Rug risk · {Math.round(card.rug * 100)}%</li>
         <li>If it works · {card.upside[0]}x to {card.upside[1]}x</li>
-        <li>Minimum ticket · {formatMoney(card.min)}</li>
+        <li>Your cash · {formatMoney(cash)}</li>
       </ul>
-      <div className="cy-actions three">
-        {sizes.map((s, i) => <Button key={i} variant={i === 2 ? "default" : "secondary"} onClick={() => onTake(s)}>{formatMoney(s)}</Button>)}
+      <div className={`cy-actions ${sizes.length === 3 ? "three" : ""}`}>
+        {sizes.map((s, i) => (
+          <Button key={s} variant={i === sizes.length - 1 ? "default" : "secondary"} onClick={() => onTake(s)}>
+            {formatMoney(s)}<small>{labels[i]}</small>
+          </Button>
+        ))}
       </div>
       <Button variant="outline" className="cy-wide" onClick={onPass}>PASS</Button>
     </>
   );
 }
+
+function LaunchResultSheet({ res, onClose }: { res: LaunchResult; onClose: () => void }) {
+  const gain = res.back - res.size;
+  return (
+    <>
+      <p className="journey-kicker"><Rocket /> {res.tag} · RESULT</p>
+      <h2 className={res.rugged ? "negative" : "positive"}>{res.rugged ? "RUGGED." : res.multi > 6 ? "MOONSHOT" : "IT PAID"}</h2>
+      <p className={`cy-delta ${gain >= 0 ? "positive" : "negative"}`}>{gain >= 0 ? "+" : "−"}{formatMoney(Math.abs(gain))}</p>
+      <ul className="cy-lines">
+        <li>{res.name} · {res.multi.toFixed(2)}x</li>
+        <li>Invested · {formatMoney(res.size)}</li>
+        <li>Back in your pocket · {formatMoney(res.back)}</li>
+      </ul>
+      <p className="cy-lead">{res.line}</p>
+      <Button className="cy-wide cy-primary" onClick={onClose}>BACK TO THE DESK <ChevronRight /></Button>
+    </>
+  );
+}
+
+function CrashSheet({ chapter, onClose }: { chapter: number; onClose: () => void }) {
+  const crash = crashFor(chapter);
+  if (!crash) return <Button className="cy-wide" onClick={onClose}>CONTINUE</Button>;
+  return (
+    <>
+      <p className="journey-kicker"><TrendingDown /> {chapterLabel(chapter)} · {monthRangeLabel(chapter)}</p>
+      <h2 className="negative">{crash.title}</h2>
+      <p className="cy-lead">{crash.line}</p>
+      <Button className="cy-wide cy-primary" onClick={onClose}>FACE IT <ChevronRight /></Button>
+    </>
+  );
+}
+
 
 function SurviveSheet({ run, cost, onEat, onCalm }: { run: Run; cost: number; onEat: () => void; onCalm: () => void }) {
   return (
@@ -641,7 +786,7 @@ function SurviveSheet({ run, cost, onEat, onCalm }: { run: Run; cost: number; on
   );
 }
 
-function DecisionSheet({ card, onPick }: { card: Decision; onPick: (o: DecisionOption) => void }) {
+function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (o: DecisionOption) => void }) {
   return (
     <>
       <p className="journey-kicker"><History /> {card.kicker}</p>
@@ -667,13 +812,13 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
       <section>
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
-        <p>Trade the whole cycle from 2020 to 2026. Spot, perps, launches and the crashes that ate everyone else. Survive 28 chapters and beat the Boss Score.</p>
+        <p>Trade the whole cycle from 2020 to 2026. Spot, perps, launches and the crashes that ate everyone else. Survive all 84 months and beat the Boss Score.</p>
         <div className="start-actions">
           <Button onClick={onStart}>ENTER THE ARENA <ChevronRight /></Button>
           {resume && <Button variant="outline" onClick={onResume}>CONTINUE RUN</Button>}
           <Button variant="outline" onClick={onBoard}><Trophy />LEADERBOARD</Button>
         </div>
-        <small>28 CHAPTERS · NO WALLET · FREE TO PLAY</small>
+        <small>84 MONTHS · NO WALLET · FREE TO PLAY</small>
       </section>
     </main>
   );
@@ -688,7 +833,7 @@ function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config
       <section className="setup-block"><p className="journey-kicker">NAME & AVATAR</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
-        <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}>{c}</button>)}</div>
+        <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
       <section className="setup-block"><p className="journey-kicker">ARCHETYPE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(a.cash)} START</em><small>{a.blurb}</small></button>)}</div></section>
       <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
@@ -712,7 +857,8 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
           {rows.map((r) => (
             <div className="board-row" key={`${r.pos}-${r.name}`}>
               <b>#{r.pos}</b>
-              <span><strong>{r.name}</strong><small>{r.arch.toUpperCase()} · {r.country} · {r.mode.toUpperCase()} · {Math.round(r.months / 3)} CH · {formatMoney(r.netWorth)}</small></span>
+              <Flag code={r.country} size={22} />
+              <span><strong>{r.name}</strong><small>{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
               <i>{(r.score ?? 0).toLocaleString("en-US")}</i>
             </div>
           ))}
@@ -732,7 +878,7 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
       await submitRun({
         name: run.config.name || "anon", arch: run.config.arch, country: run.config.country,
         difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(Math.max(0, net)),
-        score, xp: 0, level: 1, rank: end.title, months: run.chapter * 3, achievements: run.crises,
+        score, xp: run.xp, level: levelFor(run.xp), rank: end.title, months: monthsSurvived(run.chapter), achievements: run.crises,
         trades: run.trades, survived: won, avatar: run.config.avatar,
       });
       setStatus("done");
@@ -748,7 +894,8 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
         <div className="end-score">
           <span><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></span>
           <span><small>NET WORTH</small><strong>{formatMoney(net)}</strong></span>
-          <span><small>CHAPTERS</small><strong>{run.chapter}/{CHAPTERS}</strong></span>
+          <span><small>MONTHS</small><strong>{monthsSurvived(run.chapter)}/{TOTAL_MONTHS}</strong></span>
+          <span><small>LEVEL · XP</small><strong>{levelFor(run.xp)} · {run.xp.toLocaleString("en-US")}</strong></span>
           <span><small>CRISES</small><strong>{run.crises}</strong></span>
         </div>
         {run.statuses.length > 0 && <div className="cy-status-row">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
