@@ -13009,3 +13009,160 @@ body.v27 #v24-preset{position:fixed;z-index:7;top:calc(52px + env(safe-area-inse
   setTimeout(boot,800);setTimeout(boot,2200);
 })();
 </script>
+
+<style id="v36-end-cinematic">
+/* =====================================================================
+   V36 — END SCREEN GETS THE V35 CINEMATIC STAGE.
+   Presentation only: no score maths, no submit logic, no API changes.
+   ===================================================================== */
+body.v25-end #end-screen{
+  background:#02090d!important;
+  isolation:isolate;
+  padding:calc(14px + env(safe-area-inset-top)) 12px calc(130px + env(safe-area-inset-bottom))!important;
+  align-items:flex-start;justify-content:center;
+}
+body.v25-end #end-screen::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url('/boss-mobile-cinematic.webp') center 34%/cover no-repeat;
+  opacity:.5;filter:saturate(.92) contrast(1.02);
+}
+body.v25-end #end-screen::after{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(120% 60% at 50% -8%,rgba(240,180,41,.16) 0%,rgba(240,180,41,0) 52%),
+    linear-gradient(180deg,rgba(2,10,14,.62) 0%,rgba(2,10,14,.72) 30%,rgba(1,7,10,.93) 62%,#01070a 100%);
+  box-shadow:inset 0 0 170px 34px rgba(1,9,13,.6);
+}
+body.v25-end.v36-rekt #end-screen::after{
+  background:
+    radial-gradient(120% 60% at 50% -8%,rgba(255,92,77,.16) 0%,rgba(255,92,77,0) 52%),
+    linear-gradient(180deg,rgba(10,5,6,.66) 0%,rgba(6,7,10,.74) 30%,rgba(3,5,8,.94) 62%,#02060a 100%);
+}
+body.v25-end.v36-rekt #end-screen::before{filter:saturate(.55) contrast(1.05) brightness(.85)}
+body.v25-end #end-screen>.end-card{
+  position:relative;z-index:2;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  max-width:620px!important;padding:0 0 12px!important;
+}
+body.v25-end #end-screen>.end-card:before{display:none!important}
+
+/* --- hero: net worth is the loudest thing on the screen ---------------- */
+body.v25-end .ec9{
+  border:1px solid rgba(239,195,91,.28)!important;border-radius:10px!important;
+  background:linear-gradient(180deg,rgba(6,22,28,.72),rgba(2,10,14,.9))!important;
+  backdrop-filter:blur(6px);box-shadow:0 26px 70px -32px rgba(0,0,0,.9)!important;
+}
+body.v25-end .ec9-grid{opacity:.09}
+body.v25-end .ec9-kicker{color:#e7c260!important;text-shadow:none!important;letter-spacing:.24em}
+body.v25-end .ec9-net{color:#ffd76b!important;text-shadow:0 0 34px rgba(240,180,41,.28)}
+body.v25-end .ec9-title{font-family:'Russo One',sans-serif;letter-spacing:.05em}
+body.v25-end.v36-rekt .ec9-title{color:#ff6a5a!important}
+body.v25-end .ec9-cell .k{color:#8fa2a9!important;letter-spacing:.16em}
+body.v25-end .ec9-cell .v{color:#eaf3f5!important}
+body.v25-end .ec9-foot{color:#8fa2a9!important;font:700 9px/1.5 'JetBrains Mono',monospace;letter-spacing:.14em}
+
+/* --- run setup chips --------------------------------------------------- */
+body.v25-end.v26 #v26-setup span{
+  border-color:rgba(255,255,255,.12)!important;background:rgba(3,14,18,.6)!important;
+  color:#a9bbc1!important;font:800 9px/1 'JetBrains Mono',monospace!important;letter-spacing:.14em!important;
+  border-radius:999px!important;padding:6px 11px!important;
+}
+
+/* --- claim block: the one bright surface after the number -------------- */
+body.v25-end.v26 #global-submit-area{
+  border:1px solid rgba(230,255,112,.5)!important;border-radius:10px!important;
+  background:linear-gradient(170deg,rgba(150,220,40,.14),rgba(4,16,21,.94))!important;
+  box-shadow:0 22px 60px -30px rgba(173,230,53,.55)!important;margin:14px 0 0!important;
+}
+body.v25-end.v26 #v26-claim-head .k{color:#e6ff70!important;font-family:'JetBrains Mono',monospace!important;letter-spacing:.2em}
+body.v25-end.v26 #v26-claim-head .h{font-family:'Russo One',sans-serif!important;letter-spacing:.04em;color:#f3faff!important}
+body.v25-end.v26 #v26-claim-head .s{color:#b3c3c8!important}
+body.v25-end.v26 #v26-lab{color:#8fa2a9!important;font-family:'JetBrains Mono',monospace!important;letter-spacing:.12em}
+body.v25-end.v26 #global-name-input{
+  border-radius:8px!important;background:#03121a!important;border:1px solid rgba(255,255,255,.18)!important;color:#f3faff!important;
+}
+body.v25-end.v26 #global-submit-btn{
+  border-radius:8px!important;background:linear-gradient(180deg,#e6ff70,#9edb25)!important;color:#08130a!important;
+  letter-spacing:.14em!important;box-shadow:0 0 0 1px rgba(217,255,92,.4),0 16px 44px -16px rgba(173,230,53,.7)!important;
+}
+#v26-done .b{color:#e6ff70!important;font-family:'Russo One',sans-serif!important}
+
+/* --- primary actions right under the claim block ----------------------- */
+body.v25-end .end-head{position:relative;z-index:2;margin-top:12px!important;text-align:center}
+body.v25-end .rank-badge{border-radius:999px!important;font:900 10.5px/1 'JetBrains Mono',monospace!important;letter-spacing:.16em!important;text-transform:uppercase}
+body.v25-end .end-msg{color:#a9bbc1!important;font-size:12.5px}
+#v36-actions{position:relative;z-index:2;margin:12px 0 2px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#v36-actions .end-btn{
+  height:52px!important;width:100%;border-radius:8px!important;
+  font:900 12px/1 'JetBrains Mono',monospace!important;letter-spacing:.16em!important;
+}
+#v36-actions .end-btn.primary{
+  background:linear-gradient(180deg,#ffe6a3,#e0a52c)!important;color:#120a02!important;
+  box-shadow:0 16px 44px -18px rgba(240,180,41,.72)!important;border:0!important;
+}
+#v36-actions .end-btn.ghost{
+  background:rgba(3,14,18,.66)!important;border:1px solid rgba(255,255,255,.15)!important;color:#cfdde1!important;
+}
+
+/* --- everything else: quiet, collapsed, same panel language as MORE ---- */
+body.v25-end.v26 .v26-card{
+  border:1px solid rgba(255,255,255,.1)!important;border-radius:10px!important;
+  background:rgba(4,16,21,.72)!important;backdrop-filter:blur(6px);
+  position:relative;z-index:2;
+}
+body.v25-end.v26 .v26-sum{
+  color:#cfdde1!important;font:800 10.5px/1 'JetBrains Mono',monospace!important;letter-spacing:.14em!important;
+  min-height:48px;
+}
+body.v25-end.v26 .v26-cr{color:#8fa2a9!important;font-family:'JetBrains Mono',monospace!important}
+body.v25-end.v26 .v26-card.open .v26-cr{color:#e6ff70!important}
+
+/* sticky jump bar matches the start screen CTA */
+body.v25-end #v25-jump button{
+  border-radius:8px!important;background:linear-gradient(180deg,#e6ff70,#9edb25)!important;color:#08130a!important;
+  font:900 12px/1 'JetBrains Mono',monospace!important;letter-spacing:.16em!important;
+}
+@media(min-width:900px){
+  body.v25-end #end-screen>.end-card{max-width:760px!important}
+}
+@media(max-width:430px){
+  #v36-actions{grid-template-columns:1fr}
+  body.v25-end #end-screen::before{background-position:center 30%}
+}
+@media(prefers-reduced-motion:reduce){body.v25-end #end-screen>.end-card{animation:none!important}}
+</style>
+<script id="v36-end-cinematic-js">
+/* V36 — end screen stage: result tint + primary actions above the detail cards.
+   Pure DOM/presentation. Submit flow, scoring and leaderboard untouched. */
+(function(){
+  function $(id){return document.getElementById(id)}
+  function tick(){
+    var es=$('end-screen');
+    if(!es||es.classList.contains('hidden')||getComputedStyle(es).display==='none'){
+      document.body.classList.remove('v36-rekt');return;
+    }
+    var card=$('end-card');
+    document.body.classList.toggle('v36-rekt',!!(card&&card.classList.contains('rekt')));
+
+    var host=es.querySelector('.end-card');if(!host)return;
+    /* rank + message belong to the headline, not to the bottom of the page */
+    var head=host.querySelector('.end-head'),setup=$('v26-setup');
+    if(head&&setup&&setup.parentNode===host&&setup.nextElementSibling!==head)host.insertBefore(head,setup.nextSibling);
+    var actions=host.querySelector('.end-actions');
+    var slot=$('v36-actions');
+    if(actions&&!slot){
+      slot=document.createElement('div');slot.id='v36-actions';
+      slot.appendChild(actions);
+      var area=$('global-submit-area');
+      if(area&&area.parentNode===host)host.insertBefore(slot,area.nextSibling);
+      else host.appendChild(slot);
+    }else if(slot){
+      var area2=$('global-submit-area');
+      if(area2&&area2.parentNode===host&&area2.nextElementSibling!==slot)host.insertBefore(slot,area2.nextSibling);
+    }
+  }
+  setInterval(tick,500);
+  document.addEventListener('DOMContentLoaded',tick);
+  tick();
+})();
+</script>
