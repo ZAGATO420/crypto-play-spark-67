@@ -1212,19 +1212,21 @@ function LedgerSheet({ run, onClose }: { run: Run; onClose: () => void }) {
 
 
 
-function SurviveSheet({ run, cost, onEat, onCalm }: { run: Run; cost: number; onEat: () => void; onCalm: () => void }) {
+function SurviveSheet({ run, difficulty, caps, onEat, onCalm }: { run: Run; difficulty: Difficulty; caps: number; onEat: () => void; onCalm: () => void }) {
+  const left = Math.max(0, caps - run.cares);
   return (
     <>
-      <p className="journey-kicker"><HeartPulse /> STAY IN THE GAME · FREE MOVE</p>
+      <p className="journey-kicker"><HeartPulse /> STAY IN THE GAME · COSTS A MOVE</p>
       <h2>SURVIVAL</h2>
       <div className="cy-survive">
-        <div><Activity /><span><small>HUNGER</small><strong>{run.hunger}%</strong></span><Button onClick={onEat}>EAT · {formatMoney(Math.round(90 * cost))}</Button></div>
-        <div><HeartPulse /><span><small>STRESS</small><strong>{run.stress}%</strong></span><Button onClick={onCalm}>CALM · {formatMoney(Math.round(130 * cost))}</Button></div>
+        <div><Activity /><span><small>HUNGER</small><strong>{run.hunger}%</strong></span><Button disabled={!left} onClick={onEat}>EAT · {formatMoney(careCost("eat", run.chapter, difficulty))}</Button></div>
+        <div><HeartPulse /><span><small>STRESS</small><strong>{run.stress}%</strong></span><Button disabled={!left} onClick={onCalm}>CALM · {formatMoney(careCost("calm", run.chapter, difficulty))}</Button></div>
       </div>
-      <small className="cy-note">Either one at 100% ends the run. Both climb every quarter.</small>
+      <small className="cy-note">{left ? `${left} care action${left === 1 ? "" : "s"} left this quarter. Each one burns a move, and the second helps far less.` : "You are done looking after yourself this quarter. Survive on what you have."}</small>
     </>
   );
 }
+
 
 function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (o: DecisionOption) => void }) {
   return (
