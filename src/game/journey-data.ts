@@ -352,6 +352,13 @@ export const CHAPTER_WARNINGS: Record<number, string> = {
   26: "Final stretch. The Boss is already writing your rank.",
 };
 
+/** Food and calm get more expensive over the years and per difficulty. */
+export const careCost = (kind: "eat" | "calm", chapter: number, diff: Difficulty) => {
+  const d = DIFFICULTIES.find((x) => x.id === diff) ?? DIFFICULTIES[1]!;
+  const base = kind === "eat" ? 180 : 320;
+  return Math.round(base * (1 + chapter * 0.09) * d.careCost);
+};
+
 export const ENDINGS = {
   LEGEND: { title: "LEGEND", line: "You walked through every crash, every rug, every euphoric top — and left richer than the Boss." },
   SURVIVOR: { title: "SURVIVOR", line: "Seven years, still standing, still solvent. Most people did not make it this far." },
