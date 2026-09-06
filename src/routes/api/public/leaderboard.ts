@@ -270,12 +270,16 @@ export const Route = createFileRoute("/api/public/leaderboard")({
             xp: run.xp,
             level: run.level,
             trades: run.trades,
+            score: run.score,
             mode: run.mode,
           });
           return Response.json({ error: "score rejected" }, { status: 422, headers: CORS });
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively
+        // so the earned title still shows up on the board.
+        const rankMatch = RANKS.find((r) => r.toLowerCase() === run.rank.trim().toLowerCase());
         const row = {
           player_name: sanitizeName(run.name),
           archetype: run.arch,
@@ -285,12 +289,13 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           net_worth: run.net,
           xp: run.xp,
           level: run.level,
-          rank_title: RANKS.includes(run.rank) ? run.rank : "",
+          rank_title: rankMatch ?? "",
           months_survived: run.months,
           achievements: run.achievements,
           trades: run.trades,
           survived: run.survived,
-          score: Math.round(run.score),
+          score: Math.round(Math.min(Math.max(0, run.score), scoreCeiling(run))),
+
           avatar: run.avatar ?? null,
         };
 
