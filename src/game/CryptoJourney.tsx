@@ -1131,7 +1131,16 @@ function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config
       <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
         <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
       </section>
-      <div className="setup-cta"><Button onClick={() => onStart({ ...config, name: config.name.trim() || "anon" })}><Rocket />START Q1 2020</Button></div>
+      <div className="setup-cta">
+        <div className="setup-summary">
+          <img src={AVATARS.find((a) => a.id === config.avatar)?.url} alt="" />
+          <span>
+            <strong>{config.name.trim() || "anon"} <Flag code={config.country} size={14} /></strong>
+            <small>{archOf(config.arch).name} · {formatMoney(archOf(config.arch).cash)} · {config.difficulty}{config.ironman ? " · IRONMAN" : ""}</small>
+          </span>
+        </div>
+        <Button onClick={() => onStart({ ...config, name: config.name.trim() || "anon" })}><Rocket />START Q1 2020</Button>
+      </div>
     </main>
   );
 }
