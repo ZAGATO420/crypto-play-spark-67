@@ -14611,11 +14611,11 @@ body.v44-shake{animation:v44Shake .42s ease-in-out}
   },true);
 
   var MOOD={
-    rug:{em:'💀',big:'RUG PULL',cls:'bad',boss:'Dev took the LP. You took the lesson.'},
-    honeypot:{em:'🍯',big:'HONEYPOT',cls:'bad',boss:'You could buy. You could never sell.'},
-    bleed:{em:'📉',big:'BLEED',cls:'bad',boss:'Exit liquidity behaviour. Do better.'},
-    pump:{em:'📈',big:'PUMP',cls:'good',boss:'Green is green. Take some off the table.'},
-    moon:{em:'🚀',big:'MOONSHOT',cls:'good',boss:'Absolute cinema. Your bags are printing.'}
+    rug:{em:'✕',big:'RUG PULL',cls:'bad',boss:'Dev took the LP. You took the lesson.'},
+    honeypot:{em:'⚠',big:'HONEYPOT',cls:'bad',boss:'You could buy. You could never sell.'},
+    bleed:{em:'▼',big:'BLEED',cls:'bad',boss:'Exit liquidity behaviour. Do better.'},
+    pump:{em:'▲',big:'PUMP',cls:'good',boss:'Green is green. Take some off the table.'},
+    moon:{em:'★',big:'MOONSHOT',cls:'good',boss:'Absolute cinema. Your bags are printing.'}
   };
   var timer=null,wasPaused=false;
   function closeRes(){
@@ -14631,7 +14631,7 @@ body.v44-shake{animation:v44Shake .42s ease-in-out}
     if(!o){o=document.createElement('div');o.id='v44-res';document.body.appendChild(o)}
     var net=0;list.forEach(function(r){net+=(r.out||0)-(r.in||0)});
     var lead=list.slice().sort(function(a,b){return ((b.out||0)-(b.in||0))-((a.out||0)-(a.in||0))})[0];
-    var head=list.length>1?{em:net>=0?'🚀':'💀',big:net>=0?'LAUNCH PROFIT':'LAUNCH DAMAGE',cls:net>=0?'good':'bad',
+    var head=list.length>1?{em:net>=0?'★':'✕',big:net>=0?'LAUNCH PROFIT':'LAUNCH DAMAGE',cls:net>=0?'good':'bad',
       boss:net>=0?'The casino paid out. Do not give it back.':'That is what degen size costs.'}:(MOOD[lead.kind]||MOOD.bleed);
     var rows=list.map(function(r){
       var m=MOOD[r.kind]||MOOD.bleed,d=(r.out||0)-(r.in||0);
