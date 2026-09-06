@@ -105,7 +105,7 @@ export function CryptoJourney() {
   }, [screen, state]);
 
   const mood = result?.tone === "pink" || state.hunger > 75 || state.stress > 75 ? enragedBoss.url : result?.tone === "yellow" ? smugBoss.url : crownedBoss.url;
-  const bossLine = result?.detail ?? chance?.body ?? event?.body ?? `MISSION: ${mission.text}`;
+  const bossLine = decision?.body ?? result?.detail ?? chance?.body ?? event?.body ?? `MISSION: ${mission.text}`;
   const positions = useMemo(() => COINS.filter((c) => (state.holdings[c.symbol] ?? 0) > 0), [state.holdings]);
   const marketPulse = useMemo(() => {
     const btc = priceAt("BTC", state.month, state.noise);
