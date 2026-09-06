@@ -117,7 +117,7 @@ const makeNoise = (mode: BaseMode) => {
 const freshRun = (config: Config): Run => ({
   chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
   hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0,
+  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
   ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
 });
 
