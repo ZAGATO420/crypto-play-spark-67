@@ -232,3 +232,36 @@
 .board-row strong { display: block; font-size: 14px; }
 .board-row small { color: var(--muted-foreground); font-size: 10px; }
 .board-row i { color: var(--journey-cyan); font: 400 15px/1 var(--font-display); font-style: normal; }
+
+/* --- v2 gameplay: action points, market board, calls, missions --- */
+.ap-dots { display: flex; gap: 4px; align-items: center; }
+.ap-dots i { width: 10px; height: 10px; border-radius: 999px; background: color-mix(in oklab, var(--foreground) 22%, transparent); }
+.ap-dots i.is-on { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+
+.mission-strip { display: grid; gap: 4px; padding: 10px 14px; border-radius: 14px; border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent); background: color-mix(in oklab, var(--primary) 10%, var(--card)); }
+.mission-strip strong { font-size: .95rem; line-height: 1.3; }
+
+.market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.market-tile { display: grid; gap: 2px; padding: 10px; min-height: 76px; text-align: left; border-radius: 14px; border: 1px solid var(--border); background: var(--card); transition: transform .12s ease, border-color .12s ease; }
+.market-tile b { font-family: var(--font-display); font-size: .9rem; }
+.market-tile span { font-size: .85rem; }
+.market-tile em { font-size: .78rem; font-style: normal; }
+.market-tile i { font-size: .72rem; font-style: normal; color: color-mix(in oklab, var(--primary) 85%, var(--foreground)); }
+.market-tile.is-on { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 0 0 1px var(--primary); }
+.market-tile.is-off { opacity: .45; }
+.market-tile .positive { color: var(--chart-2); }
+.market-tile .negative { color: var(--destructive); }
+
+.trade-bar, .call-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
+.trade-focus { display: flex; gap: 10px; align-items: center; }
+.trade-focus span span, .trade-focus > span:last-child { display: grid; }
+.trade-buttons, .call-buttons { display: flex; gap: 8px; flex: 1 1 220px; }
+.trade-buttons > *, .call-buttons > * { flex: 1; min-height: 44px; }
+.call-bar small { display: block; font-size: .78rem; opacity: .75; }
+
+@media (max-width: 640px) {
+  .market-grid { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+  .trade-bar, .call-bar { flex-direction: column; align-items: stretch; }
+}
+
+.journey-stage > .mission-strip, .journey-stage > .market-grid, .journey-stage > .trade-bar, .journey-stage > .call-bar, .journey-stage > .journey-card { flex: 0 0 auto; align-self: stretch; }

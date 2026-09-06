@@ -1,4 +1,4 @@
-export type CoinSymbol = "BTC" | "ETH" | "SOL" | "DOGE";
+export type CoinSymbol = "BTC" | "ETH" | "SOL" | "DOGE" | "BNB" | "LINK" | "ADA" | "AVAX" | "SHIB" | "PEPE";
 
 export type Coin = {
   symbol: CoinSymbol;
@@ -82,3 +82,43 @@ export const rankTitle = (net: number, months: number, survived: boolean) => {
   if (net > 250_000) return "Top 8% Survivor";
   return "Solid Survivor";
 };
+
+// ---- extra markets: whole-market coverage 2020-2026 -------------------------
+const WIGGLE = [1, 1.07, 0.93, 1.11, 0.9, 1.05, 0.96, 1.12, 0.88, 1.06, 0.95, 1.03];
+
+const buildSeries = (anchors: number[], listing = 0) =>
+  Array.from({ length: 84 }, (_, m) => {
+    if (m < listing) return 0;
+    const year = Math.min(6, Math.floor(m / 12));
+    const t = (m % 12) / 12;
+    const a = anchors[year] ?? 0;
+    const b = anchors[year + 1] ?? a;
+    if (!a || !b) return 0;
+    const raw = Math.exp(Math.log(a) + (Math.log(b) - Math.log(a)) * t) * (WIGGLE[m % 12] ?? 1);
+    return raw < 0.01 ? Number(raw.toPrecision(3)) : Number(raw.toFixed(raw < 1 ? 4 : 2));
+  });
+
+COINS.push(
+  { symbol: "BNB", name: "BNB", color: "yellow", prices: buildSeries([14, 38, 530, 250, 310, 570, 700, 900]) },
+  { symbol: "LINK", name: "Chainlink", color: "cyan", prices: buildSeries([1.8, 11, 25, 7, 15, 20, 25, 32]) },
+  { symbol: "ADA", name: "Cardano", color: "cyan", prices: buildSeries([0.033, 0.18, 1.35, 0.25, 0.55, 1, 0.75, 1.1]) },
+  { symbol: "AVAX", name: "Avalanche", color: "pink", prices: buildSeries([0.6, 3.2, 110, 17, 40, 35, 25, 40], 9) },
+  { symbol: "SHIB", name: "Shiba Inu", color: "pink", prices: buildSeries([0.0000000015, 0.000000012, 0.000033, 0.0000085, 0.00001, 0.0000225, 0.0000115, 0.0000165], 7) },
+  { symbol: "PEPE", name: "Pepe", color: "yellow", prices: buildSeries([0, 0, 0, 0, 0.0000012, 0.0000095, 0.0000075, 0.000011], 39) },
+);
+
+// ---- boss missions: one objective per month ---------------------------------
+export type Mission = { id: string; text: string; reward: number; check: (s: MissionSnapshot) => boolean };
+export type MissionSnapshot = { netStart: number; netEnd: number; buys: number; sells: number; markets: number; spent: number; called: boolean; callRight: boolean };
+
+export const MISSIONS: Mission[] = [
+  { id: "grow", text: "Close the month with a bigger net worth than you opened it.", reward: 600, check: (s) => s.netEnd > s.netStart },
+  { id: "spread", text: "Hold at least 3 different markets when the month closes.", reward: 750, check: (s) => s.markets >= 3 },
+  { id: "sniper", text: "Make exactly one trade this month. Precision over noise.", reward: 800, check: (s) => s.buys + s.sells === 1 },
+  { id: "profit8", text: "Grow your net worth by 8% or more this month.", reward: 1200, check: (s) => s.netEnd >= s.netStart * 1.08 },
+  { id: "cashout", text: "Take profit: sell at least once before the month closes.", reward: 550, check: (s) => s.sells >= 1 },
+  { id: "read", text: "Call the market direction correctly.", reward: 900, check: (s) => s.called && s.callRight },
+  { id: "patience", text: "Spend nothing on new positions. Let the bags cook.", reward: 700, check: (s) => s.buys === 0 },
+];
+
+export const missionFor = (month: number) => MISSIONS[(month * 3 + 1) % MISSIONS.length]!;
