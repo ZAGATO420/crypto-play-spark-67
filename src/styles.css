@@ -274,3 +274,5 @@
   .start-actions button, .journey-end section > button { width: 100%; padding-inline: 12px; }
   .journey-meters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.journey-start, .journey-end { grid-template-columns: minmax(0, 1fr); }
+.journey-start section, .journey-end section { min-width: 0; }
