@@ -7,3 +7,6 @@
 - [x] Historical decision cards with lasting statuses and multiple endings
 - [x] Boss Score replaces XP in the leaderboard (fresh season, cheat gate)
 - [x] Clean retro visual system, tested 390px and 1280px, no overflow/errors
+- [x] Default menu audio starts above zero and persists explicit sound settings
+- [x] Sarcastic death-screen punchlines for every failed ending
+- [x] Run badges shown on the end screen and leaderboard
