@@ -14088,12 +14088,18 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
  body.v40-live[data-v40-stage="market"] .v40-order,body.v40-live[data-v40-stage="market"] .v40-mobile-tape,
  body.v40-live[data-v40-stage="market"] .v40-stage-head,body.v40-live[data-v40-stage="market"] .v40-actions{flex:0 0 auto!important}
  .v41-mfeed{display:none}
+ body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:clamp(96px,30vh,230px)!important;overflow:auto!important}
  body.v40-live[data-v40-stage="chart"] #v41-live{display:none}
  body.v40-live[data-v40-stage="positions"] #v41-live{display:block;margin:8px}
  body.v40-live[data-v40-stage="positions"] #v41-live .v41-lbody{max-height:none}
  body.v40-live[data-v40-stage="positions"] .v41-mfeed{display:block}
  body.v40-live[data-v40-stage="positions"] .v40-mobile-only .v40-label:first-child,
  body.v40-live[data-v40-stage="positions"] #v40-mobile-pos{display:none}
+}
+@media(max-width:820px) and (max-height:720px){
+ body.v40-live[data-v40-stage="market"] .v40-order{display:none!important}
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:74px!important;flex:1 1 74px!important}
+ body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:150px!important}
 }
 /* value reactions */
 .v41-hit{animation:v41Hit .45s ease-out}
