@@ -215,6 +215,7 @@ export function CryptoJourney() {
     setState(fresh);
     setResult(null); setChance(null); setCoinIndex(0); setAp(AP_MAX); setCall(null);
     setRound({ buys: 0, sells: 0, netStart: valueOf(fresh) });
+    setHowTo(true);
     setScreen("journey");
   };
 
