@@ -14299,6 +14299,28 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       if($('v41-mfeed'))$('v41-mfeed').innerHTML=fh;
       var f=feed();if($('v41-mlast'))$('v41-mlast').textContent=f.length?f[f.length-1].m.slice(0,26):'—';
     }
+    /* V43: market summary strip + chart stats */
+    if($('v43-mbar')){
+      $('v43-mn').textContent=r.n?(r.n+(r.n>1?' OPEN POSITIONS':' OPEN POSITION')):'NO OPEN POSITIONS';
+      $('v43-mv').textContent=r.n?('EXPOSURE '+money(r.risk)):'FLAT · pick a market';
+      var mp=$('v43-mp');mp.textContent=r.n?signed(r.pnl):'$0';
+      mp.className='p '+(r.n?(r.pnl>=0?'v40-up':'v40-down'):'');
+    }
+    if($('v43-cstat')){
+      var sym='BTC';try{var on=document.querySelector('#v40-mobile-tape .v40-coin.on,#v40-tape .v40-coin.on');if(on)sym=on.getAttribute('data-v40-coin')}catch(_){}
+      var vals=[];for(var vi=Math.max(0,s.month-11);vi<=s.month;vi++){var hv=0;try{hv=getHistPrice(sym,vi)}catch(_){}if(hv>0)vals.push(hv)}
+      var hi=vals.length?Math.max.apply(null,vals):0,lo=vals.length?Math.min.apply(null,vals):0;
+      var prev=vals.length>1?vals[vals.length-2]:0,now=vals.length?vals[vals.length-1]:0;
+      var chg=prev?((now-prev)/prev*100):0;
+      $('v43-chigh').textContent=hi?'$'+px(hi):'—';
+      $('v43-clow').textContent=lo?'$'+px(lo):'—';
+      var ce=$('v43-cchg');ce.textContent=(chg>=0?'+':'')+chg.toFixed(1)+'%';ce.className=chg>=0?'v40-up':'v40-down';
+      var pp=(s.perps||[]).filter(function(p){return p.sym===sym})[0];
+      var av=(s.avg||{})[sym]||0;
+      $('v43-centry').textContent=pp?'$'+px(pp.entry):(av?'$'+px(av):'—');
+      $('v43-cliq').textContent=pp?'$'+px(perpLiq(pp.entry,pp.dir,pp.lev)):'—';
+    }
+
 
     var nw=0;try{nw=netWorth()}catch(_){}
     if(lastNet!==null&&Math.abs(nw-lastNet)>Math.max(25,lastNet*0.004))hit($('v40-net'));
