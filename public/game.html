@@ -14337,6 +14337,8 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
 
   document.addEventListener('click',function(e){
     var opos=e.target.closest('[data-v43-open-pos]');if(opos){e.preventDefault();try{var nb=document.querySelector('#v40-shell .v40-nav[data-v40-view="positions"]');if(nb)nb.click()}catch(_){}return}
+    var coin=e.target.closest('[data-v40-coin]');if(coin){try{var cs=coin.getAttribute('data-v40-coin'),rr=rows(S()),ix=rr.syms.indexOf(cs);if(ix>=0){activePos=ix;lastSig='';setTimeout(tick,0)}}catch(_){}}
+
     var page=e.target.closest('[data-v41-page]');if(page){e.preventDefault();activePos+=+page.getAttribute('data-v41-page');lastSig='';tick();return}
 
     var b=e.target.closest('[data-v41-close]');if(b){e.preventDefault();e.stopPropagation();try{closePerp(+b.getAttribute('data-v41-close'))}catch(_){}lastSig='';tick();return}
