@@ -55,7 +55,7 @@ Heute reicht eine frühe Long-Position, weil die Kurse langfristig steigen und n
 - **Strategie-Karte pro Jahr**: eine Ausrichtung wählen (Akkumulieren, Trading, Degen, Absichern) — sie gibt kleine Boni und Mali und färbt den Run.
 - **Härtere Grenzen**: weniger Startkapital auf BOSS, teureres Leben mit den Jahren, Perp-Risiko steigt, blindes Durchdrücken endet im Aus. Ziel: Fertigspielen ist eine Leistung, nicht der Standardfall.
 
-## 6. Startseite und Setup polieren
+## 7. Startseite und Setup polieren
 
 - Archetyp, Schwierigkeit und Modus als **Bildkarten** mit Avatarbild/Icon, klarer Auswahlkante, Hover- und Tap-Feedback statt reiner Textknöpfe.
 - Avatare größer, mit Ring und leichtem Zoom bei Auswahl; Namensfeld mit Zeichenzähler.
