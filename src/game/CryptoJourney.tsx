@@ -33,7 +33,7 @@ type Config = { name: string; avatar: string; arch: Archetype; difficulty: Diffi
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
   hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
-  custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number;
+  custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; config: Config;
 };
 type Phase = "brief" | "act" | "resolve";
