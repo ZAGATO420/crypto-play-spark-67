@@ -855,7 +855,8 @@ export function CryptoJourney() {
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
           {dialog.k === "launchResult" && <LaunchResultSheet res={dialog.res} onClose={nextInQueue} />}
-          {dialog.k === "survive" && <SurviveSheet run={run} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
+          {dialog.k === "survive" && <SurviveSheet run={run} difficulty={cfg.difficulty} caps={diff.caps} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
+          {dialog.k === "cashout" && <CashOutSheet run={run} net={net} score={score} onConfirm={cashOut} onClose={() => setDialog(null)} />}
           {dialog.k === "crash" && <CrashSheet chapter={dialog.chapter} onPanic={() => setDialog({ k: "mini", kind: "panic", pending: { t: "crash", chapter: dialog.chapter } })} onClose={nextInQueue} />}
           {dialog.k === "failure" && <FailureSheet chapter={dialog.chapter} run={run} onClose={nextInQueue} />}
           {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
