@@ -12891,7 +12891,8 @@ body.v30 #market-list .v7more{display:none!important}
       if(k==='x')open_('https://twitter.com/intent/tweet?text='+encodeURIComponent(TXT)+'&url='+encodeURIComponent(url+'/'));
       else if(k==='tg')open_('https://t.me/share/url?url='+encodeURIComponent(url+'/')+'&text='+encodeURIComponent(TXT));
       else if(k==='tr'){
-        try{window.location.href=url+'/trailer';}catch(err){open_(url+'/trailer');}
+        var t=url+'/trailer';
+        try{(window.top||window).location.href=t;}catch(err){open_(t);}
       }
 
       else if(k==='cp')copy(url+'/',b);
