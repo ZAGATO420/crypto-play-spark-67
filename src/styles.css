@@ -417,6 +417,8 @@
 .cy-act:disabled { opacity: .4; cursor: not-allowed }
 .cy-act.is-go { border-color: var(--journey-yellow) } .cy-act.is-go svg { color: var(--journey-yellow) }
 .cy-act.is-go:hover { box-shadow: 0 0 22px color-mix(in oklab, var(--journey-yellow) 20%, transparent) }
+.cy-act.is-exit { border-color: color-mix(in oklab, var(--journey-pink) 60%, var(--border)) } .cy-act.is-exit svg { color: var(--journey-pink) }
+.cy-act.is-exit:hover:not(:disabled) { border-color: var(--journey-pink); box-shadow: 0 0 22px color-mix(in oklab, var(--journey-pink) 20%, transparent) }
 
 .cy-flash { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 70; max-width: min(94vw, 520px); padding: 12px 16px; border: 1px solid var(--journey-cyan); border-radius: 8px; background: color-mix(in oklab, var(--card) 96%, transparent); color: var(--foreground); font-size: 13px; line-height: 1.35; box-shadow: 0 16px 40px color-mix(in oklab, black 45%, transparent); animation: cy-flash-in .2s ease-out }
 .cy-flash.tone-pink { border-color: var(--journey-pink) } .cy-flash.tone-yellow { border-color: var(--journey-yellow) }
