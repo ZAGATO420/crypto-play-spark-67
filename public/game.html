@@ -4733,11 +4733,11 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
  .v40-workspace{display:block;padding:6px 7px;overflow:hidden}.v40-rail,.v40-side{display:none}.v40-stage{height:100%;grid-template-rows:auto auto auto minmax(112px,1fr) auto}
  .v40-stage-head{padding:9px 11px 6px}.v40-symbol{font-size:22px}.v40-price{font-size:18px}.v40-order{grid-template-columns:36px minmax(0,1fr) auto;margin:0 8px 6px;padding:6px 8px}.v40-order img{width:36px;height:36px}.v40-order b{font-size:10.5px}.v40-visual{min-height:128px;margin:0 8px 7px}.v40-actions{padding:0 8px 8px}.v40-action{min-height:44px}.v40-bottom{height:calc(69px + env(safe-area-inset-bottom))}.v40-nav{height:58px}
  .v40-mobile-tape{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:0 8px 6px}.v40-mobile-tape::-webkit-scrollbar{display:none}.v40-mobile-tape .v40-coin{flex:0 0 78px;display:block;min-height:36px;padding:6px;text-align:center;border:1px solid rgba(88,196,255,.16)}.v40-mobile-tape .v40-token,.v40-mobile-tape small,.v40-mobile-tape .q{display:none}.v40-mobile-tape .v40-coin b{font-size:10px}.v40-mobile-tape .v40-coin.on{box-shadow:inset 0 -2px var(--v40-cyan)}
- body.v40-live[data-v40-view="market"] .v40-visual{display:block}
- body.v40-live[data-v40-view="chart"] .v40-order{display:none}
- body.v40-live[data-v40-view="chart"] .v40-visual{min-height:230px}
- body.v40-live[data-v40-view="positions"] .v40-stage-head,body.v40-live[data-v40-view="positions"] .v40-order,body.v40-live[data-v40-view="positions"] .v40-visual,body.v40-live[data-v40-view="positions"] .v40-actions{display:none}
- body.v40-live[data-v40-view="positions"] .v40-mobile-only{display:block;height:100%;overflow:auto}
+  body.v40-live[data-v40-stage="market"] .v40-visual{display:block}
+  body.v40-live[data-v40-stage="chart"] .v40-order{display:none}
+  body.v40-live[data-v40-stage="chart"] .v40-visual{min-height:230px}
+  body.v40-live[data-v40-stage="positions"] .v40-stage-head,body.v40-live[data-v40-stage="positions"] .v40-order,body.v40-live[data-v40-stage="positions"] .v40-visual,body.v40-live[data-v40-stage="positions"] .v40-actions{display:none}
+  body.v40-live[data-v40-stage="positions"] .v40-mobile-only{display:block;height:100%;overflow:auto}
 }
 @media(min-width:821px){.v40-bottom{display:none}.v40-mobile-only{display:none!important}}
 @media(prefers-reduced-motion:reduce){#v40-shell *{animation:none!important;transition:none!important}}
