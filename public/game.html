@@ -4812,7 +4812,7 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
   function positions(s){var rows=[];(s.perps||[]).forEach(function(p){var pnl=0;try{pnl=perpPnl(p)}catch(_){}rows.push('<div class="v40-pos-card"><div class="r"><b>'+logo(p.sym,'v40-mark')+p.sym+' · '+p.lev+'X '+p.dir.toUpperCase()+'</b><strong class="'+(pnl>=0?'v40-up':'v40-down')+'">'+(pnl>=0?'+':'')+money(pnl)+'</strong></div><small>Margin '+money(p.margin)+' · Liq $'+price(perpLiq(p.entry,p.dir,p.lev))+'</small></div>')});try{COINS.forEach(function(c){var h=s.holdings[c.s]||0;if(h<=0)return;var val=h*(s.prices[c.s]||0),avg=s.avg[c.s]||0,p=avg?((s.prices[c.s]-avg)/avg*100):0;rows.push('<button class="v40-pos-card" data-v40-coin="'+c.s+'" style="width:100%;color:inherit;text-align:left"><div class="r"><b>'+logo(c.s,'v40-mark')+c.s+' · SPOT</b><strong class="'+(p>=0?'v40-up':'v40-down')+'">'+(p>=0?'+':'')+p.toFixed(1)+'%</strong></div><small>'+money(val)+' position value</small></button>')})}catch(_){}return rows.join('')||'<div class="v40-empty">No open position.<br>Choose a market and enter the arena.</div>'}
   function vitals(s){function row(n,v){return '<div class="v40-vital"><span>'+n+'</span><div class="v40-meter"><i style="width:'+Math.min(100,v)+'%;background:'+(v>70?'var(--v40-down)':v>40?'var(--v40-gold)':'var(--v40-acid)')+'"></i></div><b>'+Math.round(v)+'%</b></div>'}return row('HUNGER',s.hunger)+row('STRESS',s.stress)+row('RISK',s.risk)+'<div class="v40-survive"><button data-v40-act="eat">EAT</button><button data-v40-act="calm">CALM</button></div>'}
   var BOSS={calm:'/boss-mobile-cinematic.webp',smug:'/__l5e/assets-v1/3060f0e9-d226-4a76-bc8e-2b9c92a6d9cb/boss-smug.webp',crowned:'/__l5e/assets-v1/f130dbc9-2270-47bf-b867-0e21555d3999/boss-crowned.webp',enraged:'/__l5e/assets-v1/7876d3b9-a938-4ee2-aab1-827adb4ad5e5/boss-enraged.webp',stressed:'/__l5e/assets-v1/1d71b635-22c9-48c0-8d5a-e4b9117263ee/boss-stressed.webp',broken:'/__l5e/assets-v1/6a143db8-fbda-4df5-ac50-49fffb6d8a3e/boss-broken.webp'};
-  function mood(s){var nw=0;try{nw=netWorth()}catch(_){}if(s.hunger>80||s.stress>80)return'broken';if(s.risk>80)return'enraged';if((s._v22streak||0)>=3)return'crowned';if(nw>(s.startCash||1000)*3)return'smug';if(s.stress>55)return'stressed';return'calm'}
+  function mood(s){var nw=0;try{nw=netWorth()}catch(_){}if(s.hunger>80||s.stress>80)return'broken';if(s.risk>80)return'enraged';if((s._v22streak||0)>=3)return'crowned';if(nw>(s.startCash||5000)*2.5)return'smug';if(s.stress>55)return'stressed';return'calm'}
   function bossLine(s,m){if(m==='broken')return'You are falling apart. Eat. Breathe. Then trade.';if(m==='enraged')return'Your risk is insane. One wick and you are gone.';if(m==='crowned')return'Streak alive. Keep the crown, keep the multiplier.';if(m==='smug')return'Not bad. But the market is not done with you.';return order(s)}
   
   function paint(force){var s=S();if(!s)return;var c=COINS.find(function(x){return x.s===active&&s.month>=x.launch});if(!c){c=COINS.find(function(x){return s.month>=x.launch});active=c?c.s:'BTC'}var ch=change(active,s),port=0;try{port=portValue()}catch(_){}var sig=[s.month,s.day,Math.round(s.cash),Math.round(netWorth()),active,view,(s.perps||[]).length,Math.round(s.hunger),Math.round(s.stress),s._v22oid,s._v22streak].join('|');if(!force&&sig===last)return;last=sig;
@@ -14006,4 +14006,12 @@ body.v40-live .v17-win{overflow:hidden!important}
 body.v40-live .v40-empty{color:#9fc6e8!important;padding:22px 12px!important;font-size:12px!important}
 body.v40-live .v40-survive button{min-height:44px!important}
 body.v40-live .v40-label{font-size:10px!important;letter-spacing:.12em}
+</style>
+<style id="v40-actions-fix">
+@media(max-width:820px){
+ body.v40-live .v40-stage{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ body.v40-live .v40-visual{flex:1 1 auto!important;min-height:120px!important}
+ body.v40-live .v40-actions{position:sticky!important;bottom:0!important;z-index:4!important;
+   background:linear-gradient(180deg,rgba(5,15,30,0),#050f1e 30%)!important;padding-top:8px!important}
+}
 </style>
