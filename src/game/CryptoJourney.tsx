@@ -631,14 +631,36 @@ export function CryptoJourney() {
     if (taxDebt > 0 && !isTaxChapter(next)) taxDebt = Math.round(taxDebt * 1.05);
     cash = Math.max(0, cash);
 
+    // a private life happens whether the chart cares or not
+    if (next > 1 && Math.random() < 0.42) {
+      const ev = pickLifeEvent(Math.random());
+      if (ev.cash < 0) { cash = Math.max(0, cash + ev.cash); spendOn(ev.label, -ev.cash); }
+      else { cash += ev.cash; earnFrom(ev.label, ev.cash); }
+      lines.push(`${ev.label}: ${ev.line}`);
+      lifeHunger = ev.hunger ?? 0;
+      lifeStress = ev.stress ?? 0;
+    }
+
     // doing nothing is a choice, and it costs
     const idle = run.moves === 0;
-    const hunger = clamp(run.hunger + Math.round(7 * arch.risk) + (idle ? 6 : 0));
-    const stress = clamp(run.stress + Math.round(5 * arch.risk) + (idle ? 9 : 0) + Math.round(job.stress * 0.5) - house.calm);
+    // leverage does not only cost money, it costs sleep
+    const notional = positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev, 0);
+    const levered = Math.min(18, Math.round((notional / Math.max(1, startNet)) * 12));
+    const hunger = clamp(run.hunger + Math.round((8 + Math.floor(next / 6)) * arch.risk * diff.hunger) + (idle ? 7 : 0) + lifeHunger);
+    const redQuarter = netOf({ ...run, chapter: next, cash, positions, taxDebt }) < startNet;
+    const stress = clamp(
+      run.stress + Math.round((6 + Math.floor(next / 7)) * arch.risk * diff.stress) + (idle ? 10 : 0)
+      + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress,
+    );
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
+    if (levered >= 8) lines.push("Your leverage kept you awake. Stress climbed with the notional.");
+
+    const critical = hunger >= 80 || stress >= 80;
+    const criticals = run.criticals + (critical ? 1 : 0);
+    if (critical) lines.push("You are running on empty. Shaking hands cost you a move next quarter.");
 
     const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
-    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0 };
+    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
@@ -651,15 +673,16 @@ export function CryptoJourney() {
     setRun(nextRun);
     setResolution({ title, detail, tone, delta, move, lines, inflow, outflow });
     setPhase("resolve");
-    setAp(Math.min(AP_CAP, AP_BASE + job.ap + ap));
+    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
+    if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
 
     const finalNet = netOf(nextRun);
     if (hunger >= 100) return finish("STARVED");
     if (stress >= 100) return finish("BROKEN");
     if (finalNet <= 0) return finish(positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
-    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 40 && crises >= 5 ? "LEGEND" : "SURVIVOR");
+    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
   };
 
   const openChapterCards = (chapter: number) => {
