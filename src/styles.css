@@ -336,7 +336,7 @@
 @keyframes cy-shake { 0%,100% { transform: translate3d(0,0,0) } 20% { transform: translate3d(-6px,2px,0) } 40% { transform: translate3d(5px,-2px,0) } 60% { transform: translate3d(-4px,1px,0) } 80% { transform: translate3d(3px,0,0) } }
 @keyframes cy-rise { 0% { opacity: 0; transform: translateY(10px) scale(.9) } 18% { opacity: 1; transform: none } 100% { opacity: 0; transform: translateY(-34px) }
 }
-@keyframes cy-level { 0% { opacity: 0; transform: translate(-50%, 14px) scale(.9) } 15% { opacity: 1; transform: translate(-50%, 0) scale(1) } 85% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes cy-level { 0% { opacity: 0; transform: translate(-50%, 14px) scale(.9) } 15%, 85% { opacity: 1; transform: translate(-50%, 0) scale(1) } 100% { opacity: 0; transform: translate(-50%, -8px) scale(1) } }
 .cy-shell.is-shaking { animation: cy-shake .5s ease-in-out }
 .cy-xp { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 .cy-level { padding: 2px 7px; border: 1px solid var(--journey-yellow); border-radius: 5px; color: var(--journey-yellow); font: 400 11px/1.4 var(--font-display); letter-spacing: .06em }
@@ -346,7 +346,7 @@
 .cy-pops { position: fixed; left: 50%; top: 34%; z-index: 80; display: grid; justify-items: center; gap: 6px; transform: translateX(-50%); pointer-events: none }
 .cy-pop { padding: 5px 12px; border-radius: 999px; background: color-mix(in oklab, var(--card) 92%, transparent); border: 1px solid currentColor; font: 400 15px/1 var(--font-display); animation: cy-rise 1.4s ease-out forwards }
 .cy-pop.tone-xp { color: var(--journey-cyan) } .cy-pop.tone-up { color: var(--journey-yellow) } .cy-pop.tone-down { color: var(--journey-pink) }
-.cy-levelup { position: fixed; left: 50%; top: 18%; z-index: 85; display: grid; gap: 4px; justify-items: center; padding: 14px 26px; border: 1px solid var(--journey-yellow); border-radius: 10px; background: color-mix(in oklab, var(--card) 95%, transparent); color: var(--journey-yellow); font: 400 26px/1 var(--font-display); box-shadow: 0 0 40px color-mix(in oklab, var(--journey-yellow) 30%, transparent); animation: cy-level 2.2s ease-out forwards; pointer-events: none }
+.cy-levelup { position: fixed; left: 50%; max-width: 92vw; text-align: center; transform: translateX(-50%); top: 18%; z-index: 85; display: grid; gap: 4px; justify-items: center; padding: 14px 26px; border: 1px solid var(--journey-yellow); border-radius: 10px; background: color-mix(in oklab, var(--card) 95%, transparent); color: var(--journey-yellow); font: 400 26px/1 var(--font-display); box-shadow: 0 0 40px color-mix(in oklab, var(--journey-yellow) 30%, transparent); animation: cy-level 2.2s ease-out forwards; pointer-events: none }
 .cy-levelup small { color: var(--muted-foreground); font-family: var(--font-body); font-size: 11px }
 
 .cy-top-right { display: flex; align-items: center; gap: 8px; }
