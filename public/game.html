@@ -14537,3 +14537,122 @@ body.v40-live #v4-bar{display:none!important}
   setInterval(tick,300);setTimeout(tick,900);
 })();
 </script>
+<style id="v44">
+/* ===== V44 — chart clarity, result moments, warmth ===== */
+@media(max-width:820px){
+ body.v40-live .v40-stage{min-height:0!important}
+ body.v40-live[data-v40-stage="chart"] .v40-visual{flex:1 1 auto!important;min-height:104px!important;margin-bottom:6px}
+ body.v40-live[data-v40-stage="chart"] #v43-cstat{display:grid!important;flex:0 0 auto!important;grid-template-columns:repeat(3,minmax(0,1fr))}
+ body.v40-live[data-v40-stage="chart"] .v40-actions{display:none!important}
+ body.v40-live[data-v40-stage="chart"] #v44-ctrade{display:block!important}
+ body.v40-live[data-v40-stage="chart"] .v40-order{display:none!important}
+ body.v40-live[data-v40-stage="market"] #v44-ctrade{display:none!important}
+ body.v40-live[data-v40-stage="positions"] #v44-ctrade{display:none!important}
+ body.v40-live .v40-stage-head{position:relative}
+ body.v40-live .v40-stage-head::after{position:absolute;right:11px;top:2px;font:400 7px/1 'Archivo Black','Hind',sans-serif;letter-spacing:.16em;color:var(--v40-gold);opacity:.85}
+ body.v40-live[data-v40-stage="market"] .v40-stage-head::after{content:'EXCHANGE'}
+ body.v40-live[data-v40-stage="chart"] .v40-stage-head::after{content:'ANALYSIS'}
+ body.v40-live[data-v40-stage="positions"] .v40-stage-head::after{content:'POSITIONS'}
+ body.v40-live #v41-prog{padding:7px 9px!important}
+ body.v40-live .v41-badge{font-size:12px!important}
+ body.v40-live .v41-title{max-width:120px!important;font-size:10.5px!important}
+ body.v40-live .v41-xp{font-size:9.5px!important}
+}
+#v44-ctrade{display:none;width:calc(100% - 16px);margin:0 8px 8px;min-height:46px;
+ border:1px solid rgba(226,190,98,.5);border-radius:8px;color:#08170a;
+ background:linear-gradient(180deg,var(--v40-acid),#9fe016);font:400 12px/1 'Archivo Black','Hind',sans-serif}
+@media(min-width:821px){#v44-ctrade{display:none!important}}
+/* result moment */
+#v44-res{position:fixed;inset:0;z-index:400;display:none;place-items:center;padding:18px;
+ background:radial-gradient(120% 90% at 50% 0%,rgba(30,22,8,.8),rgba(3,7,14,.94));backdrop-filter:blur(6px)}
+#v44-res.show{display:grid}
+.v44-card{width:min(420px,100%);border-radius:18px;padding:18px 16px 16px;text-align:center;
+ border:1px solid rgba(226,190,98,.45);background:linear-gradient(160deg,#12253d,#07131f);
+ box-shadow:inset 0 1px rgba(255,236,190,.16),0 22px 60px rgba(0,0,0,.6);animation:v44Pop .28s cubic-bezier(.2,1.3,.4,1)}
+@keyframes v44Pop{0%{transform:scale(.86);opacity:0}100%{transform:scale(1);opacity:1}}
+.v44-card .em{font-size:46px;line-height:1}
+.v44-card .big{margin-top:4px;font:400 30px/1 'Archivo Black','Hind',sans-serif;letter-spacing:.02em}
+.v44-card.good .big{color:#4ade80}.v44-card.bad .big{color:#ff8b95}
+.v44-card .sub{margin-top:6px;font:700 11px/1.4 'Hind',sans-serif;color:#cfe6ff}
+.v44-list{margin-top:12px;display:grid;gap:6px;text-align:left}
+.v44-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;
+ border:1px solid rgba(96,178,255,.22);border-radius:10px;background:#08182b}
+.v44-row b{font:700 11px/1.2 'Hind',sans-serif;color:#eaf4ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v44-row small{display:block;margin-top:3px;font:700 8.5px/1 monospace;color:#8fb3d4}
+.v44-row strong{font:700 14px/1 monospace}
+.v44-row.good strong{color:#4ade80}.v44-row.bad strong{color:#ff8b95}
+.v44-card .boss{margin-top:12px;font:700 10.5px/1.45 'Hind',sans-serif;color:var(--v40-gold)}
+.v44-card .go{margin-top:12px;width:100%;min-height:46px;border:0;border-radius:10px;
+ background:linear-gradient(180deg,#c8ff3d,#9fe016);color:#08170a;font:400 12px/1 'Archivo Black','Hind',sans-serif}
+body.v44-shake{animation:v44Shake .42s ease-in-out}
+@keyframes v44Shake{0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-6px,2px,0)}45%{transform:translate3d(5px,-3px,0)}70%{transform:translate3d(-3px,1px,0)}}
+@media(prefers-reduced-motion:reduce){.v44-card,body.v44-shake{animation:none!important}}
+</style>
+<script id="v44-js">
+(function(){
+  function $(id){return document.getElementById(id)}
+  /* --- chart-only TRADE button --- */
+  var iv=setInterval(function(){
+    var sh=$('v40-shell');if(!sh)return;
+    if(!$('v44-ctrade')){
+      var stage=sh.querySelector('.v40-stage'),acts=sh.querySelector('.v40-actions');
+      if(!stage||!acts)return;
+      var b=document.createElement('button');b.id='v44-ctrade';b.type='button';
+      b.setAttribute('data-v44-trade','1');b.textContent='TRADE THIS MARKET ›';
+      stage.insertBefore(b,acts);
+    }
+    clearInterval(iv);
+  },250);
+  document.addEventListener('click',function(e){
+    var t=e.target.closest&&e.target.closest('[data-v44-trade]');
+    if(t){e.preventDefault();try{var nb=document.querySelector('#v40-shell .v40-nav[data-v40-view="market"]');if(nb)nb.click()}catch(_){}return}
+    var c=e.target.closest&&e.target.closest('[data-v44-close]');
+    if(c){e.preventDefault();closeRes();}
+  },true);
+
+  var MOOD={
+    rug:{em:'💀',big:'RUG PULL',cls:'bad',boss:'Dev took the LP. You took the lesson.'},
+    honeypot:{em:'🍯',big:'HONEYPOT',cls:'bad',boss:'You could buy. You could never sell.'},
+    bleed:{em:'📉',big:'BLEED',cls:'bad',boss:'Exit liquidity behaviour. Do better.'},
+    pump:{em:'📈',big:'PUMP',cls:'good',boss:'Green is green. Take some off the table.'},
+    moon:{em:'🚀',big:'MOONSHOT',cls:'good',boss:'Absolute cinema. Your bags are printing.'}
+  };
+  var timer=null,wasPaused=false;
+  function closeRes(){
+    var o=$('v44-res');if(!o)return;
+    o.classList.remove('show');
+    if(timer){clearTimeout(timer);timer=null}
+    try{if(window.state&&!window.state._gameEnded&&!wasPaused)window.state.paused=false}catch(_){}
+    try{pqRelease('presale')}catch(_){}
+  }
+  function money(v){try{return fmt(Math.round(v))}catch(_){return '$'+Math.round(v)}}
+  function render(list){
+    var o=$('v44-res');
+    if(!o){o=document.createElement('div');o.id='v44-res';document.body.appendChild(o)}
+    var net=0;list.forEach(function(r){net+=(r.out||0)-(r.in||0)});
+    var lead=list.slice().sort(function(a,b){return ((b.out||0)-(b.in||0))-((a.out||0)-(a.in||0))})[0];
+    var head=list.length>1?{em:net>=0?'🚀':'💀',big:net>=0?'LAUNCH PROFIT':'LAUNCH DAMAGE',cls:net>=0?'good':'bad',
+      boss:net>=0?'The casino paid out. Do not give it back.':'That is what degen size costs.'}:(MOOD[lead.kind]||MOOD.bleed);
+    var rows=list.map(function(r){
+      var m=MOOD[r.kind]||MOOD.bleed,d=(r.out||0)-(r.in||0);
+      return '<div class="v44-row '+m.cls+'"><div><b>'+m.em+' '+r.n+'</b><small>'+m.big+' · IN '+money(r.in)+' · OUT '+money(r.out)+
+        (r.mult?' · '+r.mult.toFixed(1)+'x':'')+'</small></div><strong>'+(d>=0?'+':'-')+money(Math.abs(d))+'</strong></div>';
+    }).join('');
+    o.innerHTML='<div class="v44-card '+head.cls+'"><div class="em">'+head.em+'</div><div class="big">'+head.big+'</div>'+
+      '<div class="sub">'+(net>=0?'+':'-')+money(Math.abs(net))+' net on '+list.length+(list.length>1?' launches':' launch')+'</div>'+
+      '<div class="v44-list">'+rows+'</div><div class="boss">'+head.boss+'</div>'+
+      '<button class="go" type="button" data-v44-close="1">CONTINUE</button></div>';
+    try{wasPaused=!!(window.state&&window.state.paused);if(window.state)window.state.paused=true}catch(_){}
+    o.classList.add('show');
+    if(head.cls==='bad'){document.body.classList.remove('v44-shake');void document.body.offsetWidth;document.body.classList.add('v44-shake');
+      setTimeout(function(){document.body.classList.remove('v44-shake')},480)}
+    try{playSound(head.cls==='good'?'quest':'crash')}catch(_){}
+    if(timer)clearTimeout(timer);
+    timer=setTimeout(closeRes,6500);
+  }
+  window.v44Result=function(list){
+    if(!list||!list.length)return;
+    try{pqEnqueue('presale',function(){render(list)},7)}catch(_){render(list)}
+  };
+})();
+</script>
