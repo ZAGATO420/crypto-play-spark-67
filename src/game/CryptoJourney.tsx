@@ -14,7 +14,7 @@ type Screen = "start" | "journey" | "portfolio" | "survival" | "end";
 const SAVE_KEY = "tcfb_card_journey_v1";
 const initialState: GameState = { month: 0, cash: 10000, holdings: {}, hunger: 8, stress: 6, xp: 0, streak: 0, trades: 0, muted: false, paused: false, logs: [] };
 
-const valueOf = (state: GameState) => COINS.reduce((sum, coin) => sum + (state.holdings[coin.symbol] ?? 0) * coin.prices[Math.min(state.month, 83)], state.cash);
+const valueOf = (state: GameState) => COINS.reduce((sum, coin) => sum + (state.holdings[coin.symbol] ?? 0) * (coin.prices[Math.min(state.month, 83)] ?? 0), state.cash);
 const pct = (current: number, previous: number) => previous ? ((current / previous) - 1) * 100 : 0;
 
 export function CryptoJourney() {
@@ -23,9 +23,9 @@ export function CryptoJourney() {
   const [coinIndex, setCoinIndex] = useState(0);
   const [result, setResult] = useState<Log | null>(null);
   const [resume, setResume] = useState(false);
-  const coin = COINS[coinIndex];
-  const price = coin.prices[state.month];
-  const previous = coin.prices[Math.max(0, state.month - 1)];
+  const coin = COINS[coinIndex] ?? { symbol: "BTC" as CoinSymbol, name: "Bitcoin", color: "yellow" as const, prices: [0] };
+  const price = coin.prices[state.month] ?? 0;
+  const previous = coin.prices[Math.max(0, state.month - 1)] ?? 0;
   const change = pct(price, previous);
   const level = levelFor(state.xp);
   const nextLevel = XP_LEVELS[Math.min(level, XP_LEVELS.length - 1)] ?? XP_LEVELS.at(-1) ?? 1;
@@ -78,8 +78,9 @@ export function CryptoJourney() {
     const monthEvent = EVENTS[next];
     const title = monthEvent?.title ?? (change >= 0 ? "MONTH SURVIVED" : "DRAWDOWN SURVIVED");
     const detail = monthEvent?.body ?? `${date} closes at ${change >= 0 ? "+" : ""}${change.toFixed(1)}%. Living cost: ${formatMoney(cost)}.`;
-    setState((current) => ({ ...current, month: next, cash: current.cash - cost, hunger: nextHunger, stress: nextStress, xp: current.xp + 120, streak: change >= 0 ? current.streak + 1 : 0, logs: [{ month: next, title, detail, tone: monthEvent?.tone === "danger" ? "pink" : monthEvent?.tone === "boss" ? "yellow" : "cyan" }, ...current.logs].slice(0, 12) }));
-    setResult({ month: next, title, detail, tone: monthEvent?.tone === "danger" ? "pink" : monthEvent?.tone === "boss" ? "yellow" : "cyan" });
+    const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : monthEvent?.tone === "boss" ? "yellow" : "cyan";
+    setState((current) => ({ ...current, month: next, cash: current.cash - cost, hunger: nextHunger, stress: nextStress, xp: current.xp + 120, streak: change >= 0 ? current.streak + 1 : 0, logs: [{ month: next, title, detail, tone }, ...current.logs].slice(0, 12) }));
+    setResult({ month: next, title, detail, tone });
     if (!alive) setScreen("end");
   };
 
@@ -188,7 +189,7 @@ function StartScreen({ resume, onStart, onResume }: { resume: boolean; onStart: 
 
 function Portfolio({ state, onClose, onSelect }: { state: GameState; onClose: () => void; onSelect: (index: number) => void }) {
   const positions = COINS.map((coin, index) => ({ coin, index, qty: state.holdings[coin.symbol] ?? 0 })).filter((item) => item.qty > 0);
-  return <section className="journey-sheet"><div className="sheet-head"><div><p className="journey-kicker">POSITION CARDS</p><h2>YOUR STACK</h2></div><Button variant="ghost" size="icon" aria-label="Close positions" onClick={onClose}><X /></Button></div>{positions.length ? <div className="position-list">{positions.map(({ coin, index, qty }) => <button key={coin.symbol} onClick={() => onSelect(index)} className={`position-card tone-${coin.color}`}><span className={`coin-mark tone-${coin.color}`}>{coin.symbol === "BTC" ? "₿" : coin.symbol[0]}</span><span><strong>{coin.symbol}</strong><small>{qty.toFixed(5)} coins</small></span><b>{formatMoney(qty * coin.prices[state.month])}</b><ChevronRight /></button>)}</div> : <div className="empty-state"><WalletCards /><h3>NO OPEN POSITIONS</h3><p>Return to the journey and buy your first coin.</p></div>}</section>;
+  return <section className="journey-sheet"><div className="sheet-head"><div><p className="journey-kicker">POSITION CARDS</p><h2>YOUR STACK</h2></div><Button variant="ghost" size="icon" aria-label="Close positions" onClick={onClose}><X /></Button></div>{positions.length ? <div className="position-list">{positions.map(({ coin, index, qty }) => <button key={coin.symbol} onClick={() => onSelect(index)} className={`position-card tone-${coin.color}`}><span className={`coin-mark tone-${coin.color}`}>{coin.symbol === "BTC" ? "₿" : coin.symbol[0]}</span><span><strong>{coin.symbol}</strong><small>{qty.toFixed(5)} coins</small></span><b>{formatMoney(qty * (coin.prices[state.month] ?? 0))}</b><ChevronRight /></button>)}</div> : <div className="empty-state"><WalletCards /><h3>NO OPEN POSITIONS</h3><p>Return to the journey and buy your first coin.</p></div>}</section>;
 }
 
 function Survival({ state, onEat, onCalm, onClose }: { state: GameState; onEat: () => void; onCalm: () => void; onClose: () => void }) {
