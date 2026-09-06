@@ -151,9 +151,9 @@ export function CryptoJourney() {
     if (card.kind === "tax") {
       return feedback("TRIBUTE PAID", `${formatMoney(stake)} to the Boss. He nods. Stress drops.`, "yellow", { cash: state.cash - stake, stress: Math.max(0, state.stress - 18), xp: state.xp + Math.round(140 * arch.xp) });
     }
-    if (card.kind === "airdrop") { multi = luck > 0.55 ? 1.8 + Math.random() * 4 : 0.2; title = multi > 1 ? "AIRDROP PRINTED" : "FARM WASTED"; }
-    else if (card.kind === "perp") { multi = luck > 0.5 ? 1.6 + Math.random() * 1.9 : 0; title = multi > 1 ? "PERP IN PROFIT" : "LIQUIDATED"; }
-    else { multi = luck > 0.72 ? 3 + Math.random() * 9 : luck > 0.5 ? 1.3 : 0; title = multi > 2.5 ? "MOONSHOT" : multi > 1 ? "SMALL PUMP" : "RUG PULL"; }
+    if (card.kind === "airdrop") { multi = luck > 0.68 ? 1.8 + Math.random() * 4 : 0.15; title = multi > 1 ? "AIRDROP PRINTED" : "FARMED FOR NOTHING"; }
+    else if (card.kind === "perp") { multi = luck > 0.66 ? 1.6 + Math.random() * 1.9 : 0; title = multi > 1 ? "PERP IN PROFIT" : "LIQUIDATED. OBVIOUSLY."; }
+    else { multi = luck > 0.85 ? 3 + Math.random() * 9 : luck > 0.68 ? 1.25 : 0; title = multi > 2.5 ? "MOONSHOT" : multi > 1 ? "SMALL PUMP" : "RUGGED"; }
     const back = Math.round(stake * multi);
     const win = back > stake;
     feedback(title, `${formatMoney(stake)} staked · ${formatMoney(back)} back · ${win ? "+" : ""}${formatMoney(back - stake)} net.`, win ? "yellow" : "pink", {
