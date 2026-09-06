@@ -14237,7 +14237,9 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       pnl+=pl;risk+=p.margin||0;
       var col=dist<25?'var(--v40-down)':dist<55?'var(--v40-gold)':'var(--v40-acid)';
       var cur=s.prices[p.sym]||p.entry,pct=p.margin?pl/p.margin*100:0;
+      syms.push(p.sym);
       out.push('<div class="v41-row'+(dist<25?' danger':'')+'" data-v41-pos="perp" data-v41-index="'+i+'"><div class="v41-r1">'+mark(p.sym)+
+
         '<b>'+p.sym+' <i>'+p.lev+'x '+p.dir.toUpperCase()+'</i></b>'+
         '<strong class="'+(pl>=0?'v40-up':'v40-down')+'">'+signed(pl)+'<small style="display:block;margin-top:4px">'+signed(pct,'pct')+'</small></strong></div>'+
         '<div class="v41-grid"><div><small>MARGIN</small><b>'+money(p.margin)+'</b></div><div><small>SIZE</small><b>'+money(p.margin*p.lev)+'</b></div><div><small>ENTRY</small><b>$'+px(p.entry)+'</b></div><div><small>MARK</small><b>$'+px(cur)+'</b></div></div>'+
