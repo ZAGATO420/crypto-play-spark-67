@@ -4767,13 +4767,21 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
     '<nav class="v40-bottom" aria-label="Game commands"><button class="v40-nav on" data-v40-view="market">'+icon('<path d="M4 17l5-5 4 3 7-8"/><path d="M15 7h5v5"/>')+'MARKET</button><button class="v40-nav" data-v40-view="chart">'+icon('<path d="M5 19V9m5 10V5m5 14v-7m5 7V8"/>')+'CHART</button><button class="v40-nav month" data-v40-act="month">'+icon('<path d="m6 5 7 7-7 7M13 5l7 7-7 7"/>')+'MONTH</button><button class="v40-nav" data-v40-view="positions">'+icon('<path d="M5 4v16M10 7v10M15 5v14M20 8v9"/>')+'POSITIONS</button><button class="v40-nav" data-v40-act="ops">'+icon('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>')+'OPS</button></nav>';
     host.appendChild(sh);
     sh.addEventListener('click',function(e){
-      var coin=e.target.closest('[data-v40-coin]');if(coin){active=coin.getAttribute('data-v40-coin');paint(true);try{playSound('click')}catch(_){}return}
-      var nav=e.target.closest('[data-v40-view]');if(nav){view=nav.getAttribute('data-v40-view');document.body.setAttribute('data-v40-view',view);sh.querySelectorAll('[data-v40-view]').forEach(function(b){b.classList.toggle('on',b===nav)});paint(true);return}
-      var act=e.target.closest('[data-v40-act]');if(!act)return;var a=act.getAttribute('data-v40-act');
-      if(a==='buy'||a==='sell'){try{if(typeof window.v6Trade==='function'){window.v6Trade(active);if(typeof window.v6Mode==='function')window.v6Mode(a)}else{window.dxOpen(active);window.dxMode(a)}}catch(_){} }
-      else if(a==='perp'){try{if(typeof v17Open==='function')v17Open('perp');else v7PerpDesk()}catch(_){} }
-      else if(a==='month'){try{advanceMonth()}catch(_){} }
-      else if(a==='ops'){try{v17Sections()}catch(_){} }
+      var act=e.target.closest('#v40-shell [data-v40-act]');
+      if(act){
+        var a=act.getAttribute('data-v40-act');
+        try{playSound('click')}catch(_){}
+        if(a==='buy'||a==='sell'){window.v6Trade(active);window.v6Mode(a==='sell'?'sell':'buy');}
+        else if(a==='perp'){window.v6Perp(active);}
+        else if(a==='month'){window.advanceMonth();}
+        else if(a==='ops'){window.v17Sections();}
+        else if(a==='eat'){window.buyItem('food');}
+        else if(a==='calm'){window.buyItem('therapy');}
+        paint(true);return;
+      }
+      var coin=e.target.closest('#v40-shell [data-v40-coin]');if(coin){active=coin.getAttribute('data-v40-coin');paint(true);try{playSound('click')}catch(_){}return}
+      var nav=e.target.closest('#v40-shell .v40-nav[data-v40-view]');
+      if(nav){view=nav.getAttribute('data-v40-view');document.body.setAttribute('data-v40-stage',view);sh.querySelectorAll('.v40-nav[data-v40-view]').forEach(function(b){b.classList.toggle('on',b===nav)});paint(true);}
     });
   }
   function change(sym,s){var now=s.prices[sym]||0,prev=0;try{prev=s.month?getHistPrice(sym,s.month-1):now}catch(_){}return prev>0?(now/prev-1)*100:0}
