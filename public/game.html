@@ -13793,12 +13793,19 @@ body.v39 #v38-strip .obj{border-radius:4px;background:var(--v39-acid)!important}
   }
   function dock(){
     var d=$('v17-dock');if(!d)return false;
+    var icons={
+      month:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 5 7 7-7 7M13 5l7 7-7 7"/></svg>',
+      market:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l5-5 4 3 7-8"/><path d="M15 7h5v5"/></svg>',
+      chart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m5 10V5m5 14v-7m5 7V8"/></svg>',
+      positions:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16M10 7v10M15 5v14M20 8v9"/></svg>',
+      more:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>'
+    };
     var month=d.querySelector('[data-act="month"]');
-    if(month)month.innerHTML='<span class="di">▶</span>MONTH';
-    var market=d.querySelector('[data-view="market"]');if(market)market.innerHTML='<span class="di">⌁</span>MARKET';
-    var chart=d.querySelector('[data-view="chart"]');if(chart)chart.innerHTML='<span class="di">⌁</span>CHART';
-    var pos=d.querySelector('[data-act="positions29"]');if(pos)pos.innerHTML='<span class="di">▥</span>POSITIONS';
-    var more=d.querySelector('[data-act="more29"]');if(more)more.innerHTML='<span class="di">＋</span>MORE';
+    if(month&&month.dataset.v39icon!=='1'){month.innerHTML='<span class="di">'+icons.month+'</span>MONTH';month.dataset.v39icon='1'}
+    var market=d.querySelector('[data-view="market"]');if(market&&market.dataset.v39icon!=='1'){market.innerHTML='<span class="di">'+icons.market+'</span>MARKET';market.dataset.v39icon='1'}
+    var chart=d.querySelector('[data-view="chart"]');if(chart&&chart.dataset.v39icon!=='1'){chart.innerHTML='<span class="di">'+icons.chart+'</span>CHART';chart.dataset.v39icon='1'}
+    var pos=d.querySelector('[data-act="positions29"]');if(pos&&pos.dataset.v39icon!=='1'){pos.innerHTML='<span class="di">'+icons.positions+'</span>POSITIONS';pos.dataset.v39icon='1'}
+    var more=d.querySelector('[data-act="more29"]');if(more&&more.dataset.v39icon!=='1'){more.innerHTML='<span class="di">'+icons.more+'</span>MORE';more.dataset.v39icon='1'}
     return true;
   }
   function clearLegacyHints(){
