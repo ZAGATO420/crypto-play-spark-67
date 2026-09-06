@@ -1,6 +1,9 @@
-# Crypto Card Journey rebuild
+# THE CYCLE (2020–2026) rebuild
 
-- [x] Lock visual direction and simplify the monthly loop
-- [x] Replace the iframe terminal with one responsive Card Journey UI
-- [x] Connect historical prices, trading, survival, XP, save/resume and end state
-- [x] Validate full interaction flow and all target viewports
+- [x] 28 quarter chapters, 2 moves each, boss briefing + market answer
+- [x] Spot, perps (2x/5x/10x), presales/fairlaunch, survival (EAT/CALM)
+- [x] Always-visible position book with P&L and liquidation bar
+- [x] Self-closing popups for market, trade, position, presale, survival, decisions
+- [x] Historical decision cards with lasting statuses and multiple endings
+- [x] Boss Score replaces XP in the leaderboard (fresh season, cheat gate)
+- [x] Clean retro visual system, tested 390px and 1280px, no overflow/errors
