@@ -168,31 +168,50 @@ export function CryptoJourney() {
     });
   };
 
+  const resolveDecision = (option: DecisionOption) => {
+    const card = decision;
+    if (!card) return;
+    setDecision(null);
+    const holdings: Holding = { ...state.holdings };
+    if (option.bagMul !== undefined) for (const c of COINS) if (holdings[c.symbol]) holdings[c.symbol] = (holdings[c.symbol] ?? 0) * option.bagMul;
+    const cash = Math.max(0, Math.round(state.cash * (option.cashMul ?? 1) + (option.cash ?? 0)));
+    feedback(option.label, option.result, option.tone === "win" ? "yellow" : option.tone === "danger" ? "pink" : "cyan", {
+      cash,
+      holdings,
+      xp: state.xp + Math.round((option.xp ?? 200) * arch.xp),
+      stress: Math.max(0, Math.min(100, state.stress + Math.round((option.stress ?? 0) * arch.risk))),
+      hunger: Math.max(0, Math.min(100, state.hunger + (option.hunger ?? 0))),
+      wins: state.wins + (option.tone === "win" ? 1 : 0),
+    });
+  };
+
   const nextMonth = () => {
     if (state.paused) return feedback("RUN PAUSED", "Resume the clock before moving forward.", "pink");
+    if (decision) return feedback("HISTORY IS WAITING", `${decision.title} — pick a side. The market moves either way.`, "pink");
     if (chance) return feedback("DECIDE FIRST", `${chance.title} is still on the table. Take it or pass.`, "pink");
-    if (!call) return feedback("CALL THE MARKET", "Say where crypto goes next month: PUMP or DUMP. No spectators.", "yellow");
     if (state.month >= 83) return setScreen("end");
     const next = state.month + 1;
     const netStart = round.netStart || net;
     const nextPulse = pct(priceAt("BTC", next, state.noise), priceAt("BTC", state.month, state.noise));
-    const callRight = call === "up" ? nextPulse >= 0 : nextPulse < 0;
-    const combo = callRight ? state.streak + 1 : 0;
+    const called = call !== null;
+    const callRight = called && (call === "up" ? nextPulse >= 0 : nextPulse < 0);
+    const combo = callRight ? state.streak + 1 : called ? 0 : state.streak;
     const cost = Math.round((260 + Math.floor(next / 12) * 90) * diff.cost);
     const nextHunger = Math.min(100, state.hunger + Math.round(13 * arch.risk));
-    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 6 : 17) * arch.risk));
+    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 6 : called ? 17 : 10) * arch.risk));
 
     const preview: GameState = { ...state, month: next };
     const netEnd = valueOf(preview);
     const markets = COINS.filter((c) => (state.holdings[c.symbol] ?? 0) > 0).length;
-    const missionOk = mission.check({ netStart, netEnd, buys: round.buys, sells: round.sells, markets, spent: 0, called: true, callRight });
+    const missionOk = mission.check({ netStart, netEnd, buys: round.buys, sells: round.sells, markets, spent: 0, called, callRight });
     const bonus = (missionOk ? mission.reward : 0) + (callRight ? 200 * Math.min(5, combo) : 0);
     const xpGain = Math.round((120 + (callRight ? 250 + combo * 60 : 0) + (missionOk ? 300 : 0)) * arch.xp);
 
     const monthEvent = EVENTS[next];
-    const title = monthEvent?.title ?? (callRight ? `CALL HIT · COMBO x${combo}` : "CALL MISSED");
-    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callRight ? "You read the tape. Enjoy it, it won't last." : "Wrong. The market doesn't care about your feelings."} ${missionOk ? `Boss order cleared: +${formatMoney(mission.reward)}.` : "Boss order failed. He noticed."} Rent and ramen: ${formatMoney(cost)}.`;
-    const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : callRight || missionOk ? "yellow" : "pink";
+    const title = monthEvent?.title ?? (callRight ? `CALL HIT · COMBO x${combo}` : called ? "CALL MISSED" : "MONTH CLOSED");
+    const callLine = callRight ? "You read the tape. Enjoy it, it won't last." : called ? "Wrong. The market doesn't care about your feelings." : "No call this month. Watching is free, it just pays nothing.";
+    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callLine} ${missionOk ? `Boss order cleared: +${formatMoney(mission.reward)}.` : "Boss order failed. He noticed."} Rent and ramen: ${formatMoney(cost)}.`;
+    const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : callRight || missionOk ? "yellow" : "cyan";
 
     const nextState: GameState = { ...state, month: next, cash: state.cash - cost + bonus, hunger: nextHunger, stress: nextStress, xp: state.xp + xpGain, streak: combo, wins: state.wins + (missionOk ? 1 : 0), logs: [{ month: next, title, detail, tone }, ...state.logs].slice(0, 14) };
     setState(nextState);
@@ -202,7 +221,9 @@ export function CryptoJourney() {
     setRound({ buys: 0, sells: 0, netStart: valueOf(nextState) });
     const alive = nextHunger < 100 && nextStress < 100 && valueOf(nextState) > 0;
     if (!alive) return setScreen("end");
-    if (monthEvent || Math.random() < 0.6) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
+    const historyCard = decisionFor(next);
+    if (historyCard) { setDecision(historyCard); setResult(null); return; }
+    if (Math.random() < 0.5) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
   };
 
   const recover = (kind: "eat" | "calm") => {
