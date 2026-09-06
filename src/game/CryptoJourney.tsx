@@ -51,6 +51,7 @@ type Dialog =
   | { k: "presale"; card: Presale }
   | { k: "launchResult"; res: LaunchResult }
   | { k: "survive" }
+  | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
   | { k: "crash"; chapter: number }
