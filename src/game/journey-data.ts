@@ -469,3 +469,51 @@ export const situationFor = (chapter: number) => SITUATIONS.find((s) => s.chapte
 
 // every historical decision, mapped to the chapter it belongs to
 export const decisionForChapter = (chapter: number) => DECISIONS.find((d) => chapterOfMonth(d.month) === chapter);
+
+// ---- V48: custody, life, tax, strategy --------------------------------------
+
+export type CustodyId = "exchange" | "hot" | "cold";
+export const CUSTODY: { id: CustodyId; name: string; short: string; blurb: string; fee: number; drain: number; risk: number }[] = [
+  { id: "exchange", name: "EXCHANGE", short: "CEX", blurb: "Instant trades, zero friction — and somebody else holds your coins when they blow up.", fee: 0.001, drain: 0, risk: 1 },
+  { id: "hot", name: "HOT WALLET", short: "HOT", blurb: "Your keys, your gas. A bad signature can still cost you a slice of the bag.", fee: 0.006, drain: 0.07, risk: 0 },
+  { id: "cold", name: "LEDGER (COLD)", short: "COLD", blurb: "Untouchable by exchanges and drainers. Selling costs an extra move and fills a quarter late.", fee: 0.002, drain: 0, risk: 0 },
+];
+export const custodyOf = (id: CustodyId) => CUSTODY.find((c) => c.id === id) ?? CUSTODY[0]!;
+
+/** Real counterparty failures: everything still sitting on an exchange takes the hit. */
+export const EXCHANGE_FAILURES: Record<number, { name: string; line: string; haircut: number }> = {
+  9: { name: "CELSIUS FREEZES WITHDRAWALS", line: "The 9% yield desk stops paying. Customer coins are now bankruptcy claims.", haircut: 0.45 },
+  11: { name: "FTX GOES TO ZERO", line: "The second biggest exchange was a hole in the ground. Balances are gone.", haircut: 0.85 },
+  21: { name: "MID-TIER CEX HALTS", line: "'Temporary maintenance.' The domain expires two weeks later.", haircut: 0.35 },
+};
+export const failureFor = (chapter: number) => EXCHANGE_FAILURES[chapter];
+
+export type JobId = "dayjob" | "parttime" | "fulltime";
+export const JOBS: { id: JobId; name: string; income: number; stress: number; ap: number; blurb: string }[] = [
+  { id: "dayjob", name: "DAY JOB", income: 5200, stress: 8, ap: 0, blurb: "Boring salary every quarter. Keeps you alive when the market doesn't." },
+  { id: "parttime", name: "PART TIME", income: 2600, stress: 4, ap: 0, blurb: "Half the money, half the boss, more screen time for charts." },
+  { id: "fulltime", name: "FULL TIME TRADER", income: 0, stress: 12, ap: 1, blurb: "No paycheck ever again. One extra move per quarter. Pure ego." },
+];
+export const jobOf = (id: JobId) => JOBS.find((j) => j.id === id) ?? JOBS[0]!;
+
+export type HousingId = "parents" | "shared" | "flat" | "penthouse";
+export const HOUSING: { id: HousingId; name: string; rent: number; calm: number; blurb: string }[] = [
+  { id: "parents", name: "MUM'S BASEMENT", rent: 300, calm: -6, blurb: "Almost free. Everyone has an opinion about your charts." },
+  { id: "shared", name: "SHARED FLAT", rent: 1400, calm: 0, blurb: "Normal rent, normal noise, normal life." },
+  { id: "flat", name: "OWN FLAT", rent: 3200, calm: 7, blurb: "Quiet, yours, expensive. Stress drops every quarter." },
+  { id: "penthouse", name: "PENTHOUSE", rent: 9000, calm: 14, blurb: "Pure flex. Costs more than most people's runs are worth." },
+];
+export const housingOf = (id: HousingId) => HOUSING.find((h) => h.id === id) ?? HOUSING[1]!;
+
+export const TAX_RATE = 0.27;
+export const isTaxChapter = (chapter: number) => chapter > 0 && chapter % 4 === 0;
+
+export const XP_EXTRA = { minigamePerfect: 260, minigameOk: 120, custody: 180, escape: 520, life: 150 } as const;
+
+/** The knowledge nudges: a whisper, never an arrow. */
+export const HINTS: Record<number, string> = {
+  8: "A lending desk is advertising 9% on your coins. Everyone you know already moved their stack there.",
+  10: "A large exchange keeps posting screenshots of its 'audited' balance sheet.",
+  20: "Withdrawal times on your exchange got noticeably slower this month.",
+};
+export const hintFor = (chapter: number) => HINTS[chapter];
