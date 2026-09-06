@@ -13088,6 +13088,9 @@ body.v25-end.v26 #global-submit-btn{
 #v26-done .b{color:#e6ff70!important;font-family:'Russo One',sans-serif!important}
 
 /* --- primary actions right under the claim block ----------------------- */
+body.v25-end .end-head{position:relative;z-index:2;margin-top:12px!important;text-align:center}
+body.v25-end .rank-badge{border-radius:999px!important;font:900 10.5px/1 'JetBrains Mono',monospace!important;letter-spacing:.16em!important;text-transform:uppercase}
+body.v25-end .end-msg{color:#a9bbc1!important;font-size:12.5px}
 #v36-actions{position:relative;z-index:2;margin:12px 0 2px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #v36-actions .end-btn{
   height:52px!important;width:100%;border-radius:8px!important;
@@ -13142,6 +13145,9 @@ body.v25-end #v25-jump button{
     document.body.classList.toggle('v36-rekt',!!(card&&card.classList.contains('rekt')));
 
     var host=es.querySelector('.end-card');if(!host)return;
+    /* rank + message belong to the headline, not to the bottom of the page */
+    var head=host.querySelector('.end-head'),setup=$('v26-setup');
+    if(head&&setup&&setup.parentNode===host&&setup.nextElementSibling!==head)host.insertBefore(head,setup.nextSibling);
     var actions=host.querySelector('.end-actions');
     var slot=$('v36-actions');
     if(actions&&!slot){
