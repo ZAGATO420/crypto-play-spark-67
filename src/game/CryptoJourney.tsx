@@ -481,7 +481,7 @@ function Meter({ label, value, icon, tone, detail }: { label: string; value: num
   );
 }
 
-function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
+function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (() => void) | undefined }) {
   return (
     <div className="cy-scrim" role="dialog" aria-modal="true">
       <div className="cy-sheet">

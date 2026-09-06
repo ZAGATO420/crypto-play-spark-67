@@ -12,6 +12,7 @@ export type BoardRow = {
   rank: string;
   months: number;
   survived: boolean;
+  score: number;
 };
 
 export type RunSubmission = {
@@ -28,6 +29,7 @@ export type RunSubmission = {
   achievements: number;
   trades: number;
   survived: boolean;
+  score: number;
   avatar?: string;
 };
 
