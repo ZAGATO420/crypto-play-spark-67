@@ -32,6 +32,12 @@ const RANKS = [
   "Achievement Hunter",
   "Made It",
   "Unknown",
+  "Certified Degen",
+  "Chart Addict",
+  "Profit Taker",
+  "Diamond Hands",
+  "Hodl Survivor",
+  "Cycle Survivor",
 ];
 
 const COUNTRIES = ["DE", "USA", "CH", "SG", "PT", "NG"] as const;
