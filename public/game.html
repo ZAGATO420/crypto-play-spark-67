@@ -14304,6 +14304,14 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
 .v42-btn:disabled{opacity:.45;cursor:not-allowed}
 .v42-btn:active{transform:translateY(1px)}
 #v42-deck{display:none}
+body.v40-live #v4-bar{display:none!important}
+.v42-time{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.v42-day{min-width:150px}
+.v42-day small{display:flex;justify-content:space-between;font:700 8px/1 monospace;color:var(--v40-muted)}
+.v42-daybar{margin-top:4px;height:5px;border:1px solid rgba(88,196,255,.24);background:#04101f}
+.v42-daybar i{display:block;height:100%;background:var(--v40-cyan);transition:width .4s linear}
+.v42-tbtn{min-height:36px;padding:0 12px;border:1px solid var(--v40-line);background:#0a1c33;color:var(--v40-cyan);font:700 10px/1 'Hind',sans-serif;cursor:pointer}
+.v42-tbtn:hover{border-color:rgba(89,213,255,.6);background:#102a48}
 @media(min-width:821px){
   #v42-deck{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;margin:0 10px 9px;
     padding:8px 10px;border:1px solid var(--v40-line);background:linear-gradient(100deg,#0c2440,#06162a)}
@@ -14348,8 +14356,12 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       var ws=sh.querySelector('.v40-workspace');
       if(ws){
         var d=document.createElement('div');d.id='v42-deck';
-        d.innerHTML='<div class="v42-tiles">'+DECK.map(function(x){
-            return '<button class="v42-tile" data-v42-open="'+x[0]+'">'+x[1]+'<b data-v42-c="'+x[0]+'"></b></button>'}).join('')+'</div>'+
+        d.innerHTML='<div><div class="v42-time">'+
+          '<div class="v42-day"><small><span id="v42-dl">DAY 1 / 30</span><span id="v42-ml">MONTH 1 / 84</span></small><div class="v42-daybar"><i id="v42-df"></i></div></div>'+
+          '<button class="v42-tbtn" data-v42-pause="1" id="v42-pause">PAUSE</button>'+
+          '<button class="v42-tbtn" data-v42-week="1">&#9654;&#9654; WEEK</button></div>'+
+          '<div class="v42-tiles">'+DECK.map(function(x){
+            return '<button class="v42-tile" data-v42-open="'+x[0]+'">'+x[1]+'<b data-v42-c="'+x[0]+'"></b></button>'}).join('')+'</div></div>'+
           '<button class="v42-month" data-v42-month="1">NEXT MONTH &raquo;</button>';
         ws.parentNode.insertBefore(d,ws.nextSibling);
       }
@@ -14377,7 +14389,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
     if(!build())return;
     var hu=Math.max(0,Math.min(100,s.hunger||0)),st=Math.max(0,Math.min(100,s.stress||0));
     var fp=0,tp=0;try{fp=itemPrice('food');tp=itemPrice('therapy')}catch(e){}
-    var sig=[Math.round(hu),Math.round(st),fp,tp,Math.round(s.cash),s.month].join('|');
+    var sig=[Math.round(hu),Math.round(st),fp,tp,Math.round(s.cash),s.month,s.day,!!s.paused].join('|');
     if(sig===lastSig)return;lastSig=sig;
     function col(v){return v>75?'var(--v40-down)':v>50?'var(--v40-gold)':'var(--v40-acid)'}
     var hb=$('v42-hbar'),sb=$('v42-sbar');
@@ -14393,6 +14405,13 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       warnedMonth=s.month;
       try{if(typeof toast==='function')toast(hu>st?'Hunger critical — EAT now or the run ends.':'Stress critical — CALM down before you snap.','warn')}catch(e){}
     }
+    if($('v42-dl')){
+      var day=Math.min(30,(s.day||0)+1);
+      $('v42-dl').textContent='DAY '+day+' / 30';
+      $('v42-ml').textContent='MONTH '+Math.min(84,(s.month||0)+1)+' / 84';
+      $('v42-df').style.width=(day/30*100).toFixed(0)+'%';
+      $('v42-pause').textContent=s.paused?'RESUME':'PAUSE';
+    }
     var c=counts();
     DECK.forEach(function(x){var el=document.querySelector('[data-v42-c="'+x[0]+'"]');if(el)el.textContent=c[x[0]]?c[x[0]]:''});
   }
@@ -14400,6 +14419,10 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
   document.addEventListener('click',function(e){
     var o=e.target.closest('[data-v42-open]');
     if(o){e.preventDefault();try{window.v17Open(o.getAttribute('data-v42-open'))}catch(_){}return}
+    var pz=e.target.closest('[data-v42-pause]');
+    if(pz){e.preventDefault();try{togglePause()}catch(_){}lastSig='';return}
+    var wk=e.target.closest('[data-v42-week]');
+    if(wk){e.preventDefault();try{advanceWeek()}catch(_){}lastSig='';return}
     var m=e.target.closest('[data-v42-month]');
     if(m){e.preventDefault();try{window.advanceMonth()}catch(_){}return}
     var b=e.target.closest('#v42-surv [data-v40-act]');
