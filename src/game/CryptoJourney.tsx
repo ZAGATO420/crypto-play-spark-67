@@ -188,7 +188,7 @@ export function CryptoJourney() {
 
     const monthEvent = EVENTS[next];
     const title = monthEvent?.title ?? (callRight ? `CALL HIT · COMBO x${combo}` : "CALL MISSED");
-    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callRight ? "Your read paid." : "The tape punished you."} ${missionOk ? `Mission cleared: +${formatMoney(mission.reward)}.` : "Mission failed."} Living cost ${formatMoney(cost)}.`;
+    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callRight ? "You read the tape. Enjoy it, it won't last." : "Wrong. The market doesn't care about your feelings."} ${missionOk ? `Boss order cleared: +${formatMoney(mission.reward)}.` : "Boss order failed. He noticed."} Rent and ramen: ${formatMoney(cost)}.`;
     const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : callRight || missionOk ? "yellow" : "pink";
 
     const nextState: GameState = { ...state, month: next, cash: state.cash - cost + bonus, hunger: nextHunger, stress: nextStress, xp: state.xp + xpGain, streak: combo, wins: state.wins + (missionOk ? 1 : 0), logs: [{ month: next, title, detail, tone }, ...state.logs].slice(0, 14) };
