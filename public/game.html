@@ -14650,9 +14650,21 @@ body.v44-shake{animation:v44Shake .42s ease-in-out}
     if(timer)clearTimeout(timer);
     timer=setTimeout(closeRes,6500);
   }
+  function overlayOpen(){
+    return ['event-overlay','presale-overlay','decision-overlay','settings-overlay','mini-overlay','levelup-overlay']
+      .some(function(id){var e=$(id);return e&&!e.classList.contains('hidden')&&getComputedStyle(e).display!=='none'});
+  }
   window.v44Result=function(list){
     if(!list||!list.length)return;
-    try{pqEnqueue('presale',function(){render(list)},7)}catch(_){render(list)}
+    var done=false;
+    function go(){if(done)return;done=true;render(list)}
+    try{pqEnqueue('presale',go,7)}catch(_){go();return}
+    /* safety net: if the popup queue is blocked, still show the moment */
+    var tries=0;
+    var t=setInterval(function(){
+      if(done||++tries>20){clearInterval(t);return}
+      if(!overlayOpen()&&!$('v44-res')){clearInterval(t);go()}
+    },700);
   };
 })();
 </script>
