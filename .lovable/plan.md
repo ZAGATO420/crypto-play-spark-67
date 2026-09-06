@@ -2,18 +2,25 @@
 
 ## 1. Echte Musik statt Geräusche
 
-Aktuell hat das Spiel keinerlei Ton — es gibt im Code keine einzige Audio-Zeile. Neu kommt richtige, produzierte Musik:
+Aktuell hat das Spiel keinerlei Ton — es gibt im Code keine einzige Audio-Zeile. Neu kommt richtige, produzierte Musik in Hip-Hop-Richtung, glasklar gemastert:
 
-- **Zwei Loops** (je ca. 60–90 s, sauber schleifend, dunkler Synthwave im Boss-Ton):
-  - `MENU` — Startbild, Setup, Bestenliste, Endscreen
-  - `RUN` — während des Runs, treibender
+- **Zwei Loops** (je ca. 60–90 s, sauber schleifend, moderner Boom-Bap/Lo-Fi-Hip-Hop mit sattem Sub-Bass, knackigen Drums, dezenten Neon-Keys — clean, kein Rauschteppich):
+  - `MENU` — Startbild, Setup, Bestenliste, Endscreen: entspannter Groove
+  - `RUN` — während des Runs: härterer Beat, mehr Druck
 - Wechsel immer per weichem Übergang (2 s), niemals harter Schnitt.
 - Musik startet erst beim ersten Tippen/Klicken (Browser erlauben Ton nicht vorher), pausiert bei inaktivem Tab.
 - Kein generiertes Gepiepse und keine synthetischen Zufallstöne — nur die fertigen Musikdateien.
 
-## 2. Dezente Klänge für Aktionen
+## 2. HD-Sounds für alle Aktionen
 
-Sparsam und sauber, keine schrillen Töne: Kauf/Verkauf, Erfolg (Level-Up, guter Launch), Warnung (Crash, Liquidation), kurzer Tick bei Auswahl. Alles echte kurze Sounds, leise gemischt.
+Für jede Aktion ein sauberer, knackiger Sound (echte Aufnahmen/produzierte Effekte, nicht synthetisches Piepsen) — passend zum Hip-Hop-Ton, glasklar und kurz:
+
+- Kauf und Verkauf: satter Cash-/Klick-Hit
+- Guter Launch, Level-Up, Streak: hell aufsteigender Erfolgs-Sound mit Tail
+- Crash, Liquidation, Exchange-Ausfall: tiefer Sub-Impact mit kurzem Alarm
+- Essen/Beruhigen, Verwahrungs-Wechsel, Quartalsende: eigene, klar unterscheidbare Klänge
+- Karten-/Menü-Auswahl und Minigame-Treffer: knappe, leise UI-Klicks (kein Ermüdungsfaktor)
+
 
 ## 3. Ton-Regler
 
