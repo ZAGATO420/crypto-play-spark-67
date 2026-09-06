@@ -155,6 +155,7 @@ export function CryptoJourney() {
   const xpBar = xpProgress(run.xp);
 
   useEffect(() => { if (localStorage.getItem(SAVE_KEY)) setResume(true); }, []);
+  useEffect(() => { void setTrack(screen === "run" ? "run" : "menu"); }, [screen]);
   useEffect(() => {
     if (screen !== "run" || cfg.ironman) return;
     localStorage.setItem(SAVE_KEY, JSON.stringify({ run, phase, ap }));
@@ -742,6 +743,12 @@ export function CryptoJourney() {
       {dialog && (
         <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
+          {dialog.k === "sound" && <SoundSheet
+            muted={muted} vols={vols}
+            onMute={(v) => { setMuted(v); setMutedState(v); }}
+            onMusic={(v) => { setMusicVol(v); setVols(getVolumes()); }}
+            onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
+            onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
           {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => setDialog({ k: "trade", symbol: s })} />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
@@ -828,6 +835,31 @@ function Rules({ onClose }: { onClose: () => void }) {
       </ol>
       <Button className="cy-primary" onClick={onClose}>LET ME TRADE</Button>
     </>
+  );
+}
+
+function SoundSheet({ muted, vols, onMute, onMusic, onSfx, onClose }: { muted: boolean; vols: { musicVol: number; sfxVol: number }; onMute: (v: boolean) => void; onMusic: (v: number) => void; onSfx: (v: number) => void; onClose: () => void }) {
+  return (
+    <div className="sheet-body">
+      <h3 className="sheet-title">SOUND</h3>
+      <p className="sheet-note">Two produced hip-hop loops and clean action sounds. Set it once, it stays.</p>
+      <div className="sound-rows">
+        <label className="sound-row">
+          <span>MUSIC</span>
+          <input type="range" min={0} max={1} step={0.05} value={vols.musicVol} onChange={(e) => onMusic(Number(e.target.value))} aria-label="Music volume" />
+          <b>{Math.round(vols.musicVol * 100)}%</b>
+        </label>
+        <label className="sound-row">
+          <span>EFFECTS</span>
+          <input type="range" min={0} max={1} step={0.05} value={vols.sfxVol} onChange={(e) => onSfx(Number(e.target.value))} aria-label="Effect volume" />
+          <b>{Math.round(vols.sfxVol * 100)}%</b>
+        </label>
+      </div>
+      <div className="sheet-actions">
+        <Button variant={muted ? "default" : "outline"} onClick={() => onMute(!muted)}>{muted ? <><Volume2 />SOUND ON</> : <><VolumeX />MUTE ALL</>}</Button>
+        <Button onClick={onClose}>DONE</Button>
+      </div>
+    </div>
   );
 }
 
@@ -1172,6 +1204,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
           {rows.map((r) => (
             <div className="board-row" key={`${r.pos}-${r.name}`}>
               <b>#{r.pos}</b>
+              <img className="board-face" src={AVATARS.find((a) => a.id === r.avatar)?.url ?? AVATARS[0]!.url} alt="" loading="lazy" />
               <Flag code={r.country} size={22} />
               <span><strong>{r.name}</strong><small>{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
               <i>{(r.score ?? 0).toLocaleString("en-US")}</i>
