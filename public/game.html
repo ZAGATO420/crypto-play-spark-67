@@ -14779,3 +14779,54 @@ body.v40-live .v40-nav.on{background:linear-gradient(180deg,#123654,#0a213a);box
  body.v40-live .v40-order{display:none!important}
 }
 </style>
+<style id="v46-feedback-css">
+/* V46 — every action answers, win or blocked. */
+#v46-flash{position:fixed;left:50%;top:14%;transform:translate(-50%,-8px);z-index:2200;width:min(420px,92vw);
+ padding:14px 16px;border-radius:14px;border:2px solid #ffb020;background:linear-gradient(160deg,#22160a,#0a1420 70%);
+ box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:inherit;opacity:0;pointer-events:none;transition:opacity .16s,transform .16s}
+#v46-flash.on{opacity:1;transform:translate(-50%,0)}
+#v46-flash.good{border-color:#bfff2e}
+#v46-flash .k{font-size:10px;letter-spacing:.16em;font-weight:900;color:#ffb020}
+#v46-flash.good .k{color:#bfff2e}
+#v46-flash .t{margin-top:5px;font-size:16px;font-weight:900;color:#fff;line-height:1.25}
+#v46-flash .s{margin-top:5px;font-size:12px;color:#9fb6cc;line-height:1.35}
+#v46-last{display:flex;align-items:center;gap:8px;margin:0 10px 6px;padding:7px 10px;border-radius:9px;
+ border:1px solid rgba(103,221,255,.24);background:linear-gradient(90deg,#08243c,#061526);min-height:34px}
+#v46-last b{font-size:9px;letter-spacing:.14em;color:#67ddff;flex:0 0 auto}
+#v46-last span{font-size:11px;font-weight:700;color:#e7f2ff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v46-last.bad{border-color:rgba(255,120,90,.5)}#v46-last.bad span{color:#ffb2a0}
+#v46-last.good{border-color:rgba(191,255,46,.45)}#v46-last.good span{color:#dcffa0}
+</style>
+<script id="v46-feedback-js">
+(function(){
+  var BAD=/not enough|no cash|too|denied|blocked|can.?t|cannot|failed|gone|over|locked|already|invalid|missing|needs/i;
+  function el(){var f=document.getElementById('v46-flash');
+    if(!f){f=document.createElement('div');f.id='v46-flash';
+      f.innerHTML='<div class="k"></div><div class="t"></div><div class="s"></div>';document.body.appendChild(f)}
+    return f}
+  var hide;
+  window.v46Flash=function(kind,title,sub){
+    var f=el();f.className=(kind==='good'?'good ':'')+'on';
+    f.querySelector('.k').textContent=kind==='good'?'ACTION CONFIRMED':'ACTION BLOCKED';
+    f.querySelector('.t').textContent=String(title||'');
+    f.querySelector('.s').textContent=String(sub||(kind==='good'?'':'Fix the reason above, then try again.'));
+    try{if(typeof playSound==='function')playSound(kind==='good'?'click':'error')}catch(_){}
+    clearTimeout(hide);hide=setTimeout(function(){f.classList.remove('on')},kind==='good'?1500:2900)};
+  function bar(){var b=document.getElementById('v46-last');
+    if(!b){var host=document.getElementById('v42-surv')||document.getElementById('v41-prog');if(!host||!host.parentNode)return null;
+      b=document.createElement('div');b.id='v46-last';b.innerHTML='<b>LAST ACTION</b><span>Pick a coin and trade – every action reports back here.</span>';
+      host.parentNode.insertBefore(b,host.nextSibling)}
+    return b}
+  setInterval(bar,500);
+  var prev=window.toast;
+  window.toast=function(msg,kind){
+    var m=String(msg||'');
+    var bad=kind==='sell'||kind==='rug'||kind==='bad'||kind==='warn';
+    try{
+      var b=bar();
+      if(b){b.className=bad?'bad':(kind==='buy'||kind==='good'?'good':'');b.querySelector('span').textContent=m}
+      if(bad&&BAD.test(m))window.v46Flash('bad',m);
+    }catch(_){}
+    if(typeof prev==='function')return prev.apply(this,arguments)};
+})();
+</script>
