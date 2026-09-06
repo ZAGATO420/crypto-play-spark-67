@@ -293,7 +293,7 @@ export function CryptoJourney() {
               </div>
 
               <div className="trade-bar">
-                <div className="trade-focus"><span className={`coin-mark tone-${coin.color}`}>{coin.symbol === "BTC" ? "₿" : coin.symbol[0]}</span><span><strong>{coin.symbol}</strong><small>{price ? formatMoney(price) : "not live"} · {change >= 0 ? "+" : ""}{change.toFixed(1)}%</small></span></div>
+                <div className="trade-focus"><CoinMark symbol={coin.symbol} size={40} /><span><strong>{coin.symbol}</strong><small>{price ? formatMoney(price) : "not live"} · {change >= 0 ? "+" : ""}{change.toFixed(1)}%</small></span></div>
                 <div className="trade-buttons">
                   <Button variant="secondary" disabled={ap <= 0} onClick={() => buy(0.25)}>BUY 25%</Button>
                   <Button disabled={ap <= 0} onClick={() => buy(0.5)}>BUY 50%</Button>
