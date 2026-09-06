@@ -1335,11 +1335,12 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
         </div>
         {run.statuses.length > 0 && <div className="cy-status-row">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
         <div className="start-actions">
-          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : "CLAIM YOUR RANK"}</Button>
+          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "error" ? "TRY AGAIN" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="secondary" onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
         </div>
-        {status === "error" && <small>The board rejected this run. Your local result still stands.</small>}
+        {status === "error" && <small>The board did not answer. Tap TRY AGAIN — your result stays right here.</small>}
+
       </section>
     </main>
   );
