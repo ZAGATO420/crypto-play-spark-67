@@ -14259,7 +14259,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
         '<div class="v41-grid"><div><small>VALUE</small><b>'+money(val)+'</b></div><div><small>AVG ENTRY</small><b>$'+px(avg)+'</b></div><div><small>MARK</small><b>$'+px(cur)+'</b></div><div><small>UNREALISED</small><b>'+signed(gain)+'</b></div></div>'+
         '<div class="v41-card-actions"><button class="hot" data-v41-buy="'+c.s+'">BUY MORE</button><button class="danger" data-v41-sell="'+c.s+'">SELL</button><button data-v41-spot="'+c.s+'">OPEN TRADE</button></div></div>');
     })}catch(_){}
-    return {items:out,n:out.length,pnl:clean(pnl),risk:risk};
+    return {items:out,n:out.length,pnl:clean(pnl),risk:risk,syms:syms};
   }
 
   function feedHtml(){
