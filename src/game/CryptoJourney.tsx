@@ -119,23 +119,23 @@ export function CryptoJourney() {
   const spendAp = () => setAp((a) => Math.max(0, a - 1));
 
   const buy = (fraction: number) => {
-    if (ap <= 0) return feedback("NO MOVES LEFT", "You used all 3 moves. Call the market and close the month.", "pink");
-    if (!price) return feedback("NOT LAUNCHED", `${coin.name} does not trade in ${date}.`, "pink");
+    if (ap <= 0) return feedback("OUT OF MOVES", "Three moves a month, that was the deal. Call the market and take your beating.", "pink");
+    if (!price) return feedback("NOT INVENTED YET", `${coin.name} does not exist in ${date}. Time travel has rules.`, "pink");
     const spend = Math.floor(state.cash * fraction);
-    if (spend < 25) return feedback("BUY BLOCKED", "You need at least $25 cash.", "pink");
+    if (spend < 25) return feedback("TOO POOR", "Under $25. The Boss has more in his couch cushions.", "pink");
     spendAp();
     setRound((r) => ({ ...r, buys: r.buys + 1 }));
-    feedback("POSITION OPENED", `${formatMoney(spend)} into ${coin.symbol} at ${formatMoney(price)}.`, "cyan", { cash: state.cash - spend, holdings: { ...state.holdings, [coin.symbol]: (state.holdings[coin.symbol] ?? 0) + spend / price }, xp: state.xp + Math.round(90 * arch.xp), trades: state.trades + 1 });
+    feedback("YOU'RE IN", `${formatMoney(spend)} into ${coin.symbol} at ${formatMoney(price)}. Pray.`, "cyan", { cash: state.cash - spend, holdings: { ...state.holdings, [coin.symbol]: (state.holdings[coin.symbol] ?? 0) + spend / price }, xp: state.xp + Math.round(90 * arch.xp), trades: state.trades + 1 });
   };
 
   const sell = () => {
-    if (ap <= 0) return feedback("NO MOVES LEFT", "You used all 3 moves this month.", "pink");
+    if (ap <= 0) return feedback("OUT OF MOVES", "You clicked your month away. Lock it in.", "pink");
     const qty = state.holdings[coin.symbol] ?? 0;
-    if (!qty) return feedback("NOTHING TO SELL", `You do not own ${coin.symbol}.`, "pink");
+    if (!qty) return feedback("YOU OWN NOTHING", `Selling ${coin.symbol} you never bought. Bold strategy.`, "pink");
     const proceeds = qty * price;
     spendAp();
     setRound((r) => ({ ...r, sells: r.sells + 1 }));
-    feedback("POSITION CLOSED", `${coin.symbol} returned ${formatMoney(proceeds)} to cash.`, proceeds >= 2500 ? "yellow" : "cyan", { cash: state.cash + proceeds, holdings: { ...state.holdings, [coin.symbol]: 0 }, xp: state.xp + Math.round(70 * arch.xp), trades: state.trades + 1 });
+    feedback("CASHED OUT", `${coin.symbol} paid you ${formatMoney(proceeds)}. Hope you didn't sell the bottom.`, proceeds >= 2500 ? "yellow" : "cyan", { cash: state.cash + proceeds, holdings: { ...state.holdings, [coin.symbol]: 0 }, xp: state.xp + Math.round(70 * arch.xp), trades: state.trades + 1 });
   };
 
   const resolveChance = (take: boolean) => {
