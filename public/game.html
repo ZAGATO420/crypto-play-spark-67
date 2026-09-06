@@ -4235,7 +4235,7 @@ function snipeLaunch(id){
 function processLaunches(){
   if(!state)return;
   state.bags=state.bags||[];
-  const stay=[];
+  const stay=[];const res=[];
   state.bags.forEach(b=>{
     if(state.month<b.due){stay.push(b);return}
     if(b.type==='honeypot'){
@@ -4243,6 +4243,7 @@ function processLaunches(){
       toast('🍯 HONEYPOT! '+b.n+' -'+fmt(b.in),'sell');
       state.stress=Math.min(100,state.stress+9); state.rugged=(state.rugged||0)+1;
       awardXP(20,'HONEYPOT LESSON'); playSound('crash');
+      res.push({kind:'honeypot',n:b.n,in:b.in,out:0,mult:0});
       return;
     }
     if(b.type==='rug'){
@@ -4252,6 +4253,7 @@ function processLaunches(){
       toast('💀 RUGGED '+b.n+' → '+fmt(dust),'sell');
       state.stress=Math.min(100,state.stress+8);
       awardXP(25,'RUG SURVIVED'); playSound('crash');
+      res.push({kind:'rug',n:b.n,in:b.in,out:dust,mult:dust/b.in});
       return;
     }
     const m=b.type==='moon'?(4+Math.random()*26):(0.6+Math.random()*2.1);
@@ -4262,9 +4264,12 @@ function processLaunches(){
     toast((win?'🚀 ':'📉 ')+b.n+' '+m.toFixed(1)+'x → '+fmt(out),win?'buy':'sell');
     if(win){state.moons=(state.moons||0)+1;playSound('quest')}
     awardXP(win?90+Math.min(800,(out-b.in)/300):20,win?'MOONSHOT '+m.toFixed(1)+'x':'EXIT');
+    res.push({kind:win?(b.type==='moon'?'moon':'pump'):'bleed',n:b.n,in:b.in,out:out,mult:m});
   });
   state.bags=stay;
+  if(res.length&&typeof window.v44Result==='function')window.v44Result(res);
 }
+
 
 /* ---------- PERPS / LEVERAGE ---------- */
 var PERP_SET=['BTC','ETH','SOL','DOGE','AVAX','LINK','ADA','DOT'];
