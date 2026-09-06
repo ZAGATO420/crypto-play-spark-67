@@ -14256,7 +14256,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto minmax(0,1fr) auto!im
     var sig=[r.n,Math.round(r.pnl),Math.round(r.risk),s.month,feed().length].join('|');
     if(sig!==lastSig){
       lastSig=sig;
-      $('v41-lbody').innerHTML=r.html;
+      $('v41-lbody').innerHTML=r.html||'<div class="v40-empty" style="padding:14px 10px">Flat. Pick a market and take a position.</div>';
       live.classList.toggle('empty',r.n===0);
       $('v41-lsum').innerHTML=r.n?('EXPOSURE '+money(r.risk)+' · <b class="'+(r.pnl>=0?'v40-up':'v40-down')+'">'+(r.pnl>=0?'+':'')+money(r.pnl)+'</b>'):'FLAT';
       var fh=feedHtml();
