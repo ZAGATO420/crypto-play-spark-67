@@ -14128,12 +14128,13 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
  body.v40-live[data-v40-stage="positions"] .v41-grid div{padding:4px 6px}
 }
 /* V43 market summary strip + chart stat row */
-#v43-mbar{display:none;width:calc(100% - 16px);margin:0 8px 6px;padding:8px 10px;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;
+#v43-mbar{display:none;width:calc(100% - 16px);margin:0 8px 6px;padding:8px 10px;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;
  border:1px solid rgba(88,196,255,.34);background:linear-gradient(90deg,#0b2542,#071628);color:var(--v40-ink);text-align:left;min-height:48px}
-#v43-mbar .k{font:400 9.5px/1.15 'Archivo Black','Hind',sans-serif;color:var(--v40-cyan)}
-#v43-mbar .v{display:block;margin-top:4px;font:700 8px/1 'Hind',sans-serif;color:var(--v40-muted)}
-#v43-mbar .p{font:700 15px/1 monospace}
-#v43-mbar .go{font:700 8px/1 'Hind',sans-serif;color:var(--v40-gold)}
+#v43-mbar .k{grid-area:1/1;font:400 9.5px/1.15 'Archivo Black','Hind',sans-serif;color:var(--v40-cyan)}
+#v43-mbar .v{grid-area:2/1;font:700 8px/1 'Hind',sans-serif;color:var(--v40-muted)}
+#v43-mbar .p{grid-area:1/2;text-align:right;font:700 15px/1 monospace}
+#v43-mbar .go{grid-area:2/2;text-align:right;font:700 8px/1 'Hind',sans-serif;color:var(--v40-gold)}
+
 #v43-cstat{display:none;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;margin:0 8px 6px;border:1px solid rgba(88,196,255,.18);background:rgba(88,196,255,.14)}
 #v43-cstat div{min-width:0;padding:6px;background:#07172b;text-align:center}
 #v43-cstat small{display:block;font:700 7px/1 'Hind',sans-serif;color:var(--v40-muted)}
