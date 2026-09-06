@@ -342,6 +342,18 @@ export function CryptoJourney() {
         <Button variant={screen === "survival" ? "default" : "ghost"} onClick={() => setScreen(screen === "survival" ? "journey" : "survival")}><HeartPulse />SURVIVE</Button>
         <Button onClick={nextMonth} className={call ? "is-ready" : ""}>{call ? "LOCK IN MONTH" : "CALL FIRST"}<ChevronRight /></Button>
       </nav>
+
+      {howTo && (
+        <div className="howto-scrim" role="dialog" aria-label="How to play">
+          <div className="howto-card">
+            <p className="journey-kicker"><Crown /> THE BOSS EXPLAINS IT ONCE</p>
+            <h2>HOW TO SURVIVE</h2>
+            <ol>{HOW_TO.map((line, i) => <li key={i}><b>{i + 1}</b><span>{line}</span></li>)}</ol>
+            <p className="howto-warn">Hunger or stress hits 100 and you're done. Broke means done. 84 months. Nobody is coming to save you.</p>
+            <Button onClick={() => setHowTo(false)}>I GET IT, LET ME TRADE</Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
