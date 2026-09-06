@@ -14674,7 +14674,7 @@ body.v40-live .presale-result .sub{font:700 11px/1.4 'Hind',sans-serif!important
     var tries=0;
     var t=setInterval(function(){
       if(done||++tries>20){clearInterval(t);return}
-      if(!overlayOpen()&&!$('v44-res')){clearInterval(t);go()}
+      if(!overlayOpen()){clearInterval(t);go()}
     },700);
   };
 })();
