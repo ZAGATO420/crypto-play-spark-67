@@ -4733,14 +4733,34 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
  .v40-workspace{display:block;padding:6px 7px;overflow:hidden}.v40-rail,.v40-side{display:none}.v40-stage{height:100%;grid-template-rows:auto auto auto minmax(112px,1fr) auto}
  .v40-stage-head{padding:9px 11px 6px}.v40-symbol{font-size:22px}.v40-price{font-size:18px}.v40-order{grid-template-columns:36px minmax(0,1fr) auto;margin:0 8px 6px;padding:6px 8px}.v40-order img{width:36px;height:36px}.v40-order b{font-size:10.5px}.v40-visual{min-height:128px;margin:0 8px 7px}.v40-actions{padding:0 8px 8px}.v40-action{min-height:44px}.v40-bottom{height:calc(69px + env(safe-area-inset-bottom))}.v40-nav{height:58px}
  .v40-mobile-tape{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:0 8px 6px}.v40-mobile-tape::-webkit-scrollbar{display:none}.v40-mobile-tape .v40-coin{flex:0 0 78px;display:block;min-height:36px;padding:6px;text-align:center;border:1px solid rgba(88,196,255,.16)}.v40-mobile-tape .v40-token,.v40-mobile-tape small,.v40-mobile-tape .q{display:none}.v40-mobile-tape .v40-coin b{font-size:10px}.v40-mobile-tape .v40-coin.on{box-shadow:inset 0 -2px var(--v40-cyan)}
- body.v40-live[data-v40-view="market"] .v40-visual{display:block}
- body.v40-live[data-v40-view="chart"] .v40-order{display:none}
- body.v40-live[data-v40-view="chart"] .v40-visual{min-height:230px}
- body.v40-live[data-v40-view="positions"] .v40-stage-head,body.v40-live[data-v40-view="positions"] .v40-order,body.v40-live[data-v40-view="positions"] .v40-visual,body.v40-live[data-v40-view="positions"] .v40-actions{display:none}
- body.v40-live[data-v40-view="positions"] .v40-mobile-only{display:block;height:100%;overflow:auto}
+  body.v40-live[data-v40-stage="market"] .v40-visual{display:block}
+  body.v40-live[data-v40-stage="chart"] .v40-order{display:none}
+  body.v40-live[data-v40-stage="chart"] .v40-visual{min-height:230px}
+  body.v40-live[data-v40-stage="positions"] .v40-stage-head,body.v40-live[data-v40-stage="positions"] .v40-order,body.v40-live[data-v40-stage="positions"] .v40-visual,body.v40-live[data-v40-stage="positions"] .v40-actions{display:none}
+  body.v40-live[data-v40-stage="positions"] .v40-mobile-only{display:block;height:100%;overflow:auto}
 }
 @media(min-width:821px){.v40-bottom{display:none}.v40-mobile-only{display:none!important}}
 @media(prefers-reduced-motion:reduce){#v40-shell *{animation:none!important;transition:none!important}}
+/* --- V40.1 : coin marks, acid accent, reactive boss --- */
+:root{--v40-acid:#c8ff3d}
+#v40-shell .v40-mark{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#071426;box-shadow:0 0 0 1px rgba(255,255,255,.14);flex:0 0 auto}
+#v40-shell span.v40-mark{display:grid;place-items:center;font:800 8px/1 monospace;color:var(--v40-gold)}
+#v40-shell .v40-mark.lg{width:34px;height:34px;margin-right:9px;vertical-align:-8px}
+#v40-shell .v40-symbol{display:flex;align-items:center;gap:2px}
+#v40-shell .v40-coin{grid-template-columns:26px minmax(0,1fr) auto}
+#v40-shell .v40-pos-card b{display:flex;align-items:center;gap:7px}
+#v40-shell .v40-pos-card .v40-mark{width:20px;height:20px}
+#v40-shell .v40-action.buy{background:linear-gradient(180deg,var(--v40-acid),#9fe016);border-color:#e2ff9a;color:#08170a;box-shadow:0 0 22px rgba(200,255,61,.28)}
+#v40-shell .v40-nav.month{background:linear-gradient(180deg,var(--v40-acid),#8ed914);border-color:#e2ff9a;color:#08170a;box-shadow:0 0 20px rgba(200,255,61,.26)}
+#v40-shell .v40-survive button{border-color:rgba(200,255,61,.42);color:var(--v40-acid);background:#111f14}
+#v40-shell .v40-stat.hero strong{text-shadow:0 0 18px rgba(226,190,98,.35)}
+#v40-shell .v40-order{transition:border-color .25s,box-shadow .25s}
+#v40-shell[data-mood="enraged"] .v40-order,#v40-shell[data-mood="broken"] .v40-order{border-color:rgba(255,112,124,.62);box-shadow:inset 0 0 26px rgba(255,112,124,.14)}
+#v40-shell[data-mood="crowned"] .v40-order,#v40-shell[data-mood="smug"] .v40-order{border-color:rgba(200,255,61,.5);box-shadow:inset 0 0 26px rgba(200,255,61,.12)}
+#v40-shell[data-mood="enraged"] .v40-boss,#v40-shell[data-mood="broken"] .v40-boss{border-color:rgba(255,112,124,.7)}
+#v40-shell .v40-boss,#v40-shell .v40-order img{transition:filter .3s}
+#v40-shell[data-mood="crowned"] .v40-boss{box-shadow:0 0 18px rgba(226,190,98,.5)}
+@media(max-width:820px){#v40-shell .v40-order img{width:44px;height:44px}#v40-shell .v40-order{grid-template-columns:44px minmax(0,1fr) auto}}
 </style>
 <script id="v40-terminal-rebuild-js">
 (function(){
@@ -4755,11 +4775,11 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
     if($('v40-shell'))return;
     var host=$('game-screen');if(!host)return;
     var sh=document.createElement('section');sh.id='v40-shell';sh.setAttribute('aria-label','Crypto trading command deck');
-    sh.innerHTML='<div class="v40-top"><div class="v40-id"><img class="v40-boss" src="/boss-mobile-cinematic.webp" alt="Crypto Final Boss"><div><div class="v40-kicker" id="v40-chapter">CHAPTER 1 · THE NOBODY</div><div class="v40-rank" id="v40-rank">MARKET SURVIVOR</div></div></div><div class="v40-date"><b id="v40-date">JAN 2020</b><span id="v40-mode">NORMAL · HISTORICAL</span></div></div>'+ 
+    sh.innerHTML='<div class="v40-top"><div class="v40-id"><img class="v40-boss" id="v40-boss-img" src="/boss-mobile-cinematic.webp" alt="Crypto Final Boss"><div><div class="v40-kicker" id="v40-chapter">CHAPTER 1 · THE NOBODY</div><div class="v40-rank" id="v40-rank">THE BOSS IS WATCHING</div></div></div><div class="v40-date"><b id="v40-date">JAN 2020</b><span id="v40-mode">NORMAL · HISTORICAL</span></div></div>'+ 
     '<div class="v40-score"><div class="v40-stat hero"><small>NET WORTH</small><strong id="v40-net">$0</strong></div><div class="v40-stat"><small>CASH</small><strong id="v40-cash">$0</strong></div><div class="v40-stat"><small>PORTFOLIO</small><strong id="v40-port">$0</strong></div><div class="v40-stat"><small>RISK</small><strong id="v40-risk">0%</strong></div></div>'+ 
     '<div class="v40-workspace"><aside class="v40-rail"><div class="v40-label">MARKET TAPE</div><div class="v40-tape" id="v40-tape"></div></aside>'+ 
     '<section class="v40-stage"><div class="v40-stage-head"><div><div class="v40-symbol" id="v40-symbol">BTC</div><div class="v40-name" id="v40-name">BITCOIN · SPOT MARKET</div></div><div><div class="v40-price" id="v40-price">$0</div><div class="v40-change" id="v40-change">+0.0% MONTH</div></div></div>'+ 
-    '<div class="v40-order"><img src="/boss-mobile-cinematic.webp" alt=""><div><small>BOSS ORDER</small><b id="v40-order">Build your first position.</b></div><div class="v40-streak"><strong id="v40-streak">0</strong><span>STREAK</span></div></div><div class="v40-mobile-tape" id="v40-mobile-tape"></div>'+ 
+    '<div class="v40-order"><img id="v40-order-img" src="/boss-mobile-cinematic.webp" alt=""><div><small>BOSS ORDER</small><b id="v40-order">Build your first position.</b></div><div class="v40-streak"><strong id="v40-streak">0</strong><span>STREAK</span></div></div><div class="v40-mobile-tape" id="v40-mobile-tape"></div>'+ 
     '<div class="v40-visual" id="v40-visual"><svg viewBox="0 0 600 220" preserveAspectRatio="none"><defs><linearGradient id="v40g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58d7ff" stop-opacity=".28"/><stop offset="1" stop-color="#58d7ff" stop-opacity="0"/></linearGradient></defs><path class="shade" id="v40-area"></path><path class="line" id="v40-line"></path></svg><div class="v40-cross" id="v40-cross">LIVE HISTORICAL MARKET · 30 DAY WINDOW</div></div>'+ 
     '<div class="v40-actions"><button class="v40-action buy" data-v40-act="buy">BUY</button><button class="v40-action sell" data-v40-act="sell">SELL</button><button class="v40-action perp" data-v40-act="perp">⚡ PERP</button></div>'+ 
     '<div class="v40-mobile-only"><div class="v40-label">LIVE POSITIONS</div><div class="v40-pos" id="v40-mobile-pos"></div><div class="v40-label">SURVIVAL</div><div class="v40-vitals" id="v40-mobile-vitals"></div></div></section>'+ 
@@ -4767,27 +4787,42 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
     '<nav class="v40-bottom" aria-label="Game commands"><button class="v40-nav on" data-v40-view="market">'+icon('<path d="M4 17l5-5 4 3 7-8"/><path d="M15 7h5v5"/>')+'MARKET</button><button class="v40-nav" data-v40-view="chart">'+icon('<path d="M5 19V9m5 10V5m5 14v-7m5 7V8"/>')+'CHART</button><button class="v40-nav month" data-v40-act="month">'+icon('<path d="m6 5 7 7-7 7M13 5l7 7-7 7"/>')+'MONTH</button><button class="v40-nav" data-v40-view="positions">'+icon('<path d="M5 4v16M10 7v10M15 5v14M20 8v9"/>')+'POSITIONS</button><button class="v40-nav" data-v40-act="ops">'+icon('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>')+'OPS</button></nav>';
     host.appendChild(sh);
     sh.addEventListener('click',function(e){
-      var coin=e.target.closest('[data-v40-coin]');if(coin){active=coin.getAttribute('data-v40-coin');paint(true);try{playSound('click')}catch(_){}return}
-      var nav=e.target.closest('[data-v40-view]');if(nav){view=nav.getAttribute('data-v40-view');document.body.setAttribute('data-v40-view',view);sh.querySelectorAll('[data-v40-view]').forEach(function(b){b.classList.toggle('on',b===nav)});paint(true);return}
-      var act=e.target.closest('[data-v40-act]');if(!act)return;var a=act.getAttribute('data-v40-act');
-      if(a==='buy'||a==='sell'){try{if(typeof window.v6Trade==='function'){window.v6Trade(active);if(typeof window.v6Mode==='function')window.v6Mode(a)}else{window.dxOpen(active);window.dxMode(a)}}catch(_){} }
-      else if(a==='perp'){try{if(typeof v17Open==='function')v17Open('perp');else v7PerpDesk()}catch(_){} }
-      else if(a==='month'){try{advanceMonth()}catch(_){} }
-      else if(a==='ops'){try{v17Sections()}catch(_){} }
+      var act=e.target.closest('#v40-shell [data-v40-act]');
+      if(act){
+        var a=act.getAttribute('data-v40-act');
+        try{playSound('click')}catch(_){}
+        if(a==='buy'||a==='sell'){window.v6Trade(active);window.v6Mode(a==='sell'?'sell':'buy');}
+        else if(a==='perp'){window.v6Perp(active);}
+        else if(a==='month'){window.advanceMonth();}
+        else if(a==='ops'){window.v17Sections();}
+        else if(a==='eat'){window.buyItem('food');}
+        else if(a==='calm'){window.buyItem('therapy');}
+        paint(true);return;
+      }
+      var coin=e.target.closest('#v40-shell [data-v40-coin]');if(coin){active=coin.getAttribute('data-v40-coin');paint(true);try{playSound('click')}catch(_){}return}
+      var nav=e.target.closest('#v40-shell .v40-nav[data-v40-view]');
+      if(nav){view=nav.getAttribute('data-v40-view');document.body.setAttribute('data-v40-stage',view);sh.querySelectorAll('.v40-nav[data-v40-view]').forEach(function(b){b.classList.toggle('on',b===nav)});paint(true);}
     });
   }
   function change(sym,s){var now=s.prices[sym]||0,prev=0;try{prev=s.month?getHistPrice(sym,s.month-1):now}catch(_){}return prev>0?(now/prev-1)*100:0}
   function order(s){var map={profit:'Grow your net worth this month.',hold:'End the month holding a bag.',noliq:'Survive without a liquidation.',trade:'Make at least one trade.',cash:'Keep cash ready for next month.'};return map[s._v22oid]||(s.month<2?'Build your first position.':'Beat the market. Protect the crown.')}
   function points(sym,s){var vals=[];for(var i=Math.max(0,s.month-11);i<=s.month;i++){var v=0;try{v=getHistPrice(sym,i)}catch(_){}if(v>0)vals.push(v)}if(vals.length<2)vals=[1,1.02,1.01,1.06];var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=hi-lo||1;return vals.map(function(v,i){return[(i/(vals.length-1))*600,205-((v-lo)/span)*180]})}
   function chart(sym,s){var pts=points(sym,s),line=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');var area=line+' L600 220 L0 220 Z';$('v40-line').setAttribute('d',line);$('v40-area').setAttribute('d',area)}
-  function positions(s){var rows=[];(s.perps||[]).forEach(function(p){var pnl=0;try{pnl=perpPnl(p)}catch(_){}rows.push('<div class="v40-pos-card"><div class="r"><b>'+p.sym+' · '+p.lev+'X '+p.dir.toUpperCase()+'</b><strong class="'+(pnl>=0?'v40-up':'v40-down')+'">'+(pnl>=0?'+':'')+money(pnl)+'</strong></div><small>Margin '+money(p.margin)+' · Liq $'+price(perpLiq(p.entry,p.dir,p.lev))+'</small></div>')});try{COINS.forEach(function(c){var h=s.holdings[c.s]||0;if(h<=0)return;var val=h*(s.prices[c.s]||0),avg=s.avg[c.s]||0,p=avg?((s.prices[c.s]-avg)/avg*100):0;rows.push('<button class="v40-pos-card" data-v40-coin="'+c.s+'" style="width:100%;color:inherit;text-align:left"><div class="r"><b>'+c.s+' · SPOT</b><strong class="'+(p>=0?'v40-up':'v40-down')+'">'+(p>=0?'+':'')+p.toFixed(1)+'%</strong></div><small>'+money(val)+' position value</small></button>')})}catch(_){}return rows.join('')||'<div class="v40-empty">No open position.<br>Choose a market and enter the arena.</div>'}
-  function vitals(s){function row(n,v){return '<div class="v40-vital"><span>'+n+'</span><div class="v40-meter"><i style="width:'+Math.min(100,v)+'%;background:'+(v>70?'var(--v40-down)':v>40?'var(--v40-gold)':'var(--v40-cyan)')+'"></i></div><b>'+Math.round(v)+'%</b></div>'}return row('HUNGER',s.hunger)+row('STRESS',s.stress)+row('RISK',s.risk)+'<div class="v40-survive"><button onclick="buyItem(\'food\')">EAT</button><button onclick="buyItem(\'therapy\')">CALM</button></div>'}
+  function logo(sym,cls){var m=(window.COIN_ICON||{})[sym];return m?'<img class="'+cls+'" src="'+m+'" alt="" loading="lazy">':'<span class="'+cls+' v40-token">'+sym.slice(0,3)+'</span>'}
+  function positions(s){var rows=[];(s.perps||[]).forEach(function(p){var pnl=0;try{pnl=perpPnl(p)}catch(_){}rows.push('<div class="v40-pos-card"><div class="r"><b>'+logo(p.sym,'v40-mark')+p.sym+' · '+p.lev+'X '+p.dir.toUpperCase()+'</b><strong class="'+(pnl>=0?'v40-up':'v40-down')+'">'+(pnl>=0?'+':'')+money(pnl)+'</strong></div><small>Margin '+money(p.margin)+' · Liq $'+price(perpLiq(p.entry,p.dir,p.lev))+'</small></div>')});try{COINS.forEach(function(c){var h=s.holdings[c.s]||0;if(h<=0)return;var val=h*(s.prices[c.s]||0),avg=s.avg[c.s]||0,p=avg?((s.prices[c.s]-avg)/avg*100):0;rows.push('<button class="v40-pos-card" data-v40-coin="'+c.s+'" style="width:100%;color:inherit;text-align:left"><div class="r"><b>'+logo(c.s,'v40-mark')+c.s+' · SPOT</b><strong class="'+(p>=0?'v40-up':'v40-down')+'">'+(p>=0?'+':'')+p.toFixed(1)+'%</strong></div><small>'+money(val)+' position value</small></button>')})}catch(_){}return rows.join('')||'<div class="v40-empty">No open position.<br>Choose a market and enter the arena.</div>'}
+  function vitals(s){function row(n,v){return '<div class="v40-vital"><span>'+n+'</span><div class="v40-meter"><i style="width:'+Math.min(100,v)+'%;background:'+(v>70?'var(--v40-down)':v>40?'var(--v40-gold)':'var(--v40-acid)')+'"></i></div><b>'+Math.round(v)+'%</b></div>'}return row('HUNGER',s.hunger)+row('STRESS',s.stress)+row('RISK',s.risk)+'<div class="v40-survive"><button data-v40-act="eat">EAT</button><button data-v40-act="calm">CALM</button></div>'}
+  var BOSS={calm:'/boss-mobile-cinematic.webp',smug:'/__l5e/assets-v1/3060f0e9-d226-4a76-bc8e-2b9c92a6d9cb/boss-smug.webp',crowned:'/__l5e/assets-v1/f130dbc9-2270-47bf-b867-0e21555d3999/boss-crowned.webp',enraged:'/__l5e/assets-v1/7876d3b9-a938-4ee2-aab1-827adb4ad5e5/boss-enraged.webp',stressed:'/__l5e/assets-v1/1d71b635-22c9-48c0-8d5a-e4b9117263ee/boss-stressed.webp',broken:'/__l5e/assets-v1/6a143db8-fbda-4df5-ac50-49fffb6d8a3e/boss-broken.webp'};
+  function mood(s){var nw=0;try{nw=netWorth()}catch(_){}if(s.hunger>80||s.stress>80)return'broken';if(s.risk>80)return'enraged';if((s._v22streak||0)>=3)return'crowned';if(nw>(s.startCash||5000)*2.5)return'smug';if(s.stress>55)return'stressed';return'calm'}
+  function bossLine(s,m){if(m==='broken')return'You are falling apart. Eat. Breathe. Then trade.';if(m==='enraged')return'Your risk is insane. One wick and you are gone.';if(m==='crowned')return'Streak alive. Keep the crown, keep the multiplier.';if(m==='smug')return'Not bad. But the market is not done with you.';return order(s)}
+  
   function paint(force){var s=S();if(!s)return;var c=COINS.find(function(x){return x.s===active&&s.month>=x.launch});if(!c){c=COINS.find(function(x){return s.month>=x.launch});active=c?c.s:'BTC'}var ch=change(active,s),port=0;try{port=portValue()}catch(_){}var sig=[s.month,s.day,Math.round(s.cash),Math.round(netWorth()),active,view,(s.perps||[]).length,Math.round(s.hunger),Math.round(s.stress),s._v22oid,s._v22streak].join('|');if(!force&&sig===last)return;last=sig;
-    $('v40-date').textContent=dateStr().toUpperCase();$('v40-mode').textContent=s.diff+' · '+String(s.pmode||'classic').toUpperCase();$('v40-net').textContent=money(netWorth());$('v40-cash').textContent=money(s.cash);$('v40-port').textContent=money(port);$('v40-risk').textContent=Math.round(s.risk)+'%';$('v40-chapter').textContent='CH '+(Math.floor(s.month/12)+1)+' · '+(s.name||'THE NOBODY');$('v40-rank').textContent=s._v22streak>=3?'CROWN STREAK ACTIVE':'COMMAND DECK ONLINE';$('v40-symbol').textContent=active;$('v40-name').textContent=(c?c.n.toUpperCase():active)+' · SPOT MARKET';$('v40-price').textContent='$'+price(s.prices[active]||0);$('v40-change').textContent=(ch>=0?'+':'')+ch.toFixed(1)+'% MONTH';$('v40-change').className='v40-change '+(ch>=0?'v40-up':'v40-down');$('v40-order').textContent=order(s);$('v40-streak').textContent=s._v22streak>0?'×'+(1+s._v22streak*.1).toFixed(1):'0';
-    var list=COINS.filter(function(x){return s.month>=x.launch&&(s.prices[x.s]||0)>0}).slice(0,12);var tape=list.map(function(x){var z=change(x.s,s),held=(s.holdings[x.s]||0)>0;return '<button class="v40-coin '+(x.s===active?'on':'')+'" data-v40-coin="'+x.s+'"><span class="v40-token">'+x.s.slice(0,2)+'</span><span><b>'+x.s+'</b><small>'+(held?'POSITION OPEN':x.n)+'</small></span><span class="q">$'+price(s.prices[x.s])+'<i class="'+(z>=0?'v40-up':'v40-down')+'">'+(z>=0?'+':'')+z.toFixed(1)+'%</i></span></button>'}).join('');$('v40-tape').innerHTML=tape;$('v40-mobile-tape').innerHTML=tape;
+    var md=mood(s);
+    $('v40-date').textContent=dateStr().toUpperCase();$('v40-mode').textContent=s.diff+' · '+String(s.pmode||'classic').toUpperCase();$('v40-net').textContent=money(netWorth());$('v40-cash').textContent=money(s.cash);$('v40-port').textContent=money(port);$('v40-risk').textContent=Math.round(s.risk)+'%';$('v40-chapter').textContent='CH '+(Math.floor(s.month/12)+1)+' · '+(s.name||'THE NOBODY');$('v40-rank').textContent=s._v22streak>=3?'CROWN STREAK · '+(1+s._v22streak*.1).toFixed(1)+'X':'THE BOSS IS WATCHING';$('v40-symbol').innerHTML=logo(active,'v40-mark lg')+active;$('v40-name').textContent=(c?c.n.toUpperCase():active)+' · SPOT MARKET';$('v40-price').textContent='$'+price(s.prices[active]||0);$('v40-change').textContent=(ch>=0?'+':'')+ch.toFixed(1)+'% MONTH';$('v40-change').className='v40-change '+(ch>=0?'v40-up':'v40-down');$('v40-order').textContent=bossLine(s,md);$('v40-streak').textContent=(s._v22streak||0)>0?'×'+(1+s._v22streak*.1).toFixed(1):'0';
+    var bsrc=BOSS[md]||BOSS.calm;['v40-boss-img','v40-order-img'].forEach(function(id){var im=$(id);if(im&&im.getAttribute('data-mood')!==md){im.setAttribute('data-mood',md);im.src=bsrc}});$('v40-shell').setAttribute('data-mood',md);
+    var list=COINS.filter(function(x){return s.month>=x.launch&&(s.prices[x.s]||0)>0}).slice(0,12);var tape=list.map(function(x){var z=change(x.s,s),held=(s.holdings[x.s]||0)>0;return '<button class="v40-coin '+(x.s===active?'on':'')+'" data-v40-coin="'+x.s+'">'+logo(x.s,'v40-mark')+'<span><b>'+x.s+'</b><small>'+(held?'POSITION OPEN':x.n)+'</small></span><span class="q">$'+price(s.prices[x.s])+'<i class="'+(z>=0?'v40-up':'v40-down')+'">'+(z>=0?'+':'')+z.toFixed(1)+'%</i></span></button>'}).join('');$('v40-tape').innerHTML=tape;$('v40-mobile-tape').innerHTML=tape;
     chart(active,s);var ph=positions(s),vh=vitals(s);$('v40-pos').innerHTML=ph;$('v40-mobile-pos').innerHTML=ph;$('v40-vitals').innerHTML=vh;$('v40-mobile-vitals').innerHTML=vh;
   }
-  function sync(){build();var on=visible();document.body.classList.toggle('v40-live',on);if(on){document.body.setAttribute('data-v40-view',view);paint(false)}}
+  function sync(){build();var on=visible();document.body.classList.toggle('v40-live',on);if(on){document.body.setAttribute('data-v40-stage',view);paint(false)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();setInterval(sync,220);setTimeout(sync,80);
 })();
 </script>
@@ -13927,3 +13962,56 @@ body.v39 #v38-strip .obj{border-radius:4px;background:var(--v39-acid)!important}
   setTimeout(function(){mission();dock();labels();clearLegacyHints()},100);
 })();
 </script>
+<style id="v40-card-unify">
+/* ===== V40.1 : one command-deck language for every window & card ===== */
+body.v40-live #v6m,body.v40-live .event-overlay,body.v40-live .decision-overlay,
+body.v40-live .presale-overlay,body.v40-live #v17-sheet{
+  background:radial-gradient(120% 90% at 50% 0%,rgba(14,45,86,.72),rgba(3,9,20,.9))!important;
+  backdrop-filter:blur(6px)!important;-webkit-backdrop-filter:blur(6px)!important}
+body.v40-live .v6c,body.v40-live .event-card,body.v40-live .decision-card,
+body.v40-live .presale-result,body.v40-live .v17-win{
+  border-radius:16px!important;
+  border:1px solid rgba(96,178,255,.34)!important;
+  background:linear-gradient(168deg,#0b1f3c 0%,#071628 62%,#050f1e 100%)!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(140,205,255,.34)!important}
+body.v40-live .v6c::before{background:linear-gradient(100deg,transparent,rgba(96,178,255,.7),rgba(200,255,61,.6),transparent)!important}
+body.v40-live .v6head .t,body.v40-live .decision-card,body.v40-live .event-card{color:#e9f4ff!important}
+body.v40-live .v6l b,body.v40-live #decision-badge{color:#c8ff3d!important}
+body.v40-live .v6price,body.v40-live .v6in input,body.v40-live .v6grid .v,body.v40-live .v6row b{color:#eaf5ff!important}
+body.v40-live .v6x,body.v40-live .v6tabs button,body.v40-live .v6chips button,
+body.v40-live .v6in,body.v40-live .v6sum,body.v40-live .v6grid{
+  border-radius:10px!important;border-color:rgba(96,178,255,.28)!important;background:rgba(11,32,58,.72)!important}
+body.v40-live .v6grid>div{background:rgba(7,22,42,.92)!important}
+body.v40-live .v6chips button.on,body.v40-live .v6chips button:hover{
+  border-color:rgba(200,255,61,.55)!important;color:#c8ff3d!important;background:rgba(200,255,61,.12)!important}
+body.v40-live .v6tabs button.b.on{border-color:rgba(200,255,61,.6)!important;color:#c8ff3d!important;background:rgba(200,255,61,.14)!important}
+body.v40-live .v6go,body.v40-live .v6ghost,body.v40-live .decision-options button,
+body.v40-live .decision-btn{border-radius:11px!important;letter-spacing:.14em!important}
+body.v40-live .v6go.b{background:linear-gradient(100deg,#9fe016,#c8ff3d)!important;color:#08170a!important;
+  box-shadow:0 0 24px rgba(200,255,61,.3)!important}
+body.v40-live .v6go.gold{background:linear-gradient(100deg,#c79a3e,#e8c876)!important;color:#160e02!important}
+body.v40-live .v6ghost{border-color:rgba(200,255,61,.42)!important;background:rgba(200,255,61,.1)!important;color:#c8ff3d!important}
+body.v40-live .v6tile,body.v40-live .v6pos{border-radius:12px!important;
+  border-color:rgba(96,178,255,.3)!important;
+  background:linear-gradient(165deg,rgba(24,66,116,.55),rgba(6,18,34,.9))!important}
+body.v40-live .v6tile:hover{border-color:rgba(200,255,61,.5)!important;box-shadow:0 14px 30px -18px rgba(200,255,61,.6)!important}
+body.v40-live .v6rng::-webkit-slider-thumb{background:linear-gradient(150deg,#c8ff3d,#9fe016)!important;box-shadow:0 4px 16px rgba(200,255,61,.45)!important}
+body.v40-live .decision-options button,body.v40-live .decision-btn{
+  border:1px solid rgba(96,178,255,.34)!important;background:rgba(11,32,58,.8)!important;color:#e9f4ff!important}
+body.v40-live .decision-options button:hover,body.v40-live .decision-btn:hover{
+  border-color:rgba(200,255,61,.55)!important;background:rgba(200,255,61,.12)!important}
+body.v40-live .v17-win{overflow:hidden!important}
+</style>
+<style id="v40-empty-polish">
+body.v40-live .v40-empty{color:#9fc6e8!important;padding:22px 12px!important;font-size:12px!important}
+body.v40-live .v40-survive button{min-height:44px!important}
+body.v40-live .v40-label{font-size:10px!important;letter-spacing:.12em}
+</style>
+<style id="v40-actions-fix">
+@media(max-width:820px){
+ body.v40-live .v40-stage{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ body.v40-live .v40-visual{flex:1 1 auto!important;min-height:120px!important}
+ body.v40-live .v40-actions{position:sticky!important;bottom:0!important;z-index:4!important;
+   background:linear-gradient(180deg,rgba(5,15,30,0),#050f1e 30%)!important;padding-top:8px!important}
+}
+</style>
