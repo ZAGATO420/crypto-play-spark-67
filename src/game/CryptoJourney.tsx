@@ -267,8 +267,8 @@ export function CryptoJourney() {
     const cost = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost);
     cash = Math.max(0, cash - cost);
     lines.push(`Living costs: ${formatMoney(cost)}.`);
-    const hunger = clamp(run.hunger + Math.round(15 * arch.risk));
-    const stress = clamp(run.stress + Math.round(11 * arch.risk));
+    const hunger = clamp(run.hunger + Math.round(9 * arch.risk));
+    const stress = clamp(run.stress + Math.round(7 * arch.risk));
 
     const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises };
     const endNet = netOf(draft);
