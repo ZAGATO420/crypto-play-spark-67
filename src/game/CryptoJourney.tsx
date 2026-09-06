@@ -261,10 +261,19 @@ export function CryptoJourney() {
         <section className="journey-stage" aria-live="polite">
           {screen === "portfolio" ? <Portfolio state={state} onClose={() => setScreen("journey")} onSelect={(i) => { setCoinIndex(i); setScreen("journey"); }} /> : screen === "survival" ? <Survival state={state} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} onClose={() => setScreen("journey")} /> : (
             <>
+              <div className="step-bar">
+                <span className={coinIndex >= 0 ? "is-done" : ""}>1 · PICK</span>
+                <span className={ap < AP_MAX ? "is-done" : ""}>2 · TRADE ({ap} left)</span>
+                <span className={call ? "is-done" : ""}>3 · CALL</span>
+                <span>4 · LOCK IN</span>
+                <button onClick={() => setHowTo(true)}>RULES</button>
+              </div>
+
               <div className={`mission-strip ${state.wins ? "has-wins" : ""}`}>
                 <span className="journey-kicker"><Crown /> BOSS ORDER · {formatMoney(mission.reward)}</span>
                 <strong>{mission.text}</strong>
               </div>
+
 
               <div className="market-grid" role="list">
                 {COINS.map((c, i) => {
