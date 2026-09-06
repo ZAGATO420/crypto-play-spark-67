@@ -14183,16 +14183,25 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
       score.parentNode.insertBefore(p,score.nextSibling);
     }
     if(!$('v41-live')){
-      var stage=sh.querySelector('.v40-stage'),acts=sh.querySelector('.v40-actions');
+      var stage=sh.querySelector('.v40-stage'),acts=sh.querySelector('.v40-actions'),vis=sh.querySelector('.v40-visual');
       if(stage&&acts){
+        if(vis&&!$('v43-cstat')){
+          var cs=document.createElement('div');cs.id='v43-cstat';
+          cs.innerHTML='<div><small>HIGH</small><b id="v43-chigh">—</b></div><div><small>LOW</small><b id="v43-clow">—</b></div><div><small>MONTH</small><b id="v43-cchg">—</b></div><div><small>ENTRY</small><b id="v43-centry">—</b></div><div><small>LIQ</small><b id="v43-cliq">—</b></div>';
+          stage.insertBefore(cs,vis.nextSibling);
+        }
         var l=document.createElement('div');l.id='v41-live';l.className='empty';
         l.innerHTML='<div class="v41-lhead"><b>POSITION COMMAND</b><span id="v41-lsum">FLAT</span><div class="v41-pager" id="v41-pager"><button data-v41-page="-1" aria-label="Previous position">‹</button><b id="v41-page">0 / 0</b><button data-v41-page="1" aria-label="Next position">›</button></div></div><div class="v41-lbody" id="v41-lbody"></div>';
         stage.insertBefore(l,acts);
+        var mb=document.createElement('button');mb.id='v43-mbar';mb.type='button';mb.setAttribute('data-v43-open-pos','1');
+        mb.innerHTML='<span class="k" id="v43-mn">NO OPEN POSITIONS</span><span class="v" id="v43-mv">—</span><span class="p" id="v43-mp">$0</span><span class="go">POSITIONS ›</span>';
+        stage.insertBefore(mb,acts);
         var d=document.createElement('details');d.className='v41-mfeed';
         d.innerHTML='<summary>RUN LOG<span id="v41-mlast">—</span></summary><div class="v41-feed" id="v41-mfeed"></div>';
         stage.insertBefore(d,acts);
       }
     }
+
     var side=sh.querySelector('.v40-side');
     if(side&&!$('v41-feed')){
       var lab=document.createElement('div');lab.className='v40-label';lab.textContent='RUN LOG';
