@@ -363,17 +363,53 @@ export function CryptoJourney() {
 
   const recover = (kind: "eat" | "calm") => {
     setDialog(null);
-    playSfx("care");
-    const cost = Math.round((kind === "eat" ? 90 : 130) * diff.cost);
+    if (ap <= 0) return say("Eating costs a move like everything else. None left this quarter.", "pink");
+    if (run.cares >= diff.caps) return say(`You already looked after yourself ${run.cares}x this quarter. That is the limit.`, "pink");
+    const cost = careCost(kind, run.chapter, cfg.difficulty);
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
+    playSfx("care");
+    // second helping does far less: you cannot buy your way out of survival
+    const relief = Math.round(42 * diff.care * (run.cares === 0 ? 1 : run.cares === 1 ? 0.55 : 0.3));
+    spend();
     setRun((r) => book({
-      ...r, cash: r.cash - cost,
-      hunger: kind === "eat" ? clamp(r.hunger - 46) : r.hunger,
-      stress: kind === "calm" ? clamp(r.stress - 46) : r.stress,
+      ...r, cash: r.cash - cost, cares: r.cares + 1,
+      hunger: kind === "eat" ? clamp(r.hunger - relief) : r.hunger,
+      stress: kind === "calm" ? clamp(r.stress - relief) : r.stress,
     }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
-    say(kind === "eat" ? "Fed. Hunger down 46." : "Head cleared. Stress down 46.", "cyan");
+    say(kind === "eat" ? `Fed. Hunger down ${relief}. That was a move you did not trade.` : `Head cleared. Stress down ${relief}.`, "cyan");
     grantXp(XP.survive, "STILL ALIVE");
   };
+
+  /** Walk away mid-run: everything sells at today's price, then the books close. */
+  const cashOut = () => {
+    setDialog(null);
+    playSfx("sell");
+    let cash = run.cash;
+    let realized = run.realized;
+    const ledger: Entry[] = [];
+    for (const p of run.positions) {
+      const cust = custodyOf(p.where);
+      const price = priceAt(p.symbol, run.chapter, run.noise);
+      const gross = Math.round(valueOf(p, price) * 0.96);
+      const fee = Math.round(gross * cust.fee);
+      cash += gross - fee;
+      realized += gross - fee - p.margin;
+      ledger.push({ chapter: run.chapter, label: `Exit ${p.symbol}`, amount: gross - fee });
+    }
+    if (realized > 0) {
+      const bill = Math.round(realized * TAX_RATE);
+      cash -= bill;
+      ledger.push({ chapter: run.chapter, label: `Exit tax on ${formatMoney(realized)}`, amount: -bill });
+    }
+    if (run.taxDebt > 0) {
+      const paid = Math.min(Math.max(0, cash), run.taxDebt);
+      cash -= paid;
+      ledger.push({ chapter: run.chapter, label: "Outstanding tax debt", amount: -paid });
+    }
+    setRun((r) => ({ ...r, cash: Math.max(0, Math.round(cash)), positions: [], taxDebt: 0, realized: 0, ledger: [...ledger, ...r.ledger].slice(0, 60) }));
+    finish("SELLOUT");
+  };
+
 
   /** Moving the bag is the most important button in the game. */
   const setCustody = (id: CustodyId) => {
