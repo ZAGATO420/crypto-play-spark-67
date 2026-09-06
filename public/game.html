@@ -14331,7 +14331,9 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
   }
 
   document.addEventListener('click',function(e){
+    var opos=e.target.closest('[data-v43-open-pos]');if(opos){e.preventDefault();try{var nb=document.querySelector('#v40-shell .v40-nav[data-v40-view="positions"]');if(nb)nb.click()}catch(_){}return}
     var page=e.target.closest('[data-v41-page]');if(page){e.preventDefault();activePos+=+page.getAttribute('data-v41-page');lastSig='';tick();return}
+
     var b=e.target.closest('[data-v41-close]');if(b){e.preventDefault();e.stopPropagation();try{closePerp(+b.getAttribute('data-v41-close'))}catch(_){}lastSig='';tick();return}
     var part=e.target.closest('[data-v41-part]');if(part){e.preventDefault();e.stopPropagation();try{closePerp(+part.getAttribute('data-v41-part'),false,.5)}catch(_){}lastSig='';tick();return}
     var manage=e.target.closest('[data-v41-manage]');if(manage){e.preventDefault();e.stopPropagation();try{window.v6Pos(+manage.getAttribute('data-v41-manage'))}catch(_){}return}
