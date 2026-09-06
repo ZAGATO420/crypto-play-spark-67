@@ -375,7 +375,7 @@ export function CryptoJourney() {
       <nav className="journey-nav" aria-label="Game actions">
         <Button variant={screen === "portfolio" ? "default" : "ghost"} onClick={() => setScreen(screen === "portfolio" ? "journey" : "portfolio")}><WalletCards />POSITIONS <span>{positions.length}</span></Button>
         <Button variant={screen === "survival" ? "default" : "ghost"} onClick={() => setScreen(screen === "survival" ? "journey" : "survival")}><HeartPulse />SURVIVE</Button>
-        <Button onClick={nextMonth} className={call ? "is-ready" : ""}>{call ? "LOCK IN MONTH" : "CALL FIRST"}<ChevronRight /></Button>
+        <Button onClick={nextMonth} className={decision ? "" : "is-ready"}>{decision ? "DECIDE HISTORY" : "LOCK IN MONTH"}<ChevronRight /></Button>
       </nav>
 
       {howTo && (
