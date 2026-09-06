@@ -4770,7 +4770,7 @@ body.v40-live #v40-shell{display:grid;grid-template-rows:auto auto minmax(0,1fr)
       var coin=e.target.closest('[data-v40-coin]');if(coin){active=coin.getAttribute('data-v40-coin');paint(true);try{playSound('click')}catch(_){}return}
       var nav=e.target.closest('[data-v40-view]');if(nav){view=nav.getAttribute('data-v40-view');document.body.setAttribute('data-v40-view',view);sh.querySelectorAll('[data-v40-view]').forEach(function(b){b.classList.toggle('on',b===nav)});paint(true);return}
       var act=e.target.closest('[data-v40-act]');if(!act)return;var a=act.getAttribute('data-v40-act');
-      if(a==='buy'||a==='sell'){try{dxOpen(active);dxMode(a)}catch(_){} }
+      if(a==='buy'||a==='sell'){try{if(typeof v6Trade==='function'){v6Trade(active);if(typeof v6Mode==='function')v6Mode(a)}else{dxOpen(active);dxMode(a)}}catch(_){} }
       else if(a==='perp'){try{if(typeof v17Open==='function')v17Open('perp');else v7PerpDesk()}catch(_){} }
       else if(a==='month'){try{advanceMonth()}catch(_){} }
       else if(a==='ops'){try{v17Sections()}catch(_){} }
