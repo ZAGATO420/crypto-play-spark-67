@@ -306,3 +306,11 @@
   .trade-buttons, .call-buttons { flex: 0 0 auto; }
   .market-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
 }
+
+/* --- history decision cards --- */
+.journey-card.is-history { border-width: 2px; box-shadow: 0 0 0 1px var(--journey-yellow), 0 18px 40px -24px var(--journey-yellow); }
+.journey-card.is-history .journey-kicker { display: flex; align-items: center; gap: 6px; }
+.journey-card.is-history .journey-kicker svg { width: 14px; height: 14px; }
+.journey-card.is-history h2 { line-height: 1.05; }
+.journey-card.is-history .journey-actions { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .journey-card.is-history .journey-actions { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); } }
