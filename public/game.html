@@ -14229,7 +14229,8 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto auto minmax(0,1fr) au
   function clean(v){return Math.abs(Number(v)||0)<.005?0:Number(v)||0}
   function signed(v,suffix){v=clean(v);return(v>0?'+':'')+(suffix==='pct'?v.toFixed(1)+'%':money(v))}
   function rows(s){
-    var out=[],risk=0,pnl=0;
+    var out=[],risk=0,pnl=0,syms=[];
+
     (s.perps||[]).forEach(function(p,i){
       var pl=0,dist=100;try{pl=perpPnl(p)}catch(_){}try{dist=perpLiqDist(p)}catch(_){}
       pl=clean(pl);
