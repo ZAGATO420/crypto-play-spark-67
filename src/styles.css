@@ -255,7 +255,7 @@
 .trade-bar, .call-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); }
 .trade-focus { display: flex; gap: 10px; align-items: center; }
 .trade-focus span span, .trade-focus > span:last-child { display: grid; }
-.trade-buttons, .call-buttons { display: flex; gap: 8px; flex: 1 1 220px; }
+.trade-buttons, .call-buttons { display: flex; gap: 8px; flex: 1 1 auto; min-width: 220px; }
 .trade-buttons > *, .call-buttons > * { flex: 1; min-height: 44px; }
 .call-bar small { display: block; font-size: .78rem; opacity: .75; }
 
