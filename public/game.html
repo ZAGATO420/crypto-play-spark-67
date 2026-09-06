@@ -13172,3 +13172,110 @@ body.v25-end #v25-jump button{
   tick();
 })();
 </script>
+
+<style id="v37-cost-guard">
+/* =====================================================================
+   V37 — no more silent bag sales: show next month's bill up front and
+   ask before the game liquidates your coins. Presentation + guard only.
+   ===================================================================== */
+#mobile-next .v37-cost,.v4-next .v37-cost{
+  display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;
+  letter-spacing:.06em;color:#cfe8a2;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:100%}
+#mobile-next.v37-short .v37-cost,.v4-next.v37-short .v37-cost{color:#ff8f7a;font-weight:700}
+#v37-ask{position:fixed;inset:0;z-index:4000;display:flex;align-items:center;
+  justify-content:center;padding:18px;background:rgba(1,7,10,.82);
+  backdrop-filter:blur(4px)}
+#v37-ask.hidden{display:none}
+#v37-ask .box{width:100%;max-width:420px;background:#0b1218;
+  border:1px solid rgba(240,180,41,.35);border-radius:16px;padding:16px;
+  box-shadow:0 24px 60px rgba(0,0,0,.6)}
+#v37-ask h4{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:14px;
+  letter-spacing:.06em;color:#ffd479}
+#v37-ask p{margin:0 0 12px;font-size:13px;line-height:1.5;color:#cfd6dc}
+#v37-ask b{color:#fff}
+#v37-ask .row{display:flex;flex-direction:column;gap:8px}
+#v37-ask button{min-height:46px;border-radius:12px;font-weight:800;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;cursor:pointer;
+  border:1px solid rgba(255,255,255,.16);background:#131b22;color:#e8eef2}
+#v37-ask button.go{background:linear-gradient(100deg,#8fd41e,#d8ff8a 55%,#b6ff2e);
+  color:#0a0d05;border-color:transparent}
+</style>
+<div id="v37-ask" class="hidden"><div class="box">
+  <h4>BILLS DUE NEXT MONTH</h4>
+  <p id="v37-ask-txt"></p>
+  <div class="row">
+    <button class="go" id="v37-ask-yes">SELL COINS &amp; CONTINUE</button>
+    <button id="v37-ask-no">CANCEL — I SELL MYSELF</button>
+  </div>
+</div></div>
+<script id="v37-cost-guard-js">
+(function(){
+  /* Same formula nextMonth() uses for monthlyCost. */
+  window.nextMonthCost=function(){
+    try{
+      if(!state)return 0;
+      var c=COUNTRIES[state.country],d=DIFF[state.diff];
+      var fee=[80,50,30,15][Math.min(3,state.feeLevel||0)];
+      return Math.round((c.rent+400+fee)*d.cost*costMult());
+    }catch(e){return 0}
+  };
+  /* Buy sliders keep next month's bill in reserve. */
+  window.cashReserve=function(){
+    if(!state||state._gameEnded)return 0;
+    var need=nextMonthCost();
+    return Math.min(need,Math.max(0,state.cash));
+  };
+
+  function label(){
+    if(!state)return'';
+    var need=nextMonthCost();
+    if(state.cash>=need)return'bills '+fmt(need)+' \u00b7 covered';
+    return'bills '+fmt(need)+' \u00b7 cash short \u2013 bags get sold';
+  }
+  function tick(){
+    if(!state)return;
+    var short=state.cash<nextMonthCost();
+    var list=[document.getElementById('mobile-next')]
+      .concat([].slice.call(document.querySelectorAll('.v4-next')));
+    var txt=label();
+    list.forEach(function(b){
+      if(!b)return;
+      var host=b.querySelector('.nm-txt')||b;
+      var el=b.querySelector('.v37-cost');
+      if(!el){el=document.createElement('span');el.className='v37-cost';host.appendChild(el)}
+      if(el.textContent!==txt)el.textContent=txt;
+      b.classList.toggle('v37-short',short);
+    });
+  }
+  setInterval(tick,700);setTimeout(tick,400);
+
+  /* Ask before the auto-liquidation touches the player's coins. */
+  var ask=document.getElementById('v37-ask');
+  var pending=null;
+  function close(){ask.classList.add('hidden');pending=null}
+  document.getElementById('v37-ask-no').onclick=function(){close()};
+  document.getElementById('v37-ask-yes').onclick=function(){
+    var go=pending;close();if(go)go();
+  };
+  var orig=window.advanceMonth;
+  window.advanceMonth=function(){
+    try{
+      if(state&&!state._gameEnded&&!state.ironman){
+        var need=nextMonthCost();
+        if(state.cash<need&&portValue()>0){
+          var short=need-state.cash;
+          document.getElementById('v37-ask-txt').innerHTML=
+            'Next month costs <b>'+fmt(need)+'</b>, but you only hold <b>'+fmt(state.cash)+
+            '</b> in cash. About <b>'+fmt(short)+'</b> will be raised by automatically selling '+
+            'your biggest bags \u2014 with a fee and a 3% forced-sale haircut.';
+          ask.classList.remove('hidden');
+          pending=function(){orig.apply(null,[])};
+          return;
+        }
+      }
+    }catch(e){}
+    return orig.apply(null,arguments);
+  };
+})();
+</script>
