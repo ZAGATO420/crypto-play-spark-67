@@ -335,7 +335,7 @@
 }
 .cy-shell > * { width: min(100%, 1180px); margin-inline: auto; }
 .cy-top { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; }
-.cy-net { margin-top: 3px; font: 400 clamp(26px, 7vw, 40px)/1 var(--font-display); transition: color .2s, text-shadow .2s }
+.cy-net { min-width: 0; margin-top: 3px; font: 400 clamp(26px, 7vw, 40px)/1 var(--font-display); overflow-wrap: anywhere; transition: color .2s, text-shadow .2s }
 .cy-net.pulse-up { color: var(--journey-yellow); text-shadow: 0 0 22px color-mix(in oklab, var(--journey-yellow) 45%, transparent); animation: cy-bump .5s ease-out }
 .cy-net.pulse-down { color: var(--journey-pink); text-shadow: 0 0 22px color-mix(in oklab, var(--journey-pink) 45%, transparent); animation: cy-bump .5s ease-out }
 @keyframes cy-bump { 0% { transform: scale(1) } 35% { transform: scale(1.06) } 100% { transform: scale(1) } }
@@ -460,6 +460,10 @@
   .cy-trail { order: 3 }
 }
 @media (max-width: 640px) {
+  .cy-top { grid-template-columns: minmax(0, 1fr); align-items: stretch }
+  .cy-top-right { justify-content: space-between; width: 100%; padding-top: 8px; border-top: 1px solid var(--border) }
+  .cy-top-right .cy-score { min-width: 0; max-width: calc(100% - 88px); text-align: left }
+  .cy-top-right .cy-score strong { overflow-wrap: anywhere }
   .cy-meters { grid-template-columns: repeat(2, minmax(0,1fr)) }
   .cy-card { padding: 16px }
   .cy-trade-cols { grid-template-columns: minmax(0,1fr) }

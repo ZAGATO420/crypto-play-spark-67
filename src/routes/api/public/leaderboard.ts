@@ -40,7 +40,10 @@ const RANKS = [
   "Cycle Survivor",
 ];
 
-const COUNTRIES = ["DE", "USA", "CH", "SG", "PT", "NG"] as const;
+const COUNTRIES = [
+  "DE", "CH", "AT", "GB", "USA", "CA", "BR", "AR", "FR", "IT", "ES", "PT",
+  "NL", "PL", "SE", "TR", "AE", "NG", "ZA", "IN", "SG", "JP", "KR", "AU",
+] as const;
 const ARCHETYPES = ["degen", "trader", "influencer", "hodler"] as const;
 const DIFFICULTIES = ["EASY", "NORMAL", "BOSS"] as const;
 const MODES = [
@@ -53,6 +56,7 @@ const MODES = [
 ] as const;
 
 const runSchema = z.object({
+  clientHash: z.string().uuid(),
   name: z.string().trim().min(1).max(18),
   arch: z.enum(ARCHETYPES),
   country: z.enum(COUNTRIES),
@@ -106,7 +110,7 @@ function implausibleReason(run: z.infer<typeof runSchema>): string | null {
 // Boss Score = net worth x chapter factor x difficulty + crisis bonus, streak-boosted.
 // It can never run far ahead of the net worth the run actually finished with.
 function scoreCeiling(run: z.infer<typeof runSchema>): number {
-  return run.net * 8 + 250_000;
+  return Math.max(250_000, Math.max(0, run.net) * 8 + 250_000);
 }
 
 
@@ -277,10 +281,10 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively
-        // so the earned title still shows up on the board.
+        // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively.
         const rankMatch = RANKS.find((r) => r.toLowerCase() === run.rank.trim().toLowerCase());
         const row = {
+          client_hash: run.clientHash,
           player_name: sanitizeName(run.name),
           archetype: run.arch,
           country: run.country,
@@ -289,7 +293,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           net_worth: run.net,
           xp: run.xp,
           level: run.level,
-          rank_title: rankMatch ?? "",
+          rank_title: rankMatch ?? run.rank.trim(),
           months_survived: run.months,
           achievements: run.achievements,
           trades: run.trades,
@@ -299,11 +303,11 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           avatar: run.avatar ?? null,
         };
 
-        let { error } = await supabaseAdmin.from("leaderboard_runs").insert(row);
-        // PGRST303 / network blips: retry before telling a player their run is lost.
+        let { error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true });
+        // PGRST303 / network blips: retry safely using the unique client hash.
         for (let attempt = 0; attempt < 3 && error; attempt++) {
           await sleep(300 * (attempt + 1));
-          ({ error } = await supabaseAdmin.from("leaderboard_runs").insert(row));
+          ({ error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true }));
         }
 
         if (error) {
