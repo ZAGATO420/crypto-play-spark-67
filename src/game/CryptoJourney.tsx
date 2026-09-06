@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Rocket, Skull, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
+import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Shield, Skull, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import crownedBoss from "@/assets/boss/crowned.webp.asset.json";
 import enragedBoss from "@/assets/boss/enraged.webp.asset.json";
@@ -13,27 +13,35 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, DIFFICULTIES, ENDINGS, MODES, PRESALES, STATUS_BY_CHOICE, TOTAL_MONTHS, XP,
-  bossScore, chapterLabel, chapterMonth, crashFor, decisionForChapter, formatMoney, levelFor, levelPerk, monthRangeLabel, monthsSurvived, presaleFor, situationFor, xpProgress,
-  type Archetype, type BaseMode, type CoinSymbol, type Country, type Decision, type DecisionOption, type Difficulty, type EndingKey, type Presale, type Situation,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
+  bossScore, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, presaleFor, situationFor, xpProgress,
+  type Archetype, type BaseMode, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
 } from "./journey-data";
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
+import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
 
 /* ------------------------------------------------------------------ types */
 
 type Kind = "spot" | "perp";
-type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number };
+type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number; where: CustodyId };
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
+type Entry = { chapter: number; label: string; amount: number };
 type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
   hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
-  statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; config: Config;
+  custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number;
+  ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; config: Config;
 };
 type Phase = "brief" | "act" | "resolve";
 type LaunchResult = { name: string; tag: string; size: number; back: number; multi: number; rugged: boolean; line: string };
+type Pending =
+  | { t: "close"; id: number; fraction: number }
+  | { t: "presale"; card: Presale; size: number }
+  | { t: "crash"; chapter: number }
+  | { t: "seed" };
 type Dialog =
   | { k: "rules" }
   | { k: "market" }
@@ -45,17 +53,23 @@ type Dialog =
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
   | { k: "crash"; chapter: number }
+  | { k: "failure"; chapter: number }
+  | { k: "custody" }
+  | { k: "life" }
+  | { k: "ledger" }
+  | { k: "mini"; kind: MiniKind; pending: Pending }
   | { k: "score" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
-type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[] };
+type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[]; inflow: Entry[]; outflow: Entry[] };
 type Pop = { id: number; text: string; tone: "xp" | "up" | "down" };
 
 
-const SAVE_KEY = "tcfb_cycle_v1";
+const SAVE_KEY = "tcfb_cycle_v2";
 const AP_BASE = 2;
 const AP_CAP = 4;
 const LEVERAGE = [2, 5, 10] as const;
+const FUNDING = 0.018; // per quarter, on notional — holding leverage is never free
 
 export const AVATARS = [
   { id: "ape", url: avApe.url }, { id: "astro", url: avAstro.url }, { id: "bot", url: avBot.url }, { id: "coder", url: avCoder.url },
@@ -82,7 +96,8 @@ const makeNoise = (mode: BaseMode) => {
 const freshRun = (config: Config): Run => ({
   chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
   hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-  statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
+  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0,
+  ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
 });
 
 const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
@@ -93,8 +108,15 @@ const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
 const pnlOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price - p.margin : p.margin * p.lev * p.dir * (price / p.entry - 1));
 const valueOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price : Math.max(0, p.margin + pnlOf(p, price)));
 const liqPct = (p: Pos, price: number) => (p.kind === "spot" ? 100 : clamp(100 + (pnlOf(p, price) / p.margin) * 100, 0, 100));
-const netOf = (r: Run) => r.positions.reduce((sum, p) => sum + valueOf(p, priceAt(p.symbol, r.chapter, r.noise)), r.cash);
+const netOf = (r: Run) => r.positions.reduce((sum, p) => sum + valueOf(p, priceAt(p.symbol, r.chapter, r.noise)), r.cash) - r.taxDebt;
 const XP_MODE: Record<BaseMode, number> = { classic: 1, historical: 0.75, chaos: 1.25 };
+const custodySplit = (r: Run) => {
+  const totals: Record<CustodyId, number> = { exchange: 0, hot: 0, cold: 0 };
+  for (const p of r.positions) totals[p.where] += valueOf(p, priceAt(p.symbol, r.chapter, r.noise));
+  const sum = totals.exchange + totals.hot + totals.cold;
+  return { totals, sum };
+};
+
 
 /* ------------------------------------------------------------------- shell */
 
@@ -172,9 +194,10 @@ export function CryptoJourney() {
 
   const rumble = () => { setShake(true); window.setTimeout(() => setShake(false), 520); };
 
-  const spend = (cost = 1) => setAp((a) => Math.max(0, a - cost));
+  const spend = (cost = 1) => { setAp((a) => Math.max(0, a - cost)); setRun((r) => ({ ...r, moves: r.moves + 1 })); };
 
-
+  /** Every dollar that moves gets a line in the books. Nothing is invisible. */
+  const book = (r: Run, label: string, amount: number): Run => ({ ...r, ledger: [{ chapter: r.chapter, label, amount }, ...r.ledger].slice(0, 60) });
 
   /* ---------------------------------------------------------- run actions */
 
@@ -184,14 +207,16 @@ export function CryptoJourney() {
     if (!price) return say(`${symbol} does not exist yet. Time travel has rules.`, "pink");
     const size = Math.floor(run.cash * fraction);
     if (size < 50) return say("Under $50. The Boss has more in his couch cushions.", "pink");
+    const cust = custodyOf(run.custody);
+    const fee = Math.round(size * cust.fee);
     spend();
-    setRun((r) => ({
-      ...r, cash: r.cash - size, trades: r.trades + 1,
-      positions: [...r.positions, { id: r.nextId, symbol, kind: "spot", dir: 1, lev: 1, margin: size, entry: price, qty: size / price }],
+    setRun((r) => book(book({
+      ...r, cash: r.cash - size - fee, trades: r.trades + 1,
+      positions: [...r.positions, { id: r.nextId, symbol, kind: "spot", dir: 1, lev: 1, margin: size, entry: price, qty: size / price, where: r.custody }],
       nextId: r.nextId + 1,
-    }));
-    log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)}.`, tone: "cyan" });
-    say(`${formatMoney(size)} into ${symbol}. Bag opened.`, "cyan");
+    }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee));
+    log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
+    say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
     grantXp(XP.trade, "TRADE");
   };
 
@@ -202,52 +227,72 @@ export function CryptoJourney() {
     const margin = Math.floor(run.cash * fraction);
     if (margin < 50) return say("Not enough margin. Perps eat small accounts first.", "pink");
     spend();
-    setRun((r) => ({
+    setRun((r) => book({
       ...r, cash: r.cash - margin, trades: r.trades + 1, risk: clamp(r.risk + lev * 6 * arch.risk),
-      positions: [...r.positions, { id: r.nextId, symbol, kind: "perp", dir, lev, margin, entry: price, qty: 0 }],
+      positions: [...r.positions, { id: r.nextId, symbol, kind: "perp", dir, lev, margin, entry: price, qty: 0, where: "exchange" }],
       nextId: r.nextId + 1,
-    }));
-    log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}.`, tone: "yellow" });
-    say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Risk meter noticed.`, "yellow");
+    }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
+    log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
+    say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
     grantXp(XP.trade + lev * 8, `${lev}x`);
   };
 
-  const closePosition = (id: number, fraction: number) => {
+  /** Closing asks for a steady hand: the timing bar decides your fill. */
+  const askClose = (id: number, fraction: number) => {
+    const pos = run.positions.find((p) => p.id === id);
+    if (!pos) return;
+    if (pos.where === "cold" && ap <= 0) { setDialog(null); return say("Cold storage needs a move to unlock. None left this quarter.", "pink"); }
+    setDialog({ k: "mini", kind: "timing", pending: { t: "close", id, fraction } });
+  };
+
+  const closePosition = (id: number, fraction: number, quality: number) => {
     setDialog(null);
     const pos = run.positions.find((p) => p.id === id);
     if (!pos) return;
-    const price = priceAt(pos.symbol, run.chapter, run.noise);
-    const whole = valueOf(pos, price);
+    const cust = custodyOf(pos.where);
+    // cold storage fills a quarter late — that is the price of being untouchable
+    const price = pos.where === "cold" ? priceAt(pos.symbol, Math.max(0, run.chapter - 1), run.noise) : priceAt(pos.symbol, run.chapter, run.noise);
+    const slip = 0.94 + quality * 0.08;
+    const whole = valueOf(pos, price) * slip;
     const back = Math.round(whole * fraction);
+    const fee = Math.round(back * cust.fee);
     const cost = pos.margin * fraction;
-    const gain = back - cost;
-    setRun((r) => ({
+    const gain = back - fee - cost;
+    if (pos.where === "cold") spend();
+    setRun((r) => book(book({
       ...r,
-      cash: r.cash + back,
+      cash: r.cash + back - fee,
       trades: r.trades + 1,
+      realized: r.realized + Math.max(0, gain),
       risk: pos.kind === "perp" ? clamp(r.risk - pos.lev * 4 * fraction) : r.risk,
       positions: fraction >= 1
         ? r.positions.filter((p) => p.id !== id)
         : r.positions.map((p) => (p.id === id ? { ...p, margin: p.margin * (1 - fraction), qty: p.qty * (1 - fraction) } : p)),
-    }));
-    log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}.`, tone: gain >= 0 ? "yellow" : "pink" });
+    }, `Closed ${pos.symbol}`, back), `${cust.short} fee`, -fee));
+    log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " · settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     pop(`${gain >= 0 ? "+" : "−"}${formatMoney(Math.abs(gain))}`, gain >= 0 ? "up" : "down");
-    grantXp(gain >= 0 ? XP.closeWin : XP.closeLoss, gain >= 0 ? "PROFIT TAKEN" : "LESSON");
+    grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (gain < 0) rumble();
   };
 
-  const takePresale = (card: Presale, size: number) => {
+  const takePresale = (card: Presale, size: number, quality: number) => {
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
+    if (quality < 0.2) {
+      setRun((r) => book({ ...r, stress: clamp(r.stress + 10) }, `${card.name} · missed mint (gas)`, -Math.round(size * 0.06)));
+      log({ chapter: run.chapter, title: `MISSED · ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
+      return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
+    }
     const rugged = Math.random() < card.rug / (arch.risk || 1);
-    const multi = rugged ? 0.08 : card.upside[0] + Math.random() * (card.upside[1] - card.upside[0]);
+    const multi = rugged ? 0.08 : (card.upside[0] + Math.random() * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
     const back = Math.round(size * multi);
-    setRun((r) => ({
+    setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
+      realized: r.realized + Math.max(0, back - size),
       risk: clamp(r.risk + 10), stress: clamp(r.stress + (rugged ? 12 : 4)),
       statuses: rugged ? Array.from(new Set([...r.statuses, "RUG VICTIM"])) : Array.from(new Set([...r.statuses, "EARLY BUYER"])),
-    }));
+    }, `${card.name} ticket`, -size), `${card.name} payout`, back));
     const title = rugged ? "RUGGED." : multi > 6 ? "MOONSHOT" : "IT PAID";
     const line = rugged
       ? "The liquidity left before you did. The Boss has seen this exact face before."
@@ -265,13 +310,43 @@ export function CryptoJourney() {
     setDialog(null);
     const cost = Math.round((kind === "eat" ? 90 : 130) * diff.cost);
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
-    setRun((r) => ({
+    setRun((r) => book({
       ...r, cash: r.cash - cost,
       hunger: kind === "eat" ? clamp(r.hunger - 38) : r.hunger,
       stress: kind === "calm" ? clamp(r.stress - 38) : r.stress,
-    }));
+    }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
     say(kind === "eat" ? "Fed. Hunger down 38." : "Head cleared. Stress down 38.", "cyan");
     grantXp(XP.survive, "STILL ALIVE");
+  };
+
+  /** Moving the bag is the most important button in the game. */
+  const setCustody = (id: CustodyId) => {
+    setDialog(null);
+    if (id === run.custody) return say(`Everything already sits in your ${custodyOf(id).short}.`, "cyan");
+    if (ap <= 0) return say("Moving coins costs a move. None left this quarter.", "pink");
+    spend();
+    const moved = run.positions.filter((p) => p.kind === "spot");
+    const value = moved.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, run.chapter, run.noise)), 0);
+    const fee = Math.round(value * 0.004);
+    setRun((r) => book({
+      ...r, custody: id, cash: r.cash - fee,
+      positions: r.positions.map((p) => (p.kind === "spot" ? { ...p, where: id } : p)),
+      statuses: id === "cold" ? Array.from(new Set([...r.statuses, "SELF CUSTODY"])) : r.statuses,
+    }, `Moved bags to ${custodyOf(id).short}`, -fee));
+    log({ chapter: run.chapter, title: `CUSTODY · ${custodyOf(id).short}`, detail: `${formatMoney(value)} moved for ${formatMoney(fee)} in fees.`, tone: "cyan" });
+    say(`Bags now in ${custodyOf(id).name}. ${custodyOf(id).blurb}`, "cyan");
+    grantXp(XP_EXTRA.custody, "CUSTODY MOVE");
+  };
+
+  const setLife = (job: JobId, housing: HousingId) => {
+    setDialog(null);
+    if (job === run.job && housing === run.housing) return;
+    if (ap <= 0) return say("Changing your life costs a move. None left.", "pink");
+    spend();
+    setRun((r) => ({ ...r, job, housing, stress: clamp(r.stress + (job === "fulltime" ? 8 : 0)) }));
+    log({ chapter: run.chapter, title: "LIFE CHANGED", detail: `${jobOf(job).name} · ${housingOf(housing).name}.`, tone: "cyan" });
+    say(`${jobOf(job).name} · ${housingOf(housing).name}. Costs and income updated.`, "cyan");
+    grantXp(XP_EXTRA.life, "LIFE CHOICE");
   };
 
   const bank = () => {
@@ -285,9 +360,10 @@ export function CryptoJourney() {
     const status = STATUS_BY_CHOICE[option.label];
     setRun((r) => {
       const positions = r.positions.map((p) => (option.bagMul !== undefined ? { ...p, margin: p.margin * option.bagMul, qty: p.qty * option.bagMul } : p));
-      return {
+      const cashAfter = Math.max(0, Math.round(r.cash * (option.cashMul ?? 1) + (option.cash ?? 0)));
+      const moved: Run = {
         ...r,
-        cash: Math.max(0, Math.round(r.cash * (option.cashMul ?? 1) + (option.cash ?? 0))),
+        cash: cashAfter,
         positions,
         stress: clamp(r.stress + Math.round((option.stress ?? 0) * arch.risk)),
         hunger: clamp(r.hunger + (option.hunger ?? 0)),
@@ -295,11 +371,53 @@ export function CryptoJourney() {
         statuses: status ? Array.from(new Set([...r.statuses, status])) : r.statuses,
         logs: [{ chapter: r.chapter, title: option.label, detail: option.result, tone: option.tone === "win" ? "yellow" : option.tone === "danger" ? "pink" : "cyan" } as Log, ...r.logs].slice(0, 12),
       };
+      return cashAfter === r.cash ? moved : book(moved, option.label, cashAfter - r.cash);
     });
     say(option.result, option.tone === "danger" ? "pink" : option.tone === "win" ? "yellow" : "cyan");
     grantXp(option.xp ?? (crisis ? XP.crisis : 200), option.tone === "win" ? "GOOD CALL" : "SURVIVED IT");
     if (option.tone === "danger") rumble();
     nextInQueue();
+  };
+
+  /** Crash cards hand you a panic exit: tap fast and you save part of the bag. */
+  const resolveCrash = (chapter: number, quality: number) => {
+    if (quality >= 0.9) {
+      setRun((r) => ({ ...r, stress: clamp(r.stress - 10), statuses: Array.from(new Set([...r.statuses, "COLD BLOODED"])) }));
+      say("You de-risked into the crash. The Boss hates good reflexes.", "yellow");
+      grantXp(XP_EXTRA.escape, "CRASH DODGED");
+    } else if (quality >= 0.5) {
+      setRun((r) => ({ ...r, positions: r.positions.map((p) => ({ ...p, margin: p.margin * 0.94, qty: p.qty * 0.94 })), stress: clamp(r.stress + 6) }));
+      say("Half your orders filled. The rest went through at panic prices.", "cyan");
+      grantXp(XP_EXTRA.minigameOk, "PARTIAL EXIT");
+    } else {
+      setRun((r) => ({ ...r, positions: r.positions.map((p) => ({ ...p, margin: p.margin * 0.84, qty: p.qty * 0.84 })), stress: clamp(r.stress + 16) }));
+      say("You froze. The book emptied without you.", "pink");
+      rumble();
+    }
+    void chapter;
+    nextInQueue();
+  };
+
+  const resolveSeed = (quality: number) => {
+    if (quality >= 0.9) {
+      say("Seed recovered word for word. Cold storage intact.", "yellow");
+      grantXp(XP_EXTRA.escape, "KEYS SECURED");
+    } else if (quality >= 0.5) {
+      setRun((r) => book({ ...r, stress: clamp(r.stress + 8) }, "Recovery service", -400));
+      say("You needed help to recover it. Embarrassing, survivable.", "cyan");
+    } else {
+      setRun((r) => ({ ...r, positions: r.positions.map((p) => (p.where === "cold" ? { ...p, margin: p.margin * 0.5, qty: p.qty * 0.5 } : p)), stress: clamp(r.stress + 22) }));
+      say("Half your cold bag is locked behind a phrase you cannot remember.", "pink");
+      rumble();
+    }
+    nextInQueue();
+  };
+
+  const finishMini = (pending: Pending, res: MiniResult) => {
+    if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
+    if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
+    if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
+    return resolveSeed(res.quality);
   };
 
   // one card at a time: crash report, then the historical decision, then the small moment
@@ -313,22 +431,30 @@ export function CryptoJourney() {
 
 
 
+
   const endChapter = () => {
     const from = run.chapter;
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
+    const inflow: Entry[] = [];
+    const outflow: Entry[] = [];
+    const spendOn = (label: string, amount: number) => { if (amount > 0) outflow.push({ chapter: next, label, amount: -amount }); };
+    const earnFrom = (label: string, amount: number) => { if (amount > 0) inflow.push({ chapter: next, label, amount }); };
 
     // liquidations first, on the new prices
     let cash = run.cash;
     let risk = clamp(run.risk - 10);
     let crises = run.crises;
+    let taxDebt = run.taxDebt;
+    let realized = run.realized;
     const survivors: Pos[] = [];
     for (const p of run.positions) {
       const price = priceAt(p.symbol, next, run.noise);
       if (!price) { survivors.push(p); continue; }
       if (p.kind === "perp" && pnlOf(p, price) <= -p.margin * 0.97) {
         lines.push(`${p.symbol} ${p.lev}x liquidated — ${formatMoney(p.margin)} margin gone.`);
+        spendOn(`${p.symbol} ${p.lev}x liquidation`, Math.round(p.margin));
         risk = clamp(risk + 14);
         continue;
       }
@@ -337,19 +463,70 @@ export function CryptoJourney() {
     if (run.risk >= 95 && survivors.some((p) => p.kind === "perp")) {
       for (const p of survivors.filter((p) => p.kind === "perp")) lines.push(`Risk overheated: ${p.symbol} ${p.lev}x force-closed.`);
     }
-    const positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
+    let positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
     if (run.risk >= 95) risk = 40;
 
-    const cost = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
-    cash = Math.max(0, cash - cost);
-    lines.push(`Living costs: ${formatMoney(cost)} (level ${levelFor(run.xp)} discount applied).`);
-    const hunger = clamp(run.hunger + Math.round(9 * arch.risk));
-    const stress = clamp(run.stress + Math.round(7 * arch.risk));
+    // perp funding: leverage is rented, never owned
+    const funding = Math.round(positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev * FUNDING, 0));
+    if (funding > 0) { cash -= funding; spendOn("Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}.`); }
 
-    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises };
+    // an exchange failure takes exactly what you left on the exchange
+    const failure = failureFor(next);
+    if (failure) {
+      const exposed = positions.filter((p) => p.where === "exchange");
+      const hit = Math.round(exposed.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, next, run.noise)) * failure.haircut, 0));
+      if (hit > 0) {
+        positions = positions.map((p) => (p.where === "exchange" ? { ...p, margin: p.margin * (1 - failure.haircut), qty: p.qty * (1 - failure.haircut) } : p));
+        spendOn(failure.name, hit);
+        lines.push(`${failure.name}: ${formatMoney(hit)} of exchange balance gone.`);
+        crises += 1;
+        rumble();
+      } else {
+        lines.push(`${failure.name}: nothing of yours was on that exchange. Well played.`);
+      }
+    }
+
+    // hot wallet drainers
+    const hotSpot = positions.filter((p) => p.where === "hot");
+    if (hotSpot.length && Math.random() < custodyOf("hot").drain) {
+      const bite = Math.round(hotSpot.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, next, run.noise)) * 0.12, 0));
+      positions = positions.map((p) => (p.where === "hot" ? { ...p, margin: p.margin * 0.88, qty: p.qty * 0.88 } : p));
+      spendOn("Wallet drainer", bite);
+      lines.push(`A malicious approval drained ${formatMoney(bite)} from your hot wallet.`);
+    }
+
+    // life: income in, rent and food out
+    const job = jobOf(run.job);
+    const house = housingOf(run.housing);
+    if (job.income > 0) { cash += job.income; earnFrom(`${job.name} income`, job.income); }
+    const rent = Math.round(house.rent * diff.cost);
+    const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
+    cash -= rent + food;
+    spendOn(`Rent · ${house.name}`, rent);
+    spendOn("Food & living", food);
+    lines.push(`Rent ${formatMoney(rent)} · living ${formatMoney(food)} · income ${formatMoney(job.income)}.`);
+
+    // tax once a year on what you actually realised
+    if (isTaxChapter(next) && realized > 0) {
+      const bill = Math.round(realized * TAX_RATE);
+      if (cash >= bill) { cash -= bill; spendOn(`Tax on ${formatMoney(realized)} realised`, bill); lines.push(`Tax bill paid: ${formatMoney(bill)}.`); }
+      else { taxDebt += Math.round(bill * 1.2); lines.push(`Tax bill ${formatMoney(bill)} unpaid — it grows 20% and follows you.`); }
+      realized = 0;
+    }
+    if (taxDebt > 0 && !isTaxChapter(next)) taxDebt = Math.round(taxDebt * 1.05);
+    cash = Math.max(0, cash);
+
+    // doing nothing is a choice, and it costs
+    const idle = run.moves === 0;
+    const hunger = clamp(run.hunger + Math.round(9 * arch.risk) + (idle ? 6 : 0));
+    const stress = clamp(run.stress + Math.round(7 * arch.risk) + (idle ? 12 : 0) + job.stress - house.calm);
+    if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
+
+    const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
+    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0 };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
-    const streak = delta > 0 ? run.streak + 1 : 0;
+    const streak = delta > 0 && !idle ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
     const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
     const detail = `${chapterLabel(next)} · ${monthRangeLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
@@ -357,28 +534,32 @@ export function CryptoJourney() {
 
     const nextRun: Run = { ...draft, streak, logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12) };
     setRun(nextRun);
-    setResolution({ title, detail, tone, delta, move, lines });
+    setResolution({ title, detail, tone, delta, move, lines, inflow, outflow });
     setPhase("resolve");
-    setAp(Math.min(AP_CAP, AP_BASE + ap));
-    grantXp(XP.chapter + (delta >= 0 ? XP.greenQuarter : 0) + streak * XP.streakStep, delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
+    setAp(Math.min(AP_CAP, AP_BASE + job.ap + ap));
+    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
 
     const finalNet = netOf(nextRun);
     if (hunger >= 100) return finish("STARVED");
     if (stress >= 100) return finish("BROKEN");
     if (finalNet <= 0) return finish(positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
-    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 25 ? "LEGEND" : "SURVIVOR");
+    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 40 && crises >= 5 ? "LEGEND" : "SURVIVOR");
   };
 
   const openChapterCards = (chapter: number) => {
     const cards: Dialog[] = [];
     if (crashFor(chapter)) cards.push({ k: "crash", chapter });
+    if (failureFor(chapter)) cards.push({ k: "failure", chapter });
     const decision = decisionForChapter(chapter);
     if (decision) cards.push({ k: "decision", card: decision });
     const situation = situationFor(chapter);
     if (situation) cards.push({ k: "situation", card: situation });
+    // cold storage occasionally asks you to prove you still own it
+    if (chapter > 3 && run.positions.some((p) => p.where === "cold") && Math.random() < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
     if (!cards.length) { setDialog(null); setPhase("brief"); return; }
     setPhase("act");
+
     setDialog(cards[0]!);
     setQueue(cards.slice(1));
   };
@@ -474,9 +655,11 @@ export function CryptoJourney() {
               <p className="journey-kicker"><History /> {chapterLabel(run.chapter)} · THE SETUP</p>
               <h2>{run.chapter === 0 ? "IT STARTS QUIET" : btcMove >= 0 ? "THE TAPE IS GREEN" : "THE TAPE IS BLEEDING"}</h2>
               <p className="cy-lead">{warning}</p>
+              {hintFor(run.chapter) && <p className="cy-hint"><strong>WORD ON THE TIMELINE ·</strong> {hintFor(run.chapter)}</p>}
               <div className="cy-facts">
                 <span><small>BTC THIS QUARTER</small><strong className={btcMove >= 0 ? "positive" : "negative"}>{btcMove >= 0 ? "+" : ""}{btcMove.toFixed(1)}%</strong></span>
                 <span><small>YOUR CASH</small><strong>{formatMoney(run.cash)}</strong></span>
+                <span><small>BAGS IN</small><strong>{custodyOf(run.custody).short}</strong></span>
                 <span><small>MOVES</small><strong>{ap}</strong></span>
               </div>
               <div className="cy-actions"><Button className="cy-primary" onClick={() => setPhase("act")}>TAKE YOUR TURN <ChevronRight /></Button></div>
@@ -491,6 +674,9 @@ export function CryptoJourney() {
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><strong>TRADE SPOT</strong><small>Buy or short-list a market</small></button>
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><Zap /><strong>PERP DESK</strong><small>2x · 5x · 10x, long or short</small></button>
                 <button className="cy-act" disabled={ap <= 0 || !presale} onClick={() => presale && setDialog({ k: "presale", card: presale })}><Rocket /><strong>{presale ? presale.tag : "NO LAUNCH"}</strong><small>{presale ? presale.name : "Nothing live this quarter"}</small></button>
+                <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield /><strong>CUSTODY · {custodyOf(run.custody).short}</strong><small>Exchange · hot wallet · Ledger</small></button>
+                <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "life" })}><Home /><strong>LIFE</strong><small>{jobOf(run.job).name} · {housingOf(run.housing).name}</small></button>
+                <button className="cy-act" onClick={() => setDialog({ k: "ledger" })}><Receipt /><strong>THE BOOKS</strong><small>Every dollar in and out</small></button>
                 <button className="cy-act" onClick={() => setDialog({ k: "survive" })}><HeartPulse /><strong>SURVIVE</strong><small>Eat · calm down</small></button>
                 <button className="cy-act" onClick={bank}><History /><strong>WAIT</strong><small>Bank a move, lose stress</small></button>
                 <button className="cy-act is-go" onClick={endChapter}><ChevronRight /><strong>END QUARTER</strong><small>Let the market answer</small></button>
@@ -504,10 +690,21 @@ export function CryptoJourney() {
               <h2>{resolution.title}</h2>
               <p className={`cy-delta ${resolution.delta >= 0 ? "positive" : "negative"}`}>{resolution.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(resolution.delta))}</p>
               <p className="cy-lead">{resolution.detail}</p>
+              <div className="cy-flows">
+                <div className="cy-flow in">
+                  <h4>MONEY IN</h4>
+                  {resolution.inflow.length ? resolution.inflow.map((e, i) => <p key={i}><span>{e.label}</span><strong>+{formatMoney(e.amount)}</strong></p>) : <p className="muted">Nothing came in. Rough quarter.</p>}
+                </div>
+                <div className="cy-flow out">
+                  <h4>MONEY OUT</h4>
+                  {resolution.outflow.length ? resolution.outflow.map((e, i) => <p key={i}><span>{e.label}</span><strong>−{formatMoney(Math.abs(e.amount))}</strong></p>) : <p className="muted">You spent nothing. Suspicious.</p>}
+                </div>
+              </div>
               <ul className="cy-lines">{resolution.lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
               <div className="cy-actions"><Button className="cy-primary" onClick={continueChapter}>NEXT CHAPTER <ChevronRight /></Button></div>
             </article>
           )}
+
         </section>
 
         <aside className="cy-trail">
@@ -528,19 +725,25 @@ export function CryptoJourney() {
       {levelUp !== null && <div className="cy-levelup" role="status">LEVEL {levelUp}<small>The Boss raised an eyebrow.</small></div>}
 
       {dialog && (
-        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" ? undefined : () => (dialog.k === "crash" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
+        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
           {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => setDialog({ k: "trade", symbol: s })} />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
-          {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => closePosition(dialog.id, f)} />}
-          {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => takePresale(dialog.card, size)} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
+          {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
+          {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
           {dialog.k === "launchResult" && <LaunchResultSheet res={dialog.res} onClose={nextInQueue} />}
           {dialog.k === "survive" && <SurviveSheet run={run} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
-          {dialog.k === "crash" && <CrashSheet chapter={dialog.chapter} onClose={nextInQueue} />}
+          {dialog.k === "crash" && <CrashSheet chapter={dialog.chapter} onPanic={() => setDialog({ k: "mini", kind: "panic", pending: { t: "crash", chapter: dialog.chapter } })} onClose={nextInQueue} />}
+          {dialog.k === "failure" && <FailureSheet chapter={dialog.chapter} run={run} onClose={nextInQueue} />}
+          {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
+          {dialog.k === "life" && <LifeSheet run={run} onPick={setLife} />}
+          {dialog.k === "ledger" && <LedgerSheet run={run} onClose={() => setDialog(null)} />}
+          {dialog.k === "mini" && <Minigame kind={dialog.kind} hard={cfg.difficulty !== "EASY"} onResult={(res) => finishMini(dialog.pending, res)} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
         </Sheet>
+
       )}
 
     </main>
@@ -758,7 +961,7 @@ function LaunchResultSheet({ res, onClose }: { res: LaunchResult; onClose: () =>
   );
 }
 
-function CrashSheet({ chapter, onClose }: { chapter: number; onClose: () => void }) {
+function CrashSheet({ chapter, onPanic, onClose }: { chapter: number; onPanic: () => void; onClose: () => void }) {
   const crash = crashFor(chapter);
   if (!crash) return <Button className="cy-wide" onClick={onClose}>CONTINUE</Button>;
   return (
@@ -766,10 +969,98 @@ function CrashSheet({ chapter, onClose }: { chapter: number; onClose: () => void
       <p className="journey-kicker"><TrendingDown /> {chapterLabel(chapter)} · {monthRangeLabel(chapter)}</p>
       <h2 className="negative">{crash.title}</h2>
       <p className="cy-lead">{crash.line}</p>
+      <div className="cy-actions">
+        <Button className="cy-primary" onClick={onPanic}>HIT THE EXIT <Zap /></Button>
+        <Button onClick={onClose}>SIT STILL</Button>
+      </div>
+      <small className="cy-note">Fast hands save part of the bag. Frozen hands pay full price.</small>
+    </>
+  );
+}
+
+function FailureSheet({ chapter, run, onClose }: { chapter: number; run: Run; onClose: () => void }) {
+  const fail = failureFor(chapter);
+  if (!fail) return <Button className="cy-wide" onClick={onClose}>CONTINUE</Button>;
+  const exposed = run.positions.filter((p) => p.where === "exchange").length;
+  return (
+    <>
+      <p className="journey-kicker"><Shield /> {chapterLabel(chapter)} · COUNTERPARTY</p>
+      <h2 className="negative">{fail.name}</h2>
+      <p className="cy-lead">{fail.line}</p>
+      <p className="cy-note">{exposed ? `You still have ${exposed} position${exposed === 1 ? "" : "s"} sitting there. ${Math.round(fail.haircut * 100)}% of it goes up in smoke at the end of this quarter.` : "Nothing of yours was on that exchange. That is what the Ledger was for."}</p>
       <Button className="cy-wide cy-primary" onClick={onClose}>FACE IT <ChevronRight /></Button>
     </>
   );
 }
+
+function CustodySheet({ run, onPick }: { run: Run; onPick: (id: CustodyId) => void }) {
+  return (
+    <>
+      <p className="journey-kicker"><Shield /> WHERE DO YOUR COINS SLEEP?</p>
+      <h2>CUSTODY</h2>
+      <div className="cy-pick-list">
+        {CUSTODY.map((c) => (
+          <button key={c.id} className={`cy-pick-row ${run.custody === c.id ? "is-on" : ""}`} onClick={() => onPick(c.id)}>
+            <strong>{c.name}</strong>
+            <small>{c.blurb}</small>
+            <em>Fee {(c.fee * 100).toFixed(1)}% · {c.id === "exchange" ? "exchange risk" : c.id === "hot" ? "drainer risk" : "slow fills"}</em>
+          </button>
+        ))}
+      </div>
+      <small className="cy-note">Moving the bag costs one move and 0.4% in fees. Perps always stay on the exchange.</small>
+    </>
+  );
+}
+
+function LifeSheet({ run, onPick }: { run: Run; onPick: (j: JobId, h: HousingId) => void }) {
+  const [job, setJob] = useState<JobId>(run.job);
+  const [housing, setHousing] = useState<HousingId>(run.housing);
+  return (
+    <>
+      <p className="journey-kicker"><Home /> INCOME · RENT · SANITY</p>
+      <h2>YOUR LIFE</h2>
+      <div className="cy-pick-list">
+        {JOBS.map((j) => (
+          <button key={j.id} className={`cy-pick-row ${job === j.id ? "is-on" : ""}`} onClick={() => setJob(j.id)}>
+            <strong>{j.name}</strong><small>{j.blurb}</small><em>{j.income ? `+${formatMoney(j.income)} / quarter` : "no income"} · stress +{j.stress}{j.ap ? ` · +${j.ap} move` : ""}</em>
+          </button>
+        ))}
+      </div>
+      <div className="cy-pick-list">
+        {HOUSING.map((h) => (
+          <button key={h.id} className={`cy-pick-row ${housing === h.id ? "is-on" : ""}`} onClick={() => setHousing(h.id)}>
+            <strong>{h.name}</strong><small>{h.blurb}</small><em>−{formatMoney(h.rent)} / quarter · stress {h.calm >= 0 ? `−${h.calm}` : `+${-h.calm}`}</em>
+          </button>
+        ))}
+      </div>
+      <Button className="cy-wide cy-primary" onClick={() => onPick(job, housing)}>LOCK IT IN <ChevronRight /></Button>
+    </>
+  );
+}
+
+function LedgerSheet({ run, onClose }: { run: Run; onClose: () => void }) {
+  const inSum = run.ledger.filter((e) => e.amount > 0).reduce((s, e) => s + e.amount, 0);
+  const outSum = run.ledger.filter((e) => e.amount < 0).reduce((s, e) => s + e.amount, 0);
+  return (
+    <>
+      <p className="journey-kicker"><Receipt /> EVERY DOLLAR, NO EXCUSES</p>
+      <h2>THE BOOKS</h2>
+      <div className="cy-facts">
+        <span><small>IN</small><strong className="positive">+{formatMoney(inSum)}</strong></span>
+        <span><small>OUT</small><strong className="negative">−{formatMoney(Math.abs(outSum))}</strong></span>
+        <span><small>TAX OWED</small><strong className={run.taxDebt ? "negative" : ""}>{formatMoney(run.taxDebt)}</strong></span>
+      </div>
+      <div className="cy-ledger">
+        {run.ledger.length ? run.ledger.map((e, i) => (
+          <p key={i}><span>{chapterLabel(e.chapter)} · {e.label}</span><strong className={e.amount >= 0 ? "positive" : "negative"}>{e.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(e.amount))}</strong></p>
+        )) : <p className="muted"><span>Nothing booked yet.</span></p>}
+      </div>
+      <Button className="cy-wide cy-primary" onClick={onClose}>CLOSE THE BOOKS <ChevronRight /></Button>
+    </>
+  );
+}
+
+
 
 
 function SurviveSheet({ run, cost, onEat, onCalm }: { run: Run; cost: number; onEat: () => void; onCalm: () => void }) {

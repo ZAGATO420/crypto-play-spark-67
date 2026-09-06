@@ -463,3 +463,44 @@
   .cy-sheet { padding: 18px }
   .cy-top-right .cy-score { padding: 5px 9px }
 }
+
+/* ---- V48: custody, life, ledger, cash flows, minigames ---- */
+.cy-facts { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)) }
+.cy-hint { margin: 8px 0 0; padding: 10px 12px; border-left: 3px solid var(--journey-yellow); background: color-mix(in srgb, var(--journey-yellow) 10%, transparent); font-size: 12px; line-height: 1.5; border-radius: 0 8px 8px 0 }
+.cy-hint strong { color: var(--journey-yellow); letter-spacing: .05em }
+
+.cy-flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 12px 0 }
+.cy-flow { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; min-width: 0 }
+.cy-flow h4 { margin: 0 0 6px; font: 700 10px/1 var(--font-body); letter-spacing: .12em; color: var(--muted-foreground) }
+.cy-flow.in h4 { color: var(--journey-cyan) } .cy-flow.out h4 { color: var(--journey-pink) }
+.cy-flow p { display: flex; justify-content: space-between; gap: 10px; margin: 0 0 4px; font-size: 12px; min-width: 0 }
+.cy-flow p span { min-width: 0; overflow-wrap: anywhere } .cy-flow p strong { white-space: nowrap }
+.cy-flow.in strong { color: var(--journey-cyan) } .cy-flow.out strong { color: var(--journey-pink) }
+.cy-flow .muted { color: var(--muted-foreground) }
+
+.cy-pick-list { display: grid; gap: 8px; margin-bottom: 10px }
+.cy-pick-row { display: grid; gap: 3px; text-align: left; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: inherit; cursor: pointer; transition: border-color .15s, transform .15s, background .15s; min-width: 0 }
+.cy-pick-row:hover { transform: translateY(-1px); border-color: var(--journey-cyan) }
+.cy-pick-row.is-on { border-color: var(--journey-cyan); background: color-mix(in srgb, var(--journey-cyan) 12%, transparent) }
+.cy-pick-row strong { font: 400 15px/1.1 var(--font-display) }
+.cy-pick-row small { color: var(--muted-foreground); font-size: 11px; line-height: 1.45 }
+.cy-pick-row em { font-style: normal; font-size: 10px; letter-spacing: .06em; color: var(--journey-yellow) }
+
+.cy-ledger { display: grid; gap: 4px; max-height: 46vh; overflow-y: auto; margin: 10px 0 }
+.cy-ledger p { display: flex; justify-content: space-between; gap: 10px; margin: 0; padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; font-size: 11px; min-width: 0 }
+.cy-ledger p span { min-width: 0; overflow-wrap: anywhere } .cy-ledger p strong { white-space: nowrap }
+
+.mg-bar { position: relative; height: 46px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: color-mix(in srgb, var(--foreground) 6%, transparent); cursor: pointer; margin: 4px 0 }
+.mg-zone { position: absolute; inset-block: 0; background: color-mix(in srgb, var(--journey-cyan) 22%, transparent) }
+.mg-core { position: absolute; inset-block: 0; background: color-mix(in srgb, var(--journey-cyan) 45%, transparent) }
+.mg-needle { position: absolute; inset-block: 0; width: 4px; margin-left: -2px; background: var(--journey-yellow); box-shadow: 0 0 12px var(--journey-yellow) }
+.mg-timer { height: 8px; border-radius: 99px; overflow: hidden; background: color-mix(in srgb, var(--foreground) 10%, transparent); margin: 6px 0 }
+.mg-timer i { display: block; height: 100%; background: var(--journey-pink); transition: width .1s linear }
+.mg-tap { display: grid; gap: 2px; place-items: center; width: 100%; min-height: 108px; border: 1px solid var(--journey-pink); border-radius: 12px; background: color-mix(in srgb, var(--journey-pink) 12%, transparent); color: inherit; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent }
+.mg-tap:active { transform: scale(.98) }
+.mg-tap strong { font: 400 40px/1 var(--font-display); color: var(--journey-pink) }
+.mg-tap small { font-size: 10px; letter-spacing: .1em; color: var(--muted-foreground) }
+.mg-range { width: 100%; accent-color: var(--journey-cyan) }
+.mg-seed { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; margin: 4px 0 }
+.mg-seed button { min-height: 48px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: inherit; font: 400 15px/1 var(--font-display); cursor: pointer }
+.mg-seed button:not(:disabled):hover { border-color: var(--journey-cyan) }
