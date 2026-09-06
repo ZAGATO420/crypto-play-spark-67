@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --font-display: "Archivo Black", sans-serif;
+  --font-body: "Hind", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -59,6 +61,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-journey-cyan: var(--journey-cyan);
+  --color-journey-pink: var(--journey-pink);
+  --color-journey-yellow: var(--journey-yellow);
+  --color-journey-panel: var(--journey-panel);
 }
 
 :root {
@@ -95,6 +101,10 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --journey-cyan: oklch(0.82 0.15 205);
+  --journey-pink: oklch(0.68 0.27 348);
+  --journey-yellow: oklch(0.9 0.17 97);
+  --journey-panel: oklch(0.18 0.02 285);
 }
 
 .dark {
@@ -142,3 +152,48 @@
     color: var(--color-foreground);
   }
 }
+
+@keyframes card-hit { 0% { transform: translateY(8px) scale(.98); opacity: .4 } 100% { transform: translateY(0) scale(1); opacity: 1 } }
+@keyframes pulse-ring { 50% { box-shadow: 0 0 30px color-mix(in oklab, var(--journey-cyan) 28%, transparent) } }
+
+.journey-shell, .journey-start, .journey-end { min-height: 100dvh; background: var(--background); color: var(--foreground); font-family: var(--font-body); }
+.journey-shell { display: flex; flex-direction: column; padding: max(14px, env(safe-area-inset-top)) 14px calc(92px + env(safe-area-inset-bottom)); overflow-x: hidden; background-image: linear-gradient(color-mix(in oklab, var(--journey-cyan) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--journey-cyan) 4%, transparent) 1px, transparent 1px); background-size: 28px 28px; }
+.journey-status { width: min(100%, 1160px); margin: 0 auto; display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 12px; }
+.journey-kicker { display: flex; align-items: center; gap: 6px; color: var(--journey-cyan); font: 700 11px/1 var(--font-body); letter-spacing: 0; text-transform: uppercase; }
+.journey-kicker svg { width: 14px; height: 14px; }
+.journey-status h1 { margin-top: 4px; font: 400 clamp(25px, 7vw, 38px)/1 var(--font-display); }
+.journey-head-actions { display: flex; gap: 4px; }
+.journey-head-actions button { width: 44px; height: 44px; color: var(--muted-foreground); }
+.journey-meters { width: min(100%, 1160px); margin: 12px auto 14px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+.journey-meter { min-width: 0; display: grid; grid-template-columns: 28px minmax(0,1fr); align-items: center; gap: 7px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: color-mix(in oklab, var(--card) 92%, transparent); }
+.meter-icon { display: grid; place-items: center; width: 28px; height: 28px; color: var(--journey-cyan); }
+.journey-meter.tone-pink .meter-icon { color: var(--journey-pink); }.journey-meter.tone-yellow .meter-icon { color: var(--journey-yellow); }
+.meter-icon svg { width: 18px; }.meter-label { display: flex; justify-content: space-between; gap: 3px; font-size: 9px; line-height: 1; }.meter-label span { color: var(--muted-foreground); }
+.meter-track { margin-top: 6px; height: 3px; background: var(--muted); overflow: hidden; }.meter-track i { display:block; height:100%; background:var(--journey-cyan); }.tone-pink .meter-track i { background:var(--journey-pink); }.tone-yellow .meter-track i { background:var(--journey-yellow); }
+.journey-layout { width: min(100%, 1160px); margin: auto; display: grid; grid-template-columns: 230px minmax(320px, 480px) 230px; justify-content: center; align-items: center; gap: 26px; }
+.boss-panel, .journey-trail { border: 1px solid var(--border); border-radius: 7px; overflow: hidden; background: var(--card); }
+.boss-panel img { width: 100%; aspect-ratio: 1/1.08; object-fit: cover; object-position: top; }.boss-panel div { padding: 14px; }.boss-panel div>p:last-child { margin-top: 10px; color: var(--muted-foreground); line-height: 1.35; }
+.journey-stage { position: relative; width: 100%; min-width: 0; }
+.card-stack { position: absolute; inset: -9px 20px auto; height: 60px; border: 1px solid color-mix(in oklab, var(--journey-pink) 40%, var(--border)); border-radius: 10px 10px 0 0; background: color-mix(in oklab, var(--journey-panel) 92%, var(--journey-pink)); transform: rotate(-1deg); }
+.journey-card { position: relative; display:flex; min-height: 478px; flex-direction:column; justify-content:space-between; padding: 24px; border: 1px solid var(--journey-cyan); border-radius: 8px; overflow:hidden; background: linear-gradient(145deg, color-mix(in oklab, var(--journey-panel) 96%, var(--journey-cyan)), var(--card)); box-shadow: 0 24px 70px color-mix(in oklab, var(--background) 75%, transparent), inset 0 1px color-mix(in oklab, var(--foreground) 12%, transparent); animation: card-hit .25s ease-out; }
+.journey-card.tone-pink { border-color:var(--journey-pink); }.journey-card.tone-yellow { border-color:var(--journey-yellow); }
+.journey-card::after { content:""; position:absolute; inset:0; pointer-events:none; background: repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in oklab, var(--foreground) 2%, transparent) 4px); }
+.journey-card-top { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; }.coin-step { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--border); border-radius:50%; color:var(--muted-foreground); cursor:pointer; }.coin-step:hover { color:var(--foreground); border-color:var(--journey-cyan); }
+.coin-mark { display:grid; place-items:center; width:80px; height:80px; border:2px solid currentColor; border-radius:50%; color:var(--journey-cyan); font:400 38px/1 var(--font-display); box-shadow:0 0 26px color-mix(in oklab, currentColor 24%, transparent); }.coin-mark.tone-pink{color:var(--journey-pink)}.coin-mark.tone-yellow{color:var(--journey-yellow)}
+.journey-card-copy { position:relative; z-index:1; text-align:center; }.journey-card-copy .journey-kicker { justify-content:center; }.journey-card-copy h2,.journey-sheet h2 { margin-top:9px; font:400 clamp(27px,7vw,42px)/1.02 var(--font-display); text-transform:uppercase; }.journey-card-copy>p:last-child { margin:12px auto 0; max-width:36ch; color:var(--muted-foreground); font-size:15px; line-height:1.4; }
+.price-orbit { position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:10px; }.price-orbit span { font:400 26px/1 var(--font-display); }.price-orbit strong { padding:5px 8px; border-radius:4px; font-size:13px; }.positive{color:var(--journey-cyan);background:color-mix(in oklab,var(--journey-cyan) 10%,transparent)}.negative{color:var(--journey-pink);background:color-mix(in oklab,var(--journey-pink) 10%,transparent)}
+.card-stats { position:relative; z-index:1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding-top:15px; border-top:1px solid var(--border); }.card-stats span { min-width:0; font-weight:700; text-align:center; overflow-wrap:anywhere; }.card-stats small { display:block; margin-bottom:4px; color:var(--muted-foreground); font-size:9px; }
+.journey-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px; }.journey-actions button { min-width:0; height:56px; border-radius:5px; font-family:var(--font-display); font-size:12px; }.journey-actions button:last-child { background:var(--journey-cyan); color:var(--background); }
+.journey-trail { padding:16px; align-self:stretch; max-height:478px; overflow:hidden; }.trail-title { display:flex; align-items:center; gap:8px; padding-bottom:12px; color:var(--muted-foreground); font-size:11px; font-weight:700; border-bottom:1px solid var(--border); }.trail-title svg { width:16px; }.trail-entry { display:flex; flex-direction:column; gap:2px; padding:12px 0 12px 13px; border-bottom:1px solid var(--border); border-left:2px solid var(--journey-cyan); }.trail-entry.tone-pink{border-left-color:var(--journey-pink)}.trail-entry.tone-yellow{border-left-color:var(--journey-yellow)}.trail-entry span,.trail-empty { color:var(--muted-foreground); font-size:10px; }.trail-entry strong { font-size:12px; }.trail-empty { margin-top:14px; line-height:1.5; }
+.journey-nav { position:fixed; z-index:20; left:50%; bottom:max(10px,env(safe-area-inset-bottom)); transform:translateX(-50%); display:grid; grid-template-columns:1fr 1fr 1.25fr; gap:5px; width:min(calc(100% - 20px),620px); padding:6px; border:1px solid var(--border); border-radius:8px; background:color-mix(in oklab,var(--card) 96%,transparent); box-shadow:0 12px 50px color-mix(in oklab,var(--background) 70%,transparent); }.journey-nav button { min-width:0; height:52px; border-radius:5px; padding-inline:8px; font:400 10px/1 var(--font-display); }.journey-nav button:last-child { background:var(--journey-yellow); color:var(--background); }.journey-nav button span { color:var(--journey-pink); }
+.journey-sheet { min-height:478px; padding:22px; border:1px solid var(--journey-cyan); border-radius:8px; background:var(--card); animation:card-hit .25s ease-out; }.sheet-head { display:flex; justify-content:space-between; align-items:start; gap:10px; }.position-list { display:grid; gap:8px; margin-top:22px; }.position-card { display:grid; grid-template-columns:48px minmax(0,1fr) auto 20px; align-items:center; gap:10px; min-height:72px; padding:10px; border:1px solid var(--border); border-left:3px solid var(--journey-cyan); border-radius:5px; background:var(--muted); text-align:left; cursor:pointer; }.position-card.tone-pink{border-left-color:var(--journey-pink)}.position-card.tone-yellow{border-left-color:var(--journey-yellow)}.position-card .coin-mark{width:44px;height:44px;font-size:19px}.position-card span small{display:block;color:var(--muted-foreground)}.empty-state { display:grid; place-items:center; min-height:330px; text-align:center; color:var(--muted-foreground); }.empty-state svg{width:52px;height:52px;color:var(--journey-pink)}.empty-state h3{font-family:var(--font-display);color:var(--foreground)}
+.survival-choice { margin-top:14px; padding:16px; border:1px solid var(--border); border-radius:6px; }.survival-choice>div { display:flex; align-items:center; gap:12px; }.survival-choice svg { width:30px; color:var(--journey-cyan); }.survival-choice span small{display:block;color:var(--muted-foreground)}.survival-choice span strong{font:400 25px/1 var(--font-display)}.survival-choice p{margin:9px 0;color:var(--muted-foreground)}.survival-choice button{width:100%;height:48px;background:var(--journey-cyan);color:var(--background)}.shop-note{display:flex;gap:10px;margin-top:14px;padding:12px;color:var(--journey-yellow);background:color-mix(in oklab,var(--journey-yellow) 7%,transparent)}.shop-note svg{flex:none}.shop-note small{display:block;color:var(--muted-foreground)}
+.journey-start,.journey-end { position:relative; display:grid; place-items:end center; min-height:100dvh; overflow:hidden; padding:24px 20px max(35px,env(safe-area-inset-bottom)); }.journey-start>img,.journey-end>img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 15%; }.start-vignette,.journey-end::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 20%,color-mix(in oklab,var(--background) 18%,transparent) 48%,var(--background) 87%); }.journey-start section,.journey-end section { position:relative; z-index:1; width:min(100%,760px); text-align:center; }.journey-start .journey-kicker,.journey-end .journey-kicker { justify-content:center; }.journey-start h1,.journey-end h1 { margin:10px 0; color:var(--foreground); font:400 clamp(42px,12vw,88px)/.9 var(--font-display); }.journey-start h1 span{color:var(--journey-yellow)}.journey-start section>p:not(.journey-kicker),.journey-end section>p:not(.journey-kicker){max-width:550px;margin:0 auto;color:var(--muted-foreground);font-size:17px;line-height:1.4}.start-actions{display:flex;justify-content:center;gap:8px;margin:22px auto 14px}.start-actions button,.journey-end section>button{height:58px;padding-inline:24px;border-radius:5px;font-family:var(--font-display);}.start-actions button:first-child,.journey-end section>button{background:var(--journey-yellow);color:var(--background)}.journey-start small{color:var(--muted-foreground);font-weight:700}.end-score{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.end-score span{padding:12px;border:1px solid var(--border);background:var(--card)}.end-score small{display:block;color:var(--muted-foreground)}.end-score strong{font:400 clamp(17px,5vw,25px)/1 var(--font-display)}
+
+@media (max-width: 840px) {
+  .journey-layout { grid-template-columns:minmax(0,520px); align-items:start; }.journey-trail { display:none; }.boss-panel { display:grid; grid-template-columns:74px minmax(0,1fr); align-items:center; margin-bottom:8px; }.boss-panel img { width:74px; height:74px; aspect-ratio:1; }.boss-panel div { padding:9px 12px; }.boss-panel div>p:last-child { margin-top:5px; font-size:12px; }.journey-card { min-height:min(455px,calc(100dvh - 275px)); padding:18px; }.journey-card-copy h2 { font-size:clamp(25px,8vw,36px); }.journey-card-copy>p:last-child{font-size:14px}.coin-mark{width:64px;height:64px;font-size:30px}.journey-actions{position:relative}.journey-sheet{min-height:min(455px,calc(100dvh - 275px))}
+}
+@media (max-width: 390px), (max-height: 720px) {
+  .journey-shell{padding-top:8px}.journey-status h1{font-size:25px}.journey-meters{margin:8px auto;}.journey-meter{grid-template-columns:minmax(0,1fr);padding:6px}.meter-icon{display:none}.boss-panel{grid-template-columns:58px minmax(0,1fr)}.boss-panel img{width:58px;height:58px}.boss-panel div>p:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.journey-card{min-height:340px;padding:14px}.coin-mark{width:52px;height:52px;font-size:24px}.journey-card-copy>p:last-child{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.journey-actions button{height:48px}.card-stats{padding-top:9px}.journey-nav button{height:48px}.journey-nav svg{display:none}.journey-start h1{font-size:40px}
+}
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; } }

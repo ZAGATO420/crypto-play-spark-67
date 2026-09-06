@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import ogAsset from "@/assets/tcfb-og.jpg.asset.json";
+import { CryptoJourney } from "@/game/CryptoJourney";
 
 const TITLE = "THE CRYPTO FINAL BOSS — Crypto Survival Trading Game";
 const DESCRIPTION =
@@ -56,10 +57,7 @@ export const Route = createFileRoute("/")({
 // every dependency inlined. Rendering it in a full-bleed frame keeps that file
 // portable to any host while this route supplies SSR metadata.
 function Index() {
-  return (
-    <main>
-      {/* Indexable description of the game for crawlers and screen readers.
-          The playable build itself lives in the frame below and covers the viewport. */}
+  return <>
       <section className="sr-only">
         <h1>The Crypto Final Boss — crypto trading survival game</h1>
         <p>
@@ -75,12 +73,6 @@ function Index() {
           Chaos, Historical or Ironman mode on desktop or mobile.
         </p>
       </section>
-      <iframe
-        src="/game.html"
-        title="The Crypto Final Boss"
-        className="fixed inset-0 h-full w-full border-0"
-        allow="autoplay; clipboard-write"
-      />
-    </main>
-  );
+      <CryptoJourney />
+    </>;
 }
