@@ -365,7 +365,7 @@ export function CryptoJourney() {
         ...r,
         cash: cashAfter,
         positions,
-        stress: clamp(r.stress + Math.round((option.stress ?? 0) * arch.risk)),
+        stress: clamp(r.stress + Math.round((option.stress ?? 0) * arch.risk * 0.55)),
         hunger: clamp(r.hunger + (option.hunger ?? 0)),
         crises: crisis ? r.crises + 1 : r.crises,
         statuses: status ? Array.from(new Set([...r.statuses, status])) : r.statuses,
