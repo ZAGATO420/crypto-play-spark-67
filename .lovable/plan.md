@@ -38,13 +38,24 @@ Der Spieler soll nie rätseln, wohin das Geld geht.
 - **Die Quartalsabrechnung** ersetzt die heutige kurze Zeile: eine echte Bilanz-Karte mit `GELD REIN` und `GELD RAUS`, farblich getrennt.
 - Vor dem Quartalsende steht eine Vorschau der fixen Kosten, damit man planen kann statt überrascht zu werden.
 
-## 5. Strategie sichtbar machen
+## 5. Kein „einmal long und fertig" mehr
+
+Heute reicht eine frühe Long-Position, weil die Kurse langfristig steigen und nichts dazwischenkommt. Das wird geschlossen:
+
+- **Bärenmärkte tun weh**: 2022 und die harten Einbrüche ziehen Bestände real nach unten; wer nicht absichert oder Gewinne mitnimmt, verliert echtes Netto statt nur Papierwert.
+- **Nichts tun kostet**: Miete, Essen, Steuern und Gebühren laufen weiter. Ohne realisierte Gewinne geht irgendwann das Cash aus — Bestände zu halten reicht nicht zum Überleben.
+- **Passivität wird bestraft**: ein Quartal ohne Aktion gibt keinen Streak, keine XP und erhöht Stress (Langeweile, Zweifel, Freunde die Gewinne zeigen).
+- **Positionen sind nicht ewig**: Perps kosten laufende Finanzierung, Exchange-Bestände sind dem Ausfallrisiko ausgesetzt, Cold Storage macht Verkaufen langsam — jede Verwahrung erzwingt Entscheidungen.
+- **Ziel statt Ende**: um `LEGEND` zu erreichen, braucht es ein Vielfaches des Startkapitals plus überlebte Krisen — reines Halten landet im besten Fall bei `SURVIVOR`, meist bei `BROKE`.
+
+## 6. Strategie sichtbar machen
+
 
 - **Wissens-Momente**: Vor bekannten Ereignissen gibt es nur einen leisen Hinweis („Ein Exchange bewirbt aggressiv sein Token“, „Alle reden von 20% Rendite“). Wer die Geschichte kennt, handelt richtig. Kein Spoiler, keine Pfeile.
 - **Strategie-Karte pro Jahr**: eine Ausrichtung wählen (Akkumulieren, Trading, Degen, Absichern) — sie gibt kleine Boni und Mali und färbt den Run.
 - **Härtere Grenzen**: weniger Startkapital auf BOSS, teureres Leben mit den Jahren, Perp-Risiko steigt, blindes Durchdrücken endet im Aus. Ziel: Fertigspielen ist eine Leistung, nicht der Standardfall.
 
-## 6. Startseite und Setup polieren
+## 7. Startseite und Setup polieren
 
 - Archetyp, Schwierigkeit und Modus als **Bildkarten** mit Avatarbild/Icon, klarer Auswahlkante, Hover- und Tap-Feedback statt reiner Textknöpfe.
 - Avatare größer, mit Ring und leichtem Zoom bei Auswahl; Namensfeld mit Zeichenzähler.
