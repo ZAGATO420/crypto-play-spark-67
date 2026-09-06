@@ -37,7 +37,7 @@ export const formatMoney = (value: number) =>
 
 export const levelFor = (xp: number) => Math.max(1, XP_LEVELS.filter((threshold) => xp >= threshold).length);
 export type Archetype = "degen" | "trader" | "influencer" | "hodler";
-export type Difficulty = "EASY" | "NORMAL" | "BOSS";
+export type Difficulty = "EASY" | "NORMAL" | "BOSS" | "NIGHTMARE";
 export type BaseMode = "classic" | "chaos" | "historical";
 
 export const ARCHETYPES: { id: Archetype; name: string; cash: number; blurb: string; risk: number; xp: number }[] = [
