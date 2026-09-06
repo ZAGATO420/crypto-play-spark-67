@@ -14101,7 +14101,7 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto minmax(0,1fr) auto!im
 </style>
 <script id="v41-progression-js">
 (function(){
-  var lastLvl=-1,lastNet=null,lastSig='',shownMs={};
+  var lastLvl=-1,lastNet=null,lastSig='',shownMs={},runKey='';
   function S(){try{return state||null}catch(e){return null}}
   function $(id){return document.getElementById(id)}
   function money(v){try{return fmt(v)}catch(e){return '$'+Math.round(v||0).toLocaleString()}}
@@ -14204,6 +14204,8 @@ body.v40-live #v40-shell{grid-template-rows:auto auto auto minmax(0,1fr) auto!im
   function tick(){
     var s=S();if(!s||s._gameEnded||!document.body.classList.contains('v40-live'))return;
     if(!build())return;
+    var rk=(s.name||'')+'|'+(s.arch||'')+'|'+(s.diff||'')+'|'+(s.netHistory&&s.netHistory[0]);
+    if(rk!==runKey){runKey=rk;shownMs={};lastLvl=-1;lastNet=null;lastSig=''}
     var xp=s.xp||0,i=(typeof xpLevel==='function'?xpLevel(xp):0),cur=XP_LEVELS[i],nxt=XP_LEVELS[i+1];
     var pct=nxt?Math.min(100,((xp-cur.xp)/(nxt.xp-cur.xp))*100):100;
     $('v41-badge').textContent='LVL '+(i+1);
