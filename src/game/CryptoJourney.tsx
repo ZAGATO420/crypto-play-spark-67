@@ -12,7 +12,7 @@ import avDiamond from "@/assets/tcfb/av-diamond.webp.asset.json";
 import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
-import { ARCHETYPES, CHANCES, COINS, COUNTRIES, DIFFICULTIES, EVENTS, MODES, MONTHS, XP_LEVELS, formatMoney, levelFor, rankTitle, type Archetype, type BaseMode, type Chance, type CoinSymbol, type Country, type Difficulty } from "./journey-data";
+import { ARCHETYPES, CHANCES, COINS, COUNTRIES, DIFFICULTIES, EVENTS, MODES, MONTHS, missionFor, XP_LEVELS, formatMoney, levelFor, rankTitle, type Archetype, type BaseMode, type Chance, type CoinSymbol, type Country, type Difficulty } from "./journey-data";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
 
 type Holding = Partial<Record<CoinSymbol, number>>;
