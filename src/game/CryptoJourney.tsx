@@ -237,7 +237,7 @@ export function CryptoJourney() {
     localStorage.removeItem(SAVE_KEY);
     const fresh = freshState(config);
     setState(fresh);
-    setResult(null); setChance(null); setCoinIndex(0); setAp(AP_MAX); setCall(null);
+    setResult(null); setChance(null); setDecision(null); setCoinIndex(0); setAp(AP_MAX); setCall(null);
     setRound({ buys: 0, sells: 0, netStart: valueOf(fresh) });
     setHowTo(true);
     setScreen("journey");
@@ -248,7 +248,7 @@ export function CryptoJourney() {
       const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? "{}");
       setState({ ...freshState(saved.config ?? defaultConfig), ...saved });
     } catch { setState(freshState(defaultConfig)); }
-    setResult(null); setChance(null); setAp(AP_MAX); setCall(null); setRound({ buys: 0, sells: 0, netStart: 0 }); setScreen("journey");
+    setResult(null); setChance(null); setDecision(null); setAp(AP_MAX); setCall(null); setRound({ buys: 0, sells: 0, netStart: 0 }); setScreen("journey");
   };
 
   if (screen === "start") return <StartScreen resume={resume} onStart={() => setScreen("setup")} onResume={restore} onBoard={() => setScreen("board")} />;
