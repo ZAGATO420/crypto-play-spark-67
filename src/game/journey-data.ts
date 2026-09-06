@@ -126,3 +126,97 @@ export const MISSIONS: Mission[] = [
 ];
 
 export const missionFor = (month: number) => MISSIONS[(month * 3 + 1) % MISSIONS.length]!;
+
+// ---- real history decisions: the moments everybody remembers ----------------
+export type DecisionOption = {
+  label: string;
+  result: string;
+  tone: "win" | "danger" | "neutral";
+  cashMul?: number;   // multiplies free cash
+  bagMul?: number;    // multiplies every open position
+  cash?: number;      // flat cash change
+  xp?: number;
+  stress?: number;
+  hunger?: number;
+};
+export type Decision = { month: number; kicker: string; title: string; body: string; options: DecisionOption[] };
+
+export const DECISIONS: Decision[] = [
+  { month: 2, kicker: "MAR 2020 · BLACK THURSDAY", title: "BITCOIN IS DOWN 50% IN A DAY", body: "COVID panic. BTC prints $3,800. Everyone on your timeline says it goes to zero. The Boss just watches your hands.",
+    options: [
+      { label: "BUY THE PANIC", result: "You bought blood. Sixty percent of your cash went in at the exact bottom nobody believed in. History says thank you.", tone: "win", cashMul: 0.4, bagMul: 1.6, xp: 700, stress: 12 },
+      { label: "SELL EVERYTHING", result: "You panicked with the crowd and locked in the loss. Classic. The chart never asked your permission to recover.", tone: "danger", bagMul: 0.55, cashMul: 1.15, xp: 120, stress: 8 },
+      { label: "DO NOTHING", result: "Frozen. Not wrong, not brave. You survived the day with your hands in your pockets.", tone: "neutral", xp: 200, stress: 6 },
+    ] },
+  { month: 4, kicker: "MAY 2020 · THE HALVING", title: "BLOCK REWARD CUTS IN HALF", body: "Miner supply drops overnight. Every cycle before this one paid the patient. Every cycle also ate the impatient.",
+    options: [
+      { label: "STACK HARD", result: "You bought supply shock before it was a Twitter thread. Slow money, real money.", tone: "win", cashMul: 0.55, bagMul: 1.35, xp: 600, stress: 6 },
+      { label: "STAY IN CASH", result: "Dry powder feels smart right up to the moment the candle leaves without you.", tone: "neutral", xp: 150, stress: 4 },
+    ] },
+  { month: 12, kicker: "JAN 2021 · TESLA BUYS BTC", title: "$1.5 BILLION FROM ONE COMPANY", body: "Wall Street finally shows up. Retail is euphoric. The Boss loves euphoria, it makes exits expensive.",
+    options: [
+      { label: "RIDE THE HYPE", result: "You added into institutional FOMO and the market handed you the easiest money of the cycle.", tone: "win", cashMul: 0.5, bagMul: 1.45, xp: 700, stress: 14 },
+      { label: "TRIM 30%", result: "You sold strength into strength. Boring, profitable, adult behaviour.", tone: "neutral", bagMul: 0.7, cashMul: 1.35, xp: 350, stress: -6 },
+    ] },
+  { month: 16, kicker: "MAY 2021 · CHINA BANS MINING", title: "HALF THE HASHRATE GOES DARK", body: "Miners flee, the chart drops 50% in weeks, and the group chat is very quiet.",
+    options: [
+      { label: "BUY THE FEAR", result: "You bought a state-level ban. Brave. It paid — eventually, and painfully.", tone: "win", cashMul: 0.5, bagMul: 1.25, xp: 550, stress: 18 },
+      { label: "DE-RISK TO CASH", result: "You cut size before the summer bleed. The Boss hates admitting you were right.", tone: "win", bagMul: 0.5, cashMul: 1.4, xp: 400, stress: -8 },
+      { label: "HOLD AND PRAY", result: "You held through -50% on pure hopium. Your stomach paid the fee.", tone: "neutral", xp: 220, stress: 20 },
+    ] },
+  { month: 21, kicker: "NOV 2021 · BTC $69,000", title: "THE TOP NOBODY SELLS", body: "Every account is a genius. NFTs of rocks cost more than houses. This is the exact month legends were supposed to take profit.",
+    options: [
+      { label: "SELL THE TOP", result: "You actually sold the top. One in a thousand does this. The Boss removes his crown for a second.", tone: "win", bagMul: 0.25, cashMul: 2.1, xp: 1400, stress: -10 },
+      { label: "SELL HALF", result: "Half off the table at the top. Nobody ever went broke doing this.", tone: "win", bagMul: 0.5, cashMul: 1.55, xp: 800, stress: -4 },
+      { label: "IT GOES TO $100K", result: "It did not go to $100K. Not that year. You are now a long term investor by accident.", tone: "danger", xp: 200, stress: 24 },
+    ] },
+  { month: 28, kicker: "MAY 2022 · LUNA COLLAPSE", title: "UST BREAKS THE PEG", body: "A $40 billion 'stablecoin' unpegs live. Anchor still shows 19.5% APY. There is a queue to buy the dip on LUNA at $1.",
+    options: [
+      { label: "BUY LUNA AT $1", result: "LUNA went to $0.0001. You caught the falling knife with both hands and your teeth.", tone: "danger", cashMul: 0.35, xp: 200, stress: 30 },
+      { label: "EXIT ALL DEFI", result: "You pulled out before contagion ate the lenders. Boring hands, still-alive portfolio.", tone: "win", bagMul: 0.75, cashMul: 1.3, xp: 900, stress: -6 },
+      { label: "SHORT THE CONTAGION", result: "You shorted the collapse and got paid by the funeral. Cold. Effective.", tone: "win", cashMul: 1.75, xp: 1100, stress: 16 },
+    ] },
+  { month: 31, kicker: "AUG 2022 · 3AC & CELSIUS", title: "THE LENDERS ARE INSOLVENT", body: "Celsius freezes withdrawals. 3AC is gone. Your coins on that yield platform are 'safe', they say.",
+    options: [
+      { label: "WITHDRAW EVERYTHING", result: "Not your keys, not your coins. You got out days before the freeze became forever.", tone: "win", xp: 850, stress: -6 },
+      { label: "KEEP EARNING 9%", result: "The 9% cost you the principal. Withdrawals are paused. Permanently.", tone: "danger", bagMul: 0.6, cashMul: 0.8, xp: 150, stress: 28 },
+    ] },
+  { month: 33, kicker: "NOV 2022 · FTX COLLAPSE", title: "THE SECOND BIGGEST EXCHANGE IS A HOLE", body: "$8 billion missing. SBF is tweeting one letter at a time. Your balance still shows on the app.",
+    options: [
+      { label: "WITHDRAW NOW", result: "You got your funds out while the withdrawal queue still moved. Ten minutes later it never moved again.", tone: "win", xp: 1200, stress: 10 },
+      { label: "BELIEVE THE TWEETS", result: "'Assets are fine.' They were not fine. Your exchange balance is now a bankruptcy claim.", tone: "danger", cashMul: 0.45, bagMul: 0.5, xp: 150, stress: 34 },
+      { label: "BUY THE BOTTOM", result: "$15,500 BTC in the middle of maximum fear. This was the cycle low. Enjoy the next two years.", tone: "win", cashMul: 0.45, bagMul: 1.7, xp: 1300, stress: 20 },
+    ] },
+  { month: 39, kicker: "MAY 2023 · PEPE ARRIVES", title: "A FROG WITH NO UTILITY", body: "A meme coin does $1 billion in weeks. Fundamentals have left the building. So has your patience.",
+    options: [
+      { label: "APE THE FROG", result: "You aped a frog and it printed. Nobody respects you. Your balance does.", tone: "win", cashMul: 0.7, bagMul: 1.5, xp: 600, stress: 12 },
+      { label: "STAY SERIOUS", result: "You stayed serious while a frog outperformed your whole thesis. Dignity intact.", tone: "neutral", xp: 250, stress: 8 },
+    ] },
+  { month: 49, kicker: "JAN 2024 · SPOT ETF APPROVED", title: "BLACKROCK GETS THE GREEN LIGHT", body: "Eleven ETFs go live at once. The 'sell the news' crowd is loud. The inflow numbers are louder.",
+    options: [
+      { label: "FRONT-RUN THE INFLOWS", result: "You bought before the biggest bid in crypto history showed up daily. That was the trade.", tone: "win", cashMul: 0.5, bagMul: 1.4, xp: 900, stress: 10 },
+      { label: "SELL THE NEWS", result: "You sold the news and watched the news buy every dip for a year.", tone: "danger", bagMul: 0.5, cashMul: 1.25, xp: 250, stress: 14 },
+    ] },
+  { month: 58, kicker: "OCT 2024 · MEME SUPERCYCLE", title: "PUMP.FUN PRINTS 20,000 TOKENS A DAY", body: "Solana is on fire. 97% of these tokens rug within a day. The other 3% make life-changing money.",
+    options: [
+      { label: "FARM THE CASINO", result: "You played the casino with size and the casino paid this time. Do not tell your accountant.", tone: "win", cashMul: 0.65, bagMul: 1.45, xp: 700, stress: 22 },
+      { label: "BUY MAJORS ONLY", result: "Majors, no drama, no 4am charts. You slept and still made money.", tone: "win", cashMul: 0.7, bagMul: 1.2, xp: 450, stress: -4 },
+    ] },
+  { month: 62, kicker: "DEC 2024 · BTC BREAKS $100,000", title: "SIX FIGURES IS ON THE BOARD", body: "The number that was a joke in 2017 is printed. Leverage across the market is at an all-time high.",
+    options: [
+      { label: "TAKE REAL PROFIT", result: "You took profit at six figures. The people who did not are still explaining themselves.", tone: "win", bagMul: 0.55, cashMul: 1.6, xp: 950, stress: -8 },
+      { label: "MAX LONG", result: "You levered into euphoria. It worked for a few glorious weeks, then the wick found you.", tone: "danger", cashMul: 0.6, bagMul: 1.15, xp: 400, stress: 26 },
+    ] },
+  { month: 70, kicker: "AUG 2025 · THE LEVERAGE FLUSH", title: "$19 BILLION LIQUIDATED IN 24 HOURS", body: "The largest liquidation cascade ever recorded. Order books go paper thin. Your positions are still open.",
+    options: [
+      { label: "BUY THE WICK", result: "You bid the wick everyone else got liquidated into. Ruthless. Correct.", tone: "win", cashMul: 0.5, bagMul: 1.5, xp: 1000, stress: 24 },
+      { label: "GO FULL CASH", result: "You raised cash into chaos and slept through the worst week of the year.", tone: "neutral", bagMul: 0.6, cashMul: 1.35, xp: 400, stress: -10 },
+    ] },
+  { month: 78, kicker: "JUL 2026 · THE LAST SETUP", title: "ONE CYCLE LEFT TO DECIDE YOUR RANK", body: "Six months on the clock. The Boss has your whole run on his desk. Whatever you do now is what people remember.",
+    options: [
+      { label: "GO FOR THE LEADERBOARD", result: "All-in on the final stretch. Glory or a story. Either way the Boss is entertained.", tone: "win", cashMul: 0.35, bagMul: 1.65, xp: 1200, stress: 26 },
+      { label: "PROTECT THE BAG", result: "You protected the run and walked to the finish line with your net worth intact.", tone: "neutral", bagMul: 0.7, cashMul: 1.3, xp: 600, stress: -12 },
+    ] },
+];
+
+export const decisionFor = (month: number) => DECISIONS.find((d) => d.month === month);
