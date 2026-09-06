@@ -1,4 +1,4 @@
-export type CoinSymbol = "BTC" | "ETH" | "SOL" | "DOGE" | "BNB" | "LINK" | "ADA" | "AVAX" | "SHIB" | "PEPE";
+export type CoinSymbol = "BTC" | "ETH" | "SOL" | "DOGE" | "LINK" | "ADA" | "AVAX" | "SHIB" | "PEPE" | "UNI" | "DOT" | "MATIC" | "BONK" | "WIF";
 
 export type Coin = {
   symbol: CoinSymbol;
@@ -99,12 +99,16 @@ const buildSeries = (anchors: number[], listing = 0) =>
   });
 
 COINS.push(
-  { symbol: "BNB", name: "BNB", color: "yellow", prices: buildSeries([14, 38, 530, 250, 310, 570, 700, 900]) },
   { symbol: "LINK", name: "Chainlink", color: "cyan", prices: buildSeries([1.8, 11, 25, 7, 15, 20, 25, 32]) },
   { symbol: "ADA", name: "Cardano", color: "cyan", prices: buildSeries([0.033, 0.18, 1.35, 0.25, 0.55, 1, 0.75, 1.1]) },
+  { symbol: "DOT", name: "Polkadot", color: "pink", prices: buildSeries([4.6, 9, 27, 6, 5.2, 6.5, 4, 5], 7) },
+  { symbol: "UNI", name: "Uniswap", color: "pink", prices: buildSeries([3, 17, 24, 5.5, 6, 13, 8, 10], 8) },
+  { symbol: "MATIC", name: "Polygon", color: "cyan", prices: buildSeries([0.018, 0.02, 1.7, 0.78, 0.55, 0.5, 0.25, 0.3]) },
   { symbol: "AVAX", name: "Avalanche", color: "pink", prices: buildSeries([0.6, 3.2, 110, 17, 40, 35, 25, 40], 9) },
   { symbol: "SHIB", name: "Shiba Inu", color: "pink", prices: buildSeries([0.0000000015, 0.000000012, 0.000033, 0.0000085, 0.00001, 0.0000225, 0.0000115, 0.0000165], 7) },
   { symbol: "PEPE", name: "Pepe", color: "yellow", prices: buildSeries([0, 0, 0, 0, 0.0000012, 0.0000095, 0.0000075, 0.000011], 39) },
+  { symbol: "BONK", name: "Bonk", color: "yellow", prices: buildSeries([0, 0, 0.0000002, 0.000012, 0.000028, 0.000018, 0.000022, 0.000025], 35) },
+  { symbol: "WIF", name: "dogwifhat", color: "yellow", prices: buildSeries([0, 0, 0, 0.02, 2.5, 0.8, 0.6, 0.7], 47) },
 );
 
 // ---- boss missions: one objective per month ---------------------------------

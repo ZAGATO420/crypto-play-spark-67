@@ -13,7 +13,18 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import { ARCHETYPES, CHANCES, COINS, COUNTRIES, DIFFICULTIES, EVENTS, MODES, MONTHS, missionFor, XP_LEVELS, formatMoney, levelFor, rankTitle, type Archetype, type BaseMode, type Chance, type CoinSymbol, type Country, type Difficulty } from "./journey-data";
+import { COIN_LOGO } from "./coin-logos";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
+
+const CoinMark = ({ symbol, size = 34 }: { symbol: string; size?: number }) => (
+  <img className="coin-logo" src={COIN_LOGO[symbol]} alt={`${symbol} logo`} width={size} height={size} loading="lazy" />
+);
+
+const HOW_TO = [
+  "Tap a market. Real prices, 2020 to 2026. No hindsight, no excuses.",
+  "You get 3 moves a month. BUY 25%, BUY 50%, SELL ALL. Spend them like they matter, because they do.",
+  "Call the next month: PUMP or DUMP. Then LOCK IN. Rent, food and stress get paid whether you were right or not.",
+];
 
 type Holding = Partial<Record<CoinSymbol, number>>;
 type Log = { month: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
@@ -68,6 +79,7 @@ export function CryptoJourney() {
   const [ap, setAp] = useState(AP_MAX);
   const [call, setCall] = useState<"up" | "down" | null>(null);
   const [round, setRound] = useState({ buys: 0, sells: 0, netStart: 0 });
+  const [howTo, setHowTo] = useState(false);
 
   const coin = COINS[coinIndex] ?? COINS[0]!;
   const price = priceAt(coin.symbol, state.month, state.noise);
@@ -107,23 +119,23 @@ export function CryptoJourney() {
   const spendAp = () => setAp((a) => Math.max(0, a - 1));
 
   const buy = (fraction: number) => {
-    if (ap <= 0) return feedback("NO MOVES LEFT", "You used all 3 moves. Call the market and close the month.", "pink");
-    if (!price) return feedback("NOT LAUNCHED", `${coin.name} does not trade in ${date}.`, "pink");
+    if (ap <= 0) return feedback("OUT OF MOVES", "Three moves a month, that was the deal. Call the market and take your beating.", "pink");
+    if (!price) return feedback("NOT INVENTED YET", `${coin.name} does not exist in ${date}. Time travel has rules.`, "pink");
     const spend = Math.floor(state.cash * fraction);
-    if (spend < 25) return feedback("BUY BLOCKED", "You need at least $25 cash.", "pink");
+    if (spend < 25) return feedback("TOO POOR", "Under $25. The Boss has more in his couch cushions.", "pink");
     spendAp();
     setRound((r) => ({ ...r, buys: r.buys + 1 }));
-    feedback("POSITION OPENED", `${formatMoney(spend)} into ${coin.symbol} at ${formatMoney(price)}.`, "cyan", { cash: state.cash - spend, holdings: { ...state.holdings, [coin.symbol]: (state.holdings[coin.symbol] ?? 0) + spend / price }, xp: state.xp + Math.round(90 * arch.xp), trades: state.trades + 1 });
+    feedback("YOU'RE IN", `${formatMoney(spend)} into ${coin.symbol} at ${formatMoney(price)}. Pray.`, "cyan", { cash: state.cash - spend, holdings: { ...state.holdings, [coin.symbol]: (state.holdings[coin.symbol] ?? 0) + spend / price }, xp: state.xp + Math.round(90 * arch.xp), trades: state.trades + 1 });
   };
 
   const sell = () => {
-    if (ap <= 0) return feedback("NO MOVES LEFT", "You used all 3 moves this month.", "pink");
+    if (ap <= 0) return feedback("OUT OF MOVES", "You clicked your month away. Lock it in.", "pink");
     const qty = state.holdings[coin.symbol] ?? 0;
-    if (!qty) return feedback("NOTHING TO SELL", `You do not own ${coin.symbol}.`, "pink");
+    if (!qty) return feedback("YOU OWN NOTHING", `Selling ${coin.symbol} you never bought. Bold strategy.`, "pink");
     const proceeds = qty * price;
     spendAp();
     setRound((r) => ({ ...r, sells: r.sells + 1 }));
-    feedback("POSITION CLOSED", `${coin.symbol} returned ${formatMoney(proceeds)} to cash.`, proceeds >= 2500 ? "yellow" : "cyan", { cash: state.cash + proceeds, holdings: { ...state.holdings, [coin.symbol]: 0 }, xp: state.xp + Math.round(70 * arch.xp), trades: state.trades + 1 });
+    feedback("CASHED OUT", `${coin.symbol} paid you ${formatMoney(proceeds)}. Hope you didn't sell the bottom.`, proceeds >= 2500 ? "yellow" : "cyan", { cash: state.cash + proceeds, holdings: { ...state.holdings, [coin.symbol]: 0 }, xp: state.xp + Math.round(70 * arch.xp), trades: state.trades + 1 });
   };
 
   const resolveChance = (take: boolean) => {
@@ -139,9 +151,9 @@ export function CryptoJourney() {
     if (card.kind === "tax") {
       return feedback("TRIBUTE PAID", `${formatMoney(stake)} to the Boss. He nods. Stress drops.`, "yellow", { cash: state.cash - stake, stress: Math.max(0, state.stress - 18), xp: state.xp + Math.round(140 * arch.xp) });
     }
-    if (card.kind === "airdrop") { multi = luck > 0.55 ? 1.8 + Math.random() * 4 : 0.2; title = multi > 1 ? "AIRDROP PRINTED" : "FARM WASTED"; }
-    else if (card.kind === "perp") { multi = luck > 0.5 ? 1.6 + Math.random() * 1.9 : 0; title = multi > 1 ? "PERP IN PROFIT" : "LIQUIDATED"; }
-    else { multi = luck > 0.72 ? 3 + Math.random() * 9 : luck > 0.5 ? 1.3 : 0; title = multi > 2.5 ? "MOONSHOT" : multi > 1 ? "SMALL PUMP" : "RUG PULL"; }
+    if (card.kind === "airdrop") { multi = luck > 0.68 ? 1.8 + Math.random() * 4 : 0.15; title = multi > 1 ? "AIRDROP PRINTED" : "FARMED FOR NOTHING"; }
+    else if (card.kind === "perp") { multi = luck > 0.66 ? 1.6 + Math.random() * 1.9 : 0; title = multi > 1 ? "PERP IN PROFIT" : "LIQUIDATED. OBVIOUSLY."; }
+    else { multi = luck > 0.85 ? 3 + Math.random() * 9 : luck > 0.68 ? 1.25 : 0; title = multi > 2.5 ? "MOONSHOT" : multi > 1 ? "SMALL PUMP" : "RUGGED"; }
     const back = Math.round(stake * multi);
     const win = back > stake;
     feedback(title, `${formatMoney(stake)} staked · ${formatMoney(back)} back · ${win ? "+" : ""}${formatMoney(back - stake)} net.`, win ? "yellow" : "pink", {
@@ -163,9 +175,9 @@ export function CryptoJourney() {
     const nextPulse = pct(priceAt("BTC", next, state.noise), priceAt("BTC", state.month, state.noise));
     const callRight = call === "up" ? nextPulse >= 0 : nextPulse < 0;
     const combo = callRight ? state.streak + 1 : 0;
-    const cost = Math.round((140 + Math.floor(next / 12) * 25) * diff.cost);
-    const nextHunger = Math.min(100, state.hunger + Math.round(9 * arch.risk));
-    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 4 : 12) * arch.risk));
+    const cost = Math.round((260 + Math.floor(next / 12) * 90) * diff.cost);
+    const nextHunger = Math.min(100, state.hunger + Math.round(13 * arch.risk));
+    const nextStress = Math.min(100, state.stress + Math.round((callRight ? 6 : 17) * arch.risk));
 
     const preview: GameState = { ...state, month: next };
     const netEnd = valueOf(preview);
@@ -176,7 +188,7 @@ export function CryptoJourney() {
 
     const monthEvent = EVENTS[next];
     const title = monthEvent?.title ?? (callRight ? `CALL HIT · COMBO x${combo}` : "CALL MISSED");
-    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callRight ? "Your read paid." : "The tape punished you."} ${missionOk ? `Mission cleared: +${formatMoney(mission.reward)}.` : "Mission failed."} Living cost ${formatMoney(cost)}.`;
+    const detail = `${MONTHS[next % 12]} ${2020 + Math.floor(next / 12)}: market ${nextPulse >= 0 ? "+" : ""}${nextPulse.toFixed(1)}%. ${callRight ? "You read the tape. Enjoy it, it won't last." : "Wrong. The market doesn't care about your feelings."} ${missionOk ? `Boss order cleared: +${formatMoney(mission.reward)}.` : "Boss order failed. He noticed."} Rent and ramen: ${formatMoney(cost)}.`;
     const tone: Log["tone"] = monthEvent?.tone === "danger" ? "pink" : callRight || missionOk ? "yellow" : "pink";
 
     const nextState: GameState = { ...state, month: next, cash: state.cash - cost + bonus, hunger: nextHunger, stress: nextStress, xp: state.xp + xpGain, streak: combo, wins: state.wins + (missionOk ? 1 : 0), logs: [{ month: next, title, detail, tone }, ...state.logs].slice(0, 14) };
@@ -187,7 +199,7 @@ export function CryptoJourney() {
     setRound({ buys: 0, sells: 0, netStart: valueOf(nextState) });
     const alive = nextHunger < 100 && nextStress < 100 && valueOf(nextState) > 0;
     if (!alive) return setScreen("end");
-    if (monthEvent || Math.random() < 0.45) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
+    if (monthEvent || Math.random() < 0.6) setChance(CHANCES[Math.floor(Math.random() * CHANCES.length)]!);
   };
 
   const recover = (kind: "eat" | "calm") => {
@@ -203,6 +215,7 @@ export function CryptoJourney() {
     setState(fresh);
     setResult(null); setChance(null); setCoinIndex(0); setAp(AP_MAX); setCall(null);
     setRound({ buys: 0, sells: 0, netStart: valueOf(fresh) });
+    setHowTo(true);
     setScreen("journey");
   };
 
@@ -249,10 +262,19 @@ export function CryptoJourney() {
         <section className="journey-stage" aria-live="polite">
           {screen === "portfolio" ? <Portfolio state={state} onClose={() => setScreen("journey")} onSelect={(i) => { setCoinIndex(i); setScreen("journey"); }} /> : screen === "survival" ? <Survival state={state} cost={diff.cost} onEat={() => recover("eat")} onCalm={() => recover("calm")} onClose={() => setScreen("journey")} /> : (
             <>
+              <div className="step-bar">
+                <span className={coinIndex >= 0 ? "is-done" : ""}>1 · PICK</span>
+                <span className={ap < AP_MAX ? "is-done" : ""}>2 · TRADE ({ap} left)</span>
+                <span className={call ? "is-done" : ""}>3 · CALL</span>
+                <span>4 · LOCK IN</span>
+                <button onClick={() => setHowTo(true)}>RULES</button>
+              </div>
+
               <div className={`mission-strip ${state.wins ? "has-wins" : ""}`}>
                 <span className="journey-kicker"><Crown /> BOSS ORDER · {formatMoney(mission.reward)}</span>
                 <strong>{mission.text}</strong>
               </div>
+
 
               <div className="market-grid" role="list">
                 {COINS.map((c, i) => {
@@ -262,7 +284,7 @@ export function CryptoJourney() {
                   const owned = (state.holdings[c.symbol] ?? 0) * p;
                   return (
                     <button role="listitem" key={c.symbol} className={`market-tile tone-${c.color} ${i === coinIndex ? "is-on" : ""} ${p ? "" : "is-off"}`} onClick={() => { setCoinIndex(i); setResult(null); }}>
-                      <b>{c.symbol}</b>
+                      <b><CoinMark symbol={c.symbol} size={20} />{c.symbol}</b>
                       <span>{p ? formatMoney(p) : "—"}</span>
                       <em className={ch >= 0 ? "positive" : "negative"}>{p ? `${ch >= 0 ? "+" : ""}${ch.toFixed(1)}%` : "not live"}</em>
                       {owned > 0 && <i>{formatMoney(owned)}</i>}
@@ -272,7 +294,7 @@ export function CryptoJourney() {
               </div>
 
               <div className="trade-bar">
-                <div className="trade-focus"><span className={`coin-mark tone-${coin.color}`}>{coin.symbol === "BTC" ? "₿" : coin.symbol[0]}</span><span><strong>{coin.symbol}</strong><small>{price ? formatMoney(price) : "not live"} · {change >= 0 ? "+" : ""}{change.toFixed(1)}%</small></span></div>
+                <div className="trade-focus"><CoinMark symbol={coin.symbol} size={40} /><span><strong>{coin.symbol}</strong><small>{price ? formatMoney(price) : "not live"} · {change >= 0 ? "+" : ""}{change.toFixed(1)}%</small></span></div>
                 <div className="trade-buttons">
                   <Button variant="secondary" disabled={ap <= 0} onClick={() => buy(0.25)}>BUY 25%</Button>
                   <Button disabled={ap <= 0} onClick={() => buy(0.5)}>BUY 50%</Button>
@@ -320,6 +342,18 @@ export function CryptoJourney() {
         <Button variant={screen === "survival" ? "default" : "ghost"} onClick={() => setScreen(screen === "survival" ? "journey" : "survival")}><HeartPulse />SURVIVE</Button>
         <Button onClick={nextMonth} className={call ? "is-ready" : ""}>{call ? "LOCK IN MONTH" : "CALL FIRST"}<ChevronRight /></Button>
       </nav>
+
+      {howTo && (
+        <div className="howto-scrim" role="dialog" aria-label="How to play">
+          <div className="howto-card">
+            <p className="journey-kicker"><Crown /> THE BOSS EXPLAINS IT ONCE</p>
+            <h2>HOW TO SURVIVE</h2>
+            <ol>{HOW_TO.map((line, i) => <li key={i}><b>{i + 1}</b><span>{line}</span></li>)}</ol>
+            <p className="howto-warn">Hunger or stress hits 100 and you're done. Broke means done. 84 months. Nobody is coming to save you.</p>
+            <Button onClick={() => setHowTo(false)}>I GET IT, LET ME TRADE</Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -369,7 +403,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 
 function Portfolio({ state, onClose, onSelect }: { state: GameState; onClose: () => void; onSelect: (index: number) => void }) {
   const positions = COINS.map((coin, index) => ({ coin, index, qty: state.holdings[coin.symbol] ?? 0 })).filter((i) => i.qty > 0);
-  return <section className="journey-sheet"><div className="sheet-head"><div><p className="journey-kicker">POSITION CARDS</p><h2>YOUR STACK</h2></div><Button variant="ghost" size="icon" aria-label="Close positions" onClick={onClose}><X /></Button></div>{positions.length ? <div className="position-list">{positions.map(({ coin, index, qty }) => <button key={coin.symbol} onClick={() => onSelect(index)} className={`position-card tone-${coin.color}`}><span className={`coin-mark tone-${coin.color}`}>{coin.symbol === "BTC" ? "₿" : coin.symbol[0]}</span><span><strong>{coin.symbol}</strong><small>{qty.toFixed(5)} coins</small></span><b>{formatMoney(qty * priceAt(coin.symbol, state.month, state.noise))}</b><ChevronRight /></button>)}</div> : <div className="empty-state"><WalletCards /><h3>NO OPEN POSITIONS</h3><p>Return to the journey and buy your first coin.</p></div>}</section>;
+  return <section className="journey-sheet"><div className="sheet-head"><div><p className="journey-kicker">POSITION CARDS</p><h2>YOUR STACK</h2></div><Button variant="ghost" size="icon" aria-label="Close positions" onClick={onClose}><X /></Button></div>{positions.length ? <div className="position-list">{positions.map(({ coin, index, qty }) => <button key={coin.symbol} onClick={() => onSelect(index)} className={`position-card tone-${coin.color}`}><CoinMark symbol={coin.symbol} size={40} /><span><strong>{coin.symbol}</strong><small>{qty.toFixed(5)} coins</small></span><b>{formatMoney(qty * priceAt(coin.symbol, state.month, state.noise))}</b><ChevronRight /></button>)}</div> : <div className="empty-state"><WalletCards /><h3>NO OPEN POSITIONS</h3><p>Return to the journey and buy your first coin.</p></div>}</section>;
 }
 
 function Survival({ state, cost, onEat, onCalm, onClose }: { state: GameState; cost: number; onEat: () => void; onCalm: () => void; onClose: () => void }) {
