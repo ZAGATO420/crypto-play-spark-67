@@ -14024,3 +14024,263 @@ body.v40-live #toast-stack{z-index:180!important}
    border:1px solid rgba(96,178,255,.3)!important;box-shadow:0 10px 26px rgba(0,0,0,.5)!important}
 }
 </style>
+<style id="v41-progression">
+/* ============================================================
+   V41 — PROGRESSION, LIVE POSITIONS, ACTIVITY, MOMENTS
+   ============================================================ */
+body.v40-live #v40-shell{grid-template-rows:auto auto auto minmax(0,1fr) auto!important}
+#v41-prog{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;
+  margin:0 10px;padding:7px 10px;border:1px solid var(--v40-line);border-top:0;
+  background:linear-gradient(100deg,rgba(200,255,61,.07),rgba(8,23,42,.95));position:relative;overflow:hidden}
+#v41-prog.lvlup{animation:v41Flash .9s ease-out}
+@keyframes v41Flash{0%{box-shadow:inset 0 0 0 rgba(226,190,98,0)}25%{box-shadow:inset 0 0 40px rgba(226,190,98,.55)}100%{box-shadow:inset 0 0 0 rgba(226,190,98,0)}}
+.v41-lvl{display:flex;align-items:center;gap:8px;min-width:0}
+.v41-badge{font:400 11px/1 'Archivo Black','Hind',sans-serif;color:#08170a;background:linear-gradient(180deg,var(--v40-acid),#9fe016);padding:5px 8px;border-radius:4px;white-space:nowrap}
+.v41-title{font:700 10px/1.1 'Hind',sans-serif;color:var(--v40-gold);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:118px}
+.v41-track{position:relative;height:9px;border:1px solid rgba(88,196,255,.3);background:#04101f;overflow:hidden}
+.v41-track i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#8ce9ff,var(--v40-acid));box-shadow:0 0 12px rgba(200,255,61,.5);transition:width .5s cubic-bezier(.2,.9,.2,1)}
+.v41-xp{margin-top:4px;font:700 8.5px/1 monospace;color:var(--v40-muted);display:flex;justify-content:space-between;gap:8px}
+.v41-xp b{color:var(--v40-acid)}
+.v41-chips{display:flex;gap:5px;flex-shrink:0}
+.v41-chip{text-align:center;min-width:44px;padding:4px 6px;border:1px solid var(--v40-line);background:#0a1c33}
+.v41-chip small{display:block;font:700 7px/1 'Hind',sans-serif;color:var(--v40-muted)}
+.v41-chip strong{display:block;margin-top:3px;font:700 11px/1 monospace;color:var(--v40-cyan)}
+.v41-chip.hot strong{color:var(--v40-gold)}
+/* live positions on the stage */
+#v41-live{margin:0 12px 9px;border:1px solid rgba(88,196,255,.22);background:#07172b}
+#v41-live.empty{display:none}
+.v41-lhead{display:flex;justify-content:space-between;align-items:center;padding:6px 9px;border-bottom:1px solid rgba(88,196,255,.16);font:400 8px/1 'Archivo Black','Hind',sans-serif;color:var(--v40-cyan)}
+.v41-lhead span{font-family:monospace;font-size:9px;color:var(--v40-muted)}
+.v41-lbody{max-height:132px;overflow:auto}
+.v41-row{padding:7px 9px;border-bottom:1px solid rgba(88,196,255,.09)}
+.v41-row:last-child{border-bottom:0}
+.v41-r1{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;gap:7px;align-items:center}
+.v41-r1 img,.v41-r1 span.t{width:20px;height:20px;border-radius:50%;object-fit:cover;background:#071426;display:grid;place-items:center;font:800 7px/1 monospace;color:var(--v40-gold)}
+.v41-r1 b{font:700 10.5px/1 'Hind',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v41-r1 b i{font-style:normal;color:var(--v40-muted);font-size:9px}
+.v41-r1 strong{font:700 11px/1 monospace}
+.v41-close{min-height:26px;padding:0 8px;border:1px solid rgba(255,112,124,.5);background:#25101a;color:#ff9ca5;font:700 9px/1 'Hind',sans-serif}
+.v41-liq{margin-top:5px;height:4px;background:#04101f;overflow:hidden}
+.v41-liq i{display:block;height:100%}
+.v41-row.danger{background:rgba(255,112,124,.09);animation:v41Pulse 1.6s ease-in-out infinite}
+@keyframes v41Pulse{0%,100%{background:rgba(255,112,124,.06)}50%{background:rgba(255,112,124,.16)}}
+.v41-sub{margin-top:4px;font:700 8.5px/1 monospace;color:var(--v40-muted)}
+/* activity feed */
+.v41-feed{max-height:100%;overflow:auto;padding:5px 7px}
+.v41-fitem{display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px;padding:5px 2px;border-bottom:1px solid rgba(88,196,255,.08);font-size:10px;line-height:1.35}
+.v41-fitem em{font-style:normal;font:700 8px/1.4 monospace;color:var(--v40-muted)}
+.v41-fitem.good{color:#a9f5cf}.v41-fitem.bad{color:#ffb0b6}.v41-fitem.xp{color:var(--v40-acid)}
+.v41-mfeed{margin:0 8px 8px;border:1px solid rgba(88,196,255,.2);background:#07172b;display:none}
+.v41-mfeed summary{list-style:none;padding:7px 9px;font:400 8px/1 'Archivo Black','Hind',sans-serif;color:var(--v40-cyan);cursor:pointer;display:flex;justify-content:space-between}
+.v41-mfeed summary::-webkit-details-marker{display:none}
+.v41-mfeed .v41-feed{max-height:150px}
+@media(max-width:820px){
+ #v41-prog{margin:0 7px;padding:5px 8px;grid-template-columns:auto minmax(0,1fr);gap:7px}
+ .v41-chips{grid-column:1/-1;justify-content:space-between}
+ .v41-chip{padding:3px 6px}.v41-chip strong{font-size:10px}
+ .v41-title{max-width:92px}
+ #v41-live{margin:0 8px 6px}.v41-lbody{max-height:78px}
+ .v41-row{padding:6px 8px}
+ body.v40-live[data-v40-stage="market"] .v40-stage{grid-template-rows:auto auto auto auto minmax(0,1fr) auto auto auto}
+ body.v40-live[data-v40-stage="market"] .v40-visual{min-height:0;height:148px}
+ body.v40-live[data-v40-stage="market"] #v41-live{min-height:0;display:flex;flex-direction:column}
+ body.v40-live[data-v40-stage="market"] #v41-live.empty{display:none}
+ body.v40-live[data-v40-stage="market"] #v41-live .v41-lbody{max-height:none;flex:1}
+ .v41-mfeed{display:none}
+ body.v40-live[data-v40-stage="chart"] #v41-live{display:none}
+ body.v40-live[data-v40-stage="positions"] #v41-live{display:block;margin:8px}
+ body.v40-live[data-v40-stage="positions"] #v41-live .v41-lbody{max-height:none}
+ body.v40-live[data-v40-stage="positions"] .v41-mfeed{display:block}
+ body.v40-live[data-v40-stage="positions"] .v40-mobile-only .v40-label:first-child,
+ body.v40-live[data-v40-stage="positions"] #v40-mobile-pos{display:none}
+}
+/* value reactions */
+.v41-hit{animation:v41Hit .45s ease-out}
+@keyframes v41Hit{0%{transform:scale(1)}35%{transform:scale(1.12);filter:brightness(1.35)}100%{transform:scale(1)}}
+/* milestone moment */
+#v41-moment{position:fixed;inset:0;z-index:210;display:none;place-items:center;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(4,12,24,.72),rgba(2,7,18,.9))}
+#v41-moment.show{display:grid;animation:v41Mom 1.6s ease-out forwards}
+@keyframes v41Mom{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+#v41-moment .box{text-align:center;padding:22px 26px;border:1px solid rgba(226,190,98,.6);
+  background:linear-gradient(160deg,rgba(20,48,80,.96),rgba(6,17,32,.97));box-shadow:0 0 60px rgba(226,190,98,.25)}
+#v41-moment small{display:block;font:400 9px/1 'Archivo Black','Hind',sans-serif;color:var(--v40-acid);letter-spacing:.22em}
+#v41-moment b{display:block;margin-top:10px;font:400 26px/1.05 'Archivo Black','Hind',sans-serif;color:var(--v40-gold)}
+#v41-moment span{display:block;margin-top:8px;font-size:11px;color:#cfe6f7}
+@media(max-width:820px){#v41-moment b{font-size:20px}#v41-moment .box{padding:18px 20px;margin:0 18px}}
+@media(prefers-reduced-motion:reduce){#v41-prog.lvlup,.v41-row.danger,.v41-hit,#v41-moment.show{animation:none!important}}
+</style>
+<script id="v41-progression-js">
+(function(){
+  var lastLvl=-1,lastNet=null,lastSig='',shownMs={},runKey='';
+  function S(){try{return state||null}catch(e){return null}}
+  function $(id){return document.getElementById(id)}
+  function money(v){try{return fmt(v)}catch(e){return '$'+Math.round(v||0).toLocaleString()}}
+  function px(v){try{return priceStr(v)}catch(e){return Number(v||0).toFixed(2)}}
+  function mark(sym){var m=(window.COIN_ICON||{})[sym];return m?'<img src="'+m+'" alt="">':'<span class="t">'+String(sym).slice(0,3)+'</span>'}
+
+  /* ---------- activity feed source ---------- */
+  function feed(){var s=S();if(!s)return[];if(!s._v41feed)s._v41feed=[];return s._v41feed}
+  function push(msg,kind){var s=S();if(!s||s._gameEnded)return;var f=feed();
+    var lbl=(typeof MONTHS!=='undefined'?MONTHS[s.month%12]:'M')+' '+(2020+Math.floor(s.month/12));
+    if(f.length&&f[f.length-1].m===msg)return;
+    f.push({m:String(msg).slice(0,120),k:kind||'',d:lbl});if(f.length>40)f.shift()}
+  var origToast=window.toast;
+  if(typeof origToast==='function'){window.toast=function(msg,kind){
+    var k=kind==='sell'||kind==='rug'||kind==='bad'||kind==='warn'?'bad':(kind==='buy'||kind==='good'?'good':'');
+    try{push(msg,k)}catch(_){}
+    return origToast.apply(this,arguments)}}
+  var origAward=window.awardXP;
+  if(typeof origAward==='function'){window.awardXP=function(base,label){
+    var got=origAward.apply(this,arguments);
+    try{if(got>0)push('+'+got.toLocaleString()+' XP'+(label?' · '+label:''),'xp')}catch(_){}
+    return got}}
+
+  /* ---------- month recap + chapter moments ---------- */
+  var origMonth=window.advanceMonth;
+  if(typeof origMonth==='function'){window.advanceMonth=function(){
+    var s=S(),n0=0,x0=0,m0=0;
+    if(s){try{n0=netWorth()}catch(_){}x0=s.xp||0;m0=s.month||0}
+    var out=origMonth.apply(this,arguments);
+    setTimeout(function(){
+      var t=S();if(!t||t._gameEnded||t.month===m0)return;
+      var n1=0;try{n1=netWorth()}catch(_){}
+      var d=n1-n0,xg=(t.xp||0)-x0;
+      push('MONTH '+t.month+' CLOSED · '+(d>=0?'+':'-')+money(Math.abs(d))+' · XP +'+xg+' · streak '+(t._v22streak||0),d>=0?'good':'bad');
+      if(t.month>0&&t.month%12===0){
+        moment('CHAPTER '+(t.month/12+1),(2020+t.month/12)+' BEGINS','You survived another year. The boss raises the stakes.','survive');
+      }
+    },420);
+    return out}}
+
+  /* ---------- build ---------- */
+  function build(){
+    var sh=$('v40-shell');if(!sh)return false;
+    if(!$('v41-prog')){
+      var score=sh.querySelector('.v40-score');if(!score)return false;
+      var p=document.createElement('div');p.id='v41-prog';
+      p.innerHTML='<div class="v41-lvl"><span class="v41-badge" id="v41-badge">LVL 1</span><span class="v41-title" id="v41-title">Exit Liquidity</span></div>'+
+        '<div><div class="v41-track"><i id="v41-fill"></i></div><div class="v41-xp"><span id="v41-xp">0 XP</span><span id="v41-next">NEXT 400</span></div></div>'+
+        '<div class="v41-chips"><div class="v41-chip"><small>STREAK</small><strong id="v41-streak">0</strong></div><div class="v41-chip"><small>MONTH</small><strong id="v41-month">1/84</strong></div><div class="v41-chip hot"><small>XP MULT</small><strong id="v41-mult">1.0x</strong></div></div>';
+      score.parentNode.insertBefore(p,score.nextSibling);
+    }
+    if(!$('v41-live')){
+      var stage=sh.querySelector('.v40-stage'),acts=sh.querySelector('.v40-actions');
+      if(stage&&acts){
+        var l=document.createElement('div');l.id='v41-live';l.className='empty';
+        l.innerHTML='<div class="v41-lhead">OPEN RISK<span id="v41-lsum">FLAT</span></div><div class="v41-lbody" id="v41-lbody"></div>';
+        stage.insertBefore(l,acts);
+        var d=document.createElement('details');d.className='v41-mfeed';
+        d.innerHTML='<summary>RUN LOG<span id="v41-mlast">—</span></summary><div class="v41-feed" id="v41-mfeed"></div>';
+        stage.insertBefore(d,acts);
+      }
+    }
+    var side=sh.querySelector('.v40-side');
+    if(side&&!$('v41-feed')){
+      var lab=document.createElement('div');lab.className='v40-label';lab.textContent='RUN LOG';
+      var box=document.createElement('div');box.className='v41-feed';box.id='v41-feed';box.style.maxHeight='30%';
+      side.appendChild(lab);side.appendChild(box);
+      side.style.display='grid';side.style.gridTemplateRows='auto minmax(0,1fr) auto auto auto minmax(0,.9fr)';
+    }
+    if(!$('v41-moment')){
+      var m=document.createElement('div');m.id='v41-moment';
+      m.innerHTML='<div class="box"><small id="v41-mkick">MILESTONE</small><b id="v41-mtitle"></b><span id="v41-mtext"></span></div>';
+      document.body.appendChild(m);
+    }
+    return true;
+  }
+
+  function moment(kick,title,text,snd){
+    var m=$('v41-moment');if(!m)return;
+    $('v41-mkick').textContent=kick;$('v41-mtitle').textContent=title;$('v41-mtext').textContent=text||'';
+    m.classList.remove('show');void m.offsetWidth;m.classList.add('show');
+    setTimeout(function(){m.classList.remove('show')},1650);
+    try{playSound(snd||'quest')}catch(_){}
+  }
+  function hit(el){if(!el)return;el.classList.remove('v41-hit');void el.offsetWidth;el.classList.add('v41-hit')}
+
+  function rows(s){
+    var out=[],risk=0,pnl=0;
+    (s.perps||[]).forEach(function(p,i){
+      var pl=0,dist=100;try{pl=perpPnl(p)}catch(_){}try{dist=perpLiqDist(p)}catch(_){}
+      pnl+=pl;risk+=p.margin||0;
+      var col=dist<25?'var(--v40-down)':dist<55?'var(--v40-gold)':'var(--v40-acid)';
+      out.push('<div class="v41-row'+(dist<25?' danger':'')+'"><div class="v41-r1">'+mark(p.sym)+
+        '<b>'+p.sym+' <i>'+p.lev+'x '+p.dir.toUpperCase()+'</i></b>'+
+        '<strong class="'+(pl>=0?'v40-up':'v40-down')+'">'+(pl>=0?'+':'')+money(pl)+'</strong>'+
+        '<button class="v41-close" data-v41-close="'+i+'">CLOSE</button></div>'+
+        '<div class="v41-liq"><i style="width:'+dist.toFixed(0)+'%;background:'+col+'"></i></div>'+
+        '<div class="v41-sub">margin '+money(p.margin)+' · liq $'+px(perpLiq(p.entry,p.dir,p.lev))+' · '+dist.toFixed(0)+'% room</div></div>');
+    });
+    try{COINS.forEach(function(c){
+      var h=s.holdings[c.s]||0;if(h<=0)return;
+      var cur=s.prices[c.s]||0,avg=s.avg[c.s]||0,val=h*cur,pc=avg?((cur-avg)/avg*100):0,gain=avg?(cur-avg)*h:0;
+      risk+=val;pnl+=gain;
+      out.push('<div class="v41-row"><div class="v41-r1">'+mark(c.s)+
+        '<b>'+c.s+' <i>SPOT</i></b><strong class="'+(pc>=0?'v40-up':'v40-down')+'">'+(pc>=0?'+':'')+pc.toFixed(1)+'%</strong>'+
+        '<span class="v41-sub" style="margin:0">'+money(val)+'</span></div>'+
+        '<div class="v41-sub">avg $'+px(avg)+' · unreal '+(gain>=0?'+':'')+money(gain)+'</div></div>');
+    })}catch(_){}
+    return {html:out.join(''),n:out.length,pnl:pnl,risk:risk};
+  }
+
+  function feedHtml(){
+    var f=feed();if(!f.length)return '<div class="v40-empty" style="padding:12px 8px">Your run log starts with your first move.</div>';
+    return f.slice(-18).reverse().map(function(x){return '<div class="v41-fitem '+x.k+'"><em>'+x.d+'</em><div>'+x.m.replace(/[<>]/g,'')+'</div></div>'}).join('');
+  }
+
+  function tick(){
+    var s=S();if(!s||s._gameEnded||!document.body.classList.contains('v40-live'))return;
+    if(!build())return;
+    var rk=(s.name||'')+'|'+(s.arch||'')+'|'+(s.diff||'')+'|'+(s.netHistory&&s.netHistory[0]);
+    if(rk!==runKey){runKey=rk;shownMs={};lastLvl=-1;lastNet=null;lastSig=''}
+    var xp=s.xp||0,i=(typeof xpLevel==='function'?xpLevel(xp):0),cur=XP_LEVELS[i],nxt=XP_LEVELS[i+1];
+    var pct=nxt?Math.min(100,((xp-cur.xp)/(nxt.xp-cur.xp))*100):100;
+    $('v41-badge').textContent='LVL '+(i+1);
+    $('v41-title').textContent=cur.t;
+    $('v41-fill').style.width=pct.toFixed(1)+'%';
+    $('v41-xp').innerHTML='<b>'+xp.toLocaleString()+'</b> XP';
+    $('v41-next').textContent=nxt?'NEXT '+nxt.xp.toLocaleString():'MAX LEVEL';
+    $('v41-streak').textContent=(s._v22streak||0);
+    $('v41-month').textContent=Math.min(84,(s.month||0)+1)+'/84';
+    var mult=1;try{mult=getXPMultiplier()}catch(_){}
+    $('v41-mult').textContent=mult.toFixed(2)+'x';
+    if(lastLvl>=0&&i>lastLvl){
+      var pb=$('v41-prog');pb.classList.remove('lvlup');void pb.offsetWidth;pb.classList.add('lvlup');
+      setTimeout(function(){pb.classList.remove('lvlup')},950);
+      moment('LEVEL '+(i+1)+' UNLOCKED',cur.t,xp.toLocaleString()+' XP · the boss noticed you','quest');
+    }
+    lastLvl=i;
+
+    var r=rows(s),live=$('v41-live');
+    var sig=[r.n,Math.round(r.pnl),Math.round(r.risk),s.month,feed().length].join('|');
+    if(sig!==lastSig){
+      lastSig=sig;
+      $('v41-lbody').innerHTML=r.html||'<div class="v40-empty" style="padding:14px 10px">Flat. Pick a market and take a position.</div>';
+      live.classList.toggle('empty',r.n===0);
+      $('v41-lsum').innerHTML=r.n?('EXPOSURE '+money(r.risk)+' · <b class="'+(r.pnl>=0?'v40-up':'v40-down')+'">'+(r.pnl>=0?'+':'')+money(r.pnl)+'</b>'):'FLAT';
+      var fh=feedHtml();
+      if($('v41-feed'))$('v41-feed').innerHTML=fh;
+      if($('v41-mfeed'))$('v41-mfeed').innerHTML=fh;
+      var f=feed();if($('v41-mlast'))$('v41-mlast').textContent=f.length?f[f.length-1].m.slice(0,26):'—';
+    }
+
+    var nw=0;try{nw=netWorth()}catch(_){}
+    if(lastNet!==null&&Math.abs(nw-lastNet)>Math.max(25,lastNet*0.004))hit($('v40-net'));
+    lastNet=nw;
+    [[100000,'FIRST SIX FIGURES','$100K NET WORTH'],[500000,'HALF A MILLION','$500K NET WORTH'],[1000000,'MILLION DOLLAR DEGEN','$1M NET WORTH']].forEach(function(ms){
+      if(nw>=ms[0]&&!shownMs[ms[0]]){shownMs[ms[0]]=1;moment(ms[1],ms[2],'You are not exit liquidity anymore.','moon')}
+    });
+  }
+
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-v41-close]');if(!b)return;
+    e.preventDefault();
+    try{closePerp(+b.getAttribute('data-v41-close'))}catch(_){}
+    lastSig='';tick();
+  },true);
+
+  setInterval(tick,260);
+  setTimeout(tick,900);
+})();
+</script>
