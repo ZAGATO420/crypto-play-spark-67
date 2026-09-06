@@ -21,6 +21,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, type BoardRow } from "./leaderboard";
+import { getVolumes, initAudio, isMuted, playSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 
 /* ------------------------------------------------------------------ types */
 
@@ -59,6 +60,7 @@ type Dialog =
   | { k: "ledger" }
   | { k: "mini"; kind: MiniKind; pending: Pending }
   | { k: "score" }
+  | { k: "sound" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
 type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[]; inflow: Entry[]; outflow: Entry[] };
@@ -133,6 +135,9 @@ export function CryptoJourney() {
   const [resume, setResume] = useState(false);
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
+  const [muted, setMutedState] = useState(false);
+  const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
+  useEffect(() => { wireAudio(); initAudio(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
   const [netPulse, setNetPulse] = useState<"up" | "down" | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
@@ -185,6 +190,7 @@ export function CryptoJourney() {
       const next = r.xp + gain;
       if (levelFor(next) > levelFor(r.xp)) {
         setLevelUp(levelFor(next));
+        playSfx("level");
         window.setTimeout(() => setLevelUp(null), 2200);
       }
       return { ...r, xp: next };
@@ -192,7 +198,7 @@ export function CryptoJourney() {
     pop(`+${gain} XP${label ? ` · ${label}` : ""}`, "xp");
   };
 
-  const rumble = () => { setShake(true); window.setTimeout(() => setShake(false), 520); };
+  const rumble = () => { playSfx("crash"); setShake(true); window.setTimeout(() => setShake(false), 520); };
 
   const spend = (cost = 1) => { setAp((a) => Math.max(0, a - cost)); setRun((r) => ({ ...r, moves: r.moves + 1 })); };
 
@@ -217,6 +223,7 @@ export function CryptoJourney() {
     }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee));
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
+    playSfx("buy");
     grantXp(XP.trade, "TRADE");
   };
 
@@ -234,6 +241,7 @@ export function CryptoJourney() {
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
+    playSfx("buy");
     grantXp(XP.trade + lev * 8, `${lev}x`);
   };
 
@@ -247,6 +255,7 @@ export function CryptoJourney() {
 
   const closePosition = (id: number, fraction: number, quality: number) => {
     setDialog(null);
+    playSfx("sell");
     const pos = run.positions.find((p) => p.id === id);
     if (!pos) return;
     const cust = custodyOf(pos.where);
@@ -308,6 +317,7 @@ export function CryptoJourney() {
 
   const recover = (kind: "eat" | "calm") => {
     setDialog(null);
+    playSfx("care");
     const cost = Math.round((kind === "eat" ? 90 : 130) * diff.cost);
     if (run.cash < cost) return say(`${kind === "eat" ? "Food" : "Calm"} costs ${formatMoney(cost)}. You cannot afford to survive.`, "pink");
     setRun((r) => book({
@@ -322,6 +332,7 @@ export function CryptoJourney() {
   /** Moving the bag is the most important button in the game. */
   const setCustody = (id: CustodyId) => {
     setDialog(null);
+    playSfx("vault");
     if (id === run.custody) return say(`Everything already sits in your ${custodyOf(id).short}.`, "cyan");
     if (ap <= 0) return say("Moving coins costs a move. None left this quarter.", "pink");
     spend();
@@ -357,6 +368,7 @@ export function CryptoJourney() {
   };
 
   const resolveDecision = (option: DecisionOption, crisis = true) => {
+    playSfx("click");
     const status = STATUS_BY_CHOICE[option.label];
     setRun((r) => {
       const positions = r.positions.map((p) => (option.bagMul !== undefined ? { ...p, margin: p.margin * option.bagMul, qty: p.qty * option.bagMul } : p));
@@ -414,6 +426,7 @@ export function CryptoJourney() {
   };
 
   const finishMini = (pending: Pending, res: MiniResult) => {
+    playSfx("hit");
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
@@ -433,6 +446,7 @@ export function CryptoJourney() {
 
 
   const endChapter = () => {
+    playSfx("quarter");
     const from = run.chapter;
     const next = from + 1;
     const startNet = netOf(run);
@@ -569,10 +583,11 @@ export function CryptoJourney() {
     openChapterCards(run.chapter);
   };
 
-  const finish = (key: EndingKey) => { setEnding(key); setScreen("end"); };
+  const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
 
   const begin = (config: Config) => {
     localStorage.removeItem(SAVE_KEY);
+    setResume(false);
     setRun(freshRun(config));
     setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null); setQueue([]);
     setScreen("run");
@@ -610,7 +625,7 @@ export function CryptoJourney() {
         <div className="cy-top-right">
           <button className="cy-score" onClick={() => setDialog({ k: "score" })}><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></button>
           <div className="cy-ap" aria-label={`${ap} moves left`}>{Array.from({ length: AP_CAP }, (_, i) => <i key={i} className={i < ap ? "is-on" : ""} />)}</div>
-          <Button variant="ghost" size="icon" aria-label={run.muted ? "Sound on" : "Mute"} onClick={() => setRun({ ...run, muted: !run.muted })}>{run.muted ? <VolumeX /> : <Volume2 />}</Button>
+          <Button variant="ghost" size="icon" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => setDialog({ k: "sound" })}>{muted ? <VolumeX /> : <Volume2 />}</Button>
         </div>
       </header>
 
