@@ -13343,7 +13343,9 @@ body.v38-shake{animation:v38shake .42s ease}
 </style>
 <script id="v38-arcade-js">
 (function(){
-  var S=function(){return window.state};
+  /* `state` is a top-level let binding, not a window property */
+  var S=function(){ try{ return state }catch(e){ return null } };
+
   /* ---------- 1. one clear month result instead of a message chain ---------- */
   var MR={on:false,lines:[]};
   var _toast=window.toast;
