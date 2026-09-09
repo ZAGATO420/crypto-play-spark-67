@@ -907,7 +907,7 @@ export function CryptoJourney() {
     const cards: Dialog[] = [];
     // the Boss steps up first: his fights and his offers open the quarter
     if (bossFightFor(chapter)) cards.push({ k: "fight", chapter });
-    const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`));
+    const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`), personaFor(det(run.seed, "persona")).bias);
     if (atk?.id === "OFFER") cards.push({ k: "offer", attack: atk });
     if (crashFor(chapter)) cards.push({ k: "crash", chapter });
     if (failureFor(chapter)) cards.push({ k: "failure", chapter });
