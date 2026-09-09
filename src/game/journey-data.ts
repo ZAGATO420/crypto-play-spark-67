@@ -451,12 +451,14 @@ export const PERK_BLURB: Record<string, string> = {
 };
 
 
-export const bossScore = (input: { net: number; chapters: number; difficulty: Difficulty; crises: number; streak: number }) => {
+export const bossScore = (input: { net: number; chapters: number; difficulty: Difficulty; crises: number; streak: number; modifier?: ModifierId }) => {
   const diff = DIFFICULTIES.find((d) => d.id === input.difficulty)?.cost ?? 1;
   const chapterFactor = Math.max(0.1, Math.min(1, input.chapters / CHAPTERS));
   const streakMul = 1 + Math.min(0.5, input.streak * 0.05);
-  return Math.round((Math.max(0, input.net) * chapterFactor * diff + input.crises * 500) * streakMul);
+  const mod = modifierOf(input.modifier ?? "straight").mul;
+  return Math.round((Math.max(0, input.net) * chapterFactor * diff * mod + input.crises * 500) * streakMul);
 };
+
 
 // ---- months language: the run is still 84 months ----------------------------
 export const TOTAL_MONTHS = 84;
