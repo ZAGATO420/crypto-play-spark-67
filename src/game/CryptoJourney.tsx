@@ -487,6 +487,7 @@ export function CryptoJourney() {
   };
 
 
+  const takePresale = (card: Presale, size: number, quality: number) => {
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
     if (quality < 0.2) {
