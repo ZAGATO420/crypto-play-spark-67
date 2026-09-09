@@ -37,7 +37,7 @@ type Kind = "spot" | "perp";
 type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number; where: CustodyId };
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
-type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string };
+type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string; modifier: ModifierId };
 type BossBook = { cash: number; btc: number; line: string };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
