@@ -986,26 +986,43 @@ export function CryptoJourney() {
       </section>
 
 
+      <section className="cy-versus" aria-label="You against the Boss">
+        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs BOSS</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
+        <div className="cy-versus-bar">
+          <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
+        </div>
+        <div className="cy-versus-num"><strong>{formatMoney(net)}</strong><strong className="boss">{formatMoney(bossNet)}</strong></div>
+        <div className="cy-conviction">
+          <span>CONVICTION</span>
+          <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
+          <button className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+        </div>
+      </section>
+
       <section className="cy-positions" aria-label="Open positions">
         <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK · {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
         {run.positions.length ? (
           <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`}>
             {run.positions.map((p) => {
-              const price = priceAt(p.symbol, run.chapter, run.noise);
+              const price = mark(p.symbol);
               const pnl = pnlOf(p, price);
               const liq = liqPct(p, price);
               return (
-                <button key={p.id} className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => setDialog({ k: "position", id: p.id })}>
-                  <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
-                  <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
-                  <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
-                  {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
-                </button>
+                <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
+                  <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => setDialog({ k: "position", id: p.id })}>
+                    <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
+                    <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
+                    <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
+                    {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
+                  </button>
+                  {phase === "act" && p.where !== "cold" && <button className="cy-chip-exit" onClick={() => quickClose(p.id)} aria-label={`Close ${p.symbol} now`}>EXIT</button>}
+                </span>
               );
             })}
           </div>
         ) : <p className="cy-empty">No positions. Cash does not win chapters.</p>}
       </section>
+
 
       <div className="cy-body">
         <aside className="cy-boss">
