@@ -1939,11 +1939,14 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 }
 
 
-function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onBoard: () => void }) {
+function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onRematch: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const [wallet, setWallet] = useState(() => readWallet());
   const [walletError, setWalletError] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const tournament = run.config.tournament;
+
   const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
   const badge = badgeFor(run, ending, net);
