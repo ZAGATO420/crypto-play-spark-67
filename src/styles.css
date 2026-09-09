@@ -656,6 +656,92 @@
 .start-rules:hover { color: var(--journey-cyan); }
 .journey-start .start-secondary button { background: color-mix(in oklab, var(--background) 55%, transparent); color: var(--foreground); }
 
+/* ---- V53: Cyber-Jungle Premium start + leaderboard ---- */
+.journey-start { place-items: stretch; padding: calc(62px + env(safe-area-inset-top)) clamp(18px,4vw,72px) max(26px,env(safe-area-inset-bottom)); }
+.journey-start > picture img { object-position: 50% 14%; filter: brightness(.78) contrast(1.08) saturate(1.02); }
+.journey-start .start-vignette { background: linear-gradient(90deg,color-mix(in oklab,var(--background) 90%,transparent) 0%,color-mix(in oklab,var(--background) 48%,transparent) 34%,transparent 58%,color-mix(in oklab,var(--background) 34%,transparent) 100%),linear-gradient(180deg,color-mix(in oklab,var(--background) 20%,transparent),transparent 42%,color-mix(in oklab,var(--background) 80%,transparent) 100%); }
+.journey-start .start-stage { align-self:end; display:grid; grid-template-columns:minmax(330px,1fr) minmax(380px,520px); align-items:end; gap:clamp(32px,6vw,100px); width:min(100%,1320px); min-height:0; margin:0 auto; text-align:left; }
+.start-brand { min-width:0; padding-bottom:20px; }
+.journey-start .start-brand .journey-kicker { justify-content:flex-start; }
+.journey-start .start-brand h1 { max-width:720px; font-size:clamp(54px,7vw,104px); line-height:.88; }
+.journey-start .start-brand > p:not(.journey-kicker) { max-width:42ch; margin:18px 0 0; font-size:17px; }
+.start-console { display:grid; gap:10px; min-width:0; padding:18px; border:1px solid color-mix(in oklab,var(--foreground) 13%,transparent); border-radius:8px; background:color-mix(in oklab,var(--card) 82%,transparent); box-shadow:0 24px 70px color-mix(in oklab,var(--background) 70%,transparent); backdrop-filter:blur(14px); }
+.start-console .season-strip { justify-content:space-between; border-radius:6px; background:color-mix(in oklab,var(--journey-yellow) 7%,var(--background)); }
+.start-console .start-record { margin:0; border-color:var(--border); border-radius:6px; background:color-mix(in oklab,var(--background) 50%,transparent); }
+.start-console .start-record span { flex:1 1 0; }
+.start-console .start-record strong { overflow-wrap:anywhere; }
+.journey-start .start-actions { margin:0; }
+.journey-start .start-actions button { border-radius:6px; }
+.journey-start .start-main { min-height:60px; font-size:14px; }
+.journey-start .start-footer { margin-top:2px; }
+
+.board-screen { padding:clamp(18px,3vw,40px) 16px 64px; background-image:linear-gradient(color-mix(in oklab,var(--journey-cyan) 3%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in oklab,var(--journey-cyan) 3%,transparent) 1px,transparent 1px); background-size:32px 32px; }
+.board-shell { width:min(100%,1080px); margin:0 auto; }
+.board-screen .board-header { width:100%; margin:0 0 18px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:14px; }
+.board-header-actions { display:flex; align-items:center; gap:5px; }
+.board-screen .board-header .menu-sound { position:static; }
+.board-screen .season-banner { width:100%; padding:15px 18px; border-radius:7px; }
+.board-screen .season-banner p { max-width:92ch; }
+.board-screen .board-tabs { width:100%; margin:10px 0 14px; padding:4px; border:1px solid var(--border); border-radius:7px; background:color-mix(in oklab,var(--card) 72%,transparent); }
+.board-screen .board-tabs button { border:0; border-radius:5px; }
+.board-screen .board-tabs button.is-on { background:color-mix(in oklab,var(--journey-cyan) 13%,var(--card)); box-shadow:inset 0 -2px var(--journey-cyan); }
+.board-column-head { display:grid; grid-template-columns:minmax(260px,1.45fr) minmax(120px,.7fr) minmax(130px,.7fr) minmax(130px,.7fr); gap:16px; padding:0 18px 7px 104px; color:var(--muted-foreground); font-size:9px; font-weight:700; letter-spacing:.12em; }
+.board-column-head span:nth-last-child(-n+2) { text-align:right; }
+.board-screen .board-list { width:100%; gap:8px; }
+.board-screen .board-row { grid-template-columns:42px 42px minmax(190px,1.45fr) minmax(120px,.7fr) minmax(130px,.7fr) minmax(130px,.7fr); gap:12px; min-height:82px; padding:12px 18px; border-left-width:1px; border-radius:7px; background:color-mix(in oklab,var(--card) 92%,transparent); }
+.board-screen .board-row:nth-child(-n+3) { border-left-width:4px; border-left-color:var(--journey-yellow); }
+.board-screen .board-row.is-prize { background:linear-gradient(90deg,color-mix(in oklab,var(--journey-yellow) 9%,var(--card)),var(--card) 42%); }
+.board-position { font-size:19px; }
+.board-screen .board-face { width:42px; height:42px; border-radius:50%; border:1px solid color-mix(in oklab,var(--journey-yellow) 45%,var(--border)); }
+.board-player,.board-run,.board-net,.board-score { display:grid; gap:4px; min-width:0; }
+.board-player strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.board-player small { display:flex; align-items:center; gap:5px; min-width:0; }
+.board-player small svg { flex:none; }
+.board-run strong,.board-net strong { font-size:13px; }
+.board-run em { color:var(--muted-foreground); font-size:9px; font-style:normal; letter-spacing:.05em; }
+.board-net,.board-score { justify-items:end; text-align:right; }
+.board-net small,.board-score small,.board-run small { color:var(--muted-foreground); font-size:9px; letter-spacing:.08em; }
+.board-score i { font-size:18px; }
+
+@media (max-width:900px) {
+  .journey-start { padding-inline:18px; }
+  .journey-start .start-stage { grid-template-columns:minmax(0,1fr); gap:16px; align-content:end; width:min(100%,620px); text-align:center; }
+  .start-brand { padding:0; }
+  .journey-start .start-brand .journey-kicker { justify-content:center; }
+  .journey-start .start-brand h1 { margin-inline:auto; font-size:clamp(42px,10vw,70px); }
+  .journey-start .start-brand > p:not(.journey-kicker) { margin:10px auto 0; }
+  .board-column-head { display:none; }
+  .board-screen .board-row { grid-template-columns:38px 40px minmax(0,1fr) auto; }
+  .board-run { display:none; }
+  .board-net { grid-column:3; justify-items:start; text-align:left; }
+  .board-score { grid-column:4; grid-row:1 / span 2; align-self:center; }
+}
+
+@media (max-width:640px) {
+  .journey-start { padding:calc(54px + env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom)); }
+  .journey-start > picture img { object-position:50% 8%; }
+  .journey-start .start-vignette { background:linear-gradient(180deg,color-mix(in oklab,var(--background) 12%,transparent) 0%,transparent 28%,color-mix(in oklab,var(--background) 72%,transparent) 55%,var(--background) 78%); }
+  .journey-start .start-stage { gap:10px; }
+  .journey-start .start-brand h1 { font-size:clamp(38px,12vw,52px); }
+  .journey-start .start-brand > p:not(.journey-kicker) { font-size:13px; }
+  .start-console { gap:8px; padding:10px; }
+  .start-console .season-strip { justify-content:center; padding:7px 8px; }
+  .start-console .start-record { gap:8px; padding:8px; }
+  .start-console .start-record span:nth-child(2) { display:none; }
+  .journey-start .start-actions button { height:50px; }
+  .journey-start .start-main { min-height:54px; }
+  .board-screen { padding-inline:10px; }
+  .board-screen .season-banner { padding:12px; }
+  .board-screen .season-banner p { display:none; }
+  .board-screen .season-head { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+  .board-screen .board-row { grid-template-columns:34px 36px minmax(0,1fr) auto; gap:8px; min-height:76px; padding:10px; }
+  .board-screen .board-face { width:36px; height:36px; }
+  .board-player strong { font-size:13px; }
+  .board-player small { font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .board-net strong { font-size:12px; }
+  .board-score i { font-size:15px; }
+}
+
 /* ---------------------------------------- V50: the duel (live quarter, boss) */
 .cy-versus { display: grid; gap: .4rem; padding: .55rem .7rem; border: 1px solid hsl(var(--border)); border-radius: .8rem; background: hsl(var(--card) / .6); }
 .cy-versus-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; font-size: .68rem; letter-spacing: .08em; }

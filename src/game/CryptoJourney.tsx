@@ -1926,21 +1926,25 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
       <div className="start-vignette" />
       <PriceTape />
       <MenuSound />
-      <section>
-        <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
-        <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
-        <p>Trade the cycle from 2020 to 2026 and survive every crash.</p>
-        <SeasonBanner compact />
-        {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
-        <div className="start-actions">
-          <Button className="start-main" onClick={() => { playSfx("win"); onStart(true); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>
-          <div className="start-secondary">
-            <Button variant="outline" onClick={() => { playSfx("click"); onStart(false); }}>FREE RUN</Button>
-            <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
-            {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
-          </div>
+      <section className="start-stage">
+        <div className="start-brand">
+          <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
+          <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
+          <p>Trade the cycle from 2020 to 2026. Survive every crash.</p>
         </div>
-        <small className="start-footer">84 MONTHS · FREE TO PLAY · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
+        <div className="start-console">
+          <SeasonBanner compact />
+          {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
+          <div className="start-actions">
+            <Button className="start-main" onClick={() => { playSfx("win"); onStart(true); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>
+            <div className="start-secondary">
+              <Button variant="outline" onClick={() => { playSfx("click"); onStart(false); }}>FREE RUN</Button>
+              <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
+              {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
+            </div>
+          </div>
+          <small className="start-footer">84 MONTHS · FREE TO PLAY · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
+        </div>
       </section>
       {rules && <Sheet onClose={() => setRules(false)}><TournamentRules onClose={() => setRules(false)} /></Sheet>}
       {endings && profile && <Sheet onClose={() => setEndings(false)}><EndingsSheet profile={profile} onClose={() => setEndings(false)} /></Sheet>}
@@ -2009,26 +2013,33 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
     return () => { alive = false; };
   }, [season, view]);
   return (
-    <main className="journey-setup">
-      <header><div><p className="journey-kicker">BOSS SCORE · {view === "season" ? seasonLabel(season) : "ALL TIME"}</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
-      <SeasonBanner />
-      <div className="cy-toggle board-tabs">
-        <button className={view === "season" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("season"); }}><Trophy />TOURNAMENT</button>
-        <button className={view === "all" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("all"); }}>ALL TIME</button>
-      </div>
-      {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">{view === "season" ? "No tournament run yet this season. Yours can be first." : "No runs yet. Yours can be first."}</p> : (
-        <div className="board-list">
-          {rows.map((r) => (
-            <div className={`board-row${r.prize ? " is-prize" : ""}`} key={`${r.pos}-${r.name}`}>
-              <b>#{r.pos}</b>
-              <img className="board-face" src={AVATARS.find((a) => a.id === r.avatar)?.url ?? AVATARS[0]!.url} alt="" loading="lazy" />
-              <Flag code={r.country} size={22} />
-              <span><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small>{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
-              <i>{(r.score ?? 0).toLocaleString("en-US")}</i>
-            </div>
-          ))}
+    <main className="journey-setup board-screen">
+      <div className="board-shell">
+        <header className="board-header"><div><p className="journey-kicker">BOSS SCORE · {view === "season" ? seasonLabel(season) : "ALL TIME"}</p><h1>LEADERBOARD</h1></div><div className="board-header-actions"><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></div></header>
+        <SeasonBanner />
+        <div className="cy-toggle board-tabs">
+          <button className={view === "season" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("season"); }}><Trophy />TOURNAMENT</button>
+          <button className={view === "all" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("all"); }}>ALL TIME</button>
         </div>
-      )}
+        <div className="board-column-head" aria-hidden="true"><span>PLAYER</span><span>RUN</span><span>NET WORTH</span><span>BOSS SCORE</span></div>
+        {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">{view === "season" ? "No tournament run yet this season. Yours can be first." : "No runs yet. Yours can be first."}</p> : (
+          <div className="board-list">
+            {rows.map((r) => {
+              const avatar = AVATARS.find((a) => a.id === r.avatar) ?? AVATARS[0];
+              return (
+                <div className={`board-row${r.prize ? " is-prize" : ""}`} key={`${r.pos}-${r.name}`}>
+                  <b className="board-position">#{r.pos}</b>
+                  {avatar && <img className="board-face" src={avatar.url} alt="" loading="lazy" />}
+                  <span className="board-player"><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small><Flag code={r.country} size={15} />{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · {r.difficulty.toUpperCase()}</small></span>
+                  <span className="board-run"><small>LVL {r.level}</small><strong>{r.xp.toLocaleString("en-US")} XP</strong><em>{r.months} / 84 MONTHS</em></span>
+                  <span className="board-net"><small>NET WORTH</small><strong>{formatMoney(r.netWorth)}</strong></span>
+                  <span className="board-score"><small>BOSS SCORE</small><i>{(r.score ?? 0).toLocaleString("en-US")}</i></span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
