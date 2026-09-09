@@ -1453,18 +1453,34 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
 function BoardScreen({ onBack }: { onBack: () => void }) {
   const [rows, setRows] = useState<BoardRow[] | null>(null);
   const [error, setError] = useState(false);
-  useEffect(() => { retryPendingSubmission().finally(() => loadBoard(25).then(setRows).catch(() => setError(true))); }, []);
+  const [view, setView] = useState<"season" | "all">("season");
+  const season = currentSeasonId();
+  useEffect(() => {
+    let alive = true;
+    setRows(null); setError(false);
+    retryPendingSubmission().finally(() => {
+      loadBoard(25, view === "season" ? season : "all")
+        .then((r) => { if (alive) setRows(r); })
+        .catch(() => { if (alive) setError(true); });
+    });
+    return () => { alive = false; };
+  }, [season, view]);
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">BOSS SCORE · SEASON 1</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
-      {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">No runs yet. Yours can be first.</p> : (
+      <header><div><p className="journey-kicker">BOSS SCORE · {view === "season" ? seasonLabel(season) : "ALL TIME"}</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      <SeasonBanner />
+      <div className="cy-toggle board-tabs">
+        <button className={view === "season" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("season"); }}><Trophy />TOURNAMENT</button>
+        <button className={view === "all" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("all"); }}>ALL TIME</button>
+      </div>
+      {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">{view === "season" ? "No tournament run yet this season. Yours can be first." : "No runs yet. Yours can be first."}</p> : (
         <div className="board-list">
           {rows.map((r) => (
-            <div className="board-row" key={`${r.pos}-${r.name}`}>
+            <div className={`board-row${r.prize ? " is-prize" : ""}`} key={`${r.pos}-${r.name}`}>
               <b>#{r.pos}</b>
               <img className="board-face" src={AVATARS.find((a) => a.id === r.avatar)?.url ?? AVATARS[0]!.url} alt="" loading="lazy" />
               <Flag code={r.country} size={22} />
-              <span><strong>{r.name}</strong><small>{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
+              <span><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small>{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
               <i>{(r.score ?? 0).toLocaleString("en-US")}</i>
             </div>
           ))}
@@ -1473,6 +1489,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
     </main>
   );
 }
+
 
 function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
