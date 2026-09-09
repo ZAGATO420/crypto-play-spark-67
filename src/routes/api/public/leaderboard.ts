@@ -262,7 +262,11 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           survived: r.survived,
           timestamp: r.created_at,
           score: Math.round(rankScore(r)),
+          season: r.season ?? null,
+          isTournament: Boolean(r.is_tournament),
+          prize: seasonView ? (PRIZES[i] ?? null) : null,
         }));
+
 
         return Response.json(rows, { headers: CORS });
       },
