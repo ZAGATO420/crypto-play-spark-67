@@ -13,6 +13,9 @@ export type BoardRow = {
   months: number;
   survived: boolean;
   score: number;
+  season?: string | null;
+  isTournament?: boolean;
+  prize?: number | null;
 };
 
 export type RunSubmission = {
@@ -32,6 +35,10 @@ export type RunSubmission = {
   survived: boolean;
   score: number;
   avatar?: string;
+  season?: string;
+  wallet?: string;
+  isTournament?: boolean;
+  playerKey?: string;
 };
 
 export type SubmitFailure = "offline" | "rejected" | "unavailable";
@@ -46,8 +53,10 @@ export class SubmitRunError extends Error {
   }
 }
 
-export async function loadBoard(limit = 25): Promise<BoardRow[]> {
-  const res = await fetch(`/api/public/leaderboard?limit=${limit}`);
+export async function loadBoard(limit = 25, season?: string): Promise<BoardRow[]> {
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (season) query.set("season", season);
+  const res = await fetch(`/api/public/leaderboard?${query.toString()}`);
   if (!res.ok) throw new Error("board unavailable");
   return (await res.json()) as BoardRow[];
 }

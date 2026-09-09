@@ -55,6 +55,8 @@ const MODES = [
   "IRONMAN-historical",
 ] as const;
 
+const WALLET = /^(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})$/;
+
 const runSchema = z.object({
   clientHash: z.string().uuid(),
   name: z.string().trim().min(1).max(18),
@@ -72,7 +74,16 @@ const runSchema = z.object({
   survived: z.boolean().default(false),
   score: z.number().finite().min(0).max(1e12).default(0),
   avatar: z.string().trim().max(12).optional(),
+  season: z.string().regex(/^\d{4}-\d{2}$/).optional(),
+  wallet: z.string().trim().regex(WALLET).optional(),
+  isTournament: z.boolean().default(false),
+  playerKey: z.string().trim().min(6).max(64).optional(),
+}).refine((r) => !r.isTournament || (r.wallet && r.season && r.playerKey), {
+  message: "tournament runs need season, wallet and playerKey",
 });
+
+const PRIZES = [20, 10, 5];
+
 
 // Mirrors the client's XP_LEVELS thresholds (public/game.html). level = index + 1.
 const XP_THRESHOLDS = [
@@ -146,7 +157,8 @@ function rankScore(r: {
 }
 
 const SELECT_COLS =
-  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at";
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament";
+
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -186,6 +198,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const url = new URL(request.url);
         const mode = url.searchParams.get("mode");
+        const season = url.searchParams.get("season");
+        const seasonView = Boolean(season && season !== "all" && /^\d{4}-\d{2}$/.test(season));
         const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
 
         const runQuery = async (client: {
@@ -198,8 +212,10 @@ export const Route = createFileRoute("/api/public/leaderboard")({
             .limit(500);
 
           if (mode && mode !== "all") query = query.eq("mode", mode);
+          if (seasonView) query = query.eq("season", season).eq("is_tournament", true);
           return (await query) as { data: any[] | null; error: any };
         };
+
 
         let { data, error } = await runQuery(supabaseAdmin);
         // Transient auth/clock/network hiccups (e.g. PGRST303) should not hard-fail the board.
@@ -246,7 +262,11 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           survived: r.survived,
           timestamp: r.created_at,
           score: Math.round(rankScore(r)),
+          season: r.season ?? null,
+          isTournament: Boolean(r.is_tournament),
+          prize: seasonView ? (PRIZES[i] ?? null) : null,
         }));
+
 
         return Response.json(rows, { headers: CORS });
       },
@@ -280,9 +300,16 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           return Response.json({ error: "score rejected" }, { status: 422, headers: CORS });
         }
 
+        const now = new Date();
+        const currentSeason = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+        if (run.isTournament && run.season !== currentSeason) {
+          return Response.json({ error: "season closed" }, { status: 422, headers: CORS });
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively.
         const rankMatch = RANKS.find((r) => r.toLowerCase() === run.rank.trim().toLowerCase());
+        const finalScore = Math.round(Math.min(Math.max(0, run.score), scoreCeiling(run)));
         const row = {
           client_hash: run.clientHash,
           player_name: sanitizeName(run.name),
@@ -298,10 +325,39 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           achievements: run.achievements,
           trades: run.trades,
           survived: run.survived,
-          score: Math.round(Math.min(Math.max(0, run.score), scoreCeiling(run))),
-
+          score: finalScore,
+          season: run.season ?? null,
+          wallet: run.isTournament ? run.wallet ?? null : null,
+          is_tournament: run.isTournament,
+          player_key: run.isTournament ? run.playerKey ?? null : null,
           avatar: run.avatar ?? null,
         };
+
+        // One best tournament result per player and season: replace only when better.
+        if (run.isTournament) {
+          const { data: existing } = await supabaseAdmin
+            .from("leaderboard_runs")
+            .select("id, score")
+            .eq("season", run.season!)
+            .eq("player_key", run.playerKey!)
+            .eq("is_tournament", true)
+            .maybeSingle();
+          if (existing) {
+            if (Number(existing.score) >= finalScore) {
+              return Response.json({ ok: true, success: true, kept: true }, { status: 200, headers: CORS });
+            }
+            let { error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id);
+            for (let attempt = 0; attempt < 3 && upErr; attempt++) {
+              await sleep(300 * (attempt + 1));
+              ({ error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id));
+            }
+            if (upErr) {
+              console.error("leaderboard tournament update failed", upErr);
+              return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
+            }
+            return Response.json({ ok: true, success: true, improved: true }, { status: 201, headers: CORS });
+          }
+        }
 
         let { error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true });
         // PGRST303 / network blips: retry safely using the unique client hash.
@@ -309,6 +365,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           await sleep(300 * (attempt + 1));
           ({ error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true }));
         }
+
 
         if (error) {
           console.error("leaderboard write failed", error);

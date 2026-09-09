@@ -608,3 +608,17 @@
 .journey-start .menu-sound { top: calc(max(12px, env(safe-area-inset-top)) + 36px); }
 .journey-setup header { position: relative; }
 .journey-setup header .menu-sound { position: static; }
+
+/* ---- $TCFB monthly tournament ---- */
+.season-banner { border: 1px solid color-mix(in oklab, var(--journey-yellow) 55%, transparent); border-radius: 10px; padding: 12px; background: color-mix(in oklab, var(--journey-yellow) 8%, var(--card)); display: grid; gap: 8px; text-align: left; }
+.season-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.season-live { display: inline-flex; align-items: center; gap: 6px; color: var(--journey-yellow); font: 400 14px/1.1 var(--font-display); }
+.season-live svg { width: 16px; height: 16px; }
+.season-head strong { color: var(--journey-cyan); font: 700 11px/1 var(--font-body); letter-spacing: .08em; }
+.season-banner p { margin: 0; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+.season-cta { width: 100%; }
+.board-tabs { margin: 10px 0 12px; }
+.board-row.is-prize { border-left-color: var(--journey-cyan); background: color-mix(in oklab, var(--journey-cyan) 8%, var(--card)); }
+.board-prize { display: inline-block; margin-left: 6px; color: var(--journey-yellow); font: 700 10px/1 var(--font-body); font-style: normal; letter-spacing: .06em; }
+.end-wallet { display: grid; gap: 6px; text-align: left; margin-bottom: 10px; }
+.end-wallet small { color: var(--muted-foreground); font-size: 10px; line-height: 1.4; }

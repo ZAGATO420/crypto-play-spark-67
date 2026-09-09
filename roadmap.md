@@ -12,3 +12,5 @@
 - [x] Run badges shown on the end screen and leaderboard
 - [x] Competition audit: mobile values, exact trade cash flows, country validation, queued/idempotent score submits
 - [x] Harder survival: care costs a move, is capped and gets pricier; NIGHTMARE mode; private life events; critical states cost a move; CASH OUT ends a run as SELLOUT
+- [x] Monthly $TCFB tournament: shared season seed, wallet entry, one best run per player/season, season + all-time board with $20/$10/$5 prize ranks
+

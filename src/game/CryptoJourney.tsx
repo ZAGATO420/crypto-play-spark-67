@@ -84,7 +84,7 @@ export const AVATARS = [
   { id: "diamond", url: avDiamond.url }, { id: "frog", url: avFrog.url }, { id: "reaper", url: avReaper.url }, { id: "whale", url: avWhale.url },
 ];
 
-const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE" };
+const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE", tournament: false, season: currentSeasonId() };
 const archOf = (id: Archetype) => ARCHETYPES.find((a) => a.id === id) ?? ARCHETYPES[1]!;
 const diffOf = (id: Difficulty) => DIFFICULTIES.find((d) => d.id === id) ?? DIFFICULTIES[1]!;
 const modeOf = (id: BaseMode) => MODES.find((m) => m.id === id) ?? MODES[0]!;
@@ -109,22 +109,30 @@ const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLO
   BROKE: ["Your portfolio has successfully become a tax deduction.", "Seven years of alpha, distilled into zero.", "The Boss thanks you for providing exit liquidity."],
 };
 
-const makeNoise = (mode: BaseMode) => {
+const makeNoise = (mode: BaseMode, seed: number) => {
   const step = mode === "historical" ? 0 : mode === "chaos" ? 0.05 : 0.018;
   const cap = mode === "chaos" ? 0.4 : 0.12;
   let drift = 0;
-  return Array.from({ length: 84 }, () => {
-    drift = Math.max(-cap, Math.min(cap, drift + (Math.random() * 2 - 1) * step));
+  return Array.from({ length: 84 }, (_, i) => {
+    drift = Math.max(-cap, Math.min(cap, drift + (det(seed, `noise-${i}`) * 2 - 1) * step));
     return 1 + drift;
   });
 };
 
-const freshRun = (config: Config): Run => ({
-  chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
-  hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
-  ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
-});
+// Tournament runs all share the season seed, so every player meets the same
+// market noise, the same rugs and the same drainers. Free runs stay random.
+const seedFor = (config: Config) => (config.tournament ? seasonSeed(config.season) : randomSeed());
+
+const freshRun = (config: Config): Run => {
+  const seed = seedFor(config);
+  return {
+    chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
+    hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
+    custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
+    ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
+  };
+};
+
 
 const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
   const month = chapterMonth(chapter);
@@ -172,6 +180,8 @@ export function CryptoJourney() {
   const [resolution, setResolution] = useState<Resolution | null>(null);
   const [ending, setEnding] = useState<EndingKey>("SURVIVOR");
   const [resume, setResume] = useState(false);
+  const [tournament, setTournament] = useState(false);
+
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -344,8 +354,9 @@ export function CryptoJourney() {
       log({ chapter: run.chapter, title: `MISSED · ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
       return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
     }
-    const rugged = Math.random() < card.rug / (arch.risk || 1);
-    const multi = rugged ? 0.08 : (card.upside[0] + Math.random() * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
+    const rugged = det(run.seed, `rug-${run.chapter}-${card.name}`) < card.rug / (arch.risk || 1);
+    const multi = rugged ? 0.08 : (card.upside[0] + det(run.seed, `multi-${run.chapter}-${card.name}`) * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
+
     const back = Math.round(size * multi);
     setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
@@ -597,7 +608,7 @@ export function CryptoJourney() {
 
     // hot wallet drainers
     const hotSpot = positions.filter((p) => p.where === "hot");
-    if (hotSpot.length && Math.random() < custodyOf("hot").drain) {
+    if (hotSpot.length && det(run.seed, `drain-${next}`) < custodyOf("hot").drain) {
       const bite = Math.round(hotSpot.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, next, run.noise)) * 0.12, 0));
       positions = positions.map((p) => (p.where === "hot" ? { ...p, margin: p.margin * 0.88, qty: p.qty * 0.88 } : p));
       spendOn("Wallet drainer", bite);
@@ -639,8 +650,9 @@ export function CryptoJourney() {
     cash = Math.max(0, cash);
 
     // a private life happens whether the chart cares or not
-    if (next > 1 && Math.random() < 0.42) {
-      const ev = pickLifeEvent(Math.random());
+    if (next > 1 && det(run.seed, `life-${next}`) < 0.42) {
+      const ev = pickLifeEvent(det(run.seed, `life-pick-${next}`));
+
       if (ev.cash < 0) { cash = Math.max(0, cash + ev.cash); spendOn(ev.label, -ev.cash); }
       else { cash += ev.cash; earnFrom(ev.label, ev.cash); }
       lines.push(`${ev.label}: ${ev.line}`);
@@ -701,7 +713,7 @@ export function CryptoJourney() {
     const situation = situationFor(chapter);
     if (situation) cards.push({ k: "situation", card: situation });
     // cold storage occasionally asks you to prove you still own it
-    if (chapter > 3 && run.positions.some((p) => p.where === "cold") && Math.random() < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
+    if (chapter > 3 && run.positions.some((p) => p.where === "cold") && det(run.seed, `seedcheck-${chapter}`) < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
     if (!cards.length) { setDialog(null); setPhase("brief"); return; }
     setPhase("act");
 
@@ -733,10 +745,11 @@ export function CryptoJourney() {
     setResolution(null); setDialog(null); setScreen("run");
   };
 
-  if (screen === "start") return <StartScreen resume={resume} onStart={() => setScreen("setup")} onResume={restore} onBoard={() => setScreen("board")} />;
-  if (screen === "setup") return <SetupScreen onBack={() => setScreen("start")} onStart={begin} />;
+  if (screen === "start") return <StartScreen resume={resume} onStart={(t) => { setTournament(t); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
+  if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return <EndScreen run={run} net={net} score={score} ending={ending} onRestart={() => setScreen("setup")} onBoard={() => setScreen("board")} />;
+
 
   const mood = run.stress > 70 || run.hunger > 70 ? enragedBoss.url : run.streak >= 2 ? smugBoss.url : crownedBoss.url;
   const bossLine = phase === "brief" ? warning : phase === "resolve" ? resolution?.detail ?? warning : "Two moves. Make them count, or bank one and wait for blood.";
@@ -745,7 +758,7 @@ export function CryptoJourney() {
     <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}</p>
+          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · TOURNAMENT ${seasonLabel(cfg.season)}` : ""}</p>
           <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
           <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
             <span className="cy-level">LVL {xpBar.level}</span>
@@ -893,7 +906,7 @@ export function CryptoJourney() {
           {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
           {dialog.k === "life" && <LifeSheet run={run} onPick={setLife} />}
           {dialog.k === "ledger" && <LedgerSheet run={run} onClose={() => setDialog(null)} />}
-          {dialog.k === "mini" && <Minigame kind={dialog.kind} hard={cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80} onResult={(res) => finishMini(dialog.pending, res)} />}
+          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80} onResult={(res) => finishMini(dialog.pending, res)} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
         </Sheet>
@@ -1361,7 +1374,31 @@ function MenuSound() {
   );
 }
 
-function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: () => void; onResume: () => void; onBoard: () => void }) {
+function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
+  const season = currentSeasonId();
+  const ends = seasonEnd(season);
+  // Countdown is time-dependent, so it only renders after mount (no SSR mismatch).
+  const [left, setLeft] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLeft(countdown(ends));
+    const id = window.setInterval(() => setLeft(countdown(ends)), 30_000);
+    return () => window.clearInterval(id);
+  }, [ends]);
+  return (
+    <div className="season-banner">
+      <div className="season-head">
+        <span className="season-live"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(season)}</span>
+        <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
+      </div>
+
+      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid after the token launch. Same seed for everyone: identical crashes, launches and rugs.</p>
+      {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
+    </div>
+  );
+}
+
+function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: (tournament: boolean) => void; onResume: () => void; onBoard: () => void }) {
   return (
     <main className="journey-start">
       <img src={crownedBoss.url} alt="The crowned Crypto Final Boss" />
@@ -1372,23 +1409,27 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
         <p>Trade the whole cycle from 2020 to 2026. Spot, perps, launches and the crashes that ate everyone else. Survive all 84 months and beat the Boss Score.</p>
+        <SeasonBanner onStart={() => onStart(true)} />
         <div className="start-actions">
-          <Button onClick={() => { playSfx("win"); onStart(); }}>ENTER THE ARENA <ChevronRight /></Button>
+          <Button onClick={() => { playSfx("win"); onStart(false); }}>FREE RUN <ChevronRight /></Button>
           {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
           <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
         </div>
-        <small>84 MONTHS · NO WALLET · FREE TO PLAY</small>
+        <small>84 MONTHS · FREE TO PLAY · WALLET ONLY FOR PRIZES</small>
       </section>
     </main>
   );
 }
 
-function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config: Config) => void }) {
-  const [config, setConfig] = useState<Config>(defaultConfig);
+
+function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onBack: () => void; onStart: (config: Config) => void }) {
+  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season: currentSeasonId() });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">BUILD YOUR PLAYER</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      {tournament && <SeasonBanner />}
+
       <section className="setup-block"><p className="journey-kicker">NAME & AVATAR</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
@@ -1416,18 +1457,34 @@ function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config
 function BoardScreen({ onBack }: { onBack: () => void }) {
   const [rows, setRows] = useState<BoardRow[] | null>(null);
   const [error, setError] = useState(false);
-  useEffect(() => { retryPendingSubmission().finally(() => loadBoard(25).then(setRows).catch(() => setError(true))); }, []);
+  const [view, setView] = useState<"season" | "all">("season");
+  const season = currentSeasonId();
+  useEffect(() => {
+    let alive = true;
+    setRows(null); setError(false);
+    retryPendingSubmission().finally(() => {
+      loadBoard(25, view === "season" ? season : "all")
+        .then((r) => { if (alive) setRows(r); })
+        .catch(() => { if (alive) setError(true); });
+    });
+    return () => { alive = false; };
+  }, [season, view]);
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">BOSS SCORE · SEASON 1</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
-      {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">No runs yet. Yours can be first.</p> : (
+      <header><div><p className="journey-kicker">BOSS SCORE · {view === "season" ? seasonLabel(season) : "ALL TIME"}</p><h1>LEADERBOARD</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      <SeasonBanner />
+      <div className="cy-toggle board-tabs">
+        <button className={view === "season" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("season"); }}><Trophy />TOURNAMENT</button>
+        <button className={view === "all" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("all"); }}>ALL TIME</button>
+      </div>
+      {error ? <p className="trail-empty">The board is unreachable right now. Try again in a moment.</p> : !rows ? <p className="trail-empty">Loading the world's best runs…</p> : rows.length === 0 ? <p className="trail-empty">{view === "season" ? "No tournament run yet this season. Yours can be first." : "No runs yet. Yours can be first."}</p> : (
         <div className="board-list">
           {rows.map((r) => (
-            <div className="board-row" key={`${r.pos}-${r.name}`}>
+            <div className={`board-row${r.prize ? " is-prize" : ""}`} key={`${r.pos}-${r.name}`}>
               <b>#{r.pos}</b>
               <img className="board-face" src={AVATARS.find((a) => a.id === r.avatar)?.url ?? AVATARS[0]!.url} alt="" loading="lazy" />
               <Flag code={r.country} size={22} />
-              <span><strong>{r.name}</strong><small>{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
+              <span><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small>{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · LVL {r.level} · {r.xp.toLocaleString("en-US")} XP · {r.months} MO · {formatMoney(r.netWorth)}</small></span>
               <i>{(r.score ?? 0).toLocaleString("en-US")}</i>
             </div>
           ))}
@@ -1437,8 +1494,12 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
+
 function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
+  const [wallet, setWallet] = useState(() => readWallet());
+  const [walletError, setWalletError] = useState(false);
+  const tournament = run.config.tournament;
   const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
   const badge = badgeFor(run, ending, net);
@@ -1448,26 +1509,33 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
     difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(net),
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
-  }), [badge, net, run, score, won]);
+    season: run.config.season, isTournament: tournament, playerKey: playerKey(),
+  }), [badge, net, run, score, tournament, won]);
   const punchline = useMemo(() => {
     if (won) return null;
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
     return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length];
   }, [ending, run.chapter, run.moves, run.trades, won]);
   const send = async () => {
+    const trimmed = wallet.trim();
+    if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
+    setWalletError(false);
+    if (tournament) saveWallet(trimmed);
+    const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
     setStatus("sending");
-    savePendingSubmission(submission);
+    savePendingSubmission(payload);
     try {
-      await submitRun(submission);
-      clearPendingSubmission(submission.clientHash);
+      await submitRun(payload);
+      clearPendingSubmission(payload.clientHash);
       setStatus("done");
     } catch (error) {
       if (error instanceof SubmitRunError && error.kind === "rejected") {
-        clearPendingSubmission(submission.clientHash);
+        clearPendingSubmission(payload.clientHash);
         setStatus("rejected");
       } else setStatus("queued");
     }
   };
+
   return (
     <main className={`journey-end ${won ? "won" : "lost"}`}>
       <img src={won ? smugBoss.url : enragedBoss.url} alt={won ? "The Boss respects your run" : "The Boss ends your run"} />
@@ -1494,7 +1562,17 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
         </div>
 
+        {tournament && status !== "done" && (
+          <div className="end-wallet">
+            <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
+            <input className="setup-input" placeholder="YOUR WALLET (EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
+            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 of the season need it. Wallets stay private."}</small>
+          </div>
+        )}
+        {tournament && status === "done" && wallet.trim() && <small className="end-message">Entered for {seasonLabel(run.config.season)} as {shortWallet(wallet.trim())}.</small>}
+
         <div className="start-actions end-actions">
+
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
