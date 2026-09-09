@@ -103,6 +103,7 @@ const modeId = (c: Config) => (c.ironman ? `IRONMAN-${c.mode}` : c.mode);
 const clamp = (v: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 
 const badgeFor = (run: Run, ending: EndingKey, net: number) => {
+  if (ending === "THRONE") return "THRONE TAKER";
   if (ending === "LEGEND") return "FINAL BOSS";
   if (ending === "CASINO") return "EXIT LIQUIDITY";
   if (ending === "BROKE") return run.trades >= 10 ? "CERTIFIED DEGEN" : "PAPER HANDS";
@@ -113,7 +114,7 @@ const badgeFor = (run: Run, ending: EndingKey, net: number) => {
   return "CYCLE SURVIVOR";
 };
 
-const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLOUT">, string[]> = {
+const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLOUT" | "THRONE">, string[]> = {
   CASINO: ["The liquidation engine sends its regards.", "You called it conviction. The exchange called it collateral.", "10x confidence. 0x account."],
   STARVED: ["You fed the bags. The bags did not feed you.", "Great portfolio. Shame about the human holding it.", "The candles were green. Your fridge was not."],
   BROKEN: ["The market stayed irrational longer than you stayed functional.", "You survived the volatility. Your nervous system did not.", "Touching grass was always free."],
@@ -141,6 +142,8 @@ const freshRun = (config: Config): Run => {
     hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
     custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
     ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
+    boss: { cash: archOf(config.arch).cash * 3, btc: 0, line: "He is already seated. You are not." },
+    conviction: 0, convictionOn: false, perks: [], bossWins: 0,
   };
 };
 
@@ -150,10 +153,29 @@ const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
   const base = COINS.find((c) => c.symbol === symbol)?.prices[month] ?? 0;
   return base ? base * (noise[month] ?? 1) : 0;
 };
+
+/**
+ * The quarter is not a jump any more: t walks from 0 to 1 in front of the
+ * player, with real intra-quarter wicks on top of the historical path.
+ * Deterministic, so a tournament seed shows everyone the same tape.
+ */
+const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) => {
+  const a = priceAt(symbol, r.chapter, r.noise);
+  if (!a) return 0;
+  const b = priceAt(symbol, r.chapter + 1, r.noise) || a;
+  const span = Math.abs(b / a - 1);
+  const phase = det(r.seed, `wick-${r.chapter}-${symbol}`) * Math.PI * 2;
+  const amp = (0.35 + det(r.seed, `amp-${r.chapter}-${symbol}`) * 0.7) * Math.max(0.05, span);
+  const wick = Math.sin(t * Math.PI * 3 + phase) * amp * (1 - t * 0.55);
+  const hunt = sweep ? -Math.max(0, Math.sin(t * Math.PI * 2)) * (0.05 + span * 0.5) : 0;
+  return Math.max(a * 0.02, (a + (b - a) * t) * (1 + wick + hunt));
+};
+
 const pnlOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price - p.margin : p.margin * p.lev * p.dir * (price / p.entry - 1));
 const valueOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price : Math.max(0, p.margin + pnlOf(p, price)));
 const liqPct = (p: Pos, price: number) => (p.kind === "spot" ? 100 : clamp(100 + (pnlOf(p, price) / p.margin) * 100, 0, 100));
 const netOf = (r: Run) => r.positions.reduce((sum, p) => sum + valueOf(p, priceAt(p.symbol, r.chapter, r.noise)), r.cash) - r.taxDebt;
+const bossNetOf = (r: Run, chapter = r.chapter) => Math.round(r.boss.cash + r.boss.btc * priceAt("BTC", chapter, r.noise));
 const XP_MODE: Record<BaseMode, number> = { classic: 1, historical: 0.75, chaos: 1.25 };
 const custodySplit = (r: Run) => {
   const totals: Record<CustodyId, number> = { exchange: 0, hot: 0, cold: 0 };
@@ -161,6 +183,41 @@ const custodySplit = (r: Run) => {
   const sum = totals.exchange + totals.hot + totals.cold;
   return { totals, sum };
 };
+
+/** Three readings, one of them a lie. Knowing the cycle is the edge. */
+const signalsFor = (r: Run) => {
+  const move = (() => {
+    const a = priceAt("BTC", r.chapter, r.noise);
+    const b = priceAt("BTC", r.chapter + 1, r.noise) || a;
+    return a ? (b / a - 1) * 100 : 0;
+  })();
+  const up = move >= 0;
+  const truths = [
+    { label: "FUNDING", value: up ? "positive and climbing" : "negative, shorts are paying" },
+    { label: "OPEN INTEREST", value: up ? "building into the move" : "unwinding fast" },
+    { label: "SENTIMENT", value: up ? "greedy" : "fearful" },
+  ];
+  const lie = Math.floor(det(r.seed, `lie-${r.chapter}`) * 3) % 3;
+  return truths.map((s, i) => (i === lie
+    ? { ...s, value: i === 0 ? (up ? "negative, shorts are paying" : "positive and climbing") : i === 1 ? (up ? "unwinding fast" : "building into the move") : (up ? "fearful" : "greedy"), lie: true }
+    : { ...s, lie: false }));
+};
+
+/** The Boss rebalances his own book every quarter. He is right more often than you. */
+const bossTurn = (r: Run, next: number): BossBook => {
+  const p0 = priceAt("BTC", r.chapter, r.noise) || 1;
+  const value = (r.boss.cash + r.boss.btc * p0) * (1 - BOSS_DRAG);
+  const upNext = (priceAt("BTC", next, r.noise) || p0) >= p0;
+  const smart = det(r.seed, `bossiq-${next}`) < 0.6;
+  const long = smart ? upNext : !upNext;
+  const target = long ? 0.85 : 0.12;
+  const btc = (value * target) / p0;
+  const line = long
+    ? "He loaded the boat while you were thinking about it."
+    : "He sold into your optimism and is sitting on cash.";
+  return { cash: value - btc * p0, btc, line };
+};
+
 
 const readPendingSubmission = (): RunSubmission | null => {
   try { return JSON.parse(localStorage.getItem(PENDING_SUBMIT_KEY) ?? "null") as RunSubmission | null; }
