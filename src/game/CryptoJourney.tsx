@@ -1857,8 +1857,12 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
 
 
 function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onBack: () => void; onStart: (config: Config) => void }) {
-  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season: currentSeasonId() });
+  const season = currentSeasonId();
+  // In the tournament everyone plays the same twist, so nobody picks an easier one.
+  const locked = tournament ? tournamentModifier(season) : null;
+  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season, modifier: locked ?? "straight" });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
+  const startCash = Math.round(archOf(config.arch).cash * (config.modifier === "glass" ? 0.5 : 1));
   return (
     <main className="journey-setup">
       <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
@@ -1870,6 +1874,11 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
         <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
       <section className="setup-block"><p className="journey-kicker">ARCHETYPE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(a.cash)} START</em><small>{a.blurb}</small></button>)}</div></section>
+      <section className="setup-block"><p className="journey-kicker">THE TWIST{locked ? ` · LOCKED FOR ${seasonLabel(season)}` : ""}</p>
+        <div className="pick-grid">{MODIFIERS.filter((m) => !locked || m.id === locked).map((m) => (
+          <button key={m.id} className={`pick-card ${config.modifier === m.id ? "is-on" : ""}`} disabled={!!locked} onClick={() => set("modifier", m.id)}><strong>{m.name}</strong><em>SCORE x{m.mul.toFixed(2)}</em><small>{m.blurb}</small></button>
+        ))}</div>
+      </section>
       <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
       <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
         <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
@@ -1879,11 +1888,12 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
           <img src={AVATARS.find((a) => a.id === config.avatar)?.url} alt="" />
           <span>
             <strong>{config.name.trim() || "anon"} <Flag code={config.country} size={14} /></strong>
-            <small>{archOf(config.arch).name} · {formatMoney(archOf(config.arch).cash)} · {config.difficulty}{config.ironman ? " · IRONMAN" : ""}</small>
+            <small>{archOf(config.arch).name} · {formatMoney(startCash)} · {config.difficulty}{config.modifier !== "straight" ? ` · ${modifierOf(config.modifier).name}` : ""}{config.ironman ? " · IRONMAN" : ""}</small>
           </span>
         </div>
         <Button onClick={() => { playSfx("win"); onStart({ ...config, name: config.name.trim() || "anon" }); }}><Rocket />START Q1 2020</Button>
       </div>
+
     </main>
   );
 }
