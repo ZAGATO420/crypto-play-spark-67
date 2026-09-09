@@ -821,10 +821,12 @@ export function CryptoJourney() {
     const levered = Math.min(18, Math.round((notional / Math.max(1, startNet)) * 12));
     const hunger = clamp(run.hunger + Math.round((8 + Math.floor(next / 6)) * arch.risk * diff.hunger) + (idle ? 7 : 0) + lifeHunger);
     const redQuarter = netOf({ ...run, chapter: next, cash, positions, taxDebt }) < startNet;
+    const nerves = run.perks.includes("STEEL NERVES") ? 0.7 : 1;
     const stress = clamp(
-      run.stress + Math.round((6 + Math.floor(next / 7)) * arch.risk * diff.stress) + (idle ? 10 : 0)
-      + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress,
+      run.stress + Math.round(((6 + Math.floor(next / 7)) * arch.risk * diff.stress + (idle ? 10 : 0)
+      + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress) * nerves),
     );
+
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
     if (levered >= 8) lines.push("Your leverage kept you awake. Stress climbed with the notional.");
 
