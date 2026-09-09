@@ -371,6 +371,49 @@ export const ENDINGS = {
 } as const;
 export type EndingKey = keyof typeof ENDINGS;
 
+/** What it takes to unlock each ending — shown as a hint while it is still locked. */
+export const ENDING_HINTS: Record<EndingKey, string> = {
+  THRONE: "Beat the Boss' own book, win 3 fights, never hit a critical state.",
+  LEGEND: "Reach 60x your start money, survive 6 crises, trade at least 12 times, stay out of the red zones.",
+  SURVIVOR: "Reach the last quarter of 2026 with money left.",
+  CASINO: "Get liquidated until nothing is left.",
+  STARVED: "Let hunger hit 100.",
+  BROKEN: "Let stress hit 100.",
+  BROKE: "Lose every dollar without leverage doing it for you.",
+  SELLOUT: "Use CASH OUT before the last chapter.",
+};
+
+/* ---- run modifiers: no two runs start the same way -------------------- */
+
+export type ModifierId = "straight" | "glass" | "keys" | "debt";
+export const MODIFIERS: { id: ModifierId; name: string; blurb: string; mul: number }[] = [
+  { id: "straight", name: "STRAIGHT UP", blurb: "The honest run. Your archetype's money, all options open.", mul: 1 },
+  { id: "glass", name: "GLASS CANNON", blurb: "Half the starting money. Every score counts far more.", mul: 1.6 },
+  { id: "keys", name: "NO COLD STORAGE", blurb: "The Ledger is locked. Exchange and hot wallet only — drainers and failures can reach you.", mul: 1.35 },
+  { id: "debt", name: "DEEP IN DEBT", blurb: "You start owing $8,000 to the taxman. It grows until you pay it.", mul: 1.4 },
+];
+export const modifierOf = (id: ModifierId) => MODIFIERS.find((m) => m.id === id) ?? MODIFIERS[0]!;
+
+/* ---- the Boss has a different personality every run ------------------- */
+
+export type PersonaId = "hunter" | "banker" | "puppeteer";
+export const PERSONAS: { id: PersonaId; name: string; line: string; bias: "SWEEP" | "SQUEEZE" | "OFFER" }[] = [
+  { id: "hunter", name: "THE HUNTER", line: "This one hunts liquidations. He can smell leverage through the screen.", bias: "SWEEP" },
+  { id: "banker", name: "THE BANKER", line: "This one owns the funding rate. Holding a position is going to cost you.", bias: "SQUEEZE" },
+  { id: "puppeteer", name: "THE PUPPETEER", line: "This one buys people, not coins. He will offer you money to quit.", bias: "OFFER" },
+];
+export const personaFor = (roll: number) => PERSONAS[Math.floor(roll * PERSONAS.length) % PERSONAS.length]!;
+
+/* ---- three acts, rising pressure ------------------------------------- */
+
+export const ACTS = [
+  { n: 1, name: "ACT I · THE BOOM", from: 0, line: "Money is easy, everyone is a genius. Build something before it breaks." },
+  { n: 2, name: "ACT II · THE COLLAPSE", from: 8, line: "Luna, Celsius, FTX. Counterparties matter more than charts now." },
+  { n: 3, name: "ACT III · THE ENDGAME", from: 14, line: "ETFs, six figures, record leverage. The Boss is writing your rank." },
+] as const;
+export const actFor = (chapter: number) => [...ACTS].reverse().find((a) => chapter >= a.from) ?? ACTS[0];
+
+
 /* ---- the Boss plays against you --------------------------------------- */
 
 export type BossAttack = { id: "SWEEP" | "SQUEEZE" | "OFFER"; name: string; line: string };
