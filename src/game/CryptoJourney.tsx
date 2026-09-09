@@ -758,7 +758,7 @@ export function CryptoJourney() {
     <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}</p>
+          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · TOURNAMENT ${seasonLabel(cfg.season)}` : ""}</p>
           <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
           <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
             <span className="cy-level">LVL {xpBar.level}</span>
