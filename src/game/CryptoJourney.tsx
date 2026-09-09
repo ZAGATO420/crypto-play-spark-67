@@ -97,7 +97,7 @@ export const AVATARS = [
   { id: "diamond", url: avDiamond.url }, { id: "frog", url: avFrog.url }, { id: "reaper", url: avReaper.url }, { id: "whale", url: avWhale.url },
 ];
 
-const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE", tournament: false, season: currentSeasonId() };
+const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE", tournament: false, season: currentSeasonId(), modifier: "straight" };
 const archOf = (id: Archetype) => ARCHETYPES.find((a) => a.id === id) ?? ARCHETYPES[1]!;
 const diffOf = (id: Difficulty) => DIFFICULTIES.find((d) => d.id === id) ?? DIFFICULTIES[1]!;
 const modeOf = (id: BaseMode) => MODES.find((m) => m.id === id) ?? MODES[0]!;
@@ -134,20 +134,30 @@ const makeNoise = (mode: BaseMode, seed: number) => {
 };
 
 // Tournament runs all share the season seed, so every player meets the same
-// market noise, the same rugs and the same drainers. Free runs stay random.
-const seedFor = (config: Config) => (config.tournament ? seasonSeed(config.season) : randomSeed());
+// market noise, the same rugs and the same drainers. Free runs stay random,
+// unless a player asks for a rematch on the exact same seed.
+const seedFor = (config: Config, reuse?: number) =>
+  config.tournament ? seasonSeed(config.season) : reuse ?? randomSeed();
 
-const freshRun = (config: Config): Run => {
-  const seed = seedFor(config);
+/** In the tournament the modifier is locked to the season seed, so it stays fair. */
+export const tournamentModifier = (season: string): ModifierId =>
+  MODIFIERS[Math.floor(det(seasonSeed(season), "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
+
+const freshRun = (config: Config, reuse?: number): Run => {
+  const seed = seedFor(config, reuse);
+  const mod = modifierOf(config.modifier).id;
+  const start = Math.round(archOf(config.arch).cash * (mod === "glass" ? 0.5 : 1));
   return {
-    chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
+    chapter: 0, cash: start, positions: [], nextId: 1,
     hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-    custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
-    ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
-    boss: { cash: archOf(config.arch).cash * 3, btc: 0, line: "He is already seated. You are not." },
+    custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: mod === "debt" ? 8000 : 0, moves: 0, cares: 0, criticals: 0,
+    ledger: mod === "debt" ? [{ chapter: 0, label: "Inherited tax debt", amount: -8000 }] : [], statuses: mod === "straight" ? [] : [modifierOf(mod).name],
+    logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
+    boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0,
   };
 };
+
 
 
 const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
