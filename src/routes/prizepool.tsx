@@ -96,6 +96,7 @@ function PrizePoolPage() {
         <div className="prizepool-stats">
           <span>{seasons.length} SEASON{seasons.length !== 1 ? "S" : ""}</span>
           <span>{totalEntries} ENTR{totalEntries === 1 ? "Y" : "IES"}</span>
+
           <button onClick={() => setSeasons(null)} className="prizepool-logout">LOCK</button>
         </div>
       </header>
