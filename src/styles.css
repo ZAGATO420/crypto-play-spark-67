@@ -685,3 +685,14 @@
 .cy-signal.is-fake { border-color: hsl(var(--destructive)); color: hsl(var(--destructive)); text-decoration: line-through; }
 .cy-signal.is-true { border-color: hsl(var(--primary)); }
 .cy-verify { padding: .25rem .55rem; border-radius: 99px; border: 1px dashed hsl(var(--border)); font-size: .6rem; letter-spacing: .08em; }
+
+/* ---- V51: meta progression, endings gallery, share ------------------- */
+.start-record { display:flex; align-items:center; gap:14px; width:100%; padding:10px 14px; margin:0 0 4px; border:1px solid color-mix(in srgb, var(--cy-gold) 35%, transparent); border-radius:14px; background:color-mix(in srgb, #04121a 72%, transparent); backdrop-filter:blur(8px); text-align:left; }
+.start-record span { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.start-record small { font-size:.58rem; letter-spacing:.14em; opacity:.6; }
+.start-record strong { font-size:.86rem; }
+.start-record svg { margin-left:auto; width:16px; height:16px; opacity:.6; }
+.end-gallery .is-locked { opacity:.55; }
+.end-record { margin:8px 0 0; font-size:.74rem; letter-spacing:.12em; color:var(--cy-gold); }
+.end-nearmiss { margin:6px 0 0; font-size:.78rem; opacity:.82; }
+.end-progress { display:block; margin-top:6px; font-size:.62rem; letter-spacing:.12em; opacity:.55; }
