@@ -15,10 +15,11 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
-  bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, pickLifeEvent, presaleFor, situationFor, xpProgress,
-  type Archetype, type BaseMode, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
+  attackFor, bossFightFor, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, pickLifeEvent, presaleFor, situationFor, xpProgress,
+  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
 } from "./journey-data";
+
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
@@ -35,11 +36,13 @@ type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: numbe
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
 type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string };
+type BossBook = { cash: number; btc: number; line: string };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
   hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
+  boss: BossBook; conviction: number; convictionOn: boolean; perks: string[]; bossWins: number;
 };
 
 type Phase = "brief" | "act" | "resolve";
@@ -48,6 +51,7 @@ type Pending =
   | { t: "close"; id: number; fraction: number }
   | { t: "presale"; card: Presale; size: number }
   | { t: "crash"; chapter: number }
+  | { t: "fight"; chapter: number; wager: number }
   | { t: "seed" };
 type Dialog =
   | { k: "rules" }
@@ -66,6 +70,8 @@ type Dialog =
   | { k: "life" }
   | { k: "ledger" }
   | { k: "mini"; kind: MiniKind; pending: Pending }
+  | { k: "fight"; chapter: number }
+  | { k: "offer"; attack: BossAttack }
   | { k: "score" }
   | { k: "sound" }
   | null;
@@ -77,9 +83,12 @@ type Pop = { id: number; text: string; tone: "xp" | "up" | "down" };
 const SAVE_KEY = "tcfb_cycle_v2";
 const PENDING_SUBMIT_KEY = "tcfb_pending_score_v1";
 const AP_BASE = 2;
-const AP_CAP = 4;
+const AP_CAP = 5;
 const LEVERAGE = [2, 5, 10] as const;
 const FUNDING = 0.018; // per quarter, on notional — holding leverage is never free
+const LIVE_MS = 13_000; // one quarter runs live in front of you
+const BOSS_DRAG = 0.045; // even the Boss burns money on the throne
+
 
 export const AVATARS = [
   { id: "ape", url: avApe.url }, { id: "astro", url: avAstro.url }, { id: "bot", url: avBot.url }, { id: "coder", url: avCoder.url },
@@ -94,6 +103,7 @@ const modeId = (c: Config) => (c.ironman ? `IRONMAN-${c.mode}` : c.mode);
 const clamp = (v: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 
 const badgeFor = (run: Run, ending: EndingKey, net: number) => {
+  if (ending === "THRONE") return "THRONE TAKER";
   if (ending === "LEGEND") return "FINAL BOSS";
   if (ending === "CASINO") return "EXIT LIQUIDITY";
   if (ending === "BROKE") return run.trades >= 10 ? "CERTIFIED DEGEN" : "PAPER HANDS";
@@ -104,7 +114,7 @@ const badgeFor = (run: Run, ending: EndingKey, net: number) => {
   return "CYCLE SURVIVOR";
 };
 
-const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLOUT">, string[]> = {
+const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLOUT" | "THRONE">, string[]> = {
   CASINO: ["The liquidation engine sends its regards.", "You called it conviction. The exchange called it collateral.", "10x confidence. 0x account."],
   STARVED: ["You fed the bags. The bags did not feed you.", "Great portfolio. Shame about the human holding it.", "The candles were green. Your fridge was not."],
   BROKEN: ["The market stayed irrational longer than you stayed functional.", "You survived the volatility. Your nervous system did not.", "Touching grass was always free."],
@@ -132,6 +142,8 @@ const freshRun = (config: Config): Run => {
     hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
     custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
     ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
+    boss: { cash: archOf(config.arch).cash * 3, btc: 0, line: "He is already seated. You are not." },
+    conviction: 0, convictionOn: false, perks: [], bossWins: 0,
   };
 };
 
@@ -141,10 +153,29 @@ const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
   const base = COINS.find((c) => c.symbol === symbol)?.prices[month] ?? 0;
   return base ? base * (noise[month] ?? 1) : 0;
 };
+
+/**
+ * The quarter is not a jump any more: t walks from 0 to 1 in front of the
+ * player, with real intra-quarter wicks on top of the historical path.
+ * Deterministic, so a tournament seed shows everyone the same tape.
+ */
+const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) => {
+  const a = priceAt(symbol, r.chapter, r.noise);
+  if (!a) return 0;
+  const b = priceAt(symbol, r.chapter + 1, r.noise) || a;
+  const span = Math.abs(b / a - 1);
+  const phase = det(r.seed, `wick-${r.chapter}-${symbol}`) * Math.PI * 2;
+  const amp = (0.35 + det(r.seed, `amp-${r.chapter}-${symbol}`) * 0.7) * Math.max(0.05, span);
+  const wick = Math.sin(t * Math.PI * 3 + phase) * amp * (1 - t * 0.55);
+  const hunt = sweep ? -Math.max(0, Math.sin(t * Math.PI * 2)) * (0.05 + span * 0.5) : 0;
+  return Math.max(a * 0.02, (a + (b - a) * t) * (1 + wick + hunt));
+};
+
 const pnlOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price - p.margin : p.margin * p.lev * p.dir * (price / p.entry - 1));
 const valueOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price : Math.max(0, p.margin + pnlOf(p, price)));
 const liqPct = (p: Pos, price: number) => (p.kind === "spot" ? 100 : clamp(100 + (pnlOf(p, price) / p.margin) * 100, 0, 100));
 const netOf = (r: Run) => r.positions.reduce((sum, p) => sum + valueOf(p, priceAt(p.symbol, r.chapter, r.noise)), r.cash) - r.taxDebt;
+const bossNetOf = (r: Run, chapter = r.chapter) => Math.round(r.boss.cash + r.boss.btc * priceAt("BTC", chapter, r.noise));
 const XP_MODE: Record<BaseMode, number> = { classic: 1, historical: 0.75, chaos: 1.25 };
 const custodySplit = (r: Run) => {
   const totals: Record<CustodyId, number> = { exchange: 0, hot: 0, cold: 0 };
@@ -152,6 +183,41 @@ const custodySplit = (r: Run) => {
   const sum = totals.exchange + totals.hot + totals.cold;
   return { totals, sum };
 };
+
+/** Three readings, one of them a lie. Knowing the cycle is the edge. */
+const signalsFor = (r: Run) => {
+  const move = (() => {
+    const a = priceAt("BTC", r.chapter, r.noise);
+    const b = priceAt("BTC", r.chapter + 1, r.noise) || a;
+    return a ? (b / a - 1) * 100 : 0;
+  })();
+  const up = move >= 0;
+  const truths = [
+    { label: "FUNDING", value: up ? "positive and climbing" : "negative, shorts are paying" },
+    { label: "OPEN INTEREST", value: up ? "building into the move" : "unwinding fast" },
+    { label: "SENTIMENT", value: up ? "greedy" : "fearful" },
+  ];
+  const lie = Math.floor(det(r.seed, `lie-${r.chapter}`) * 3) % 3;
+  return truths.map((s, i) => (i === lie
+    ? { ...s, value: i === 0 ? (up ? "negative, shorts are paying" : "positive and climbing") : i === 1 ? (up ? "unwinding fast" : "building into the move") : (up ? "fearful" : "greedy"), lie: true }
+    : { ...s, lie: false }));
+};
+
+/** The Boss rebalances his own book every quarter. He is right more often than you. */
+const bossTurn = (r: Run, next: number): BossBook => {
+  const p0 = priceAt("BTC", r.chapter, r.noise) || 1;
+  const value = (r.boss.cash + r.boss.btc * p0) * (1 - BOSS_DRAG);
+  const upNext = (priceAt("BTC", next, r.noise) || p0) >= p0;
+  const smart = det(r.seed, `bossiq-${next}`) < 0.6;
+  const long = smart ? upNext : !upNext;
+  const target = long ? 0.85 : 0.12;
+  const btc = (value * target) / p0;
+  const line = long
+    ? "He loaded the boat while you were thinking about it."
+    : "He sold into your optimism and is sitting on cash.";
+  return { cash: value - btc * p0, btc, line };
+};
+
 
 const readPendingSubmission = (): RunSubmission | null => {
   try { return JSON.parse(localStorage.getItem(PENDING_SUBMIT_KEY) ?? "null") as RunSubmission | null; }
@@ -195,6 +261,12 @@ export function CryptoJourney() {
   const popId = useRef(1);
   const lastNet = useRef(0);
 
+  // the live quarter: t walks 0 -> 1 while you act, then the market answers
+  const [tick, setTick] = useState(0);
+  const [fast, setFast] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const tickRef = useRef(0);
+
   const cfg = run.config;
   const arch = archOf(cfg.arch);
   const diff = diffOf(cfg.difficulty);
@@ -204,6 +276,14 @@ export function CryptoJourney() {
   const warning = CHAPTER_WARNINGS[run.chapter] ?? "The market never announces what it is about to do.";
   const presale = presaleFor(run.chapter);
   const xpBar = xpProgress(run.xp);
+  const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`));
+  const sweeping = attack?.id === "SWEEP";
+  const signals = useMemo(() => signalsFor(run), [run.chapter, run.seed, run.noise]);
+  const bossNet = bossNetOf(run);
+  const perkFee = run.perks.includes("CHEAP FEES") ? 0.5 : 1;
+  /** During the live phase every price is the moving one. */
+  const mark = (symbol: CoinSymbol) => (phase === "act" ? livePrice(symbol, run, tick, sweeping) : priceAt(symbol, run.chapter, run.noise));
+
 
   useEffect(() => {
     if (localStorage.getItem(SAVE_KEY)) setResume(true);
@@ -266,14 +346,15 @@ export function CryptoJourney() {
   /* ---------------------------------------------------------- run actions */
 
   const openSpot = (symbol: CoinSymbol, fraction: number) => {
-    const price = priceAt(symbol, run.chapter, run.noise);
+    const price = mark(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} does not exist yet. Time travel has rules.`, "pink");
     const cust = custodyOf(run.custody);
     const budget = Math.floor(run.cash * fraction);
-    const size = Math.floor(budget / (1 + cust.fee));
+    const size = Math.floor(budget / (1 + cust.fee * perkFee));
     if (size < 50) return say("Under $50. The Boss has more in his couch cushions.", "pink");
-    const fee = Math.round(size * cust.fee);
+    const fee = Math.round(size * cust.fee * perkFee);
+
     spend();
     setRun((r) => {
       if (r.cash < size + fee) return r;
@@ -290,7 +371,7 @@ export function CryptoJourney() {
   };
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
-    const price = priceAt(symbol, run.chapter, run.noise);
+    const price = mark(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} has no market in ${chapterLabel(run.chapter)}.`, "pink");
     const margin = Math.floor(run.cash * fraction);
@@ -322,13 +403,14 @@ export function CryptoJourney() {
     if (!pos) return;
     const cust = custodyOf(pos.where);
     // cold storage fills a quarter late — that is the price of being untouchable
-    const price = pos.where === "cold" ? priceAt(pos.symbol, Math.max(0, run.chapter - 1), run.noise) : priceAt(pos.symbol, run.chapter, run.noise);
+    const price = pos.where === "cold" ? priceAt(pos.symbol, Math.max(0, run.chapter - 1), run.noise) : mark(pos.symbol);
     const slip = 0.94 + quality * 0.08;
     const whole = valueOf(pos, price) * slip;
     const back = Math.round(whole * fraction);
-    const fee = Math.round(back * cust.fee);
+    const fee = Math.round(back * cust.fee * perkFee);
     const cost = pos.margin * fraction;
     const gain = back - fee - cost;
+
     if (pos.where === "cold") spend();
     setRun((r) => book(book({
       ...r,
@@ -346,6 +428,64 @@ export function CryptoJourney() {
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (gain < 0) rumble();
   };
+
+  /**
+   * One tap on a chip is a market exit at the live price. Fast, slightly worse
+   * fill, no window in the way — speed instead of clicking.
+   */
+  const quickClose = (id: number) => {
+    const pos = run.positions.find((p) => p.id === id);
+    if (!pos) return;
+    if (pos.where === "cold") return setDialog({ k: "position", id });
+    closePosition(id, 1, 0.5);
+  };
+
+  /** Double or nothing on the whole quarter. The bar took you a while to fill. */
+  const toggleConviction = () => {
+    if (run.conviction < 100 && !run.convictionOn) return say("Conviction is not full yet. Win quarters, fill the bar.", "pink");
+    playSfx("hit");
+    setRun((r) => ({ ...r, convictionOn: !r.convictionOn }));
+    say(run.convictionOn ? "Conviction back in the holster." : "CONVICTION ARMED · this quarter counts 1.5x, win or lose.", "yellow");
+  };
+
+  const takeOffer = (amount: number) => {
+    setDialog(null);
+    playSfx("vault");
+    setRun((r) => book({ ...r, cash: r.cash + amount, statuses: Array.from(new Set([...r.statuses, "BOSS DEBT"])), stress: clamp(r.stress + 6) }, "The Boss bought you out", amount));
+    log({ chapter: run.chapter, title: "TOOK THE OFFER", detail: `${formatMoney(amount)} now, a cut of every quarter forever.`, tone: "pink" });
+    say(`${formatMoney(amount)} in your account. He owns a piece of you now.`, "pink");
+  };
+
+  /** A boss fight: stake real money, land the skill moment, live with it. */
+  const resolveFight = (chapter: number, wager: number, quality: number) => {
+    const fight = bossFightFor(chapter);
+    if (!fight) return nextInQueue();
+    if (quality >= 0.9) {
+      const won = Math.round(wager * 2);
+      setRun((r) => book({
+        ...r, cash: r.cash + won, bossWins: r.bossWins + 1, conviction: clamp(r.conviction + 35),
+        boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
+        perks: Array.from(new Set([...r.perks, fight.perk])),
+        statuses: Array.from(new Set([...r.statuses, "BOSS BEATEN"])),
+      }, `${fight.title} · won`, won));
+      say(`You took ${formatMoney(won)} off the Boss. Perk unlocked: ${fight.perk}.`, "yellow");
+      playSfx("win");
+      grantXp(XP_EXTRA.escape * 2, "BOSS BEATEN");
+    } else if (quality >= 0.5) {
+      setRun((r) => ({ ...r, stress: clamp(r.stress + 8), conviction: clamp(r.conviction + 10) }));
+      say("A draw. He keeps the chair, you keep your stake.", "cyan");
+      grantXp(XP_EXTRA.minigameOk, "HELD YOUR GROUND");
+    } else {
+      setRun((r) => book({
+        ...r, cash: Math.max(0, r.cash - wager), stress: clamp(r.stress + 16), conviction: 0, convictionOn: false,
+        boss: { ...r.boss, cash: r.boss.cash + wager, line: "He counted your money in front of you." },
+      }, `${fight.title} · lost`, -wager));
+      say(`He took ${formatMoney(wager)} and told the room about it.`, "pink");
+      rumble();
+    }
+    nextInQueue();
+  };
+
 
   const takePresale = (card: Presale, size: number, quality: number) => {
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
@@ -531,8 +671,10 @@ export function CryptoJourney() {
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
+    if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
     return resolveSeed(res.quality);
   };
+
 
   // one card at a time: crash report, then the historical decision, then the small moment
   const nextInQueue = () => {
@@ -588,9 +730,19 @@ export function CryptoJourney() {
     let positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
     if (run.risk >= 95) risk = 40;
 
-    // perp funding: leverage is rented, never owned
-    const funding = Math.round(positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev * FUNDING, 0));
-    if (funding > 0) { cash -= funding; spendOn("Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}.`); }
+    // perp funding: leverage is rented, never owned — and the Boss can raise the rent
+    const squeeze = attack?.id === "SQUEEZE" ? 2.2 : 1;
+    const funding = Math.round(positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev * FUNDING * squeeze, 0));
+    if (funding > 0) { cash -= funding; spendOn(squeeze > 1 ? "Perp funding · squeezed" : "Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}${squeeze > 1 ? " — he doubled the rate." : "."}`); }
+
+    // the price of taking his money
+    if (run.statuses.includes("BOSS DEBT")) {
+      const cut = Math.round(Math.max(600, startNet * 0.02));
+      cash -= cut;
+      spendOn("The Boss takes his cut", cut);
+      lines.push(`He took his cut: ${formatMoney(cut)}. That deal never expires.`);
+    }
+
 
     // an exchange failure takes exactly what you left on the exchange
     const failure = failureFor(next);
@@ -684,17 +836,40 @@ export function CryptoJourney() {
     const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
+
+    // conviction: you called the quarter, so the quarter pays or bills you double
+    let convCash = 0;
+    if (run.convictionOn) {
+      convCash = Math.round(delta * 0.5);
+      draft.cash = Math.max(0, draft.cash + convCash);
+      draft.ledger = [{ chapter: next, label: convCash >= 0 ? "Conviction paid off" : "Conviction backfired", amount: convCash }, ...draft.ledger].slice(0, 60);
+      lines.push(convCash >= 0
+        ? `Conviction paid: ${formatMoney(convCash)} extra.`
+        : `Conviction backfired: ${formatMoney(Math.abs(convCash))} gone. He warned you.`);
+    }
+
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
     const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
     const detail = `${chapterLabel(next)} · ${monthRangeLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
     const tone: Log["tone"] = delta >= 0 ? (streak >= 3 ? "yellow" : "cyan") : "pink";
 
-    const nextRun: Run = { ...draft, streak, logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12) };
+    // the Boss trades his own book against yours, every single quarter
+    const boss = bossTurn(run, next);
+    const conviction = run.convictionOn ? 0 : clamp(run.conviction + (delta > 0 && !idle ? 22 : delta < 0 ? -12 : 4));
+    lines.push(boss.line);
+
+    const nextRun: Run = {
+      ...draft, streak, boss, conviction, convictionOn: false,
+      logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
+    };
     setRun(nextRun);
-    setResolution({ title, detail, tone, delta, move, lines, inflow, outflow });
+    setResolution({ title, detail, tone, delta: delta + convCash, move, lines, inflow, outflow });
     setPhase("resolve");
-    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0))));
+    setTick(0);
+    setFast(false);
+    setVerified(false);
+    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("EXTRA MOVE") ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
@@ -703,8 +878,13 @@ export function CryptoJourney() {
     if (hunger >= 100) return finish("STARVED");
     if (stress >= 100) return finish("BROKEN");
     if (finalNet <= 0) return finish(positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
-    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
+    if (next >= CHAPTERS) {
+      // beating him means out-trading his book and taking his fights
+      if (finalNet > bossNetOf(nextRun, next) && nextRun.bossWins >= 3 && criticals === 0) return finish("THRONE");
+      return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
+    }
   };
+
 
   const openChapterCards = (chapter: number) => {
     const cards: Dialog[] = [];
@@ -729,6 +909,29 @@ export function CryptoJourney() {
   };
 
   const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
+
+  /**
+   * The live quarter. While you act, the price actually walks from this
+   * quarter's open to the next one's close. When it arrives, the quarter ends
+   * whether you were ready or not. HOLD runs the clock down fast.
+   */
+  useEffect(() => {
+    if (screen !== "run" || phase !== "act" || dialog) return;
+    let raf = 0;
+    let last = performance.now();
+    const step = (now: number) => {
+      const dt = now - last;
+      last = now;
+      tickRef.current = Math.min(1, tickRef.current + dt / (fast ? 1_600 : LIVE_MS));
+      setTick(tickRef.current);
+      if (tickRef.current >= 1) { tickRef.current = 0; endChapter(); return; }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, phase, dialog, fast, run]);
+
 
   const begin = (config: Config) => {
     localStorage.removeItem(SAVE_KEY);
@@ -783,26 +986,43 @@ export function CryptoJourney() {
       </section>
 
 
+      <section className="cy-versus" aria-label="You against the Boss">
+        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs BOSS</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
+        <div className="cy-versus-bar">
+          <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
+        </div>
+        <div className="cy-versus-num"><strong>{formatMoney(net)}</strong><strong className="boss">{formatMoney(bossNet)}</strong></div>
+        <div className="cy-conviction">
+          <span>CONVICTION</span>
+          <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
+          <button className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+        </div>
+      </section>
+
       <section className="cy-positions" aria-label="Open positions">
         <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK · {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
         {run.positions.length ? (
           <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`}>
             {run.positions.map((p) => {
-              const price = priceAt(p.symbol, run.chapter, run.noise);
+              const price = mark(p.symbol);
               const pnl = pnlOf(p, price);
               const liq = liqPct(p, price);
               return (
-                <button key={p.id} className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => setDialog({ k: "position", id: p.id })}>
-                  <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
-                  <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
-                  <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
-                  {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
-                </button>
+                <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
+                  <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => setDialog({ k: "position", id: p.id })}>
+                    <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
+                    <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
+                    <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
+                    {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
+                  </button>
+                  {phase === "act" && p.where !== "cold" && <button className="cy-chip-exit" onClick={() => quickClose(p.id)} aria-label={`Close ${p.symbol} now`}>EXIT</button>}
+                </span>
               );
             })}
           </div>
         ) : <p className="cy-empty">No positions. Cash does not win chapters.</p>}
       </section>
+
 
       <div className="cy-body">
         <aside className="cy-boss">
@@ -829,9 +1049,42 @@ export function CryptoJourney() {
 
           {phase === "act" && (
             <article className="cy-card" key={`act-${run.chapter}`}>
-              <p className="journey-kicker"><Zap /> YOUR TURN · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p>
+              <p className="journey-kicker"><Zap /> LIVE · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p>
+              <div className="cy-live">
+                <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
+                <div className="cy-live-tape">
+                  {(["BTC", "ETH", "SOL"] as CoinSymbol[]).map((s) => {
+                    const open = priceAt(s, run.chapter, run.noise);
+                    const now = mark(s);
+                    if (!open) return null;
+                    const pct = (now / open - 1) * 100;
+                    return (
+                      <span key={s} className={pct >= 0 ? "up" : "down"}>
+                        <img src={COIN_LOGO[s]} alt="" width={18} height={18} />
+                        <strong>{formatMoney(now)}</strong>
+                        <small>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</small>
+                      </span>
+                    );
+                  })}
+                </div>
+                {attack && <p className="cy-attack"><strong>{attack.title} ·</strong> {attack.line}</p>}
+                <div className="cy-signals">
+                  {signals.map((s, i) => (
+                    <span key={i} className={`cy-signal${verified && s.fake ? " is-fake" : ""}${verified && !s.fake ? " is-true" : ""}`}>{s.text}</span>
+                  ))}
+                  <button className="cy-verify" disabled={verified} onClick={() => {
+                    if (verified) return;
+                    const fee = Math.max(150, Math.round(net * 0.01));
+                    if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
+                    setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
+                    setVerified(true);
+                    playSfx("click");
+                  }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
+                </div>
+              </div>
               <h2>WHAT DO YOU DO?</h2>
               <div className="cy-grid">
+
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><strong>TRADE SPOT</strong><small>Buy or short-list a market</small></button>
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><Zap /><strong>PERP DESK</strong><small>2x · 5x · 10x, long or short</small></button>
                 <button className="cy-act" disabled={ap <= 0 || !presale} onClick={() => presale && setDialog({ k: "presale", card: presale })}><Rocket /><strong>{presale ? presale.tag : "NO LAUNCH"}</strong><small>{presale ? presale.name : "Nothing live this quarter"}</small></button>
