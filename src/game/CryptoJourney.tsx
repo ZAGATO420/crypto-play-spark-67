@@ -958,10 +958,10 @@ export function CryptoJourney() {
 
 
 
-  const begin = (config: Config) => {
+  const begin = (config: Config, reuse?: number) => {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
-    setRun(freshRun(config));
+    setRun(freshRun(config, reuse));
     setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null); setQueue([]);
     setScreen("run");
   };
@@ -978,7 +978,14 @@ export function CryptoJourney() {
   if (screen === "start") return <StartScreen resume={resume} onStart={(t) => { setTournament(t); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
   if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
-  if (screen === "end") return <EndScreen run={run} net={net} score={score} ending={ending} onRestart={() => setScreen("setup")} onBoard={() => setScreen("board")} />;
+  if (screen === "end") return (
+    <EndScreen
+      run={run} net={net} score={score} ending={ending}
+      onRestart={() => setScreen("setup")}
+      onRematch={() => begin(run.config, run.seed)}
+      onBoard={() => setScreen("board")} />
+  );
+
 
 
   const mood = run.stress > 70 || run.hunger > 70 ? enragedBoss.url : run.streak >= 2 ? smugBoss.url : crownedBoss.url;
