@@ -145,9 +145,23 @@ function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResul
 
 /* --------------------------------------------------------------- seed check */
 
-function SeedCheck({ onResult }: { onResult: (r: MiniResult) => void }) {
-  const order = useRef([...SEED_WORDS].sort(() => Math.random() - 0.5).slice(0, 4));
-  const shuffled = useRef([...order.current].sort(() => Math.random() - 0.5));
+function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) => void }) {
+  // deterministic shuffle so a tournament season shows every player the same words
+  const rand = useRef(((s: number) => () => {
+    s = (s * 1664525 + 1013904223) % 4294967296;
+    return s / 4294967296;
+  })(Math.floor(roll * 4294967296)));
+  const shuffle = (list: string[]) => {
+    const out = [...list];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(rand.current() * (i + 1));
+      [out[i], out[j]] = [out[j]!, out[i]!];
+    }
+    return out;
+  };
+  const order = useRef(shuffle(SEED_WORDS).slice(0, 4));
+  const shuffled = useRef(shuffle(order.current));
+
   const [step, setStep] = useState(0);
   const [wrong, setWrong] = useState(0);
   const [show, setShow] = useState(true);
