@@ -606,7 +606,7 @@ export function CryptoJourney() {
 
     // hot wallet drainers
     const hotSpot = positions.filter((p) => p.where === "hot");
-    if (hotSpot.length && Math.random() < custodyOf("hot").drain) {
+    if (hotSpot.length && det(run.seed, `drain-${next}`) < custodyOf("hot").drain) {
       const bite = Math.round(hotSpot.reduce((s, p) => s + valueOf(p, priceAt(p.symbol, next, run.noise)) * 0.12, 0));
       positions = positions.map((p) => (p.where === "hot" ? { ...p, margin: p.margin * 0.88, qty: p.qty * 0.88 } : p));
       spendOn("Wallet drainer", bite);
