@@ -939,7 +939,7 @@ export function CryptoJourney() {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, phase, dialog, fast, run.chapter]);
+  }, [screen, phase, dialog, fast, run]);
 
 
 
