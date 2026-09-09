@@ -1542,7 +1542,7 @@ function CustodySheet({ run, onPick }: { run: Run; onPick: (id: CustodyId) => vo
       <p className="journey-kicker"><Shield /> WHERE DO YOUR COINS SLEEP?</p>
       <h2>CUSTODY</h2>
       <div className="cy-pick-list">
-        {CUSTODY.map((c) => (
+        {CUSTODY.filter((c) => !(run.config.modifier === "keys" && c.id === "cold")).map((c) => (
           <button key={c.id} className={`cy-pick-row ${run.custody === c.id ? "is-on" : ""}`} onClick={() => onPick(c.id)}>
             <strong>{c.name}</strong>
             <small>{c.blurb}</small>
@@ -1550,7 +1550,8 @@ function CustodySheet({ run, onPick }: { run: Run; onPick: (id: CustodyId) => vo
           </button>
         ))}
       </div>
-      <small className="cy-note">Moving the bag costs one move and 0.4% in fees. Perps always stay on the exchange.</small>
+      <small className="cy-note">{run.config.modifier === "keys" ? "NO COLD STORAGE: the Ledger is locked this run. You live with counterparty risk." : "Moving the bag costs one move and 0.4% in fees. Perps always stay on the exchange."}</small>
+
     </>
   );
 }
