@@ -1493,6 +1493,9 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 
 function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
+  const [wallet, setWallet] = useState(() => readWallet());
+  const [walletError, setWalletError] = useState(false);
+  const tournament = run.config.tournament;
   const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
   const badge = badgeFor(run, ending, net);
@@ -1502,26 +1505,33 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
     difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(net),
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
-  }), [badge, net, run, score, won]);
+    season: run.config.season, isTournament: tournament, playerKey: playerKey(),
+  }), [badge, net, run, score, tournament, won]);
   const punchline = useMemo(() => {
     if (won) return null;
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
     return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length];
   }, [ending, run.chapter, run.moves, run.trades, won]);
   const send = async () => {
+    const trimmed = wallet.trim();
+    if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
+    setWalletError(false);
+    if (tournament) saveWallet(trimmed);
+    const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
     setStatus("sending");
-    savePendingSubmission(submission);
+    savePendingSubmission(payload);
     try {
-      await submitRun(submission);
-      clearPendingSubmission(submission.clientHash);
+      await submitRun(payload);
+      clearPendingSubmission(payload.clientHash);
       setStatus("done");
     } catch (error) {
       if (error instanceof SubmitRunError && error.kind === "rejected") {
-        clearPendingSubmission(submission.clientHash);
+        clearPendingSubmission(payload.clientHash);
         setStatus("rejected");
       } else setStatus("queued");
     }
   };
+
   return (
     <main className={`journey-end ${won ? "won" : "lost"}`}>
       <img src={won ? smugBoss.url : enragedBoss.url} alt={won ? "The Boss respects your run" : "The Boss ends your run"} />
