@@ -745,10 +745,11 @@ export function CryptoJourney() {
     setResolution(null); setDialog(null); setScreen("run");
   };
 
-  if (screen === "start") return <StartScreen resume={resume} onStart={() => setScreen("setup")} onResume={restore} onBoard={() => setScreen("board")} />;
-  if (screen === "setup") return <SetupScreen onBack={() => setScreen("start")} onStart={begin} />;
+  if (screen === "start") return <StartScreen resume={resume} onStart={(t) => { setTournament(t); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
+  if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return <EndScreen run={run} net={net} score={score} ending={ending} onRestart={() => setScreen("setup")} onBoard={() => setScreen("board")} />;
+
 
   const mood = run.stress > 70 || run.hunger > 70 ? enragedBoss.url : run.streak >= 2 ? smugBoss.url : crownedBoss.url;
   const bossLine = phase === "brief" ? warning : phase === "resolve" ? resolution?.detail ?? warning : "Two moves. Make them count, or bank one and wait for blood.";
