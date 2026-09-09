@@ -360,6 +360,7 @@ export const careCost = (kind: "eat" | "calm", chapter: number, diff: Difficulty
 };
 
 export const ENDINGS = {
+  THRONE: { title: "THRONE TAKEN", line: "You finished richer than the Boss himself. The chair is yours until someone takes it." },
   LEGEND: { title: "LEGEND", line: "You walked through every crash, every rug, every euphoric top — and left richer than the Boss." },
   SURVIVOR: { title: "SURVIVOR", line: "Seven years, still standing, still solvent. Most people did not make it this far." },
   CASINO: { title: "CASINO CASUALTY", line: "Leverage found you. It always finds the ones who like it most." },
@@ -369,6 +370,37 @@ export const ENDINGS = {
   SELLOUT: { title: "SELLOUT", line: "You cashed out early and walked away with the bag. Safe. Boring. Respectable." },
 } as const;
 export type EndingKey = keyof typeof ENDINGS;
+
+/* ---- the Boss plays against you --------------------------------------- */
+
+export type BossAttack = { id: "SWEEP" | "SQUEEZE" | "OFFER"; name: string; line: string };
+const ATTACKS: BossAttack[] = [
+  { id: "SWEEP", name: "LIQUIDITY SWEEP", line: "He is hunting stops this quarter. The wick will look like the end of the world." },
+  { id: "SQUEEZE", name: "FUNDING SQUEEZE", line: "He doubled the cost of holding leverage. Rent your convictions carefully." },
+  { id: "OFFER", name: "THE OFFER", line: "He wants to buy you out cheap. Cash today, a leash forever." },
+];
+/** Deterministic: the same seed gives every tournament player the same attacks. */
+export const attackFor = (chapter: number, roll: number): BossAttack | null => {
+  if (chapter < 2 || roll >= 0.42) return null;
+  return ATTACKS[Math.floor((roll / 0.42) * ATTACKS.length) % ATTACKS.length]!;
+};
+
+export type BossFight = { title: string; line: string; mini: "timing" | "panic" | "gas" | "seed"; perk: string };
+export const BOSS_FIGHTS: Record<number, BossFight> = {
+  0: { title: "ROUND 1 · BLACK THURSDAY", line: "He froze the exchanges and put your account on the table. Get an order out.", mini: "panic", perk: "STEEL NERVES" },
+  5: { title: "ROUND 2 · THE MINING BAN", line: "He is selling hashrate into your face. Land the exit or wear it.", mini: "timing", perk: "CHEAP FEES" },
+  9: { title: "ROUND 3 · LUNA", line: "A death spiral with your name on it. Out in seconds or not at all.", mini: "panic", perk: "+1 MOVE" },
+  11: { title: "ROUND 4 · FTX", line: "The withdrawal queue is a race and he is at the front of it.", mini: "gas", perk: "CHEAP FEES" },
+  19: { title: "ROUND 5 · THE ETF BID", line: "Wall Street is bidding. He wants your allocation before you can take it.", mini: "gas", perk: "+1 MOVE" },
+  22: { title: "FINAL ROUND · THE FLUSH", line: "Nineteen billion liquidated. Books are paper thin. Prove the hands.", mini: "timing", perk: "STEEL NERVES" },
+};
+export const bossFightFor = (chapter: number) => BOSS_FIGHTS[chapter];
+export const PERK_BLURB: Record<string, string> = {
+  "STEEL NERVES": "Stress climbs slower for the rest of the run.",
+  "CHEAP FEES": "Every fee you pay is halved.",
+  "+1 MOVE": "One extra move every quarter.",
+};
+
 
 export const bossScore = (input: { net: number; chapters: number; difficulty: Difficulty; crises: number; streak: number }) => {
   const diff = DIFFICULTIES.find((d) => d.id === input.difficulty)?.cost ?? 1;
