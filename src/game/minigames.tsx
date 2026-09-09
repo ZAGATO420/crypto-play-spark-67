@@ -113,10 +113,11 @@ function PanicTap({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult)
 
 /* ----------------------------------------------------------------- gas war */
 
-function GasWar({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult) => void }) {
+function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
   const [gas, setGas] = useState(50);
   const [done, setDone] = useState<MiniResult | null>(null);
-  const band = useRef({ lo: 25 + Math.random() * 40, w: hard ? 12 : 20 });
+  const band = useRef({ lo: 25 + roll * 40, w: hard ? 12 : 20 });
+
 
   const send = () => {
     const { lo, w } = band.current;
