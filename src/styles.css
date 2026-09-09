@@ -622,3 +622,10 @@
 .board-prize { display: inline-block; margin-left: 6px; color: var(--journey-yellow); font: 700 10px/1 var(--font-body); font-style: normal; letter-spacing: .06em; }
 .end-wallet { display: grid; gap: 6px; text-align: left; margin-bottom: 10px; }
 .end-wallet small { color: var(--muted-foreground); font-size: 10px; line-height: 1.4; }
+
+.season-rules {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  opacity: 0.72;
+}

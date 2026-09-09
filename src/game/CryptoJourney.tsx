@@ -1392,8 +1392,10 @@ function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
         <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
       </div>
 
-      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid after the token launch. Same seed for everyone: identical crashes, launches and rugs.</p>
+      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid within 3 days after the token launch in October. Same seed for everyone: identical crashes, launches and rugs.</p>
+      <p className="season-rules">One account per player. Multiple accounts, shared wallets or duplicate entries are disqualified. Only your best run of the season counts.</p>
       {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
+
     </div>
   );
 }
@@ -1566,7 +1568,8 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
             <input className="setup-input" placeholder="YOUR WALLET (EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
-            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 of the season need it. Wallets stay private."}</small>
+            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 of the season need it. Wallets stay private. One account per player — prizes are paid within 3 days after the October token launch."}</small>
+
           </div>
         )}
         {tournament && status === "done" && wallet.trim() && <small className="end-message">Entered for {seasonLabel(run.config.season)} as {shortWallet(wallet.trim())}.</small>}
