@@ -36,11 +36,13 @@ type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: numbe
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
 type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string };
+type BossBook = { cash: number; btc: number; line: string };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
   hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
+  boss: BossBook; conviction: number; convictionOn: boolean; perks: string[]; bossWins: number;
 };
 
 type Phase = "brief" | "act" | "resolve";
@@ -49,6 +51,7 @@ type Pending =
   | { t: "close"; id: number; fraction: number }
   | { t: "presale"; card: Presale; size: number }
   | { t: "crash"; chapter: number }
+  | { t: "fight"; chapter: number; wager: number }
   | { t: "seed" };
 type Dialog =
   | { k: "rules" }
@@ -67,6 +70,8 @@ type Dialog =
   | { k: "life" }
   | { k: "ledger" }
   | { k: "mini"; kind: MiniKind; pending: Pending }
+  | { k: "fight"; chapter: number }
+  | { k: "offer"; attack: BossAttack }
   | { k: "score" }
   | { k: "sound" }
   | null;
@@ -78,9 +83,12 @@ type Pop = { id: number; text: string; tone: "xp" | "up" | "down" };
 const SAVE_KEY = "tcfb_cycle_v2";
 const PENDING_SUBMIT_KEY = "tcfb_pending_score_v1";
 const AP_BASE = 2;
-const AP_CAP = 4;
+const AP_CAP = 5;
 const LEVERAGE = [2, 5, 10] as const;
 const FUNDING = 0.018; // per quarter, on notional — holding leverage is never free
+const LIVE_MS = 13_000; // one quarter runs live in front of you
+const BOSS_DRAG = 0.045; // even the Boss burns money on the throne
+
 
 export const AVATARS = [
   { id: "ape", url: avApe.url }, { id: "astro", url: avAstro.url }, { id: "bot", url: avBot.url }, { id: "coder", url: avCoder.url },
