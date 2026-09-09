@@ -654,3 +654,4 @@
 .start-footer { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 10px; letter-spacing: .08em; }
 .start-rules { color: var(--journey-yellow); font: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .start-rules:hover { color: var(--journey-cyan); }
+.journey-start .start-secondary button { background: color-mix(in oklab, var(--background) 55%, transparent); color: var(--foreground); }
