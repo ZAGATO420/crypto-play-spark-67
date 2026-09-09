@@ -926,18 +926,21 @@ export function CryptoJourney() {
     if (screen !== "run" || phase !== "act" || dialog) return;
     let raf = 0;
     let last = performance.now();
+    let shown = tickRef.current;
     const step = (now: number) => {
       const dt = now - last;
       last = now;
       tickRef.current = Math.min(1, tickRef.current + dt / (fast ? 1_600 : LIVE_MS));
-      setTick(tickRef.current);
       if (tickRef.current >= 1) { tickRef.current = 0; endChapter(); return; }
+      // Repaint at ~5 fps, not 60: a full re-render every frame made the cards flicker.
+      if (tickRef.current - shown >= 0.02) { shown = tickRef.current; setTick(tickRef.current); }
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, phase, dialog, fast, run]);
+  }, [screen, phase, dialog, fast, run.chapter]);
+
 
 
   const begin = (config: Config) => {
