@@ -1377,7 +1377,9 @@ function MenuSound() {
 function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
   const season = currentSeasonId();
   const ends = seasonEnd(season);
-  const [left, setLeft] = useState(() => countdown(ends));
+  // Countdown is time-dependent, so it only renders after mount (no SSR mismatch).
+  const [left, setLeft] = useState<string | null>(null);
+
   useEffect(() => {
     const id = window.setInterval(() => setLeft(countdown(ends)), 30_000);
     return () => window.clearInterval(id);
