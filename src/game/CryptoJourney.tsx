@@ -1776,8 +1776,52 @@ function TournamentRules({ onClose }: { onClose: () => void }) {
   );
 }
 
+/** Everything the player keeps: runs, records, endings, badges. */
+function RecordStrip({ profile, onEndings }: { profile: Profile; onEndings: () => void }) {
+  const seen = Object.keys(profile.endings).length;
+  const total = Object.keys(ENDINGS).length;
+  if (!profile.runs) return null;
+  return (
+    <button className="start-record" onClick={() => { playSfx("click"); onEndings(); }}>
+      <span><small>RUNS</small><strong>{profile.runs}</strong></span>
+      <span><small>BEST</small><strong>{formatMoney(profile.bestNet)}</strong></span>
+      <span><small>BEST SCORE</small><strong>{profile.bestScore.toLocaleString("en-US")}</strong></span>
+      <span><small>ENDINGS</small><strong>{seen}/{total}</strong></span>
+      <ChevronRight />
+    </button>
+  );
+}
+
+function EndingsSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
+  const keys = Object.keys(ENDINGS) as EndingKey[];
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> YOUR COLLECTION</p>
+      <h2>ENDINGS {Object.keys(profile.endings).length}/{keys.length}</h2>
+      <div className="cy-pick-list end-gallery">
+        {keys.map((k) => {
+          const found = (profile.endings[k] ?? 0) > 0;
+          return (
+            <div key={k} className={`cy-pick-row ${found ? "is-on" : "is-locked"}`}>
+              <strong>{found ? ENDINGS[k].title : "???"}</strong>
+              <small>{found ? ENDINGS[k].line : ENDING_HINTS[k]}</small>
+              <em>{found ? `REACHED ${profile.endings[k]}x` : "LOCKED"}</em>
+            </div>
+          );
+        })}
+      </div>
+      {profile.badges.length > 0 && <div className="cy-status-row">{profile.badges.map((b) => <span key={b}>{b}</span>)}</div>}
+      <Button className="cy-primary" onClick={onClose}>BACK <ChevronRight /></Button>
+    </>
+  );
+}
+
 function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: (tournament: boolean) => void; onResume: () => void; onBoard: () => void }) {
   const [rules, setRules] = useState(false);
+  const [endings, setEndings] = useState(false);
+  // Read after mount: localStorage is not available while rendering on the server.
+  const [profile, setProfile] = useState<Profile | null>(null);
+  useEffect(() => { setProfile(readProfile()); }, []);
   return (
     <main className="journey-start">
       <picture>
@@ -1792,6 +1836,7 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
         <p>Trade the cycle from 2020 to 2026 and survive every crash.</p>
         <SeasonBanner compact />
+        {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
         <div className="start-actions">
           <Button className="start-main" onClick={() => { playSfx("win"); onStart(true); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>
           <div className="start-secondary">
@@ -1803,9 +1848,11 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <small className="start-footer">84 MONTHS · FREE TO PLAY · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
       </section>
       {rules && <Sheet onClose={() => setRules(false)}><TournamentRules onClose={() => setRules(false)} /></Sheet>}
+      {endings && profile && <Sheet onClose={() => setEndings(false)}><EndingsSheet profile={profile} onClose={() => setEndings(false)} /></Sheet>}
     </main>
   );
 }
+
 
 
 
