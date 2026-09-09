@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Shield, Skull, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import crownedBoss from "@/assets/boss/crowned.webp.asset.json";
+import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
+import bossStagePortrait from "@/assets/boss/stage-portrait.jpg.asset.json";
 import enragedBoss from "@/assets/boss/enraged.webp.asset.json";
 import smugBoss from "@/assets/boss/smug.webp.asset.json";
 import avApe from "@/assets/tcfb/av-ape.webp.asset.json";
@@ -1374,7 +1376,7 @@ function MenuSound() {
   );
 }
 
-function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
+function SeasonBanner({ onStart, compact }: { onStart?: (() => void) | undefined; compact?: boolean }) {
   const season = currentSeasonId();
   const ends = seasonEnd(season);
   // Countdown is time-dependent, so it only renders after mount (no SSR mismatch).
@@ -1385,43 +1387,78 @@ function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
     const id = window.setInterval(() => setLeft(countdown(ends)), 30_000);
     return () => window.clearInterval(id);
   }, [ends]);
+
+  if (compact) {
+    return (
+      <div className="season-strip">
+        <span className="season-live"><Trophy /> {seasonLabel(season)}</span>
+        <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
+        <span className="season-prizes">{PRIZES.map((p) => <em key={p}>${p}</em>)}<b>$TCFB</b></span>
+      </div>
+    );
+  }
+
   return (
     <div className="season-banner">
       <div className="season-head">
         <span className="season-live"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(season)}</span>
         <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
       </div>
-
       <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid within 3 days after the token launch in October. Same seed for everyone: identical crashes, launches and rugs.</p>
       <p className="season-rules">One account per player. Multiple accounts, shared wallets or duplicate entries are disqualified. Only your best run of the season counts.</p>
       {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
-
     </div>
   );
 }
 
+function TournamentRules({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <p className="journey-kicker"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(currentSeasonId())}</p>
+      <h2>THE RULES</h2>
+      <ol className="cy-steps">
+        <li><b>1</b><span>Every tournament run of the month uses the same seed. Identical crashes, launches and rugs for everyone.</span></li>
+        <li><b>2</b><span>Only your best run of the month counts. Play as often as you like.</span></li>
+        <li><b>3</b><span>One account per player. Multiple accounts, shared wallets or duplicate entries are disqualified.</span></li>
+        <li><b>4</b><span>Top 3 win {PRIZES.map((p) => `$${p}`).join(" / ")} in $TCFB, paid within 3 days after the token launch in October.</span></li>
+        <li><b>5</b><span>You only add a wallet at the end of a run. Wallets stay private.</span></li>
+      </ol>
+      <Button className="cy-primary" onClick={onClose}>GOT IT <ChevronRight /></Button>
+    </>
+  );
+}
+
 function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: (tournament: boolean) => void; onResume: () => void; onBoard: () => void }) {
+  const [rules, setRules] = useState(false);
   return (
     <main className="journey-start">
-      <img src={crownedBoss.url} alt="The crowned Crypto Final Boss" />
+      <picture>
+        <source media="(max-width: 720px)" srcSet={bossStagePortrait.url} />
+        <img src={bossStageWide.url} alt="The Crypto Final Boss on his server throne" width={1920} height={1088} />
+      </picture>
       <div className="start-vignette" />
       <PriceTape />
       <MenuSound />
       <section>
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
-        <p>Trade the whole cycle from 2020 to 2026. Spot, perps, launches and the crashes that ate everyone else. Survive all 84 months and beat the Boss Score.</p>
-        <SeasonBanner onStart={() => onStart(true)} />
+        <p>Trade the cycle from 2020 to 2026 and survive every crash.</p>
+        <SeasonBanner compact />
         <div className="start-actions">
-          <Button onClick={() => { playSfx("win"); onStart(false); }}>FREE RUN <ChevronRight /></Button>
-          {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
-          <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
+          <Button className="start-main" onClick={() => { playSfx("win"); onStart(true); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>
+          <div className="start-secondary">
+            <Button variant="outline" onClick={() => { playSfx("click"); onStart(false); }}>FREE RUN</Button>
+            <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
+            {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
+          </div>
         </div>
-        <small>84 MONTHS · FREE TO PLAY · WALLET ONLY FOR PRIZES</small>
+        <small className="start-footer">84 MONTHS · FREE TO PLAY · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
       </section>
+      {rules && <Sheet onClose={() => setRules(false)}><TournamentRules onClose={() => setRules(false)} /></Sheet>}
     </main>
   );
 }
+
 
 
 function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onBack: () => void; onStart: (config: Config) => void }) {
@@ -1568,7 +1605,7 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
             <input className="setup-input" placeholder="YOUR WALLET (EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
-            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 of the season need it. Wallets stay private. One account per player — prizes are paid within 3 days after the October token launch."}</small>
+            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 need it. Wallets stay private. One account per player — prizes are paid within 3 days after the October launch."}</small>
 
           </div>
         )}

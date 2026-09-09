@@ -629,3 +629,29 @@
   letter-spacing: 0.02em;
   opacity: 0.72;
 }
+
+/* ---- clean start screen (V49) ---- */
+.journey-start { place-items: center; padding-block: calc(58px + env(safe-area-inset-top)) max(32px, env(safe-area-inset-bottom)); }
+.journey-start > picture { position: absolute; inset: 0; }
+.journey-start > picture img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; filter: brightness(.86) contrast(1.04); image-rendering: auto; }
+.journey-start .start-vignette { background: linear-gradient(180deg, color-mix(in oklab, var(--background) 42%, transparent) 0%, transparent 18%, transparent 42%, color-mix(in oklab, var(--background) 78%, transparent) 68%, var(--background) 94%); }
+.journey-start section { display: grid; gap: 12px; align-content: end; width: min(100%, 620px); min-height: 100%; }
+.journey-start h1 { margin: 0; text-shadow: 0 8px 40px rgba(0,0,0,.75); }
+.journey-start section > p:not(.journey-kicker) { max-width: 44ch; font-size: 15px; }
+
+.season-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; padding: 8px 12px; border: 1px solid color-mix(in oklab, var(--journey-yellow) 45%, transparent); border-radius: 999px; background: color-mix(in oklab, var(--background) 62%, transparent); backdrop-filter: blur(8px); }
+.season-strip .season-live { font-size: 13px; }
+.season-strip strong { color: var(--journey-cyan); font: 700 10px/1 var(--font-body); letter-spacing: .1em; }
+.season-prizes { display: inline-flex; align-items: center; gap: 5px; }
+.season-prizes em { padding: 3px 7px; border-radius: 4px; background: color-mix(in oklab, var(--journey-yellow) 20%, transparent); color: var(--journey-yellow); font: 700 10px/1 var(--font-body); font-style: normal; }
+.season-prizes b { color: var(--muted-foreground); font: 700 10px/1 var(--font-body); letter-spacing: .08em; }
+
+.journey-start .start-actions { display: grid; gap: 8px; margin: 6px 0 0; }
+.journey-start .start-actions button { height: 54px; }
+.journey-start .start-main { background: var(--journey-yellow); color: var(--background); }
+.start-secondary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.start-secondary button { background: color-mix(in oklab, var(--background) 55%, transparent); backdrop-filter: blur(6px); }
+.start-footer { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 10px; letter-spacing: .08em; }
+.start-rules { color: var(--journey-yellow); font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.start-rules:hover { color: var(--journey-cyan); }
+.journey-start .start-secondary button { background: color-mix(in oklab, var(--background) 55%, transparent); color: var(--foreground); }
