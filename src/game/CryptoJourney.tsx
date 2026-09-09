@@ -1381,6 +1381,7 @@ function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
   const [left, setLeft] = useState<string | null>(null);
 
   useEffect(() => {
+    setLeft(countdown(ends));
     const id = window.setInterval(() => setLeft(countdown(ends)), 30_000);
     return () => window.clearInterval(id);
   }, [ends]);
@@ -1388,8 +1389,9 @@ function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
     <div className="season-banner">
       <div className="season-head">
         <span className="season-live"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(season)}</span>
-        <strong>ENDS IN {left}</strong>
+        <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
       </div>
+
       <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid after the token launch. Same seed for everyone: identical crashes, launches and rugs.</p>
       {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
     </div>
