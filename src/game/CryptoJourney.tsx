@@ -711,7 +711,7 @@ export function CryptoJourney() {
     const situation = situationFor(chapter);
     if (situation) cards.push({ k: "situation", card: situation });
     // cold storage occasionally asks you to prove you still own it
-    if (chapter > 3 && run.positions.some((p) => p.where === "cold") && Math.random() < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
+    if (chapter > 3 && run.positions.some((p) => p.where === "cold") && det(run.seed, `seedcheck-${chapter}`) < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
     if (!cards.length) { setDialog(null); setPhase("brief"); return; }
     setPhase("act");
 
