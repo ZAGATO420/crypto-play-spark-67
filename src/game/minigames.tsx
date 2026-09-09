@@ -12,12 +12,13 @@ export type MiniResult = { quality: number; label: string };
 
 const SEED_WORDS = ["throne", "candle", "gorilla", "liquid", "diamond", "vault", "sniper", "ledger"];
 
-export function Minigame({ kind, hard, onResult }: { kind: MiniKind; hard: boolean; onResult: (r: MiniResult) => void }) {
+export function Minigame({ kind, hard, roll = Math.random(), onResult }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void }) {
   if (kind === "timing") return <TimingBar hard={hard} onResult={onResult} />;
   if (kind === "panic") return <PanicTap hard={hard} onResult={onResult} />;
-  if (kind === "gas") return <GasWar hard={hard} onResult={onResult} />;
-  return <SeedCheck onResult={onResult} />;
+  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={onResult} />;
+  return <SeedCheck roll={roll} onResult={onResult} />;
 }
+
 
 /* ------------------------------------------------------------- timing bar */
 
@@ -112,10 +113,11 @@ function PanicTap({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult)
 
 /* ----------------------------------------------------------------- gas war */
 
-function GasWar({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult) => void }) {
+function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
   const [gas, setGas] = useState(50);
   const [done, setDone] = useState<MiniResult | null>(null);
-  const band = useRef({ lo: 25 + Math.random() * 40, w: hard ? 12 : 20 });
+  const band = useRef({ lo: 25 + roll * 40, w: hard ? 12 : 20 });
+
 
   const send = () => {
     const { lo, w } = band.current;
@@ -143,9 +145,23 @@ function GasWar({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult) =
 
 /* --------------------------------------------------------------- seed check */
 
-function SeedCheck({ onResult }: { onResult: (r: MiniResult) => void }) {
-  const order = useRef([...SEED_WORDS].sort(() => Math.random() - 0.5).slice(0, 4));
-  const shuffled = useRef([...order.current].sort(() => Math.random() - 0.5));
+function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) => void }) {
+  // deterministic shuffle so a tournament season shows every player the same words
+  const rand = useRef(((s: number) => () => {
+    s = (s * 1664525 + 1013904223) % 4294967296;
+    return s / 4294967296;
+  })(Math.floor(roll * 4294967296)));
+  const shuffle = (list: string[]) => {
+    const out = [...list];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(rand.current() * (i + 1));
+      [out[i], out[j]] = [out[j]!, out[i]!];
+    }
+    return out;
+  };
+  const order = useRef(shuffle(SEED_WORDS).slice(0, 4));
+  const shuffled = useRef(shuffle(order.current));
+
   const [step, setStep] = useState(0);
   const [wrong, setWrong] = useState(0);
   const [show, setShow] = useState(true);

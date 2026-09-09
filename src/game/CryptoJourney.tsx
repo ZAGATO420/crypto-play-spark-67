@@ -22,6 +22,9 @@ import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { det, randomSeed } from "./rng";
+import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readWallet, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
+
 
 /* ------------------------------------------------------------------ types */
 
@@ -29,13 +32,14 @@ type Kind = "spot" | "perp";
 type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number; where: CustodyId };
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
-type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country };
+type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
   hunger: number; stress: number; risk: number; streak: number; crises: number; trades: number; xp: number;
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
-  ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; config: Config;
+  ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
 };
+
 type Phase = "brief" | "act" | "resolve";
 type LaunchResult = { name: string; tag: string; size: number; back: number; multi: number; rugged: boolean; line: string };
 type Pending =
