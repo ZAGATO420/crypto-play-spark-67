@@ -744,3 +744,61 @@
   .prizepool-table th,.prizepool-table td { padding:5px 3px; }
   .prizepool-podium { grid-template-columns:1fr; }
 }
+
+/* ============================================================
+   V52 — the run gets a feeling: one clear goal, a talking Boss,
+   colour that reacts, and the story of the run at the end.
+   ============================================================ */
+
+.cy-goal {
+  margin: 0.6rem 0 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 32%, transparent);
+  border-left: 3px solid var(--primary);
+  border-radius: 0.8rem;
+  background: color-mix(in oklab, var(--primary) 8%, var(--card));
+}
+.cy-goal.is-urgent {
+  border-color: color-mix(in oklab, var(--destructive) 55%, transparent);
+  border-left-color: var(--destructive);
+  background: color-mix(in oklab, var(--destructive) 10%, var(--card));
+  animation: cy-urgent 1.8s ease-in-out infinite;
+}
+@keyframes cy-urgent { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 20%, transparent); } }
+.cy-goal-head { font-size: 0.62rem; letter-spacing: 0.18em; color: var(--muted-foreground); margin: 0; }
+.cy-goal-line { margin: 0.15rem 0 0.2rem; font-weight: 800; font-size: clamp(1rem, 4.4vw, 1.25rem); line-height: 1.2; }
+.cy-goal-why { margin: 0; font-size: 0.8rem; color: var(--muted-foreground); line-height: 1.45; }
+.cy-goal-doom { margin: 0.35rem 0 0; font-size: 0.74rem; letter-spacing: 0.08em; color: color-mix(in oklab, var(--destructive) 80%, var(--foreground)); }
+
+.cy-details-toggle {
+  width: 100%;
+  margin: 0.4rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-align: left;
+}
+.cy-details-toggle:hover { color: var(--foreground); border-color: color-mix(in oklab, var(--primary) 40%, transparent); }
+.cy-versus-help { margin: 0.3rem 0 0; font-size: 0.72rem; line-height: 1.45; color: var(--muted-foreground); }
+.cy-pos-plain { margin: 0.45rem 0 0; font-size: 0.78rem; line-height: 1.45; color: var(--muted-foreground); }
+
+/* the screen answers every moment: gold for a win, red for damage */
+.cy-fx { position: fixed; inset: 0; z-index: 60; pointer-events: none; animation: cy-fx-out 0.62s ease-out forwards; }
+.cy-fx-gold { background: radial-gradient(circle at 50% 45%, color-mix(in oklab, var(--primary) 38%, transparent), transparent 70%); }
+.cy-fx-red { background: radial-gradient(circle at 50% 45%, color-mix(in oklab, var(--destructive) 42%, transparent), transparent 70%); }
+@keyframes cy-fx-out { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cy-fx, .cy-goal.is-urgent { animation: none; } }
+
+.end-chronicle {
+  margin: 0.9rem 0 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+}
+.end-chronicle ol { margin: 0.45rem 0 0; padding: 0 0 0 1.05rem; display: grid; gap: 0.4rem; }
+.end-chronicle li { font-size: 0.84rem; line-height: 1.5; color: color-mix(in oklab, var(--foreground) 88%, transparent); }
