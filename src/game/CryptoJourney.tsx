@@ -2039,6 +2039,9 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
             <span><small>CRISES</small><strong>{run.crises}</strong></span>
           </div>
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
+          {newRecord && <p className="end-record">NEW PERSONAL RECORD · beat {before?.bestScore.toLocaleString("en-US")}</p>}
+          {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
+          {profile && <small className="end-progress">RUN {profile.runs} · ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} · BEST {formatMoney(profile.bestNet)}</small>}
         </div>
 
         {tournament && status !== "done" && (
@@ -2055,8 +2058,11 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
-          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
+          <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
+          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
+          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}NEW RUN</Button>
         </div>
+
         {status === "queued" && <small className="end-message">The board is unavailable. Your result is saved and will retry automatically.</small>}
         {status === "rejected" && <small className="end-message">This result failed the board's integrity checks and cannot be submitted.</small>}
 
