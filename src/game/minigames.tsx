@@ -12,12 +12,13 @@ export type MiniResult = { quality: number; label: string };
 
 const SEED_WORDS = ["throne", "candle", "gorilla", "liquid", "diamond", "vault", "sniper", "ledger"];
 
-export function Minigame({ kind, hard, onResult }: { kind: MiniKind; hard: boolean; onResult: (r: MiniResult) => void }) {
+export function Minigame({ kind, hard, roll = Math.random(), onResult }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void }) {
   if (kind === "timing") return <TimingBar hard={hard} onResult={onResult} />;
   if (kind === "panic") return <PanicTap hard={hard} onResult={onResult} />;
-  if (kind === "gas") return <GasWar hard={hard} onResult={onResult} />;
-  return <SeedCheck onResult={onResult} />;
+  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={onResult} />;
+  return <SeedCheck roll={roll} onResult={onResult} />;
 }
+
 
 /* ------------------------------------------------------------- timing bar */
 
