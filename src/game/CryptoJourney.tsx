@@ -352,8 +352,9 @@ export function CryptoJourney() {
       log({ chapter: run.chapter, title: `MISSED · ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
       return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
     }
-    const rugged = Math.random() < card.rug / (arch.risk || 1);
-    const multi = rugged ? 0.08 : (card.upside[0] + Math.random() * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
+    const rugged = det(run.seed, `rug-${run.chapter}-${card.name}`) < card.rug / (arch.risk || 1);
+    const multi = rugged ? 0.08 : (card.upside[0] + det(run.seed, `multi-${run.chapter}-${card.name}`) * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
+
     const back = Math.round(size * multi);
     setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
