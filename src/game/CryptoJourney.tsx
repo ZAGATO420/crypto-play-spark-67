@@ -890,6 +890,10 @@ export function CryptoJourney() {
 
   const openChapterCards = (chapter: number) => {
     const cards: Dialog[] = [];
+    // the Boss steps up first: his fights and his offers open the quarter
+    if (bossFightFor(chapter)) cards.push({ k: "fight", chapter });
+    const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`));
+    if (atk?.id === "OFFER") cards.push({ k: "offer", attack: atk });
     if (crashFor(chapter)) cards.push({ k: "crash", chapter });
     if (failureFor(chapter)) cards.push({ k: "failure", chapter });
     const decision = decisionForChapter(chapter);
@@ -899,6 +903,7 @@ export function CryptoJourney() {
     // cold storage occasionally asks you to prove you still own it
     if (chapter > 3 && run.positions.some((p) => p.where === "cold") && det(run.seed, `seedcheck-${chapter}`) < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
     if (!cards.length) { setDialog(null); setPhase("brief"); return; }
+
     setPhase("act");
 
     setDialog(cards[0]!);
