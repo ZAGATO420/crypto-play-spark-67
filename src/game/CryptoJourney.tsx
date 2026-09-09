@@ -1392,8 +1392,10 @@ function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
         <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
       </div>
 
-      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid after the token launch. Same seed for everyone: identical crashes, launches and rugs.</p>
+      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid within 3 days after the token launch in October. Same seed for everyone: identical crashes, launches and rugs.</p>
+      <p className="season-rules">One account per player. Multiple accounts, shared wallets or duplicate entries are disqualified. Only your best run of the season counts.</p>
       {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
+
     </div>
   );
 }
