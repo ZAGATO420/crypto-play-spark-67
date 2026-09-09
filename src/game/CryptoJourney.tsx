@@ -371,7 +371,7 @@ export function CryptoJourney() {
   };
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
-    const price = priceAt(symbol, run.chapter, run.noise);
+    const price = mark(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} has no market in ${chapterLabel(run.chapter)}.`, "pink");
     const margin = Math.floor(run.cash * fraction);
