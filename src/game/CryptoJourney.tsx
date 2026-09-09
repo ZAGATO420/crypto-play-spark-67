@@ -261,6 +261,12 @@ export function CryptoJourney() {
   const popId = useRef(1);
   const lastNet = useRef(0);
 
+  // the live quarter: t walks 0 -> 1 while you act, then the market answers
+  const [tick, setTick] = useState(0);
+  const [fast, setFast] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const tickRef = useRef(0);
+
   const cfg = run.config;
   const arch = archOf(cfg.arch);
   const diff = diffOf(cfg.difficulty);
@@ -270,6 +276,14 @@ export function CryptoJourney() {
   const warning = CHAPTER_WARNINGS[run.chapter] ?? "The market never announces what it is about to do.";
   const presale = presaleFor(run.chapter);
   const xpBar = xpProgress(run.xp);
+  const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`));
+  const sweeping = attack?.id === "SWEEP";
+  const signals = useMemo(() => signalsFor(run), [run.chapter, run.seed, run.noise]);
+  const bossNet = bossNetOf(run);
+  const perkFee = run.perks.includes("CHEAP FEES") ? 0.5 : 1;
+  /** During the live phase every price is the moving one. */
+  const mark = (symbol: CoinSymbol) => (phase === "act" ? livePrice(symbol, run, tick, sweeping) : priceAt(symbol, run.chapter, run.noise));
+
 
   useEffect(() => {
     if (localStorage.getItem(SAVE_KEY)) setResume(true);
