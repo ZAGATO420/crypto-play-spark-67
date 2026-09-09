@@ -1049,9 +1049,42 @@ export function CryptoJourney() {
 
           {phase === "act" && (
             <article className="cy-card" key={`act-${run.chapter}`}>
-              <p className="journey-kicker"><Zap /> YOUR TURN · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p>
+              <p className="journey-kicker"><Zap /> LIVE · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p>
+              <div className="cy-live">
+                <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
+                <div className="cy-live-tape">
+                  {(["BTC", "ETH", "SOL"] as CoinSymbol[]).map((s) => {
+                    const open = priceAt(s, run.chapter, run.noise);
+                    const now = mark(s);
+                    if (!open) return null;
+                    const pct = (now / open - 1) * 100;
+                    return (
+                      <span key={s} className={pct >= 0 ? "up" : "down"}>
+                        <img src={COIN_LOGO[s]} alt="" width={18} height={18} />
+                        <strong>{formatMoney(now)}</strong>
+                        <small>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</small>
+                      </span>
+                    );
+                  })}
+                </div>
+                {attack && <p className="cy-attack"><strong>{attack.title} ·</strong> {attack.line}</p>}
+                <div className="cy-signals">
+                  {signals.map((s, i) => (
+                    <span key={i} className={`cy-signal${verified && s.fake ? " is-fake" : ""}${verified && !s.fake ? " is-true" : ""}`}>{s.text}</span>
+                  ))}
+                  <button className="cy-verify" disabled={verified} onClick={() => {
+                    if (verified) return;
+                    const fee = Math.max(150, Math.round(net * 0.01));
+                    if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
+                    setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
+                    setVerified(true);
+                    playSfx("click");
+                  }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
+                </div>
+              </div>
               <h2>WHAT DO YOU DO?</h2>
               <div className="cy-grid">
+
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><strong>TRADE SPOT</strong><small>Buy or short-list a market</small></button>
                 <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><Zap /><strong>PERP DESK</strong><small>2x · 5x · 10x, long or short</small></button>
                 <button className="cy-act" disabled={ap <= 0 || !presale} onClick={() => presale && setDialog({ k: "presale", card: presale })}><Rocket /><strong>{presale ? presale.tag : "NO LAUNCH"}</strong><small>{presale ? presale.name : "Nothing live this quarter"}</small></button>
