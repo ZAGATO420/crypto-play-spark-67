@@ -109,7 +109,7 @@ function PrizePoolPage() {
         <section key={s.season} className="prizepool-season">
           <div className="prizepool-season-head">
             <h2 className="prizepool-season-title">{seasonLabel(s.season)}</h2>
-            <span className="prizepool-season-count">{s.entries.length} players</span>
+            <span className="prizepool-season-count">{s.entries.length} player{s.entries.length !== 1 ? "s" : ""}</span>
           </div>
 
           {/* Prize winners — top 3 */}
