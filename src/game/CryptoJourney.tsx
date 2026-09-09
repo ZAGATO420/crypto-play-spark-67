@@ -730,9 +730,19 @@ export function CryptoJourney() {
     let positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
     if (run.risk >= 95) risk = 40;
 
-    // perp funding: leverage is rented, never owned
-    const funding = Math.round(positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev * FUNDING, 0));
-    if (funding > 0) { cash -= funding; spendOn("Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}.`); }
+    // perp funding: leverage is rented, never owned — and the Boss can raise the rent
+    const squeeze = attack?.id === "SQUEEZE" ? 2.2 : 1;
+    const funding = Math.round(positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev * FUNDING * squeeze, 0));
+    if (funding > 0) { cash -= funding; spendOn(squeeze > 1 ? "Perp funding · squeezed" : "Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}${squeeze > 1 ? " — he doubled the rate." : "."}`); }
+
+    // the price of taking his money
+    if (run.statuses.includes("BOSS DEBT")) {
+      const cut = Math.round(Math.max(600, startNet * 0.02));
+      cash -= cut;
+      spendOn("The Boss takes his cut", cut);
+      lines.push(`He took his cut: ${formatMoney(cut)}. That deal never expires.`);
+    }
+
 
     // an exchange failure takes exactly what you left on the exchange
     const failure = failureFor(next);
