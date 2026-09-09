@@ -1963,6 +1963,38 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
     return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length];
   }, [ending, run.chapter, run.moves, run.trades, won]);
+
+  // Store the run once, and keep the record from *before* this run so we can taunt with it.
+  const beforeRef = useRef<Profile | null>(null);
+  useEffect(() => {
+    beforeRef.current = readProfile();
+    setProfile(recordRun({ ending, net, score, months: monthsSurvived(run.chapter), bossWins: run.bossWins, badge }));
+    // Runs once per end screen on purpose.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const before = beforeRef.current;
+  const newRecord = !!before && score > before.bestScore && before.runs > 0;
+  const nearMiss = useMemo(() => {
+    const startCash = Math.round(archOf(run.config.arch).cash * (run.config.modifier === "glass" ? 0.5 : 1));
+    if (ending === "THRONE") return null;
+    if (won && net >= startCash * 40) return `You were ${formatMoney(startCash * 60 - net)} short of LEGEND. One better exit and it was yours.`;
+    if (!won) {
+      const left = TOTAL_MONTHS - monthsSurvived(run.chapter);
+      return `${left} months left on the clock. The Boss barely had to try.`;
+    }
+    return "Beat the Boss' own book and win 3 fights to take the THRONE.";
+  }, [ending, net, run.chapter, run.config.arch, run.config.modifier, won]);
+
+  const shareText = `THE CRYPTO FINAL BOSS\n${ENDINGS[ending].title} · ${badge}\nNET ${formatMoney(net)} · SCORE ${score.toLocaleString("en-US")}\n${monthsSurvived(run.chapter)}/${TOTAL_MONTHS} months · ${run.bossWins} boss fights won${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}\nplay: thecryptofinalboss.app`;
+  const share = async () => {
+    playSfx("click");
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+    } catch { setCopied(false); }
+  };
+
   const send = async () => {
     const trimmed = wallet.trim();
     if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
