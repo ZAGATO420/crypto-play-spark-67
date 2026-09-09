@@ -429,7 +429,64 @@ export function CryptoJourney() {
     if (gain < 0) rumble();
   };
 
-  const takePresale = (card: Presale, size: number, quality: number) => {
+  /**
+   * One tap on a chip is a market exit at the live price. Fast, slightly worse
+   * fill, no window in the way — speed instead of clicking.
+   */
+  const quickClose = (id: number) => {
+    const pos = run.positions.find((p) => p.id === id);
+    if (!pos) return;
+    if (pos.where === "cold") return setDialog({ k: "position", id });
+    closePosition(id, 1, 0.5);
+  };
+
+  /** Double or nothing on the whole quarter. The bar took you a while to fill. */
+  const toggleConviction = () => {
+    if (run.conviction < 100 && !run.convictionOn) return say("Conviction is not full yet. Win quarters, fill the bar.", "pink");
+    playSfx("hit");
+    setRun((r) => ({ ...r, convictionOn: !r.convictionOn }));
+    say(run.convictionOn ? "Conviction back in the holster." : "CONVICTION ARMED · this quarter counts 1.5x, win or lose.", "yellow");
+  };
+
+  const takeOffer = (amount: number) => {
+    setDialog(null);
+    playSfx("vault");
+    setRun((r) => book({ ...r, cash: r.cash + amount, statuses: Array.from(new Set([...r.statuses, "BOSS DEBT"])), stress: clamp(r.stress + 6) }, "The Boss bought you out", amount));
+    log({ chapter: run.chapter, title: "TOOK THE OFFER", detail: `${formatMoney(amount)} now, a cut of every quarter forever.`, tone: "pink" });
+    say(`${formatMoney(amount)} in your account. He owns a piece of you now.`, "pink");
+  };
+
+  /** A boss fight: stake real money, land the skill moment, live with it. */
+  const resolveFight = (chapter: number, wager: number, quality: number) => {
+    const fight = bossFightFor(chapter);
+    if (!fight) return nextInQueue();
+    if (quality >= 0.9) {
+      const won = Math.round(wager * 2);
+      setRun((r) => book({
+        ...r, cash: r.cash + won, bossWins: r.bossWins + 1, conviction: clamp(r.conviction + 35),
+        boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
+        perks: Array.from(new Set([...r.perks, fight.perk])),
+        statuses: Array.from(new Set([...r.statuses, "BOSS BEATEN"])),
+      }, `${fight.title} · won`, won));
+      say(`You took ${formatMoney(won)} off the Boss. Perk unlocked: ${fight.perk}.`, "yellow");
+      playSfx("win");
+      grantXp(XP_EXTRA.escape * 2, "BOSS BEATEN");
+    } else if (quality >= 0.5) {
+      setRun((r) => ({ ...r, stress: clamp(r.stress + 8), conviction: clamp(r.conviction + 10) }));
+      say("A draw. He keeps the chair, you keep your stake.", "cyan");
+      grantXp(XP_EXTRA.minigameOk, "HELD YOUR GROUND");
+    } else {
+      setRun((r) => book({
+        ...r, cash: Math.max(0, r.cash - wager), stress: clamp(r.stress + 16), conviction: 0, convictionOn: false,
+        boss: { ...r.boss, cash: r.boss.cash + wager, line: "He counted your money in front of you." },
+      }, `${fight.title} · lost`, -wager));
+      say(`He took ${formatMoney(wager)} and told the room about it.`, "pink");
+      rumble();
+    }
+    nextInQueue();
+  };
+
+
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
     if (quality < 0.2) {
