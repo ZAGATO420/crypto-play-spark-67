@@ -1077,8 +1077,9 @@ export function CryptoJourney() {
                 {attack && <p className="cy-attack"><strong>{attack.name} ·</strong> {attack.line}</p>}
                 <div className="cy-signals">
                   {signals.map((s, i) => (
-                    <span key={i} className={`cy-signal${verified && s.fake ? " is-fake" : ""}${verified && !s.fake ? " is-true" : ""}`}>{s.text}</span>
+                    <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
                   ))}
+
                   <button className="cy-verify" disabled={verified} onClick={() => {
                     if (verified) return;
                     const fee = Math.max(150, Math.round(net * 0.01));
