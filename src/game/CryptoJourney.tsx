@@ -1444,6 +1444,51 @@ function CrashSheet({ chapter, onPanic, onClose }: { chapter: number; onPanic: (
   );
 }
 
+/** A real duel: stake money, land the skill moment, win a perk off him. */
+function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash: number; onFight: (wager: number, kind: MiniKind) => void; onDuck: () => void }) {
+  const fight = bossFightFor(chapter);
+  if (!fight) return <Button className="cy-wide" onClick={onDuck}>CONTINUE</Button>;
+  const stakes = [0.1, 0.25, 0.5].map((f) => Math.max(200, Math.round(cash * f)));
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> BOSS FIGHT · {chapterLabel(chapter)}</p>
+      <h2>{fight.title}</h2>
+      <p className="cy-lead">{fight.line}</p>
+      <p className="cy-hint"><strong>WIN ·</strong> double your stake and the perk {fight.perk} ({PERK_BLURB[fight.perk]}) · <strong>LOSE ·</strong> he keeps the stake.</p>
+      <div className="cy-grid">
+        {stakes.map((s, i) => (
+          <button key={i} className="cy-act" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
+            <Zap /><strong>{formatMoney(s)}</strong><small>{["Careful", "Serious", "Everything he expects"][i]}</small>
+          </button>
+        ))}
+      </div>
+      <div className="cy-actions"><Button onClick={onDuck}>WALK AWAY</Button></div>
+      <small className="cy-note">Walking away costs no money, just stress and your conviction.</small>
+    </>
+  );
+}
+
+function OfferSheet({ attack, net, onTake, onRefuse }: { attack: BossAttack; net: number; onTake: () => void; onRefuse: () => void }) {
+  const amount = Math.max(2000, Math.round(net * 0.25));
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> {attack.name}</p>
+      <h2>HE WANTS TO BUY YOU OUT</h2>
+      <p className="cy-lead">{attack.line}</p>
+      <div className="cy-facts">
+        <span><small>CASH NOW</small><strong className="positive">{formatMoney(amount)}</strong></span>
+        <span><small>FOREVER</small><strong className="negative">2% of your book every quarter</strong></span>
+      </div>
+      <div className="cy-actions">
+        <Button className="cy-primary" onClick={onTake}>TAKE THE MONEY</Button>
+        <Button onClick={onRefuse}>TELL HIM NO</Button>
+      </div>
+    </>
+  );
+}
+
+
+
 function FailureSheet({ chapter, run, onClose }: { chapter: number; run: Run; onClose: () => void }) {
   const fail = failureFor(chapter);
   if (!fail) return <Button className="cy-wide" onClick={onClose}>CONTINUE</Button>;
