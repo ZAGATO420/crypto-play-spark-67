@@ -1094,7 +1094,9 @@ export function CryptoJourney() {
                 <button className="cy-act" onClick={() => setDialog({ k: "survive" })}><HeartPulse /><strong>SURVIVE</strong><small>Eat · calm down · costs a move</small></button>
                 <button className="cy-act is-exit" onClick={() => setDialog({ k: "cashout" })}><Skull /><strong>CASH OUT</strong><small>End the run, take the bag</small></button>
                 <button className="cy-act" onClick={bank}><History /><strong>WAIT</strong><small>Bank a move, lose stress</small></button>
+                <button className={`cy-act${fast ? " is-go" : ""}`} onClick={() => { setFast(true); playSfx("click"); }}><Flame /><strong>HOLD</strong><small>{fast ? "Running the clock down" : "Fast-forward the quarter"}</small></button>
                 <button className="cy-act is-go" onClick={endChapter}><ChevronRight /><strong>END QUARTER</strong><small>Let the market answer</small></button>
+
               </div>
             </article>
           )}
