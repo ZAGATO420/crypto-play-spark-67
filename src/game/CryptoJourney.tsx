@@ -1374,7 +1374,27 @@ function MenuSound() {
   );
 }
 
-function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: () => void; onResume: () => void; onBoard: () => void }) {
+function SeasonBanner({ onStart }: { onStart?: (() => void) | undefined }) {
+  const season = currentSeasonId();
+  const ends = seasonEnd(season);
+  const [left, setLeft] = useState(() => countdown(ends));
+  useEffect(() => {
+    const id = window.setInterval(() => setLeft(countdown(ends)), 30_000);
+    return () => window.clearInterval(id);
+  }, [ends]);
+  return (
+    <div className="season-banner">
+      <div className="season-head">
+        <span className="season-live"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(season)}</span>
+        <strong>ENDS IN {left}</strong>
+      </div>
+      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid after the token launch. Same seed for everyone: identical crashes, launches and rugs.</p>
+      {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
+    </div>
+  );
+}
+
+function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: (tournament: boolean) => void; onResume: () => void; onBoard: () => void }) {
   return (
     <main className="journey-start">
       <img src={crownedBoss.url} alt="The crowned Crypto Final Boss" />
@@ -1385,16 +1405,18 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
         <p>Trade the whole cycle from 2020 to 2026. Spot, perps, launches and the crashes that ate everyone else. Survive all 84 months and beat the Boss Score.</p>
+        <SeasonBanner onStart={() => onStart(true)} />
         <div className="start-actions">
-          <Button onClick={() => { playSfx("win"); onStart(); }}>ENTER THE ARENA <ChevronRight /></Button>
+          <Button onClick={() => { playSfx("win"); onStart(false); }}>FREE RUN <ChevronRight /></Button>
           {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
           <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
         </div>
-        <small>84 MONTHS · NO WALLET · FREE TO PLAY</small>
+        <small>84 MONTHS · FREE TO PLAY · WALLET ONLY FOR PRIZES</small>
       </section>
     </main>
   );
 }
+
 
 function SetupScreen({ onBack, onStart }: { onBack: () => void; onStart: (config: Config) => void }) {
   const [config, setConfig] = useState<Config>(defaultConfig);
