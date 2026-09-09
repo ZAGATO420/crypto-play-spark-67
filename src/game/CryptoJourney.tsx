@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Shield, Skull, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import crownedBoss from "@/assets/boss/crowned.webp.asset.json";
+import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
+import bossStagePortrait from "@/assets/boss/stage-portrait.jpg.asset.json";
 import enragedBoss from "@/assets/boss/enraged.webp.asset.json";
 import smugBoss from "@/assets/boss/smug.webp.asset.json";
 import avApe from "@/assets/tcfb/av-ape.webp.asset.json";
