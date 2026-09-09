@@ -696,3 +696,51 @@
 .end-record { margin:8px 0 0; font-size:.74rem; letter-spacing:.12em; color:var(--cy-gold); }
 .end-nearmiss { margin:6px 0 0; font-size:.78rem; opacity:.82; }
 .end-progress { display:block; margin-top:6px; font-size:.62rem; letter-spacing:.12em; opacity:.55; }
+
+/* ---- Prize Pool admin page ------------------------------------------- */
+.prizepool-gate { min-height:100vh; display:flex; align-items:center; justify-content:center; background:#04090e; padding:20px; }
+.prizepool-gate-card { width:100%; max-width:360px; text-align:center; padding:32px 24px; border:1px solid hsl(var(--border)); border-radius:16px; background:color-mix(in srgb,#04121a 80%,transparent); backdrop-filter:blur(10px); }
+.prizepool-title { font-family:"Archivo Black",sans-serif; font-size:1.3rem; letter-spacing:.06em; color:#eaf2f6; margin:0 0 6px; }
+.prizepool-sub { font-size:.72rem; letter-spacing:.1em; color:#7a9ab0; margin:0 0 22px; }
+.prizepool-input { width:100%; padding:12px 14px; border:1px solid hsl(var(--border)); border-radius:10px; background:#02070b; color:#eaf2f6; font-family:"Hind",sans-serif; font-size:.9rem; letter-spacing:.1em; text-align:center; outline:none; }
+.prizepool-input:focus { border-color:#f0c040; }
+.prizepool-error { color:hsl(var(--destructive)); font-size:.72rem; margin:8px 0 0; }
+.prizepool-btn { width:100%; margin-top:14px; padding:12px; border:none; border-radius:10px; background:#f0c040; color:#04121a; font-family:"Archivo Black",sans-serif; font-size:.82rem; letter-spacing:.12em; cursor:pointer; }
+.prizepool-btn:disabled { opacity:.4; cursor:default; }
+
+.prizepool-page { min-height:100vh; background:#04090e; color:#eaf2f6; padding:20px 16px 60px; max-width:920px; margin:0 auto; }
+.prizepool-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid hsl(var(--border)); }
+.prizepool-header .prizepool-title { margin:0; }
+.prizepool-stats { display:flex; align-items:center; gap:16px; font-size:.66rem; letter-spacing:.12em; opacity:.6; }
+.prizepool-logout { padding:6px 14px; border:1px solid hsl(var(--destructive)); border-radius:8px; background:transparent; color:hsl(var(--destructive)); font-family:"Hind",sans-serif; font-size:.66rem; letter-spacing:.12em; cursor:pointer; }
+.prizepool-logout:hover { background:color-mix(in srgb,hsl(var(--destructive)) 12%,transparent); }
+.prizepool-empty { text-align:center; opacity:.5; padding:40px; font-size:.9rem; }
+
+.prizepool-season { margin-bottom:32px; }
+.prizepool-season-head { display:flex; align-items:baseline; gap:12px; margin-bottom:12px; }
+.prizepool-season-title { font-family:"Archivo Black",sans-serif; font-size:1rem; letter-spacing:.06em; color:#f0c040; margin:0; }
+.prizepool-season-count { font-size:.64rem; letter-spacing:.1em; opacity:.5; }
+
+.prizepool-podium { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-bottom:16px; }
+.prizepool-prize-card { padding:14px; border:2px solid hsl(var(--border)); border-radius:12px; background:color-mix(in srgb,#06141e 70%,transparent); }
+.prizepool-prize-place { font-family:"Archivo Black",sans-serif; font-size:.72rem; letter-spacing:.08em; margin-bottom:8px; }
+.prizepool-prize-winner { display:flex; flex-direction:column; gap:4px; }
+.prizepool-winner-name { font-size:.86rem; font-weight:600; }
+.prizepool-winner-score { font-size:.66rem; opacity:.6; }
+.prizepool-prize-empty { font-size:1.2rem; opacity:.3; }
+
+.prizepool-table { width:100%; border-collapse:collapse; font-size:.72rem; }
+.prizepool-table th { text-align:left; padding:8px 6px; border-bottom:1px solid hsl(var(--border)); font-size:.58rem; letter-spacing:.1em; opacity:.5; text-transform:uppercase; white-space:nowrap; }
+.prizepool-table td { padding:7px 6px; border-bottom:1px solid color-mix(in srgb,hsl(var(--border)) 40%,transparent); white-space:nowrap; }
+.prizepool-row-prize td { background:color-mix(in srgb,#f0c040 6%,transparent); }
+
+.prizepool-wallet-btn { display:inline; border:none; background:transparent; color:#8ab4ca; font-family:"monospace"; font-size:.7rem; cursor:pointer; padding:0; }
+.prizepool-wallet-btn:hover { text-decoration:underline; }
+.prizepool-copy-btn { display:inline; border:1px solid hsl(var(--border)); border-radius:5px; background:transparent; color:#8ab4ca; font-size:.56rem; letter-spacing:.08em; cursor:pointer; padding:2px 6px; margin-left:6px; }
+.prizepool-copy-btn:hover { background:color-mix(in srgb,hsl(var(--border)) 30%,transparent); }
+
+@media (max-width:520px) {
+  .prizepool-table { font-size:.64rem; }
+  .prizepool-table th,.prizepool-table td { padding:5px 3px; }
+  .prizepool-podium { grid-template-columns:1fr; }
+}
