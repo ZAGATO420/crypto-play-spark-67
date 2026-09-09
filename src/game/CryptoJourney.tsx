@@ -910,6 +910,29 @@ export function CryptoJourney() {
 
   const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
 
+  /**
+   * The live quarter. While you act, the price actually walks from this
+   * quarter's open to the next one's close. When it arrives, the quarter ends
+   * whether you were ready or not. HOLD runs the clock down fast.
+   */
+  useEffect(() => {
+    if (screen !== "run" || phase !== "act" || dialog) return;
+    let raf = 0;
+    let last = performance.now();
+    const step = (now: number) => {
+      const dt = now - last;
+      last = now;
+      tickRef.current = Math.min(1, tickRef.current + dt / (fast ? 1_600 : LIVE_MS));
+      setTick(tickRef.current);
+      if (tickRef.current >= 1) { tickRef.current = 0; endChapter(); return; }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, phase, dialog, fast, run]);
+
+
   const begin = (config: Config) => {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
