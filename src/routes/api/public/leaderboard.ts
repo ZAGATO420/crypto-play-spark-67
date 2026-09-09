@@ -198,6 +198,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const url = new URL(request.url);
         const mode = url.searchParams.get("mode");
+        const season = url.searchParams.get("season");
+        const seasonView = Boolean(season && season !== "all" && /^\d{4}-\d{2}$/.test(season));
         const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
 
         const runQuery = async (client: {
@@ -210,8 +212,10 @@ export const Route = createFileRoute("/api/public/leaderboard")({
             .limit(500);
 
           if (mode && mode !== "all") query = query.eq("mode", mode);
+          if (seasonView) query = query.eq("season", season).eq("is_tournament", true);
           return (await query) as { data: any[] | null; error: any };
         };
+
 
         let { data, error } = await runQuery(supabaseAdmin);
         // Transient auth/clock/network hiccups (e.g. PGRST303) should not hard-fail the board.
