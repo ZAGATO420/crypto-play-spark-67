@@ -821,10 +821,12 @@ export function CryptoJourney() {
     const levered = Math.min(18, Math.round((notional / Math.max(1, startNet)) * 12));
     const hunger = clamp(run.hunger + Math.round((8 + Math.floor(next / 6)) * arch.risk * diff.hunger) + (idle ? 7 : 0) + lifeHunger);
     const redQuarter = netOf({ ...run, chapter: next, cash, positions, taxDebt }) < startNet;
+    const nerves = run.perks.includes("STEEL NERVES") ? 0.7 : 1;
     const stress = clamp(
-      run.stress + Math.round((6 + Math.floor(next / 7)) * arch.risk * diff.stress) + (idle ? 10 : 0)
-      + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress,
+      run.stress + Math.round(((6 + Math.floor(next / 7)) * arch.risk * diff.stress + (idle ? 10 : 0)
+      + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress) * nerves),
     );
+
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
     if (levered >= 8) lines.push("Your leverage kept you awake. Stress climbed with the notional.");
 
@@ -869,7 +871,7 @@ export function CryptoJourney() {
     setTick(0);
     setFast(false);
     setVerified(false);
-    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("EXTRA MOVE") ? 1 : 0))));
+    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("+1 MOVE") ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
@@ -888,6 +890,10 @@ export function CryptoJourney() {
 
   const openChapterCards = (chapter: number) => {
     const cards: Dialog[] = [];
+    // the Boss steps up first: his fights and his offers open the quarter
+    if (bossFightFor(chapter)) cards.push({ k: "fight", chapter });
+    const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`));
+    if (atk?.id === "OFFER") cards.push({ k: "offer", attack: atk });
     if (crashFor(chapter)) cards.push({ k: "crash", chapter });
     if (failureFor(chapter)) cards.push({ k: "failure", chapter });
     const decision = decisionForChapter(chapter);
@@ -897,6 +903,7 @@ export function CryptoJourney() {
     // cold storage occasionally asks you to prove you still own it
     if (chapter > 3 && run.positions.some((p) => p.where === "cold") && det(run.seed, `seedcheck-${chapter}`) < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
     if (!cards.length) { setDialog(null); setPhase("brief"); return; }
+
     setPhase("act");
 
     setDialog(cards[0]!);
@@ -1067,11 +1074,12 @@ export function CryptoJourney() {
                     );
                   })}
                 </div>
-                {attack && <p className="cy-attack"><strong>{attack.title} ·</strong> {attack.line}</p>}
+                {attack && <p className="cy-attack"><strong>{attack.name} ·</strong> {attack.line}</p>}
                 <div className="cy-signals">
                   {signals.map((s, i) => (
-                    <span key={i} className={`cy-signal${verified && s.fake ? " is-fake" : ""}${verified && !s.fake ? " is-true" : ""}`}>{s.text}</span>
+                    <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
                   ))}
+
                   <button className="cy-verify" disabled={verified} onClick={() => {
                     if (verified) return;
                     const fee = Math.max(150, Math.round(net * 0.01));
@@ -1094,7 +1102,9 @@ export function CryptoJourney() {
                 <button className="cy-act" onClick={() => setDialog({ k: "survive" })}><HeartPulse /><strong>SURVIVE</strong><small>Eat · calm down · costs a move</small></button>
                 <button className="cy-act is-exit" onClick={() => setDialog({ k: "cashout" })}><Skull /><strong>CASH OUT</strong><small>End the run, take the bag</small></button>
                 <button className="cy-act" onClick={bank}><History /><strong>WAIT</strong><small>Bank a move, lose stress</small></button>
+                <button className={`cy-act${fast ? " is-go" : ""}`} onClick={() => { setFast(true); playSfx("click"); }}><Flame /><strong>HOLD</strong><small>{fast ? "Running the clock down" : "Fast-forward the quarter"}</small></button>
                 <button className="cy-act is-go" onClick={endChapter}><ChevronRight /><strong>END QUARTER</strong><small>Let the market answer</small></button>
+
               </div>
             </article>
           )}
@@ -1140,7 +1150,7 @@ export function CryptoJourney() {
       {levelUp !== null && <div className="cy-levelup" role="status">LEVEL {levelUp}<small>The Boss raised an eyebrow.</small></div>}
 
       {dialog && (
-        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
+        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
           {dialog.k === "sound" && <SoundSheet
             muted={muted} vols={vols}
@@ -1164,6 +1174,13 @@ export function CryptoJourney() {
           {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80} onResult={(res) => finishMini(dialog.pending, res)} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
+          {dialog.k === "fight" && <FightSheet chapter={dialog.chapter} cash={run.cash}
+            onFight={(wager, kind) => setDialog({ k: "mini", kind, pending: { t: "fight", chapter: dialog.chapter, wager } })}
+            onDuck={() => { setRun((r) => ({ ...r, stress: clamp(r.stress + 10), conviction: 0 })); say("You walked past his table. He remembers that.", "pink"); nextInQueue(); }} />}
+          {dialog.k === "offer" && <OfferSheet attack={dialog.attack} net={net}
+            onTake={() => takeOffer(Math.max(2000, Math.round(net * 0.25)))}
+            onRefuse={() => { setDialog(null); setRun((r) => ({ ...r, conviction: clamp(r.conviction + 15) })); say("You told him no. Conviction up.", "yellow"); }} />}
+
         </Sheet>
 
       )}
@@ -1227,11 +1244,12 @@ function Rules({ onClose }: { onClose: () => void }) {
       <p className="journey-kicker"><Crown /> THE BOSS EXPLAINS IT ONCE</p>
       <h2>HOW THE CYCLE WORKS</h2>
       <ol className="cy-steps">
-        <li><b>1</b><span>28 chapters, one per quarter, 2020 to 2026. Real prices, no hindsight.</span></li>
-        <li><b>2</b><span>Two moves per chapter: spot, perps, a launch, or wait and bank one for later.</span></li>
-        <li><b>3</b><span>END QUARTER and the market answers. Perps can liquidate, the risk meter can force-close everything.</span></li>
-        <li><b>4</b><span>History hits back: Black Thursday, Luna, FTX, the ETF. Your choice becomes a permanent status.</span></li>
-        <li><b>5</b><span>Hunger or stress at 100 ends the run. So does zero. Only the Boss Score counts on the board.</span></li>
+        <li><b>1</b><span>28 quarters, 2020 to 2026. Real prices, no hindsight. Each quarter runs live — the price moves while you decide.</span></li>
+        <li><b>2</b><span>Moves are your currency: spot, perps, launches, food, sleep. HOLD runs the clock down, WAIT banks a move.</span></li>
+        <li><b>3</b><span>Three signals every quarter and one of them is a lie. VERIFY costs money and shows you which.</span></li>
+        <li><b>4</b><span>The Boss trades his own book against you. Beat him in six boss fights to win his perks — or take his buy-out and pay him forever.</span></li>
+        <li><b>5</b><span>History hits back: Black Thursday, Luna, FTX, the ETF. Hunger or stress at 100 ends the run. Only the Boss Score counts on the board.</span></li>
+
       </ol>
       <Button className="cy-primary" onClick={onClose}>LET ME TRADE</Button>
     </>
@@ -1426,6 +1444,51 @@ function CrashSheet({ chapter, onPanic, onClose }: { chapter: number; onPanic: (
     </>
   );
 }
+
+/** A real duel: stake money, land the skill moment, win a perk off him. */
+function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash: number; onFight: (wager: number, kind: MiniKind) => void; onDuck: () => void }) {
+  const fight = bossFightFor(chapter);
+  if (!fight) return <Button className="cy-wide" onClick={onDuck}>CONTINUE</Button>;
+  const stakes = [0.1, 0.25, 0.5].map((f) => Math.max(200, Math.round(cash * f)));
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> BOSS FIGHT · {chapterLabel(chapter)}</p>
+      <h2>{fight.title}</h2>
+      <p className="cy-lead">{fight.line}</p>
+      <p className="cy-hint"><strong>WIN ·</strong> double your stake and the perk {fight.perk} ({PERK_BLURB[fight.perk]}) · <strong>LOSE ·</strong> he keeps the stake.</p>
+      <div className="cy-grid">
+        {stakes.map((s, i) => (
+          <button key={i} className="cy-act" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
+            <Zap /><strong>{formatMoney(s)}</strong><small>{["Careful", "Serious", "Everything he expects"][i]}</small>
+          </button>
+        ))}
+      </div>
+      <div className="cy-actions"><Button onClick={onDuck}>WALK AWAY</Button></div>
+      <small className="cy-note">Walking away costs no money, just stress and your conviction.</small>
+    </>
+  );
+}
+
+function OfferSheet({ attack, net, onTake, onRefuse }: { attack: BossAttack; net: number; onTake: () => void; onRefuse: () => void }) {
+  const amount = Math.max(2000, Math.round(net * 0.25));
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> {attack.name}</p>
+      <h2>HE WANTS TO BUY YOU OUT</h2>
+      <p className="cy-lead">{attack.line}</p>
+      <div className="cy-facts">
+        <span><small>CASH NOW</small><strong className="positive">{formatMoney(amount)}</strong></span>
+        <span><small>FOREVER</small><strong className="negative">2% of your book every quarter</strong></span>
+      </div>
+      <div className="cy-actions">
+        <Button className="cy-primary" onClick={onTake}>TAKE THE MONEY</Button>
+        <Button onClick={onRefuse}>TELL HIM NO</Button>
+      </div>
+    </>
+  );
+}
+
+
 
 function FailureSheet({ chapter, run, onClose }: { chapter: number; run: Run; onClose: () => void }) {
   const fail = failureFor(chapter);
