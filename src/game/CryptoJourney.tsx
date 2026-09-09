@@ -1202,8 +1202,13 @@ const pctMove = (symbol: CoinSymbol, r: Run) => {
 
 function Count({ value }: { value: number }) {
   const [shown, setShown] = useState(value);
+  const shownRef = useRef(value);
+  useEffect(() => { shownRef.current = shown; }, [shown]);
   useEffect(() => {
-    const from = shown;
+    const from = shownRef.current;
+    // Small live wobbles snap instead of animating, otherwise the number
+    // restarts its count-up every few frames and the card looks like it flickers.
+    if (Math.abs(value - from) < Math.max(2, Math.abs(value) * 0.01)) { setShown(value); return; }
     const start = performance.now();
     let frame = 0;
     const tick = (t: number) => {
@@ -1217,6 +1222,7 @@ function Count({ value }: { value: number }) {
   }, [value]);
   return <>{formatMoney(Math.round(shown))}</>;
 }
+
 
 function Meter({ label, value, icon, tone, detail }: { label: string; value: number; icon: React.ReactNode; tone: string; detail: string }) {
   return (
