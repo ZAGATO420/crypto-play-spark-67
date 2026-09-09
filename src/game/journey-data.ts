@@ -422,11 +422,17 @@ const ATTACKS: BossAttack[] = [
   { id: "SQUEEZE", name: "FUNDING SQUEEZE", line: "He doubled the cost of holding leverage. Rent your convictions carefully." },
   { id: "OFFER", name: "THE OFFER", line: "He wants to buy you out cheap. Cash today, a leash forever." },
 ];
-/** Deterministic: the same seed gives every tournament player the same attacks. */
-export const attackFor = (chapter: number, roll: number): BossAttack | null => {
+/**
+ * Deterministic: the same seed gives every tournament player the same attacks.
+ * The Boss' personality bends which attack shows up — a Hunter sweeps more.
+ */
+export const attackFor = (chapter: number, roll: number, bias?: BossAttack["id"]): BossAttack | null => {
   if (chapter < 2 || roll >= 0.42) return null;
-  return ATTACKS[Math.floor((roll / 0.42) * ATTACKS.length) % ATTACKS.length]!;
+  const scaled = roll / 0.42;
+  if (bias && scaled < 0.5) return ATTACKS.find((a) => a.id === bias)!;
+  return ATTACKS[Math.floor(scaled * ATTACKS.length) % ATTACKS.length]!;
 };
+
 
 export type BossFight = { title: string; line: string; mini: "timing" | "panic" | "gas" | "seed"; perk: string };
 export const BOSS_FIGHTS: Record<number, BossFight> = {
