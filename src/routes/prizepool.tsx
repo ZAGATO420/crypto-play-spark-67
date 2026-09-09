@@ -122,25 +122,28 @@ function PrizePoolPage() {
                 <div className="prizepool-prize-place" style={{ color: PRIZE_COLORS[i] }}>
                   #{p.place} · ${p.amount} TCFB
                 </div>
-                {p.entry ? (
+                {p.entry ? (() => {
+                  const w = p.entry;
+                  return (
                   <div className="prizepool-prize-winner">
                     <span className="prizepool-winner-name">
-                      <CountryFlag code={p.entry.country} /> {p.entry.name}
+                      <CountryFlag code={w.country} /> {w.name}
                     </span>
                     <span className="prizepool-winner-score">
-                      Score {p.entry.score.toLocaleString()} · Net ${p.entry.netWorth.toLocaleString()}
+                      Score {w.score.toLocaleString()} · Net ${w.netWorth.toLocaleString()}
                     </span>
                     <button
-                      onClick={() => toggleReveal(p.entry.wallet)}
+                      onClick={() => toggleReveal(w.wallet)}
                       className="prizepool-wallet-btn"
                     >
-                      {revealed.has(p.entry.wallet) ? p.entry.wallet : shortWallet(p.entry.wallet)}
+                      {revealed.has(w.wallet) ? w.wallet : shortWallet(w.wallet)}
                     </button>
-                    <button onClick={() => copyWallet(p.entry.wallet)} className="prizepool-copy-btn">
+                    <button onClick={() => copyWallet(w.wallet)} className="prizepool-copy-btn">
                       COPY
                     </button>
                   </div>
-                ) : (
+                  );
+                })() : (
                   <span className="prizepool-prize-empty">—</span>
                 )}
               </div>
