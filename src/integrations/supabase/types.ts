@@ -24,15 +24,19 @@ export type Database = {
           created_at: string
           difficulty: string
           id: string
+          is_tournament: boolean
           level: number
           mode: string
           months_survived: number
           net_worth: number
+          player_key: string | null
           player_name: string
           rank_title: string
           score: number
+          season: string | null
           survived: boolean
           trades: number
+          wallet: string | null
           xp: number
         }
         Insert: {
@@ -44,15 +48,19 @@ export type Database = {
           created_at?: string
           difficulty: string
           id?: string
+          is_tournament?: boolean
           level?: number
           mode: string
           months_survived?: number
           net_worth: number
+          player_key?: string | null
           player_name: string
           rank_title?: string
           score?: number
+          season?: string | null
           survived?: boolean
           trades?: number
+          wallet?: string | null
           xp?: number
         }
         Update: {
@@ -64,15 +72,19 @@ export type Database = {
           created_at?: string
           difficulty?: string
           id?: string
+          is_tournament?: boolean
           level?: number
           mode?: string
           months_survived?: number
           net_worth?: number
+          player_key?: string | null
           player_name?: string
           rank_title?: string
           score?: number
+          season?: string | null
           survived?: boolean
           trades?: number
+          wallet?: string | null
           xp?: number
         }
         Relationships: []
