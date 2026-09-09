@@ -180,6 +180,8 @@ export function CryptoJourney() {
   const [resolution, setResolution] = useState<Resolution | null>(null);
   const [ending, setEnding] = useState<EndingKey>("SURVIVOR");
   const [resume, setResume] = useState(false);
+  const [tournament, setTournament] = useState(false);
+
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
   const [muted, setMutedState] = useState(false);
