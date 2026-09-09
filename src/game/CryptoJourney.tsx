@@ -403,13 +403,14 @@ export function CryptoJourney() {
     if (!pos) return;
     const cust = custodyOf(pos.where);
     // cold storage fills a quarter late — that is the price of being untouchable
-    const price = pos.where === "cold" ? priceAt(pos.symbol, Math.max(0, run.chapter - 1), run.noise) : priceAt(pos.symbol, run.chapter, run.noise);
+    const price = pos.where === "cold" ? priceAt(pos.symbol, Math.max(0, run.chapter - 1), run.noise) : mark(pos.symbol);
     const slip = 0.94 + quality * 0.08;
     const whole = valueOf(pos, price) * slip;
     const back = Math.round(whole * fraction);
-    const fee = Math.round(back * cust.fee);
+    const fee = Math.round(back * cust.fee * perkFee);
     const cost = pos.margin * fraction;
     const gain = back - fee - cost;
+
     if (pos.where === "cold") spend();
     setRun((r) => book(book({
       ...r,
