@@ -283,13 +283,16 @@ export function CryptoJourney() {
   const arch = archOf(cfg.arch);
   const diff = diffOf(cfg.difficulty);
   const net = netOf(run);
-  const score = bossScore({ net, chapters: run.chapter, difficulty: cfg.difficulty, crises: run.crises, streak: run.streak });
+  const score = bossScore({ net, chapters: run.chapter, difficulty: cfg.difficulty, crises: run.crises, streak: run.streak, modifier: cfg.modifier });
   const btcMove = pctMove("BTC", run);
   const warning = CHAPTER_WARNINGS[run.chapter] ?? "The market never announces what it is about to do.";
   const presale = presaleFor(run.chapter);
   const xpBar = xpProgress(run.xp);
-  const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`));
+  const persona = personaFor(det(run.seed, "persona"));
+  const act = actFor(run.chapter);
+  const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`), persona.bias);
   const sweeping = attack?.id === "SWEEP";
+
   const signals = useMemo(() => signalsFor(run), [run.chapter, run.seed, run.noise]);
   const bossNet = bossNetOf(run);
   const perkFee = run.perks.includes("CHEAP FEES") ? 0.5 : 1;
