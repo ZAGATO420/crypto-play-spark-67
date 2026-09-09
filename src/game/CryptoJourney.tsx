@@ -1605,7 +1605,7 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
             <input className="setup-input" placeholder="YOUR WALLET (EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
-            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 of the season need it. Wallets stay private. One account per player — prizes are paid within 3 days after the October token launch."}</small>
+            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 need it. Wallets stay private. One account per player — prizes are paid within 3 days after the October launch."}</small>
 
           </div>
         )}
