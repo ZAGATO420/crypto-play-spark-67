@@ -926,18 +926,21 @@ export function CryptoJourney() {
     if (screen !== "run" || phase !== "act" || dialog) return;
     let raf = 0;
     let last = performance.now();
+    let shown = tickRef.current;
     const step = (now: number) => {
       const dt = now - last;
       last = now;
       tickRef.current = Math.min(1, tickRef.current + dt / (fast ? 1_600 : LIVE_MS));
-      setTick(tickRef.current);
       if (tickRef.current >= 1) { tickRef.current = 0; endChapter(); return; }
+      // Repaint at ~5 fps, not 60: a full re-render every frame made the cards flicker.
+      if (tickRef.current - shown >= 0.02) { shown = tickRef.current; setTick(tickRef.current); }
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, phase, dialog, fast, run]);
+
 
 
   const begin = (config: Config) => {
@@ -1199,8 +1202,13 @@ const pctMove = (symbol: CoinSymbol, r: Run) => {
 
 function Count({ value }: { value: number }) {
   const [shown, setShown] = useState(value);
+  const shownRef = useRef(value);
+  useEffect(() => { shownRef.current = shown; }, [shown]);
   useEffect(() => {
-    const from = shown;
+    const from = shownRef.current;
+    // Small live wobbles snap instead of animating, otherwise the number
+    // restarts its count-up every few frames and the card looks like it flickers.
+    if (Math.abs(value - from) < Math.max(2, Math.abs(value) * 0.01)) { setShown(value); return; }
     const start = performance.now();
     let frame = 0;
     const tick = (t: number) => {
@@ -1214,6 +1222,7 @@ function Count({ value }: { value: number }) {
   }, [value]);
   return <>{formatMoney(Math.round(shown))}</>;
 }
+
 
 function Meter({ label, value, icon, tone, detail }: { label: string; value: number; icon: React.ReactNode; tone: string; detail: string }) {
   return (
