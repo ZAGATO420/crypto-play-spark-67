@@ -1244,11 +1244,12 @@ function Rules({ onClose }: { onClose: () => void }) {
       <p className="journey-kicker"><Crown /> THE BOSS EXPLAINS IT ONCE</p>
       <h2>HOW THE CYCLE WORKS</h2>
       <ol className="cy-steps">
-        <li><b>1</b><span>28 chapters, one per quarter, 2020 to 2026. Real prices, no hindsight.</span></li>
-        <li><b>2</b><span>Two moves per chapter: spot, perps, a launch, or wait and bank one for later.</span></li>
-        <li><b>3</b><span>END QUARTER and the market answers. Perps can liquidate, the risk meter can force-close everything.</span></li>
-        <li><b>4</b><span>History hits back: Black Thursday, Luna, FTX, the ETF. Your choice becomes a permanent status.</span></li>
-        <li><b>5</b><span>Hunger or stress at 100 ends the run. So does zero. Only the Boss Score counts on the board.</span></li>
+        <li><b>1</b><span>28 quarters, 2020 to 2026. Real prices, no hindsight. Each quarter runs live — the price moves while you decide.</span></li>
+        <li><b>2</b><span>Moves are your currency: spot, perps, launches, food, sleep. HOLD runs the clock down, WAIT banks a move.</span></li>
+        <li><b>3</b><span>Three signals every quarter and one of them is a lie. VERIFY costs money and shows you which.</span></li>
+        <li><b>4</b><span>The Boss trades his own book against you. Beat him in six boss fights to win his perks — or take his buy-out and pay him forever.</span></li>
+        <li><b>5</b><span>History hits back: Black Thursday, Luna, FTX, the ETF. Hunger or stress at 100 ends the run. Only the Boss Score counts on the board.</span></li>
+
       </ol>
       <Button className="cy-primary" onClick={onClose}>LET ME TRADE</Button>
     </>
