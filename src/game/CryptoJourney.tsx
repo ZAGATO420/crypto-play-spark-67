@@ -836,17 +836,40 @@ export function CryptoJourney() {
     const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
+
+    // conviction: you called the quarter, so the quarter pays or bills you double
+    let convCash = 0;
+    if (run.convictionOn) {
+      convCash = Math.round(delta * 0.5);
+      draft.cash = Math.max(0, draft.cash + convCash);
+      draft.ledger = [{ chapter: next, label: convCash >= 0 ? "Conviction paid off" : "Conviction backfired", amount: convCash }, ...draft.ledger].slice(0, 60);
+      lines.push(convCash >= 0
+        ? `Conviction paid: ${formatMoney(convCash)} extra.`
+        : `Conviction backfired: ${formatMoney(Math.abs(convCash))} gone. He warned you.`);
+    }
+
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
     const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
     const detail = `${chapterLabel(next)} · ${monthRangeLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
     const tone: Log["tone"] = delta >= 0 ? (streak >= 3 ? "yellow" : "cyan") : "pink";
 
-    const nextRun: Run = { ...draft, streak, logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12) };
+    // the Boss trades his own book against yours, every single quarter
+    const boss = bossTurn(run, next);
+    const conviction = run.convictionOn ? 0 : clamp(run.conviction + (delta > 0 && !idle ? 22 : delta < 0 ? -12 : 4));
+    lines.push(boss.line);
+
+    const nextRun: Run = {
+      ...draft, streak, boss, conviction, convictionOn: false,
+      logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
+    };
     setRun(nextRun);
-    setResolution({ title, detail, tone, delta, move, lines, inflow, outflow });
+    setResolution({ title, detail, tone, delta: delta + convCash, move, lines, inflow, outflow });
     setPhase("resolve");
-    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0))));
+    setTick(0);
+    setFast(false);
+    setVerified(false);
+    setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("EXTRA MOVE") ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
@@ -855,8 +878,13 @@ export function CryptoJourney() {
     if (hunger >= 100) return finish("STARVED");
     if (stress >= 100) return finish("BROKEN");
     if (finalNet <= 0) return finish(positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
-    if (next >= CHAPTERS) return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
+    if (next >= CHAPTERS) {
+      // beating him means out-trading his book and taking his fights
+      if (finalNet > bossNetOf(nextRun, next) && nextRun.bossWins >= 3 && criticals === 0) return finish("THRONE");
+      return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
+    }
   };
+
 
   const openChapterCards = (chapter: number) => {
     const cards: Dialog[] = [];
