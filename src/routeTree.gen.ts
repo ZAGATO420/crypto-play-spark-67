@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContentRouteImport } from './routes/content'
+import { Route as PrizepoolRouteImport } from './routes/prizepool'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TrailerRouteImport } from './routes/trailer'
 import { Route as ApiPublicLeaderboardRouteImport } from './routes/api/public/leaderboard'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ContentRoute = ContentRouteImport.update({
   id: '/content',
   path: '/content',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrizepoolRoute = PrizepoolRouteImport.update({
+  id: '/prizepool',
+  path: '/prizepool',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -50,6 +56,7 @@ const ApiPublicPricesRoute = ApiPublicPricesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/content': typeof ContentRoute
+  '/prizepool': typeof PrizepoolRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trailer': typeof TrailerRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/content': typeof ContentRoute
+  '/prizepool': typeof PrizepoolRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trailer': typeof TrailerRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/content': typeof ContentRoute
+  '/prizepool': typeof PrizepoolRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trailer': typeof TrailerRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/content'
+    | '/prizepool'
     | '/sitemap.xml'
     | '/trailer'
     | '/api/public/leaderboard'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/content'
+    | '/prizepool'
     | '/sitemap.xml'
     | '/trailer'
     | '/api/public/leaderboard'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/content'
+    | '/prizepool'
     | '/sitemap.xml'
     | '/trailer'
     | '/api/public/leaderboard'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContentRoute: typeof ContentRoute
+  PrizepoolRoute: typeof PrizepoolRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrailerRoute: typeof TrailerRoute
   ApiPublicLeaderboardRoute: typeof ApiPublicLeaderboardRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/content'
       fullPath: '/content'
       preLoaderRoute: typeof ContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prizepool': {
+      id: '/prizepool'
+      path: '/prizepool'
+      fullPath: '/prizepool'
+      preLoaderRoute: typeof PrizepoolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContentRoute: ContentRoute,
+  PrizepoolRoute: PrizepoolRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrailerRoute: TrailerRoute,
   ApiPublicLeaderboardRoute: ApiPublicLeaderboardRoute,
