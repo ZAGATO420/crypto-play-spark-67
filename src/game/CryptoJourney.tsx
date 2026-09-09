@@ -1067,7 +1067,7 @@ export function CryptoJourney() {
                     );
                   })}
                 </div>
-                {attack && <p className="cy-attack"><strong>{attack.title} ·</strong> {attack.line}</p>}
+                {attack && <p className="cy-attack"><strong>{attack.name} ·</strong> {attack.line}</p>}
                 <div className="cy-signals">
                   {signals.map((s, i) => (
                     <span key={i} className={`cy-signal${verified && s.fake ? " is-fake" : ""}${verified && !s.fake ? " is-true" : ""}`}>{s.text}</span>
