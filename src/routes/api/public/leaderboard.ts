@@ -300,9 +300,16 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           return Response.json({ error: "score rejected" }, { status: 422, headers: CORS });
         }
 
+        const now = new Date();
+        const currentSeason = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+        if (run.isTournament && run.season !== currentSeason) {
+          return Response.json({ error: "season closed" }, { status: 422, headers: CORS });
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively.
         const rankMatch = RANKS.find((r) => r.toLowerCase() === run.rank.trim().toLowerCase());
+        const finalScore = Math.round(Math.min(Math.max(0, run.score), scoreCeiling(run)));
         const row = {
           client_hash: run.clientHash,
           player_name: sanitizeName(run.name),
@@ -318,10 +325,39 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           achievements: run.achievements,
           trades: run.trades,
           survived: run.survived,
-          score: Math.round(Math.min(Math.max(0, run.score), scoreCeiling(run))),
-
+          score: finalScore,
+          season: run.season ?? null,
+          wallet: run.isTournament ? run.wallet ?? null : null,
+          is_tournament: run.isTournament,
+          player_key: run.isTournament ? run.playerKey ?? null : null,
           avatar: run.avatar ?? null,
         };
+
+        // One best tournament result per player and season: replace only when better.
+        if (run.isTournament) {
+          const { data: existing } = await supabaseAdmin
+            .from("leaderboard_runs")
+            .select("id, score")
+            .eq("season", run.season!)
+            .eq("player_key", run.playerKey!)
+            .eq("is_tournament", true)
+            .maybeSingle();
+          if (existing) {
+            if (Number(existing.score) >= finalScore) {
+              return Response.json({ ok: true, success: true, kept: true }, { status: 200, headers: CORS });
+            }
+            let { error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id);
+            for (let attempt = 0; attempt < 3 && upErr; attempt++) {
+              await sleep(300 * (attempt + 1));
+              ({ error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id));
+            }
+            if (upErr) {
+              console.error("leaderboard tournament update failed", upErr);
+              return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
+            }
+            return Response.json({ ok: true, success: true, improved: true }, { status: 201, headers: CORS });
+          }
+        }
 
         let { error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true });
         // PGRST303 / network blips: retry safely using the unique client hash.
@@ -329,6 +365,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           await sleep(300 * (attempt + 1));
           ({ error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true }));
         }
+
 
         if (error) {
           console.error("leaderboard write failed", error);
