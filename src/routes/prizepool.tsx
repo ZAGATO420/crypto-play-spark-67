@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { fetchPrizepool, type PrizeSeason } from "@/lib/prizepool.functions";
 import { shortWallet } from "@/game/season";
-import { CountryFlag } from "@/game/flags";
+import { Flag as CountryFlag } from "@/game/flags";
 
 const MONTHS = [
   "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",

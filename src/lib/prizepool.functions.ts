@@ -58,6 +58,7 @@ export const fetchPrizepool = createServerFn({ method: "POST" })
 
     const bySeason = new Map<string, PrizeEntry[]>();
     for (const r of rows ?? []) {
+      if (!r.season || !r.wallet) continue;
       const entry: PrizeEntry = {
         name: r.player_name,
         country: r.country,
