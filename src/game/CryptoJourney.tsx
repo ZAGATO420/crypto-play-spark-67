@@ -15,10 +15,11 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
-  bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, pickLifeEvent, presaleFor, situationFor, xpProgress,
-  type Archetype, type BaseMode, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
+  attackFor, bossFightFor, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, pickLifeEvent, presaleFor, situationFor, xpProgress,
+  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
 } from "./journey-data";
+
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
