@@ -22,6 +22,9 @@ import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { det, randomSeed } from "./rng";
+import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readWallet, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
+
 
 /* ------------------------------------------------------------------ types */
 
