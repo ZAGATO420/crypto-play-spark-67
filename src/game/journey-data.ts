@@ -632,3 +632,83 @@ export const HINTS: Record<number, string> = {
   20: "Withdrawal times on your exchange got noticeably slower this month.",
 };
 export const hintFor = (chapter: number) => HINTS[chapter];
+
+
+/* ==================================================================== */
+/*  Warmth, clarity and pull: everything below exists so the run reads   */
+/*  like a story you are inside of, not a form you are filling in.       */
+/* ==================================================================== */
+
+/** The guided opening. One goal at a time, in plain words, no jargon. */
+export type Guide = { chapter: number; goal: string; why: string };
+export const GUIDE_STEPS: Guide[] = [
+  { chapter: 0, goal: "Buy Bitcoin with a quarter of your cash", why: "One tap on the QUICK BUY row does it. You cannot win a cycle from the sidelines." },
+  { chapter: 1, goal: "Survive the quarter and end it yourself", why: "END QUARTER lets the market answer. Your money moves, then you see exactly where it went." },
+  { chapter: 2, goal: "Get your coins off the exchange", why: "CUSTODY moves your bag to a wallet you own. Exchanges in this game really do collapse." },
+];
+export const guideFor = (chapter: number) => GUIDE_STEPS.find((g) => g.chapter === chapter);
+
+export type Objective = { goal: string; why: string; urgent: boolean };
+
+/** What the player should do right now, in one sentence a beginner understands. */
+export const objectiveFor = (s: {
+  chapter: number; positions: number; cash: number; hunger: number; stress: number;
+  taxDebt: number; crash: boolean; presale: boolean; moves: number; net: number; bossNet: number;
+}): Objective => {
+  const guide = guideFor(s.chapter);
+  if (guide) return { goal: guide.goal, why: guide.why, urgent: false };
+  if (s.hunger >= 75) return { goal: "Eat something before hunger ends the run", why: "Hunger at 100 is game over. SURVIVE costs a move and some money — pay it.", urgent: true };
+  if (s.stress >= 75) return { goal: "Calm down before your head goes", why: "Stress at 100 ends the run just like broke does. Take the move.", urgent: true };
+  if (s.crash) return { goal: "Protect the bag: this quarter breaks charts", why: "Sell part of it, or hit the exit when the crash card comes. Frozen hands pay full price.", urgent: true };
+  if (s.taxDebt > 0) return { goal: "Clear your tax debt before it grows", why: "Unpaid tax grows 5% every quarter and eats every green quarter you have.", urgent: true };
+  if (!s.positions && s.cash > 0) return { goal: "Get money into the market", why: "Cash does not compound. The Boss is fully invested and he is ahead of you.", urgent: false };
+  if (s.net < s.bossNet) return { goal: `Close the gap: he is ${Math.round(((s.bossNet - s.net) / Math.max(1, s.bossNet)) * 100)}% ahead`, why: "Out-trade his book. Beating him on net worth is the only way to the throne.", urgent: false };
+  if (s.presale) return { goal: "Decide on the launch that is live", why: "Early tickets are the fastest money in the game and the fastest way to get rugged.", urgent: false };
+  return { goal: "Take profit or add — but make the quarter count", why: "Doing nothing costs stress, hunger and money. Idle quarters are punished.", urgent: false };
+};
+
+/** Every number on screen can explain itself in one sentence. */
+export const EXPLAIN: Record<string, string> = {
+  net: "NET WORTH: your cash plus everything your positions are worth right now, minus tax you still owe.",
+  cash: "CASH: money you can spend this quarter. Rent, food and tax come out of it whether you like it or not.",
+  left: "QUARTERS LEFT: how much of 2020–2026 is still ahead of you. Surviving longer multiplies your score.",
+  score: "BOSS SCORE: net worth × how far you survived × difficulty, plus every crisis you lived through, times your streak. Only this counts on the board.",
+  moves: "MOVES: actions per quarter. Trading, moving coins, eating and changing your life each cost one.",
+  risk: "RISK: how exposed you are through leverage. Above 95% the exchange force-closes your perps.",
+  hunger: "HUNGER: reaches 100 and the run ends. Eating costs a move and real money.",
+  stress: "STRESS: reaches 100 and you break. Cheap rent and leverage push it up, calm and green quarters bring it down.",
+  streak: "STREAK: green quarters in a row. Each one multiplies your score, one red quarter resets it.",
+  boss: "THE BOSS' BOOK: he trades his own money against you every quarter. Finish above him and you take the throne.",
+  conviction: "CONVICTION: fills with good quarters. Armed, the next quarter counts 1.5x — up or down.",
+  xp: "LEVEL: experience from every trade, crisis and survived quarter. Higher levels shave your living costs.",
+};
+
+/** The Boss talks back. Short, mean, and always about what just happened. */
+export const BOSS_REACTIONS: Record<"win" | "loss" | "liq" | "crash" | "save" | "green" | "red" | "idle", string[]> = {
+  win: ["Lucky. Do it twice.", "Careful, you almost looked like a trader.", "Screenshot it. It will not last."],
+  loss: ["That one is going in my scrapbook.", "You paid tuition. Again.", "I felt that from across the room."],
+  liq: ["Liquidated. My favourite sound.", "Your margin was my liquidity.", "Borrowed courage, returned empty."],
+  crash: ["Everybody panics. Only the timing differs.", "This is the part where most people quit.", "Charts do not care about your plans."],
+  save: ["Fast hands. Annoying.", "You got out. I noticed.", "Fine. That was actually good."],
+  green: ["Green quarter. Do not get attached.", "You are up. Statistically, that is temporary.", "Enjoy it. I am still ahead of you."],
+  red: ["Red again. The market is not confused, you are.", "Down. Predictably.", "You are funding somebody else's yacht."],
+  idle: ["You did nothing. Doing nothing has a price.", "Sitting still is a position, and it is losing.", "The chart moved. You did not."],
+};
+export const bossReaction = (kind: keyof typeof BOSS_REACTIONS, salt: number) => {
+  const list = BOSS_REACTIONS[kind];
+  return list[Math.abs(salt) % list.length]!;
+};
+
+/** First-person beats: the moments a player actually remembers. */
+export const MILESTONES: { id: string; net: number; line: string }[] = [
+  { id: "m10k", net: 10_000, line: "Five figures. I stopped telling people it was a hobby." },
+  { id: "m100k", net: 100_000, line: "Six figures. I sat in the dark and refreshed the screen for an hour." },
+  { id: "m500k", net: 500_000, line: "Half a million. I started sleeping badly for entirely new reasons." },
+  { id: "m1m", net: 1_000_000, line: "A million. Nobody in my family would believe the number, so I never said it." },
+];
+
+/** How many quarters until history hits again — the dread, without the spoiler. */
+export const doomIn = (chapter: number) => {
+  for (let c = chapter + 1; c <= CHAPTERS; c++) if (CRASHES[c] || EXCHANGE_FAILURES[c]) return c - chapter;
+  return null;
+};

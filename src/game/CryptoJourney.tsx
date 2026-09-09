@@ -15,10 +15,11 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, HOUSING, JOBS, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
-  actFor, attackFor, bossFightFor, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, modifierOf, monthRangeLabel, monthsSurvived, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
+  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
+
 import { readProfile, recordRun, type Profile } from "./profile";
 
 
@@ -26,7 +27,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readWallet, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
@@ -45,7 +46,12 @@ type Run = {
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
   boss: BossBook; conviction: number; convictionOn: boolean; perks: string[]; bossWins: number;
+  /** The story of this run, in the player's own voice. Rendered on the end screen. */
+  chronicle: string[];
+  /** Milestone ids already lived through, so a beat never repeats. */
+  seen: string[];
 };
+
 
 type Phase = "brief" | "act" | "resolve";
 type LaunchResult = { name: string; tag: string; size: number; back: number; multi: number; rugged: boolean; line: string };
@@ -75,6 +81,8 @@ type Dialog =
   | { k: "fight"; chapter: number }
   | { k: "offer"; attack: BossAttack }
   | { k: "score" }
+  | { k: "year"; chapter: number }
+
   | { k: "sound" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
@@ -155,6 +163,8 @@ const freshRun = (config: Config, reuse?: number): Run => {
     logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0,
+    chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [],
+
   };
 };
 
@@ -264,6 +274,11 @@ export function CryptoJourney() {
 
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
+  // the feeling layer: a coloured flash over everything, and the Boss talking back
+  const [fxFlash, setFxFlash] = useState<"gold" | "red" | null>(null);
+  const [bossTalk, setBossTalk] = useState<string | null>(null);
+  const [details, setDetails] = useState(false);
+
   const [muted, setMutedState] = useState(false);
   const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
   useEffect(() => { wireAudio(); initAudio(); preloadSfx(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
@@ -323,6 +338,13 @@ export function CryptoJourney() {
     const t = window.setTimeout(() => setNetPulse(null), 700);
     return () => window.clearTimeout(t);
   }, [net, screen]);
+  /** The music leans with the market: hyped in a bull, choked in a crash. */
+  useEffect(() => {
+    if (screen !== "run") return;
+    const danger = crashFor(run.chapter) || run.stress > 75 || run.hunger > 75 || run.risk > 85;
+    setMood(danger ? "tense" : run.streak >= 2 ? "hype" : "calm");
+  }, [screen, run.chapter, run.stress, run.hunger, run.risk, run.streak]);
+
 
   const say = (text: string, tone: Log["tone"] = "cyan") => {
     setFlash({ text, tone });
@@ -353,10 +375,30 @@ export function CryptoJourney() {
 
   const rumble = () => { playSfx("crash"); setShake(true); window.setTimeout(() => setShake(false), 520); };
 
+  /**
+   * One place decides how a moment *feels*: sound, colour, shake, the flying
+   * number and what the Boss says about it. Every action calls this instead of
+   * wiring its own effects, so nothing on screen stays silent.
+   */
+  const feel = (kind: "win" | "loss" | "liq" | "crash" | "save" | "green" | "red" | "idle", amount?: number) => {
+    const salt = run.chapter * 7 + run.trades + run.moves;
+    if (kind === "win" || kind === "green" || kind === "save") { setFxFlash("gold"); playSfx(kind === "save" ? "hit" : "win"); }
+    if (kind === "loss" || kind === "red") { setFxFlash("red"); playSfx("sell"); }
+    if (kind === "liq" || kind === "crash") { setFxFlash("red"); rumble(); }
+    if (kind === "idle") playSfx("click");
+    if (amount !== undefined && Math.abs(amount) >= 1) pop(`${amount >= 0 ? "+" : "−"}${formatMoney(Math.abs(amount))}`, amount >= 0 ? "up" : "down");
+    setBossTalk(bossReaction(kind, salt));
+    window.setTimeout(() => setFxFlash(null), 620);
+  };
+
   const spend = (cost = 1) => { setAp((a) => Math.max(0, a - cost)); setRun((r) => ({ ...r, moves: r.moves + 1 })); };
 
   /** Every dollar that moves gets a line in the books. Nothing is invisible. */
   const book = (r: Run, label: string, amount: number): Run => ({ ...r, ledger: [{ chapter: r.chapter, label, amount }, ...r.ledger].slice(0, 60) });
+
+  /** One line of the story, told in the first person, kept for the end screen. */
+  const chron = (r: Run, line: string): Run => ({ ...r, chronicle: [...r.chronicle, line].slice(-14) });
+
 
   /* ---------------------------------------------------------- run actions */
 
@@ -439,9 +481,12 @@ export function CryptoJourney() {
     }, `Closed ${pos.symbol}`, back), `${cust.short} fee`, -fee));
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " · settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
-    pop(`${gain >= 0 ? "+" : "−"}${formatMoney(Math.abs(gain))}`, gain >= 0 ? "up" : "down");
+    feel(gain >= 0 ? "win" : "loss", gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
-    if (gain < 0) rumble();
+    if (Math.abs(gain) >= 25_000) setRun((r) => chron(r, gain >= 0
+      ? `In ${chapterLabel(run.chapter)} I took ${formatMoney(gain)} out of ${pos.symbol} and felt untouchable.`
+      : `${chapterLabel(run.chapter)}: I closed ${pos.symbol} for a ${formatMoney(Math.abs(gain))} loss and told myself it was tuition.`));
+
   };
 
   /**
@@ -477,27 +522,29 @@ export function CryptoJourney() {
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
       const won = Math.round(wager * 2);
-      setRun((r) => book({
+      setRun((r) => chron(book({
         ...r, cash: r.cash + won, bossWins: r.bossWins + 1, conviction: clamp(r.conviction + 35),
         boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
         perks: Array.from(new Set([...r.perks, fight.perk])),
         statuses: Array.from(new Set([...r.statuses, "BOSS BEATEN"])),
-      }, `${fight.title} · won`, won));
+      }, `${fight.title} · won`, won), `I beat him at ${fight.title.replace(/^.*· /, "")} and took ${formatMoney(won)} off his table.`));
       say(`You took ${formatMoney(won)} off the Boss. Perk unlocked: ${fight.perk}.`, "yellow");
-      playSfx("win");
+      feel("win", won);
       grantXp(XP_EXTRA.escape * 2, "BOSS BEATEN");
     } else if (quality >= 0.5) {
       setRun((r) => ({ ...r, stress: clamp(r.stress + 8), conviction: clamp(r.conviction + 10) }));
       say("A draw. He keeps the chair, you keep your stake.", "cyan");
+      feel("save");
       grantXp(XP_EXTRA.minigameOk, "HELD YOUR GROUND");
     } else {
-      setRun((r) => book({
+      setRun((r) => chron(book({
         ...r, cash: Math.max(0, r.cash - wager), stress: clamp(r.stress + 16), conviction: 0, convictionOn: false,
         boss: { ...r.boss, cash: r.boss.cash + wager, line: "He counted your money in front of you." },
-      }, `${fight.title} · lost`, -wager));
+      }, `${fight.title} · lost`, -wager), `He took ${formatMoney(wager)} off me in ${chapterLabel(chapter)} and made sure the room saw it.`));
       say(`He took ${formatMoney(wager)} and told the room about it.`, "pink");
-      rumble();
+      feel("liq", -wager);
     }
+
     nextInQueue();
   };
 
@@ -649,22 +696,25 @@ export function CryptoJourney() {
 
   /** Crash cards hand you a panic exit: tap fast and you save part of the bag. */
   const resolveCrash = (chapter: number, quality: number) => {
+    const title = crashFor(chapter)?.title ?? "the crash";
     if (quality >= 0.9) {
-      setRun((r) => ({ ...r, stress: clamp(r.stress - 10), statuses: Array.from(new Set([...r.statuses, "COLD BLOODED"])) }));
+      setRun((r) => chron({ ...r, stress: clamp(r.stress - 10), statuses: Array.from(new Set([...r.statuses, "COLD BLOODED"])) }, `I saw ${title} coming and got out with my hands steady.`));
       say("You de-risked into the crash. The Boss hates good reflexes.", "yellow");
+      feel("save");
       grantXp(XP_EXTRA.escape, "CRASH DODGED");
     } else if (quality >= 0.5) {
       setRun((r) => ({ ...r, positions: r.positions.map((p) => ({ ...p, margin: p.margin * 0.94, qty: p.qty * 0.94 })), stress: clamp(r.stress + 6) }));
       say("Half your orders filled. The rest went through at panic prices.", "cyan");
+      feel("crash");
       grantXp(XP_EXTRA.minigameOk, "PARTIAL EXIT");
     } else {
-      setRun((r) => ({ ...r, positions: r.positions.map((p) => ({ ...p, margin: p.margin * 0.84, qty: p.qty * 0.84 })), stress: clamp(r.stress + 16) }));
+      setRun((r) => chron({ ...r, positions: r.positions.map((p) => ({ ...p, margin: p.margin * 0.84, qty: p.qty * 0.84 })), stress: clamp(r.stress + 16) }, `${title} hit and I just sat there watching the numbers fall.`));
       say("You froze. The book emptied without you.", "pink");
-      rumble();
+      feel("crash");
     }
-    void chapter;
     nextInQueue();
   };
+
 
   const resolveSeed = (quality: number) => {
     if (quality >= 0.9) {
@@ -876,8 +926,20 @@ export function CryptoJourney() {
     const conviction = run.convictionOn ? 0 : clamp(run.conviction + (delta > 0 && !idle ? 22 : delta < 0 ? -12 : 4));
     lines.push(boss.line);
 
+    const liquidated = lines.some((l) => l.includes("liquidated"));
+    // the story of the run writes itself from the quarters that actually hurt or paid
+    const story: string[] = [];
+    if (liquidated) story.push(`${chapterLabel(next)}: I got liquidated and stared at an empty position for a while.`);
+    if (failure && lines.some((l) => l.includes(failure.name) && l.includes("gone"))) story.push(`${failure.name} took money that was supposed to be mine.`);
+    if (Math.abs(delta) >= Math.max(40_000, startNet * 0.5)) story.push(delta > 0
+      ? `${chapterLabel(next)} paid me ${formatMoney(delta)} and I thought I had figured it out.`
+      : `${chapterLabel(next)} cost me ${formatMoney(Math.abs(delta))} and I stopped opening the app for a week.`);
+    const milestone = MILESTONES.find((m) => !run.seen.includes(m.id) && netOf(draft) >= m.net);
+
     const nextRun: Run = {
       ...draft, streak, boss, conviction, convictionOn: false,
+      chronicle: [...draft.chronicle, ...story, ...(milestone ? [milestone.line] : [])].slice(-14),
+      seen: milestone ? [...run.seen, milestone.id] : run.seen,
       logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
     };
     setRun(nextRun);
@@ -888,8 +950,10 @@ export function CryptoJourney() {
     setVerified(false);
     setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("+1 MOVE") ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
-    if (lines.some((l) => l.includes("liquidated")) || move <= -20) rumble();
+    feel(liquidated ? "liq" : idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash);
+    if (milestone) say(milestone.line, "yellow");
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
+
 
     const finalNet = netOf(nextRun);
     if (hunger >= 100) return finish("STARVED");
@@ -989,10 +1053,19 @@ export function CryptoJourney() {
 
 
   const mood = run.stress > 70 || run.hunger > 70 ? enragedBoss.url : run.streak >= 2 ? smugBoss.url : crownedBoss.url;
-  const bossLine = phase === "brief" ? warning : phase === "resolve" ? resolution?.detail ?? warning : "Two moves. Make them count, or bank one and wait for blood.";
+  const bossLine = bossTalk ?? (phase === "brief" ? warning : phase === "resolve" ? resolution?.detail ?? warning : "Two moves. Make them count, or bank one and wait for blood.");
+  // the one sentence a first-time player needs, and the dread of what is coming
+  const objective = objectiveFor({
+    chapter: run.chapter, positions: run.positions.length, cash: run.cash, hunger: run.hunger, stress: run.stress,
+    taxDebt: run.taxDebt, crash: !!crashFor(run.chapter), presale: !!presaleFor(run.chapter), moves: ap, net, bossNet,
+  });
+  const doom = doomIn(run.chapter);
+
 
   return (
     <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
+      {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
+
       <header className="cy-top">
         <div className="min-w-0">
           <p className="journey-kicker">{act.name} · {chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty}{cfg.modifier !== "straight" ? ` · ${modifierOf(cfg.modifier).name}` : ""}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · ${seasonLabel(cfg.season)}` : ""}</p>
@@ -1010,6 +1083,13 @@ export function CryptoJourney() {
         </div>
       </header>
 
+      <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}`} aria-live="polite">
+        <p className="cy-goal-head">DO THIS NOW</p>
+        <p className="cy-goal-line">{objective.goal}</p>
+        <p className="cy-goal-why">{objective.why}</p>
+        {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
+      </section>
+
       <section className="cy-meters" aria-label="Run status">
         <Meter label="RISK" value={run.risk} tone={run.risk > 70 ? "pink" : "yellow"} detail={`${Math.round(run.risk)}%`} icon={<Zap />} />
         <Meter label="HUNGER" value={run.hunger} tone={run.hunger > 70 ? "pink" : "cyan"} detail={`${run.hunger}%`} icon={<Activity />} />
@@ -1017,19 +1097,27 @@ export function CryptoJourney() {
         <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
       </section>
 
+      <button className="cy-details-toggle" onClick={() => setDetails((d) => !d)} aria-expanded={details}>
+        {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
+      </button>
 
-      <section className="cy-versus" aria-label="You against the Boss">
-        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs {persona.name}</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
-        <div className="cy-versus-bar">
-          <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
-        </div>
-        <div className="cy-versus-num"><strong>{formatMoney(net)}</strong><strong className="boss">{formatMoney(bossNet)}</strong></div>
-        <div className="cy-conviction">
-          <span>CONVICTION</span>
-          <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
-          <button className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
-        </div>
-      </section>
+      {details && (
+        <section className="cy-versus" aria-label="You against the Boss">
+          <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs {persona.name}</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
+          <p className="cy-versus-help">{EXPLAIN["boss"]}</p>
+          <div className="cy-versus-bar">
+            <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
+          </div>
+          <div className="cy-versus-num"><strong>{formatMoney(net)}</strong><strong className="boss">{formatMoney(bossNet)}</strong></div>
+          <div className="cy-conviction">
+            <span>CONVICTION</span>
+            <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
+            <button className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+          </div>
+          <p className="cy-versus-help">{EXPLAIN["conviction"]}</p>
+        </section>
+      )}
+
 
       <section className="cy-positions" aria-label="Open positions">
         <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK · {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
@@ -1053,6 +1141,13 @@ export function CryptoJourney() {
             })}
           </div>
         ) : <p className="cy-empty">No positions. Cash does not win chapters.</p>}
+        {run.positions.length > 0 && (() => {
+          const p = [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
+          const price = mark(p.symbol);
+          const pnl = pnlOf(p, price);
+          return <p className="cy-pos-plain">Your biggest bet: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap it to sell.</p>;
+        })()}
+
       </section>
 
 
@@ -2043,6 +2138,14 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
           {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
           {profile && <small className="end-progress">RUN {profile.runs} · ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} · BEST {formatMoney(profile.bestNet)}</small>}
         </div>
+
+        {run.chronicle.length > 1 && (
+          <div className="end-chronicle">
+            <p className="journey-kicker">HOW IT WENT</p>
+            <ol>{run.chronicle.slice(-7).map((line, i) => <li key={i}>{line}</li>)}</ol>
+          </div>
+        )}
+
 
         {tournament && status !== "done" && (
           <div className="end-wallet">

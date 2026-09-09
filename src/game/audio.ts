@@ -34,6 +34,7 @@ const FADE = 2;
 type State = {
   ctx: AudioContext | null;
   musicBus: GainNode | null;
+  moodFilter: BiquadFilterNode | null;
   sfxBus: GainNode | null;
   players: Partial<Record<TrackId, { el: HTMLAudioElement; gain: GainNode }>>;
   buffers: Partial<Record<SfxId, AudioBuffer>>;
@@ -42,7 +43,17 @@ type State = {
   ready: boolean;
 };
 
-const s: State = { ctx: null, musicBus: null, sfxBus: null, players: {}, buffers: {}, loading: {}, track: null, ready: false };
+const s: State = { ctx: null, musicBus: null, moodFilter: null, sfxBus: null, players: {}, buffers: {}, loading: {}, track: null, ready: false };
+
+/** The music leans with the market: hyped in a bull, thin and tense in a crash. */
+export type Mood = "calm" | "hype" | "tense";
+const MOOD: Record<Mood, { cut: number; gain: number }> = {
+  calm: { cut: 16_000, gain: 1 },
+  hype: { cut: 20_000, gain: 1.15 },
+  tense: { cut: 900, gain: 0.72 },
+};
+let mood: Mood = "calm";
+
 
 const num = (key: string, fallback: number) => {
   if (typeof localStorage === "undefined") return fallback;
@@ -66,9 +77,17 @@ export function readSettings() {
 const applyBuses = () => {
   if (!s.ctx || !s.musicBus || !s.sfxBus) return;
   const t = s.ctx.currentTime;
-  s.musicBus.gain.setTargetAtTime(muted ? 0 : musicVol, t, 0.2);
+  s.musicBus.gain.setTargetAtTime(muted ? 0 : musicVol * MOOD[mood].gain, t, 0.2);
   s.sfxBus.gain.setTargetAtTime(muted ? 0 : sfxVol, t, 0.05);
+  if (s.moodFilter) s.moodFilter.frequency.setTargetAtTime(MOOD[mood].cut, t, 0.6);
 };
+
+/** Called by the run: bull market opens the music up, a crash chokes it. */
+export function setMood(next: Mood) {
+  if (mood === next) return;
+  mood = next;
+  applyBuses();
+}
 
 export function initAudio() {
   if (typeof window === "undefined") return;
@@ -79,7 +98,10 @@ export function initAudio() {
     s.ctx = new Ctor();
     s.musicBus = s.ctx.createGain();
     s.sfxBus = s.ctx.createGain();
-    s.musicBus.connect(s.ctx.destination);
+    s.moodFilter = s.ctx.createBiquadFilter();
+    s.moodFilter.type = "lowpass";
+    s.moodFilter.frequency.value = MOOD[mood].cut;
+    s.musicBus.connect(s.moodFilter).connect(s.ctx.destination);
     s.sfxBus.connect(s.ctx.destination);
     s.ready = true;
   }
@@ -87,6 +109,7 @@ export function initAudio() {
   applyBuses();
   if (s.track) void setTrack(s.track);
 }
+
 
 function player(id: TrackId) {
   if (!s.ctx || !s.musicBus) return null;
