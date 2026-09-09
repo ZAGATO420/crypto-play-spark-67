@@ -995,7 +995,7 @@ export function CryptoJourney() {
     <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · TOURNAMENT ${seasonLabel(cfg.season)}` : ""}</p>
+          <p className="journey-kicker">{act.name} · {chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty}{cfg.modifier !== "straight" ? ` · ${modifierOf(cfg.modifier).name}` : ""}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · ${seasonLabel(cfg.season)}` : ""}</p>
           <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
           <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
             <span className="cy-level">LVL {xpBar.level}</span>
@@ -1019,7 +1019,7 @@ export function CryptoJourney() {
 
 
       <section className="cy-versus" aria-label="You against the Boss">
-        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs BOSS</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
+        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs {persona.name}</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
         <div className="cy-versus-bar">
           <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
         </div>
