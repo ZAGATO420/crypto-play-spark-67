@@ -648,8 +648,9 @@ export function CryptoJourney() {
     cash = Math.max(0, cash);
 
     // a private life happens whether the chart cares or not
-    if (next > 1 && Math.random() < 0.42) {
-      const ev = pickLifeEvent(Math.random());
+    if (next > 1 && det(run.seed, `life-${next}`) < 0.42) {
+      const ev = pickLifeEvent(det(run.seed, `life-pick-${next}`));
+
       if (ev.cash < 0) { cash = Math.max(0, cash + ev.cash); spendOn(ev.label, -ev.cash); }
       else { cash += ev.cash; earnFrom(ev.label, ev.cash); }
       lines.push(`${ev.label}: ${ev.line}`);
