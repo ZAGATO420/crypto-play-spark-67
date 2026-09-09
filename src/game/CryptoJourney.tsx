@@ -109,22 +109,30 @@ const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLO
   BROKE: ["Your portfolio has successfully become a tax deduction.", "Seven years of alpha, distilled into zero.", "The Boss thanks you for providing exit liquidity."],
 };
 
-const makeNoise = (mode: BaseMode) => {
+const makeNoise = (mode: BaseMode, seed: number) => {
   const step = mode === "historical" ? 0 : mode === "chaos" ? 0.05 : 0.018;
   const cap = mode === "chaos" ? 0.4 : 0.12;
   let drift = 0;
-  return Array.from({ length: 84 }, () => {
-    drift = Math.max(-cap, Math.min(cap, drift + (Math.random() * 2 - 1) * step));
+  return Array.from({ length: 84 }, (_, i) => {
+    drift = Math.max(-cap, Math.min(cap, drift + (det(seed, `noise-${i}`) * 2 - 1) * step));
     return 1 + drift;
   });
 };
 
-const freshRun = (config: Config): Run => ({
-  chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
-  hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-  custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
-  ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode), muted: false, config,
-});
+// Tournament runs all share the season seed, so every player meets the same
+// market noise, the same rugs and the same drainers. Free runs stay random.
+const seedFor = (config: Config) => (config.tournament ? seasonSeed(config.season) : randomSeed());
+
+const freshRun = (config: Config): Run => {
+  const seed = seedFor(config);
+  return {
+    chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
+    hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
+    custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
+    ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
+  };
+};
+
 
 const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
   const month = chapterMonth(chapter);
