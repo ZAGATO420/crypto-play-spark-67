@@ -671,8 +671,10 @@ export function CryptoJourney() {
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
+    if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
     return resolveSeed(res.quality);
   };
+
 
   // one card at a time: crash report, then the historical decision, then the small moment
   const nextInQueue = () => {
