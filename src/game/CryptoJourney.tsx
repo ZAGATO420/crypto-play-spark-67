@@ -346,14 +346,15 @@ export function CryptoJourney() {
   /* ---------------------------------------------------------- run actions */
 
   const openSpot = (symbol: CoinSymbol, fraction: number) => {
-    const price = priceAt(symbol, run.chapter, run.noise);
+    const price = mark(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} does not exist yet. Time travel has rules.`, "pink");
     const cust = custodyOf(run.custody);
     const budget = Math.floor(run.cash * fraction);
-    const size = Math.floor(budget / (1 + cust.fee));
+    const size = Math.floor(budget / (1 + cust.fee * perkFee));
     if (size < 50) return say("Under $50. The Boss has more in his couch cushions.", "pink");
-    const fee = Math.round(size * cust.fee);
+    const fee = Math.round(size * cust.fee * perkFee);
+
     spend();
     setRun((r) => {
       if (r.cash < size + fee) return r;
