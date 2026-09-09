@@ -55,6 +55,8 @@ const MODES = [
   "IRONMAN-historical",
 ] as const;
 
+const WALLET = /^(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})$/;
+
 const runSchema = z.object({
   clientHash: z.string().uuid(),
   name: z.string().trim().min(1).max(18),
@@ -72,7 +74,16 @@ const runSchema = z.object({
   survived: z.boolean().default(false),
   score: z.number().finite().min(0).max(1e12).default(0),
   avatar: z.string().trim().max(12).optional(),
+  season: z.string().regex(/^\d{4}-\d{2}$/).optional(),
+  wallet: z.string().trim().regex(WALLET).optional(),
+  isTournament: z.boolean().default(false),
+  playerKey: z.string().trim().min(6).max(64).optional(),
+}).refine((r) => !r.isTournament || (r.wallet && r.season && r.playerKey), {
+  message: "tournament runs need season, wallet and playerKey",
 });
+
+const PRIZES = [20, 10, 5];
+
 
 // Mirrors the client's XP_LEVELS thresholds (public/game.html). level = index + 1.
 const XP_THRESHOLDS = [
