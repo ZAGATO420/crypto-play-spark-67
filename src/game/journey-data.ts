@@ -371,6 +371,49 @@ export const ENDINGS = {
 } as const;
 export type EndingKey = keyof typeof ENDINGS;
 
+/** What it takes to unlock each ending — shown as a hint while it is still locked. */
+export const ENDING_HINTS: Record<EndingKey, string> = {
+  THRONE: "Beat the Boss' own book, win 3 fights, never hit a critical state.",
+  LEGEND: "Reach 60x your start money, survive 6 crises, trade at least 12 times, stay out of the red zones.",
+  SURVIVOR: "Reach the last quarter of 2026 with money left.",
+  CASINO: "Get liquidated until nothing is left.",
+  STARVED: "Let hunger hit 100.",
+  BROKEN: "Let stress hit 100.",
+  BROKE: "Lose every dollar without leverage doing it for you.",
+  SELLOUT: "Use CASH OUT before the last chapter.",
+};
+
+/* ---- run modifiers: no two runs start the same way -------------------- */
+
+export type ModifierId = "straight" | "glass" | "keys" | "debt";
+export const MODIFIERS: { id: ModifierId; name: string; blurb: string; mul: number }[] = [
+  { id: "straight", name: "STRAIGHT UP", blurb: "The honest run. Your archetype's money, all options open.", mul: 1 },
+  { id: "glass", name: "GLASS CANNON", blurb: "Half the starting money. Every score counts far more.", mul: 1.6 },
+  { id: "keys", name: "NO COLD STORAGE", blurb: "The Ledger is locked. Exchange and hot wallet only — drainers and failures can reach you.", mul: 1.35 },
+  { id: "debt", name: "DEEP IN DEBT", blurb: "You start owing $8,000 to the taxman. It grows until you pay it.", mul: 1.4 },
+];
+export const modifierOf = (id: ModifierId) => MODIFIERS.find((m) => m.id === id) ?? MODIFIERS[0]!;
+
+/* ---- the Boss has a different personality every run ------------------- */
+
+export type PersonaId = "hunter" | "banker" | "puppeteer";
+export const PERSONAS: { id: PersonaId; name: string; line: string; bias: "SWEEP" | "SQUEEZE" | "OFFER" }[] = [
+  { id: "hunter", name: "THE HUNTER", line: "This one hunts liquidations. He can smell leverage through the screen.", bias: "SWEEP" },
+  { id: "banker", name: "THE BANKER", line: "This one owns the funding rate. Holding a position is going to cost you.", bias: "SQUEEZE" },
+  { id: "puppeteer", name: "THE PUPPETEER", line: "This one buys people, not coins. He will offer you money to quit.", bias: "OFFER" },
+];
+export const personaFor = (roll: number) => PERSONAS[Math.floor(roll * PERSONAS.length) % PERSONAS.length]!;
+
+/* ---- three acts, rising pressure ------------------------------------- */
+
+export const ACTS = [
+  { n: 1, name: "ACT I · THE BOOM", from: 0, line: "Money is easy, everyone is a genius. Build something before it breaks." },
+  { n: 2, name: "ACT II · THE COLLAPSE", from: 8, line: "Luna, Celsius, FTX. Counterparties matter more than charts now." },
+  { n: 3, name: "ACT III · THE ENDGAME", from: 14, line: "ETFs, six figures, record leverage. The Boss is writing your rank." },
+] as const;
+export const actFor = (chapter: number) => [...ACTS].reverse().find((a) => chapter >= a.from) ?? ACTS[0];
+
+
 /* ---- the Boss plays against you --------------------------------------- */
 
 export type BossAttack = { id: "SWEEP" | "SQUEEZE" | "OFFER"; name: string; line: string };
@@ -379,11 +422,17 @@ const ATTACKS: BossAttack[] = [
   { id: "SQUEEZE", name: "FUNDING SQUEEZE", line: "He doubled the cost of holding leverage. Rent your convictions carefully." },
   { id: "OFFER", name: "THE OFFER", line: "He wants to buy you out cheap. Cash today, a leash forever." },
 ];
-/** Deterministic: the same seed gives every tournament player the same attacks. */
-export const attackFor = (chapter: number, roll: number): BossAttack | null => {
+/**
+ * Deterministic: the same seed gives every tournament player the same attacks.
+ * The Boss' personality bends which attack shows up — a Hunter sweeps more.
+ */
+export const attackFor = (chapter: number, roll: number, bias?: BossAttack["id"]): BossAttack | null => {
   if (chapter < 2 || roll >= 0.42) return null;
-  return ATTACKS[Math.floor((roll / 0.42) * ATTACKS.length) % ATTACKS.length]!;
+  const scaled = roll / 0.42;
+  if (bias && scaled < 0.5) return ATTACKS.find((a) => a.id === bias)!;
+  return ATTACKS[Math.floor(scaled * ATTACKS.length) % ATTACKS.length]!;
 };
+
 
 export type BossFight = { title: string; line: string; mini: "timing" | "panic" | "gas" | "seed"; perk: string };
 export const BOSS_FIGHTS: Record<number, BossFight> = {
@@ -402,12 +451,14 @@ export const PERK_BLURB: Record<string, string> = {
 };
 
 
-export const bossScore = (input: { net: number; chapters: number; difficulty: Difficulty; crises: number; streak: number }) => {
+export const bossScore = (input: { net: number; chapters: number; difficulty: Difficulty; crises: number; streak: number; modifier?: ModifierId }) => {
   const diff = DIFFICULTIES.find((d) => d.id === input.difficulty)?.cost ?? 1;
   const chapterFactor = Math.max(0.1, Math.min(1, input.chapters / CHAPTERS));
   const streakMul = 1 + Math.min(0.5, input.streak * 0.05);
-  return Math.round((Math.max(0, input.net) * chapterFactor * diff + input.crises * 500) * streakMul);
+  const mod = modifierOf(input.modifier ?? "straight").mul;
+  return Math.round((Math.max(0, input.net) * chapterFactor * diff * mod + input.crises * 500) * streakMul);
 };
+
 
 // ---- months language: the run is still 84 months ----------------------------
 export const TOTAL_MONTHS = 84;

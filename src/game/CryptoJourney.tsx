@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Shield, Skull, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
+import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Share2, Shield, Skull, Swords, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import crownedBoss from "@/assets/boss/crowned.webp.asset.json";
 import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
@@ -15,10 +15,12 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, HOUSING, JOBS, MODES, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
-  attackFor, bossFightFor, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, monthRangeLabel, monthsSurvived, pickLifeEvent, presaleFor, situationFor, xpProgress,
-  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type Presale, type Situation,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, HOUSING, JOBS, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
+  actFor, attackFor, bossFightFor, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, modifierOf, monthRangeLabel, monthsSurvived, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
+  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
+import { readProfile, recordRun, type Profile } from "./profile";
+
 
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
@@ -35,7 +37,7 @@ type Kind = "spot" | "perp";
 type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number; where: CustodyId };
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
-type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string };
+type Config = { name: string; avatar: string; arch: Archetype; difficulty: Difficulty; mode: BaseMode; ironman: boolean; country: Country; tournament: boolean; season: string; modifier: ModifierId };
 type BossBook = { cash: number; btc: number; line: string };
 type Run = {
   chapter: number; cash: number; positions: Pos[]; nextId: number;
@@ -95,7 +97,7 @@ export const AVATARS = [
   { id: "diamond", url: avDiamond.url }, { id: "frog", url: avFrog.url }, { id: "reaper", url: avReaper.url }, { id: "whale", url: avWhale.url },
 ];
 
-const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE", tournament: false, season: currentSeasonId() };
+const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE", tournament: false, season: currentSeasonId(), modifier: "straight" };
 const archOf = (id: Archetype) => ARCHETYPES.find((a) => a.id === id) ?? ARCHETYPES[1]!;
 const diffOf = (id: Difficulty) => DIFFICULTIES.find((d) => d.id === id) ?? DIFFICULTIES[1]!;
 const modeOf = (id: BaseMode) => MODES.find((m) => m.id === id) ?? MODES[0]!;
@@ -132,20 +134,30 @@ const makeNoise = (mode: BaseMode, seed: number) => {
 };
 
 // Tournament runs all share the season seed, so every player meets the same
-// market noise, the same rugs and the same drainers. Free runs stay random.
-const seedFor = (config: Config) => (config.tournament ? seasonSeed(config.season) : randomSeed());
+// market noise, the same rugs and the same drainers. Free runs stay random,
+// unless a player asks for a rematch on the exact same seed.
+const seedFor = (config: Config, reuse?: number) =>
+  config.tournament ? seasonSeed(config.season) : reuse ?? randomSeed();
 
-const freshRun = (config: Config): Run => {
-  const seed = seedFor(config);
+/** In the tournament the modifier is locked to the season seed, so it stays fair. */
+export const tournamentModifier = (season: string): ModifierId =>
+  MODIFIERS[Math.floor(det(seasonSeed(season), "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
+
+const freshRun = (config: Config, reuse?: number): Run => {
+  const seed = seedFor(config, reuse);
+  const mod = modifierOf(config.modifier).id;
+  const start = Math.round(archOf(config.arch).cash * (mod === "glass" ? 0.5 : 1));
   return {
-    chapter: 0, cash: archOf(config.arch).cash, positions: [], nextId: 1,
+    chapter: 0, cash: start, positions: [], nextId: 1,
     hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
-    custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: 0, moves: 0, cares: 0, criticals: 0,
-    ledger: [], statuses: [], logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
-    boss: { cash: archOf(config.arch).cash * 3, btc: 0, line: "He is already seated. You are not." },
+    custody: "exchange", job: "dayjob", housing: "shared", realized: 0, taxDebt: mod === "debt" ? 8000 : 0, moves: 0, cares: 0, criticals: 0,
+    ledger: mod === "debt" ? [{ chapter: 0, label: "Inherited tax debt", amount: -8000 }] : [], statuses: mod === "straight" ? [] : [modifierOf(mod).name],
+    logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
+    boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0,
   };
 };
+
 
 
 const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
@@ -271,13 +283,16 @@ export function CryptoJourney() {
   const arch = archOf(cfg.arch);
   const diff = diffOf(cfg.difficulty);
   const net = netOf(run);
-  const score = bossScore({ net, chapters: run.chapter, difficulty: cfg.difficulty, crises: run.crises, streak: run.streak });
+  const score = bossScore({ net, chapters: run.chapter, difficulty: cfg.difficulty, crises: run.crises, streak: run.streak, modifier: cfg.modifier });
   const btcMove = pctMove("BTC", run);
   const warning = CHAPTER_WARNINGS[run.chapter] ?? "The market never announces what it is about to do.";
   const presale = presaleFor(run.chapter);
   const xpBar = xpProgress(run.xp);
-  const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`));
+  const persona = personaFor(det(run.seed, "persona"));
+  const act = actFor(run.chapter);
+  const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`), persona.bias);
   const sweeping = attack?.id === "SWEEP";
+
   const signals = useMemo(() => signalsFor(run), [run.chapter, run.seed, run.noise]);
   const bossNet = bossNetOf(run);
   const perkFee = run.perks.includes("CHEAP FEES") ? 0.5 : 1;
@@ -892,7 +907,7 @@ export function CryptoJourney() {
     const cards: Dialog[] = [];
     // the Boss steps up first: his fights and his offers open the quarter
     if (bossFightFor(chapter)) cards.push({ k: "fight", chapter });
-    const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`));
+    const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`), personaFor(det(run.seed, "persona")).bias);
     if (atk?.id === "OFFER") cards.push({ k: "offer", attack: atk });
     if (crashFor(chapter)) cards.push({ k: "crash", chapter });
     if (failureFor(chapter)) cards.push({ k: "failure", chapter });
@@ -943,10 +958,10 @@ export function CryptoJourney() {
 
 
 
-  const begin = (config: Config) => {
+  const begin = (config: Config, reuse?: number) => {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
-    setRun(freshRun(config));
+    setRun(freshRun(config, reuse));
     setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null); setQueue([]);
     setScreen("run");
   };
@@ -963,7 +978,14 @@ export function CryptoJourney() {
   if (screen === "start") return <StartScreen resume={resume} onStart={(t) => { setTournament(t); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
   if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
-  if (screen === "end") return <EndScreen run={run} net={net} score={score} ending={ending} onRestart={() => setScreen("setup")} onBoard={() => setScreen("board")} />;
+  if (screen === "end") return (
+    <EndScreen
+      run={run} net={net} score={score} ending={ending}
+      onRestart={() => setScreen("setup")}
+      onRematch={() => begin(run.config, run.seed)}
+      onBoard={() => setScreen("board")} />
+  );
+
 
 
   const mood = run.stress > 70 || run.hunger > 70 ? enragedBoss.url : run.streak >= 2 ? smugBoss.url : crownedBoss.url;
@@ -973,7 +995,7 @@ export function CryptoJourney() {
     <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty} · {modeOf(cfg.mode).name}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · TOURNAMENT ${seasonLabel(cfg.season)}` : ""}</p>
+          <p className="journey-kicker">{act.name} · {chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty}{cfg.modifier !== "straight" ? ` · ${modifierOf(cfg.modifier).name}` : ""}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · ${seasonLabel(cfg.season)}` : ""}</p>
           <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
           <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
             <span className="cy-level">LVL {xpBar.level}</span>
@@ -997,7 +1019,7 @@ export function CryptoJourney() {
 
 
       <section className="cy-versus" aria-label="You against the Boss">
-        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs BOSS</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
+        <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs {persona.name}</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
         <div className="cy-versus-bar">
           <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
         </div>
@@ -1520,7 +1542,7 @@ function CustodySheet({ run, onPick }: { run: Run; onPick: (id: CustodyId) => vo
       <p className="journey-kicker"><Shield /> WHERE DO YOUR COINS SLEEP?</p>
       <h2>CUSTODY</h2>
       <div className="cy-pick-list">
-        {CUSTODY.map((c) => (
+        {CUSTODY.filter((c) => !(run.config.modifier === "keys" && c.id === "cold")).map((c) => (
           <button key={c.id} className={`cy-pick-row ${run.custody === c.id ? "is-on" : ""}`} onClick={() => onPick(c.id)}>
             <strong>{c.name}</strong>
             <small>{c.blurb}</small>
@@ -1528,7 +1550,8 @@ function CustodySheet({ run, onPick }: { run: Run; onPick: (id: CustodyId) => vo
           </button>
         ))}
       </div>
-      <small className="cy-note">Moving the bag costs one move and 0.4% in fees. Perps always stay on the exchange.</small>
+      <small className="cy-note">{run.config.modifier === "keys" ? "NO COLD STORAGE: the Ledger is locked this run. You live with counterparty risk." : "Moving the bag costs one move and 0.4% in fees. Perps always stay on the exchange."}</small>
+
     </>
   );
 }
@@ -1753,8 +1776,52 @@ function TournamentRules({ onClose }: { onClose: () => void }) {
   );
 }
 
+/** Everything the player keeps: runs, records, endings, badges. */
+function RecordStrip({ profile, onEndings }: { profile: Profile; onEndings: () => void }) {
+  const seen = Object.keys(profile.endings).length;
+  const total = Object.keys(ENDINGS).length;
+  if (!profile.runs) return null;
+  return (
+    <button className="start-record" onClick={() => { playSfx("click"); onEndings(); }}>
+      <span><small>RUNS</small><strong>{profile.runs}</strong></span>
+      <span><small>BEST</small><strong>{formatMoney(profile.bestNet)}</strong></span>
+      <span><small>BEST SCORE</small><strong>{profile.bestScore.toLocaleString("en-US")}</strong></span>
+      <span><small>ENDINGS</small><strong>{seen}/{total}</strong></span>
+      <ChevronRight />
+    </button>
+  );
+}
+
+function EndingsSheet({ profile, onClose }: { profile: Profile; onClose: () => void }) {
+  const keys = Object.keys(ENDINGS) as EndingKey[];
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> YOUR COLLECTION</p>
+      <h2>ENDINGS {Object.keys(profile.endings).length}/{keys.length}</h2>
+      <div className="cy-pick-list end-gallery">
+        {keys.map((k) => {
+          const found = (profile.endings[k] ?? 0) > 0;
+          return (
+            <div key={k} className={`cy-pick-row ${found ? "is-on" : "is-locked"}`}>
+              <strong>{found ? ENDINGS[k].title : "???"}</strong>
+              <small>{found ? ENDINGS[k].line : ENDING_HINTS[k]}</small>
+              <em>{found ? `REACHED ${profile.endings[k]}x` : "LOCKED"}</em>
+            </div>
+          );
+        })}
+      </div>
+      {profile.badges.length > 0 && <div className="cy-status-row">{profile.badges.map((b) => <span key={b}>{b}</span>)}</div>}
+      <Button className="cy-primary" onClick={onClose}>BACK <ChevronRight /></Button>
+    </>
+  );
+}
+
 function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: (tournament: boolean) => void; onResume: () => void; onBoard: () => void }) {
   const [rules, setRules] = useState(false);
+  const [endings, setEndings] = useState(false);
+  // Read after mount: localStorage is not available while rendering on the server.
+  const [profile, setProfile] = useState<Profile | null>(null);
+  useEffect(() => { setProfile(readProfile()); }, []);
   return (
     <main className="journey-start">
       <picture>
@@ -1769,6 +1836,7 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
         <p>Trade the cycle from 2020 to 2026 and survive every crash.</p>
         <SeasonBanner compact />
+        {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
         <div className="start-actions">
           <Button className="start-main" onClick={() => { playSfx("win"); onStart(true); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>
           <div className="start-secondary">
@@ -1780,15 +1848,21 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <small className="start-footer">84 MONTHS · FREE TO PLAY · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
       </section>
       {rules && <Sheet onClose={() => setRules(false)}><TournamentRules onClose={() => setRules(false)} /></Sheet>}
+      {endings && profile && <Sheet onClose={() => setEndings(false)}><EndingsSheet profile={profile} onClose={() => setEndings(false)} /></Sheet>}
     </main>
   );
 }
 
 
 
+
 function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onBack: () => void; onStart: (config: Config) => void }) {
-  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season: currentSeasonId() });
+  const season = currentSeasonId();
+  // In the tournament everyone plays the same twist, so nobody picks an easier one.
+  const locked = tournament ? tournamentModifier(season) : null;
+  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season, modifier: locked ?? "straight" });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
+  const startCash = Math.round(archOf(config.arch).cash * (config.modifier === "glass" ? 0.5 : 1));
   return (
     <main className="journey-setup">
       <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
@@ -1800,6 +1874,11 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
         <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
       <section className="setup-block"><p className="journey-kicker">ARCHETYPE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(a.cash)} START</em><small>{a.blurb}</small></button>)}</div></section>
+      <section className="setup-block"><p className="journey-kicker">THE TWIST{locked ? ` · LOCKED FOR ${seasonLabel(season)}` : ""}</p>
+        <div className="pick-grid">{MODIFIERS.filter((m) => !locked || m.id === locked).map((m) => (
+          <button key={m.id} className={`pick-card ${config.modifier === m.id ? "is-on" : ""}`} disabled={!!locked} onClick={() => set("modifier", m.id)}><strong>{m.name}</strong><em>SCORE x{m.mul.toFixed(2)}</em><small>{m.blurb}</small></button>
+        ))}</div>
+      </section>
       <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
       <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
         <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
@@ -1809,11 +1888,12 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
           <img src={AVATARS.find((a) => a.id === config.avatar)?.url} alt="" />
           <span>
             <strong>{config.name.trim() || "anon"} <Flag code={config.country} size={14} /></strong>
-            <small>{archOf(config.arch).name} · {formatMoney(archOf(config.arch).cash)} · {config.difficulty}{config.ironman ? " · IRONMAN" : ""}</small>
+            <small>{archOf(config.arch).name} · {formatMoney(startCash)} · {config.difficulty}{config.modifier !== "straight" ? ` · ${modifierOf(config.modifier).name}` : ""}{config.ironman ? " · IRONMAN" : ""}</small>
           </span>
         </div>
         <Button onClick={() => { playSfx("win"); onStart({ ...config, name: config.name.trim() || "anon" }); }}><Rocket />START Q1 2020</Button>
       </div>
+
     </main>
   );
 }
@@ -1859,11 +1939,14 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 }
 
 
-function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onBoard: () => void }) {
+function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onRematch: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const [wallet, setWallet] = useState(() => readWallet());
   const [walletError, setWalletError] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const tournament = run.config.tournament;
+
   const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
   const badge = badgeFor(run, ending, net);
@@ -1880,6 +1963,38 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
     return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length];
   }, [ending, run.chapter, run.moves, run.trades, won]);
+
+  // Store the run once, and keep the record from *before* this run so we can taunt with it.
+  const beforeRef = useRef<Profile | null>(null);
+  useEffect(() => {
+    beforeRef.current = readProfile();
+    setProfile(recordRun({ ending, net, score, months: monthsSurvived(run.chapter), bossWins: run.bossWins, badge }));
+    // Runs once per end screen on purpose.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const before = beforeRef.current;
+  const newRecord = !!before && score > before.bestScore && before.runs > 0;
+  const nearMiss = useMemo(() => {
+    const startCash = Math.round(archOf(run.config.arch).cash * (run.config.modifier === "glass" ? 0.5 : 1));
+    if (ending === "THRONE") return null;
+    if (won && net >= startCash * 40) return `You were ${formatMoney(startCash * 60 - net)} short of LEGEND. One better exit and it was yours.`;
+    if (!won) {
+      const left = TOTAL_MONTHS - monthsSurvived(run.chapter);
+      return `${left} months left on the clock. The Boss barely had to try.`;
+    }
+    return "Beat the Boss' own book and win 3 fights to take the THRONE.";
+  }, [ending, net, run.chapter, run.config.arch, run.config.modifier, won]);
+
+  const shareText = `THE CRYPTO FINAL BOSS\n${ENDINGS[ending].title} · ${badge}\nNET ${formatMoney(net)} · SCORE ${score.toLocaleString("en-US")}\n${monthsSurvived(run.chapter)}/${TOTAL_MONTHS} months · ${run.bossWins} boss fights won${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}\nplay: thecryptofinalboss.app`;
+  const share = async () => {
+    playSfx("click");
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+    } catch { setCopied(false); }
+  };
+
   const send = async () => {
     const trimmed = wallet.trim();
     if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
@@ -1924,6 +2039,9 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
             <span><small>CRISES</small><strong>{run.crises}</strong></span>
           </div>
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
+          {newRecord && <p className="end-record">NEW PERSONAL RECORD · beat {before?.bestScore.toLocaleString("en-US")}</p>}
+          {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
+          {profile && <small className="end-progress">RUN {profile.runs} · ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} · BEST {formatMoney(profile.bestNet)}</small>}
         </div>
 
         {tournament && status !== "done" && (
@@ -1940,8 +2058,11 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
 
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
-          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
+          <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
+          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
+          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}NEW RUN</Button>
         </div>
+
         {status === "queued" && <small className="end-message">The board is unavailable. Your result is saved and will retry automatically.</small>}
         {status === "rejected" && <small className="end-message">This result failed the board's integrity checks and cannot be submitted.</small>}
 
