@@ -157,7 +157,8 @@ function rankScore(r: {
 }
 
 const SELECT_COLS =
-  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at";
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament";
+
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
