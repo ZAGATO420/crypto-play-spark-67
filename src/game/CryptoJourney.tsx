@@ -1558,7 +1558,17 @@ function EndScreen({ run, net, score, ending, onRestart, onBoard }: { run: Run; 
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
         </div>
 
+        {tournament && status !== "done" && (
+          <div className="end-wallet">
+            <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
+            <input className="setup-input" placeholder="YOUR WALLET (EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
+            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 of the season need it. Wallets stay private."}</small>
+          </div>
+        )}
+        {tournament && status === "done" && wallet.trim() && <small className="end-message">Entered for {seasonLabel(run.config.season)} as {shortWallet(wallet.trim())}.</small>}
+
         <div className="start-actions end-actions">
+
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}PLAY AGAIN</Button>
