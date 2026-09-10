@@ -658,7 +658,7 @@
 
 /* ---- V53: Cyber-Jungle Premium start + leaderboard ---- */
 .journey-start { place-items: stretch; padding: calc(62px + env(safe-area-inset-top)) clamp(18px,4vw,72px) max(26px,env(safe-area-inset-bottom)); }
-.journey-start > picture img { object-position: 50% 14%; filter: brightness(.78) contrast(1.08) saturate(1.02); }
+.journey-start > picture img { object-position: 50% 0%; filter: brightness(.78) contrast(1.08) saturate(1.02); }
 .journey-start .start-vignette { background: linear-gradient(90deg,color-mix(in oklab,var(--background) 90%,transparent) 0%,color-mix(in oklab,var(--background) 48%,transparent) 34%,transparent 58%,color-mix(in oklab,var(--background) 34%,transparent) 100%),linear-gradient(180deg,color-mix(in oklab,var(--background) 20%,transparent),transparent 42%,color-mix(in oklab,var(--background) 80%,transparent) 100%); }
 .journey-start .start-stage { align-self:end; display:grid; grid-template-columns:minmax(330px,1fr) minmax(380px,520px); align-items:end; gap:clamp(32px,6vw,100px); width:min(100%,1320px); min-height:0; margin:0 auto; text-align:left; }
 .start-brand { min-width:0; padding-bottom:20px; }
@@ -719,7 +719,7 @@
 
 @media (max-width:640px) {
   .journey-start { padding:calc(54px + env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom)); }
-  .journey-start > picture img { object-position:50% 8%; }
+  .journey-start > picture img { object-position:50% 0%; }
   .journey-start .start-vignette { background:linear-gradient(180deg,color-mix(in oklab,var(--background) 12%,transparent) 0%,transparent 28%,color-mix(in oklab,var(--background) 72%,transparent) 55%,var(--background) 78%); }
   .journey-start .start-stage { gap:10px; }
   .journey-start .start-brand h1 { font-size:clamp(38px,12vw,52px); }
