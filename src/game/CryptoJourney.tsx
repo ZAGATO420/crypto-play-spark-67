@@ -509,7 +509,7 @@ export function CryptoJourney() {
   };
 
   const takeOffer = (amount: number) => {
-    setDialog(null);
+    nextInQueue();
     playSfx("vault");
     setRun((r) => book({ ...r, cash: r.cash + amount, statuses: Array.from(new Set([...r.statuses, "BOSS DEBT"])), stress: clamp(r.stress + 6) }, "The Boss bought you out", amount));
     log({ chapter: run.chapter, title: "TOOK THE OFFER", detail: `${formatMoney(amount)} now, a cut of every quarter forever.`, tone: "pink" });
@@ -981,7 +981,7 @@ export function CryptoJourney() {
     if (situation) cards.push({ k: "situation", card: situation });
     // cold storage occasionally asks you to prove you still own it
     if (chapter > 3 && run.positions.some((p) => p.where === "cold") && det(run.seed, `seedcheck-${chapter}`) < 0.18) cards.push({ k: "mini", kind: "seed", pending: { t: "seed" } });
-    if (!cards.length) { setDialog(null); setPhase("brief"); return; }
+    if (!cards.length) { setDialog(null); setQueue([]); setPhase("brief"); return; }
 
     setPhase("act");
 
@@ -1299,7 +1299,7 @@ export function CryptoJourney() {
             onDuck={() => { setRun((r) => ({ ...r, stress: clamp(r.stress + 10), conviction: 0 })); say("You walked past his table. He remembers that.", "pink"); nextInQueue(); }} />}
           {dialog.k === "offer" && <OfferSheet attack={dialog.attack} net={net}
             onTake={() => takeOffer(Math.max(2000, Math.round(net * 0.25)))}
-            onRefuse={() => { setDialog(null); setRun((r) => ({ ...r, conviction: clamp(r.conviction + 15) })); say("You told him no. Conviction up.", "yellow"); }} />}
+            onRefuse={() => { nextInQueue(); setRun((r) => ({ ...r, conviction: clamp(r.conviction + 15) })); say("You told him no. Conviction up.", "yellow"); }} />}
 
         </Sheet>
 
