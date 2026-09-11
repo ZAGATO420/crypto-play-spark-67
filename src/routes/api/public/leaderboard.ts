@@ -157,7 +157,26 @@ function rankScore(r: {
 }
 
 const SELECT_COLS =
-  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament";
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament, wallet, player_key";
+
+// One prize slot per player: inside a season only the player's best run may
+// occupy a rank. Identity is the wallet when present (a device can host several
+// players), otherwise the browser player key. Nothing is deleted — every run
+// stays in the table and in the ALL TIME view.
+function bestPerPlayer(rows: any[]): any[] {
+  const best = new Map<string, any>();
+  const out: any[] = [];
+  for (const r of rows) {
+    const id = String(r.wallet ?? "").trim().toLowerCase() || String(r.player_key ?? "").trim();
+    if (!id) {
+      out.push(r);
+      continue;
+    }
+    const prev = best.get(id);
+    if (!prev || rankScore(r) > rankScore(prev)) best.set(id, r);
+  }
+  return [...out, ...best.values()];
+}
 
 
 function sleep(ms: number) {
