@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS public.leaderboard_runs_season_player_key;
