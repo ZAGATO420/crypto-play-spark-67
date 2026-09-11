@@ -353,31 +353,9 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           avatar: run.avatar ?? null,
         };
 
-        // One best tournament result per player and season: replace only when better.
-        if (run.isTournament) {
-          const { data: existing } = await supabaseAdmin
-            .from("leaderboard_runs")
-            .select("id, score")
-            .eq("season", run.season!)
-            .eq("player_key", run.playerKey!)
-            .eq("is_tournament", true)
-            .maybeSingle();
-          if (existing) {
-            if (Number(existing.score) >= finalScore) {
-              return Response.json({ ok: true, success: true, kept: true }, { status: 200, headers: CORS });
-            }
-            let { error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id);
-            for (let attempt = 0; attempt < 3 && upErr; attempt++) {
-              await sleep(300 * (attempt + 1));
-              ({ error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id));
-            }
-            if (upErr) {
-              console.error("leaderboard tournament update failed", upErr);
-              return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
-            }
-            return Response.json({ ok: true, success: true, improved: true }, { status: 201, headers: CORS });
-          }
-        }
+        // Every run is kept as its own row. Ranking dedupes a player's runs when
+        // the season board is read, so an earlier entry never disappears.
+
 
         let { error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true });
         // PGRST303 / network blips: retry safely using the unique client hash.
