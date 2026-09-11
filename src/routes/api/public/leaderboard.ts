@@ -260,7 +260,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
 
 
 
-        const rows = (data ?? [])
+        const base = seasonView ? bestPerPlayer(data ?? []) : (data ?? []);
+        const rows = base
           .slice()
           .sort((a, b) => rankScore(b) - rankScore(a))
           .slice(0, limit)
