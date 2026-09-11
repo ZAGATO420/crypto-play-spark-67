@@ -157,7 +157,26 @@ function rankScore(r: {
 }
 
 const SELECT_COLS =
-  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament";
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament, wallet, player_key";
+
+// One prize slot per player: inside a season only the player's best run may
+// occupy a rank. Identity is the wallet when present (a device can host several
+// players), otherwise the browser player key. Nothing is deleted — every run
+// stays in the table and in the ALL TIME view.
+function bestPerPlayer(rows: any[]): any[] {
+  const best = new Map<string, any>();
+  const out: any[] = [];
+  for (const r of rows) {
+    const id = String(r.wallet ?? "").trim().toLowerCase() || String(r.player_key ?? "").trim();
+    if (!id) {
+      out.push(r);
+      continue;
+    }
+    const prev = best.get(id);
+    if (!prev || rankScore(r) > rankScore(prev)) best.set(id, r);
+  }
+  return [...out, ...best.values()];
+}
 
 
 function sleep(ms: number) {
@@ -241,7 +260,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
 
 
 
-        const rows = (data ?? [])
+        const base = seasonView ? bestPerPlayer(data ?? []) : (data ?? []);
+        const rows = base
           .slice()
           .sort((a, b) => rankScore(b) - rankScore(a))
           .slice(0, limit)
@@ -333,31 +353,9 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           avatar: run.avatar ?? null,
         };
 
-        // One best tournament result per player and season: replace only when better.
-        if (run.isTournament) {
-          const { data: existing } = await supabaseAdmin
-            .from("leaderboard_runs")
-            .select("id, score")
-            .eq("season", run.season!)
-            .eq("player_key", run.playerKey!)
-            .eq("is_tournament", true)
-            .maybeSingle();
-          if (existing) {
-            if (Number(existing.score) >= finalScore) {
-              return Response.json({ ok: true, success: true, kept: true }, { status: 200, headers: CORS });
-            }
-            let { error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id);
-            for (let attempt = 0; attempt < 3 && upErr; attempt++) {
-              await sleep(300 * (attempt + 1));
-              ({ error: upErr } = await supabaseAdmin.from("leaderboard_runs").update(row).eq("id", existing.id));
-            }
-            if (upErr) {
-              console.error("leaderboard tournament update failed", upErr);
-              return Response.json({ error: "unavailable" }, { status: 503, headers: CORS });
-            }
-            return Response.json({ ok: true, success: true, improved: true }, { status: 201, headers: CORS });
-          }
-        }
+        // Every run is kept as its own row. Ranking dedupes a player's runs when
+        // the season board is read, so an earlier entry never disappears.
+
 
         let { error } = await supabaseAdmin.from("leaderboard_runs").upsert(row, { onConflict: "client_hash", ignoreDuplicates: true });
         // PGRST303 / network blips: retry safely using the unique client hash.
