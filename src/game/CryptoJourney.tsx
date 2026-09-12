@@ -15,7 +15,7 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, XP, XP_EXTRA,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
   actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
@@ -151,10 +151,17 @@ const seedFor = (config: Config, reuse?: number) =>
 export const tournamentModifier = (season: string): ModifierId =>
   MODIFIERS[Math.floor(det(seasonSeed(season), "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
 
+/** Tournament runs all start with the same money, so the archetype is looks and
+ *  playstyle only — never an advantage. Free runs keep the archetype bankroll. */
+export const startCashFor = (config: Config) => {
+  const base = config.tournament ? TOURNAMENT_RULES.cash : archOf(config.arch).cash;
+  return Math.round(base * (config.modifier === "glass" ? 0.5 : 1));
+};
+
 const freshRun = (config: Config, reuse?: number): Run => {
   const seed = seedFor(config, reuse);
   const mod = modifierOf(config.modifier).id;
-  const start = Math.round(archOf(config.arch).cash * (mod === "glass" ? 0.5 : 1));
+  const start = startCashFor(config);
   return {
     chapter: 0, cash: start, positions: [], nextId: 1,
     hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
@@ -1959,9 +1966,12 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
   const season = currentSeasonId();
   // In the tournament everyone plays the same twist, so nobody picks an easier one.
   const locked = tournament ? tournamentModifier(season) : null;
-  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season, modifier: locked ?? "straight" });
+  const [config, setConfig] = useState<Config>({
+    ...defaultConfig, tournament, season, modifier: locked ?? "straight",
+    ...(tournament ? { difficulty: TOURNAMENT_RULES.difficulty, mode: TOURNAMENT_RULES.mode, ironman: TOURNAMENT_RULES.ironman } : {}),
+  });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
-  const startCash = Math.round(archOf(config.arch).cash * (config.modifier === "glass" ? 0.5 : 1));
+  const startCash = startCashFor(config);
   return (
     <main className="journey-setup">
       <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
@@ -1972,16 +1982,32 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
         <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
-      <section className="setup-block"><p className="journey-kicker">ARCHETYPE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(a.cash)} START</em><small>{a.blurb}</small></button>)}</div></section>
-      <section className="setup-block"><p className="journey-kicker">THE TWIST{locked ? ` · LOCKED FOR ${seasonLabel(season)}` : ""}</p>
-        <div className="pick-grid">{MODIFIERS.filter((m) => !locked || m.id === locked).map((m) => (
-          <button key={m.id} className={`pick-card ${config.modifier === m.id ? "is-on" : ""}`} disabled={!!locked} onClick={() => set("modifier", m.id)}><strong>{m.name}</strong><em>SCORE x{m.mul.toFixed(2)}</em><small>{m.blurb}</small></button>
-        ))}</div>
-      </section>
-      <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
-      <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
-        <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
-      </section>
+      <section className="setup-block"><p className="journey-kicker">ARCHETYPE{tournament ? " · SAME MONEY FOR EVERYONE" : ""}</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(tournament ? TOURNAMENT_RULES.cash : a.cash)} START</em><small>{a.blurb}</small></button>)}</div></section>
+      {tournament ? (
+        <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
+          <ul>
+            <li><b>SEED</b><span>{seasonLabel(season)} — same crashes, rugs, launches and minigames for all players.</span></li>
+            <li><b>MONEY</b><span>{formatMoney(startCashFor(config))} start for everyone. Your archetype is style, not an edge.</span></li>
+            <li><b>DIFFICULTY</b><span>{TOURNAMENT_RULES.difficulty}</span></li>
+            <li><b>MARKET</b><span>{modeOf(TOURNAMENT_RULES.mode).name} — real 2020–2026 prices, no chaos mode.</span></li>
+            <li><b>TWIST</b><span>{modifierOf(config.modifier).name} — {modifierOf(config.modifier).blurb}</span></li>
+            <li><b>IRONMAN</b><span>OFF</span></li>
+          </ul>
+          <small>Only handle, country and avatar are yours to pick. Want free settings? Start a FREE RUN instead.</small>
+        </section>
+      ) : (
+        <>
+          <section className="setup-block"><p className="journey-kicker">THE TWIST</p>
+            <div className="pick-grid">{MODIFIERS.map((m) => (
+              <button key={m.id} className={`pick-card ${config.modifier === m.id ? "is-on" : ""}`} onClick={() => set("modifier", m.id)}><strong>{m.name}</strong><em>SCORE x{m.mul.toFixed(2)}</em><small>{m.blurb}</small></button>
+            ))}</div>
+          </section>
+          <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
+          <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
+            <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
+          </section>
+        </>
+      )}
       <div className="setup-cta">
         <div className="setup-summary">
           <img src={AVATARS.find((a) => a.id === config.avatar)?.url} alt="" />
