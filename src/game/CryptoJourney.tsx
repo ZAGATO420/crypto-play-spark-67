@@ -151,10 +151,17 @@ const seedFor = (config: Config, reuse?: number) =>
 export const tournamentModifier = (season: string): ModifierId =>
   MODIFIERS[Math.floor(det(seasonSeed(season), "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
 
+/** Tournament runs all start with the same money, so the archetype is looks and
+ *  playstyle only — never an advantage. Free runs keep the archetype bankroll. */
+export const startCashFor = (config: Config) => {
+  const base = config.tournament ? TOURNAMENT_RULES.cash : archOf(config.arch).cash;
+  return Math.round(base * (config.modifier === "glass" ? 0.5 : 1));
+};
+
 const freshRun = (config: Config, reuse?: number): Run => {
   const seed = seedFor(config, reuse);
   const mod = modifierOf(config.modifier).id;
-  const start = Math.round(archOf(config.arch).cash * (mod === "glass" ? 0.5 : 1));
+  const start = startCashFor(config);
   return {
     chapter: 0, cash: start, positions: [], nextId: 1,
     hunger: 8, stress: 6, risk: 0, streak: 0, crises: 0, trades: 0, xp: 0,
