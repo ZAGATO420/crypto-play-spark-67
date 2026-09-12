@@ -394,6 +394,18 @@ export const MODIFIERS: { id: ModifierId; name: string; blurb: string; mul: numb
 ];
 export const modifierOf = (id: ModifierId) => MODIFIERS.find((m) => m.id === id) ?? MODIFIERS[0]!;
 
+/* ---- tournament: identical conditions for every player ----------------
+ * The season seed already gives everyone the same crashes, rugs and
+ * minigames. These fixed settings make the rest of the run comparable too:
+ * same difficulty, same market mode, same starting money, no ironman.
+ * Only handle, country and avatar stay free. */
+export const TOURNAMENT_RULES = {
+  difficulty: "NORMAL" as Difficulty,
+  mode: "classic" as BaseMode,
+  ironman: false,
+  cash: 10000,
+} as const;
+
 /* ---- the Boss has a different personality every run ------------------- */
 
 export type PersonaId = "hunter" | "banker" | "puppeteer";
