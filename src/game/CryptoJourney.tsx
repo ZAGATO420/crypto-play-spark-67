@@ -1966,9 +1966,12 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
   const season = currentSeasonId();
   // In the tournament everyone plays the same twist, so nobody picks an easier one.
   const locked = tournament ? tournamentModifier(season) : null;
-  const [config, setConfig] = useState<Config>({ ...defaultConfig, tournament, season, modifier: locked ?? "straight" });
+  const [config, setConfig] = useState<Config>({
+    ...defaultConfig, tournament, season, modifier: locked ?? "straight",
+    ...(tournament ? { difficulty: TOURNAMENT_RULES.difficulty, mode: TOURNAMENT_RULES.mode, ironman: TOURNAMENT_RULES.ironman } : {}),
+  });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
-  const startCash = Math.round(archOf(config.arch).cash * (config.modifier === "glass" ? 0.5 : 1));
+  const startCash = startCashFor(config);
   return (
     <main className="journey-setup">
       <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
