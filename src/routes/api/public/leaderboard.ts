@@ -353,9 +353,9 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           survived: run.survived,
           score: finalScore,
           season: run.season ?? null,
-          wallet: run.isTournament ? run.wallet ?? null : null,
-          is_tournament: run.isTournament,
-          player_key: run.isTournament ? run.playerKey ?? null : null,
+          wallet: asTournament ? run.wallet ?? null : null,
+          is_tournament: asTournament,
+          player_key: asTournament ? run.playerKey ?? null : null,
           avatar: run.avatar ?? null,
         };
 
