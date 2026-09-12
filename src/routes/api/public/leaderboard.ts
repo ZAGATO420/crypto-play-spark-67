@@ -326,6 +326,12 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           return Response.json({ error: "season closed" }, { status: 422, headers: CORS });
         }
 
+        // Tournament conditions are fixed: NORMAL difficulty and the CLASSIC market.
+        // A run played on anything else is still kept, but only as a free run, so
+        // the prize ranking stays comparable.
+        const asTournament =
+          run.isTournament && run.difficulty.toUpperCase() === "NORMAL" && run.mode.toLowerCase() === "classic";
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively.
         const rankMatch = RANKS.find((r) => r.toLowerCase() === run.rank.trim().toLowerCase());
