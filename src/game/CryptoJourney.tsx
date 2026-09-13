@@ -1982,7 +1982,7 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
         <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
-      <section className="setup-block"><p className="journey-kicker">ARCHETYPE{tournament ? " · SAME MONEY FOR EVERYONE" : ""}</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(tournament ? TOURNAMENT_RULES.cash : a.cash)} START</em><small>{a.blurb}</small></button>)}</div></section>
+      <section className="setup-block"><p className="journey-kicker">ARCHETYPE{tournament ? " · SAME MONEY FOR EVERYONE" : ""}</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
       {tournament ? (
         <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
           <ul>
