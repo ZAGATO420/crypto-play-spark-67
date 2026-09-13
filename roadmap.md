@@ -16,3 +16,6 @@
 - [x] Cyber-Jungle Premium redesign: cleaner asymmetric start screen and one-width detailed leaderboard
 
 - V51 replayability: local profile records, endings gallery, run modifiers, boss personas, three acts, near-miss line, share result, same-seed rematch
+
+- [x] Turnier: gleiche Bedingungen (NORMAL, CLASSIC, $10k, kein Ironman, Saison-Twist) + Server-Prüfung
+- [x] Preisreihen aller 14 Märkte auf echte Monats-Closes 2020–2026 umgestellt (Okt–Dez 2026 fiktiv)
