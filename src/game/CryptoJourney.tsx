@@ -119,7 +119,7 @@ const badgeFor = (run: Run, ending: EndingKey, net: number) => {
   if (ending === "BROKE") return run.trades >= 10 ? "CERTIFIED DEGEN" : "PAPER HANDS";
   if (ending === "STARVED" || ending === "BROKEN") return "CHART ADDICT";
   if (ending === "SELLOUT") return "PROFIT TAKER";
-  if (run.crises >= 5 && net >= archOf(run.config.arch).cash * 8) return "DIAMOND HANDS";
+  if (run.crises >= 5 && net >= startCashFor(run.config) * 8) return "DIAMOND HANDS";
   if (run.trades <= 3) return "HODL SURVIVOR";
   return "CYCLE SURVIVOR";
 };
