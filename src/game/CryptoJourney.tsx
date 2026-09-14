@@ -969,7 +969,7 @@ export function CryptoJourney() {
     if (next >= CHAPTERS) {
       // beating him means out-trading his book and taking his fights
       if (finalNet > bossNetOf(nextRun, next) && nextRun.bossWins >= 3 && criticals === 0) return finish("THRONE");
-      return finish(finalNet > archOf(cfg.arch).cash * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
+      return finish(finalNet > startCashFor(cfg) * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
     }
   };
 
@@ -2108,7 +2108,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const before = beforeRef.current;
   const newRecord = !!before && score > before.bestScore && before.runs > 0;
   const nearMiss = useMemo(() => {
-    const startCash = Math.round(archOf(run.config.arch).cash * (run.config.modifier === "glass" ? 0.5 : 1));
+    const startCash = startCashFor(run.config);
     if (ending === "THRONE") return null;
     if (won && net >= startCash * 40) return `You were ${formatMoney(startCash * 60 - net)} short of LEGEND. One better exit and it was yours.`;
     if (!won) {
