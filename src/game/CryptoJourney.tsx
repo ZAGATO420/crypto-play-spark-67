@@ -2129,10 +2129,12 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
   const send = async () => {
     const trimmed = wallet.trim();
-    if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
+    // The wallet is only needed to receive a prize, never to be listed. A
+    // mandatory address stopped players from entering the board at all.
+    if (tournament && trimmed && !isWallet(trimmed)) { setWalletError(true); return; }
     setWalletError(false);
-    if (tournament) saveWallet(trimmed);
-    const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
+    if (tournament && trimmed) saveWallet(trimmed);
+    const payload: RunSubmission = tournament && trimmed ? { ...submission, wallet: trimmed } : submission;
     setStatus("sending");
     savePendingSubmission(payload);
     try {
@@ -2187,8 +2189,8 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
         {tournament && status !== "done" && (
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
-            <input className="setup-input" placeholder="YOUR WALLET (EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
-            <small>{walletError ? "That wallet address is not valid. Check it and try again." : "Only the top 3 need it. Wallets stay private. One account per player — prizes are paid within 3 days after the October launch."}</small>
+            <input className="setup-input" placeholder="YOUR WALLET (OPTIONAL · EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
+            <small>{walletError ? "That wallet address is not valid. Clear it or fix it — you can also submit without one." : "Optional: only the top 3 need a wallet to get paid. You can submit without it and add one later. Wallets stay private — prizes are paid within 3 days after the October launch."}</small>
 
           </div>
         )}
