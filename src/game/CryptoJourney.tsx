@@ -2079,7 +2079,9 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const [profile, setProfile] = useState<Profile | null>(null);
   const tournament = run.config.tournament;
 
-  const won = ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
+  // THRONE belongs here too: it is the best ending, and leaving it out sent the
+  // end screen looking for a death punchline that does not exist.
+  const won = ending === "THRONE" || ending === "LEGEND" || ending === "SURVIVOR" || ending === "SELLOUT";
   const end = ENDINGS[ending];
   const badge = badgeFor(run, ending, net);
   const submission = useMemo<RunSubmission>(() => ({
@@ -2093,7 +2095,8 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const punchline = useMemo(() => {
     if (won) return null;
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
-    return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length];
+    if (!lines?.length) return null;
+    return lines[Math.abs(run.moves + run.trades + run.chapter) % lines.length] ?? null;
   }, [ending, run.chapter, run.moves, run.trades, won]);
 
   // Store the run once, and keep the record from *before* this run so we can taunt with it.
