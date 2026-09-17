@@ -163,23 +163,57 @@ const SELECT_COLS =
   "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament, wallet, player_key";
 
 // One prize slot per player: inside a season only the player's best run may
-// occupy a rank. Identity is the wallet when present (a device can host several
-// players), otherwise the browser player key. Nothing is deleted — every run
-// stays in the table and in the ALL TIME view.
+// occupy a rank. A player is identified by BOTH the browser player key and any
+// wallet they used — since the wallet field is optional, the same person can
+// have a wallet run and a wallet-less run, so those identities are merged
+// (union-find) into one competitor. Nothing is deleted — every run stays in the
+// table and in the ALL TIME view.
 function bestPerPlayer(rows: any[]): any[] {
+  const parent = new Map<string, string>();
+  const find = (x: string): string => {
+    let r = x;
+    while (parent.get(r) && parent.get(r) !== r) r = parent.get(r)!;
+    parent.set(x, r);
+    return r;
+  };
+  const union = (a: string, b: string) => {
+    parent.set(a, parent.get(a) ?? a);
+    parent.set(b, parent.get(b) ?? b);
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent.set(rb, ra);
+  };
+
+  const idsOf = (r: any) => {
+    const wallet = String(r.wallet ?? "").trim().toLowerCase();
+    const key = String(r.player_key ?? "").trim();
+    const ids: string[] = [];
+    if (wallet) ids.push(`w:${wallet}`);
+    if (key) ids.push(`k:${key}`);
+    return ids;
+  };
+
+  for (const r of rows) {
+    const ids = idsOf(r);
+    for (const id of ids) parent.set(id, parent.get(id) ?? id);
+    for (let i = 1; i < ids.length; i++) union(ids[0]!, ids[i]!);
+  }
+
   const best = new Map<string, any>();
   const out: any[] = [];
   for (const r of rows) {
-    const id = String(r.wallet ?? "").trim().toLowerCase() || String(r.player_key ?? "").trim();
-    if (!id) {
+    const ids = idsOf(r);
+    if (!ids.length) {
       out.push(r);
       continue;
     }
+    const id = find(ids[0]!);
     const prev = best.get(id);
     if (!prev || rankScore(r) > rankScore(prev)) best.set(id, r);
   }
   return [...out, ...best.values()];
 }
+
 
 
 function sleep(ms: number) {
