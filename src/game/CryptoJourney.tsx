@@ -2327,6 +2327,14 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
         )}
 
 
+        {status !== "done" && (
+          <div className="end-wallet">
+            <p className="journey-kicker">YOUR NAME ON THE BOARD</p>
+            <input className="setup-input" placeholder="YOUR NAME" maxLength={18} value={name} onChange={(e) => { setName(e.target.value); setNameError(false); }} aria-label="Player name" />
+            <small>{nameError ? "Enter a name so you can find your own entry on the board." : "This is how your run appears on the leaderboard."}</small>
+          </div>
+        )}
+
         {tournament && status !== "done" && (
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
