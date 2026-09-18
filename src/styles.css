@@ -1036,3 +1036,25 @@
   .cy-world,.cy-journey-track i.is-now,.cy-act-splash,.cy-core > span.is-critical,.cy-chart-live-line,.cy-boss-presence { transition:none; animation:none; }
   .cy-act-splash { display:none; }
 }
+
+/* ---- guided first-run coach ---- */
+.coach { position:fixed; inset:0; z-index:90; }
+.coach-veil { position:absolute; inset:0; background:color-mix(in oklab,#000 76%,transparent); backdrop-filter:blur(1.5px); }
+.coach-ring { position:absolute; border:2px solid var(--journey-yellow); border-radius:10px; box-shadow:0 0 0 9999px color-mix(in oklab,#000 66%,transparent),0 0 26px color-mix(in oklab,var(--journey-yellow) 55%,transparent); pointer-events:none; animation:coach-pulse 1.5s ease-in-out infinite; }
+@keyframes coach-pulse { 0%,100% { box-shadow:0 0 0 9999px color-mix(in oklab,#000 66%,transparent),0 0 16px color-mix(in oklab,var(--journey-yellow) 40%,transparent); } 50% { box-shadow:0 0 0 9999px color-mix(in oklab,#000 66%,transparent),0 0 34px color-mix(in oklab,var(--journey-yellow) 70%,transparent); } }
+.coach-tip { position:absolute; left:50%; transform:translateX(-50%); width:min(430px,calc(100vw - 24px)); padding:14px 15px 12px; border:1px solid color-mix(in oklab,var(--journey-cyan) 55%,var(--border)); border-radius:10px; background:color-mix(in oklab,var(--background) 95%,transparent); box-shadow:0 18px 50px color-mix(in oklab,#000 65%,transparent); }
+.coach-step { margin:0; font-family:var(--font-display); font-size:0.78rem; letter-spacing:0.14em; color:var(--journey-yellow); }
+.coach-body { margin:0.45rem 0 0.8rem; font-size:0.88rem; line-height:1.45; color:var(--foreground); }
+.coach-foot { display:flex; align-items:center; gap:9px; }
+.coach-dots { display:flex; gap:4px; margin-right:auto; }
+.coach-dots i { width:16px; height:3px; border-radius:2px; background:color-mix(in oklab,var(--foreground) 22%,transparent); }
+.coach-dots i.is-on { background:var(--journey-yellow); }
+.coach-skip { font-size:0.68rem; letter-spacing:0.12em; color:var(--muted-foreground); }
+.coach-next { min-height:42px; padding:0 14px; font-family:var(--font-display); font-size:0.78rem; }
+@media (prefers-reduced-motion: reduce) { .coach-ring { animation:none; } }
+
+/* keep the live chart readable behind the boss */
+.cy-boss-presence { opacity:.3; width:38%; }
+.cy-boss-presence.is-danger { opacity:.46; }
+.cy-boss-presence.is-winning { opacity:.34; }
+@media (max-width: 640px) { .cy-boss-presence { width:46%; opacity:.3; } }
