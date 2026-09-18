@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createHash, timingSafeEqual } from "node:crypto";
+import { bestPerPlayer, rankScore } from "@/game/ranking";
 
 export type PrizeEntry = {
   name: string;
@@ -43,7 +44,7 @@ export const fetchPrizepool = createServerFn({ method: "POST" })
     const { data: rows, error } = await supabaseAdmin
       .from("leaderboard_runs")
       .select(
-        "player_name, country, archetype, difficulty, mode, net_worth, score, season, wallet, rank_title, months_survived, created_at",
+         "player_name, country, archetype, difficulty, mode, net_worth, score, season, wallet, player_key, rank_title, months_survived, achievements, xp, survived, created_at",
       )
       .eq("is_tournament", true)
       .not("wallet", "is", null)
@@ -56,9 +57,18 @@ export const fetchPrizepool = createServerFn({ method: "POST" })
       return { ok: true as const, seasons: [] as PrizeSeason[] };
     }
 
-    const bySeason = new Map<string, PrizeEntry[]>();
+    const rawBySeason = new Map<string, NonNullable<typeof rows>>();
     for (const r of rows ?? []) {
       if (!r.season || !r.wallet) continue;
+      const list = rawBySeason.get(r.season) ?? [];
+      list.push(r);
+      rawBySeason.set(r.season, list);
+    }
+
+    const bySeason = new Map<string, PrizeEntry[]>();
+    for (const [season, seasonRows] of rawBySeason) {
+      const ranked = bestPerPlayer(seasonRows).sort((a, b) => rankScore(b) - rankScore(a));
+      for (const r of ranked) {
       const entry: PrizeEntry = {
         name: r.player_name,
         country: r.country,
@@ -67,20 +77,21 @@ export const fetchPrizepool = createServerFn({ method: "POST" })
         mode: r.mode,
         netWorth: Number(r.net_worth),
         score: Math.round(Number(r.score)),
-        season: r.season,
+        season,
         wallet: r.wallet,
         rankTitle: r.rank_title,
         months: r.months_survived,
         createdAt: r.created_at,
       };
-      const list = bySeason.get(r.season) ?? [];
+      const list = bySeason.get(season) ?? [];
       list.push(entry);
-      bySeason.set(r.season, list);
+      bySeason.set(season, list);
+      }
     }
 
     const seasons: PrizeSeason[] = [];
     for (const [season, entries] of bySeason) {
-      const sorted = entries.sort((a, b) => b.score - a.score);
+      const sorted = entries;
       seasons.push({
         season,
         entries: sorted,
