@@ -249,9 +249,9 @@ export function wireAudio() {
     window.removeEventListener("pointerdown", unlock);
     window.removeEventListener("keydown", unlock);
     window.removeEventListener("touchstart", unlock);
-    // Let the click finish first. PLAY NOW changes the requested track in that
-    // same gesture, so this starts only the final track instead of menu + run.
-    window.setTimeout(() => { void setTrack(s.track ?? "menu"); }, 0);
+    // Give React's screen change time to choose the final track. Starting the
+    // menu loop in the same PLAY NOW gesture briefly layers menu and run audio.
+    window.setTimeout(() => { void setTrack(s.track ?? "menu"); }, 120);
   };
   window.addEventListener("touchstart", unlock, { once: false });
   window.addEventListener("pointerdown", unlock, { once: false });
