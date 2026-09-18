@@ -110,7 +110,6 @@ export function initAudio() {
   }
   void s.ctx.resume();
   applyBuses();
-  if (s.track) void setTrack(s.track);
 }
 
 
@@ -247,10 +246,12 @@ export function wireAudio() {
   const unlock = () => {
     initAudio();
     preloadSfx();
-    if (!s.track) void setTrack("menu");
     window.removeEventListener("pointerdown", unlock);
     window.removeEventListener("keydown", unlock);
     window.removeEventListener("touchstart", unlock);
+    // Let the click finish first. PLAY NOW changes the requested track in that
+    // same gesture, so this starts only the final track instead of menu + run.
+    window.setTimeout(() => { void setTrack(s.track ?? "menu"); }, 0);
   };
   window.addEventListener("touchstart", unlock, { once: false });
   window.addEventListener("pointerdown", unlock, { once: false });
