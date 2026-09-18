@@ -158,7 +158,7 @@ export const tournamentModifier = (season: string): ModifierId =>
  *  playstyle only — never an advantage. Free runs keep the archetype bankroll. */
 export const startCashFor = (config: Config) => {
   const base = config.tournament ? TOURNAMENT_RULES.cash : archOf(config.arch).cash;
-  return Math.round(base * (config.modifier === "glass" ? 0.5 : 1));
+  return Math.round(base * (!config.tournament && config.modifier === "glass" ? 0.5 : 1));
 };
 
 const tournamentConfig = (): Config => {
@@ -474,6 +474,9 @@ export function CryptoJourney() {
     playSfx("buy");
     if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
     grantXp(XP.trade, "TRADE");
+    // The opening lesson lets the player act before history hits. Immediately
+    // after that first BTC order, the full Q1 event queue still plays.
+    if (run.chapter === 0 && run.trades === 0) window.setTimeout(() => openChapterCards(0), 260);
   };
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
@@ -1290,7 +1293,7 @@ export function CryptoJourney() {
                 </div>
               </div>
               <div className="cy-main-actions">
-                <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}>{focusPosition ? <><TrendingUp />ADD / TRADE</> : <><TrendingUp />BUY BTC NOW</>}<ChevronRight /></Button>
+                <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}>{focusPosition ? <><TrendingUp />ADD / TRADE</> : <><TrendingUp />BUY BTC NOW</>}<ChevronRight /></Button>
                 <Button variant="secondary" onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />SELL {focusSymbol}</> : <><History />WAIT</>}</Button>
                 <Button variant="outline" onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : "HOLD"}</Button>
               </div>
