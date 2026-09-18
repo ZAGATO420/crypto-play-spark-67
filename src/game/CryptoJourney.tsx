@@ -49,6 +49,8 @@ type Run = {
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
   boss: BossBook; conviction: number; convictionOn: boolean; perks: string[]; bossWins: number;
+  /** Chapters whose boss fight is already settled, so nobody can farm the same duel twice. */
+  fought: number[];
   /** The story of this run, in the player's own voice. Rendered on the end screen. */
   chronicle: string[];
   /** Milestone ids already lived through, so a beat never repeats. */
