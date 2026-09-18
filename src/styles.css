@@ -1217,3 +1217,26 @@
 .cy-launch-facts small { font-size:8px; font-weight:800; letter-spacing:.1em; color:color-mix(in oklab,var(--foreground) 60%,transparent); }
 .cy-launch-facts strong { font-size:12px; font-weight:900; color:var(--journey-yellow); }
 .cy-launch-cta { width:100%; }
+
+/* ---- plain-words preview of the main action, last move, skill test ---- */
+.cy-preview { display: grid; gap: .45rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: .55rem 0 .35rem; }
+.cy-preview span { display: flex; flex-direction: column; gap: .2rem; padding: .5rem .6rem; border: 1px solid color-mix(in srgb, var(--journey-cyan) 26%, transparent); border-radius: .7rem; background: color-mix(in srgb, #02110d 82%, transparent); min-width: 0; }
+.cy-preview small { font-size: .58rem; letter-spacing: .12em; opacity: .72; }
+.cy-preview strong { font-size: .72rem; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+.cy-lastmove { font-size: .68rem; letter-spacing: .04em; opacity: .9; margin: 0 0 .45rem; overflow-wrap: anywhere; }
+.cy-lastmove b.positive { color: var(--journey-cyan); }
+.cy-lastmove b.negative { color: var(--journey-pink); }
+.cy-skill { margin: .5rem 0 .6rem; padding: .65rem .7rem; border: 1px solid color-mix(in srgb, var(--journey-yellow) 44%, transparent); border-radius: .85rem; background: color-mix(in srgb, #140f02 76%, transparent); }
+.cy-skill.is-done { border-color: color-mix(in srgb, var(--journey-cyan) 40%, transparent); }
+.cy-skill-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem .6rem; }
+.cy-skill-head span { font-size: .58rem; letter-spacing: .14em; opacity: .75; }
+.cy-skill-head strong { font-size: .86rem; letter-spacing: .06em; color: var(--journey-yellow); }
+.cy-skill p { font-size: .72rem; line-height: 1.3; margin: .3rem 0 .5rem; opacity: .9; }
+.cy-skill-cta { width: 100%; }
+.cy-skill-result { font-weight: 700; letter-spacing: .06em; }
+.cy-skill-result.positive { color: var(--journey-cyan); }
+.cy-skill-result.negative { color: var(--journey-pink); }
+@media (max-width: 640px) {
+  .cy-preview { grid-template-columns: 1fr; gap: .35rem; }
+  .cy-preview strong { font-size: .76rem; }
+}
