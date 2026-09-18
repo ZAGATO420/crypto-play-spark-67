@@ -242,11 +242,14 @@ export const isMuted = () => muted;
 export const getVolumes = () => ({ musicVol, sfxVol });
 
 let wired = false;
+let unlocking = false;
 export function wireAudio() {
   if (wired || typeof window === "undefined") return;
   wired = true;
   readSettings();
   const unlock = () => {
+    if (unlocking) return;
+    unlocking = true;
     initAudio();
     preloadSfx();
     window.removeEventListener("pointerdown", unlock);
@@ -256,9 +259,9 @@ export function wireAudio() {
     // menu loop in the same PLAY NOW gesture briefly layers menu and run audio.
     window.setTimeout(() => { void setTrack(s.track ?? "menu"); }, 120);
   };
-  window.addEventListener("touchstart", unlock, { once: false });
-  window.addEventListener("pointerdown", unlock, { once: false });
-  window.addEventListener("keydown", unlock, { once: false });
+  window.addEventListener("touchstart", unlock, { once: true });
+  window.addEventListener("pointerdown", unlock, { once: true });
+  window.addEventListener("keydown", unlock, { once: true });
   document.addEventListener("visibilitychange", () => {
     if (!s.ctx) return;
     if (document.hidden) void s.ctx.suspend();

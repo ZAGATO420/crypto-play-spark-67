@@ -337,6 +337,9 @@ export function CryptoJourney() {
   const [guide, setGuide] = useState<0 | 1 | 2 | null>(null);
   const [verified, setVerified] = useState(false);
   const tickRef = useRef(0);
+  const chartLineRef = useRef<SVGPolylineElement | null>(null);
+  const chartMarkerRef = useRef<HTMLElement | null>(null);
+  const liveClockRef = useRef<HTMLElement | null>(null);
   const [actSplash, setActSplash] = useState(true);
   const lastAct = useRef(1);
 
@@ -1123,9 +1126,15 @@ export function CryptoJourney() {
       last = now;
       tickRef.current = Math.min(1, tickRef.current + dt / (fast ? 1_600 : LIVE_MS));
       if (tickRef.current >= 1) { tickRef.current = 0; endChapter(); return; }
-      // Repaint at ~12 fps and let CSS bridge the small gaps. Five updates per
-      // second looked visibly jerky, while a full 60 fps re-render flickers cards.
-      if (tickRef.current - shown >= 0.008) { shown = tickRef.current; setTick(tickRef.current); }
+      const liveX = Math.max(2, Math.min(98, tickRef.current * 100));
+      const liveMark = livePrice(focusSymbol, run, tickRef.current, sweeping);
+      const liveY = 92 - ((liveMark - chartMin) / chartSpan) * 76;
+      if (chartLineRef.current) chartLineRef.current.style.strokeDashoffset = String(100 - liveX);
+      if (chartMarkerRef.current) chartMarkerRef.current.style.transform = `translate(-50%, -50%) translate(${liveX}%, ${liveY}%)`;
+      if (liveClockRef.current) liveClockRef.current.style.width = `${tickRef.current * 100}%`;
+      // Financial values update at a calm rate; the visual tape above moves at
+      // native requestAnimationFrame speed without rerendering the whole game.
+      if (tickRef.current - shown >= 0.02) { shown = tickRef.current; setTick(tickRef.current); }
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
@@ -1334,17 +1343,17 @@ export function CryptoJourney() {
                     <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
                     <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
                     <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
-                    <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
+                    <polyline ref={chartLineRef} className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
                     {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
                     <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   </svg>
-                  <i className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
+                  <i ref={chartMarkerRef} className="cy-now-marker" style={{ "--chart-x": `${currentChartX}%`, "--chart-y": `${currentChartY}%` } as React.CSSProperties} aria-hidden />
                 </div>
                 <div className="cy-chart-legend"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
                 <div className="cy-chart-foot"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
               <div className="cy-live">
-                <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
+                <div className="cy-live-clock"><i ref={liveClockRef} style={{ width: `${Math.round(tick * 100)}%` }} /></div>
                 <div className="cy-live-tape">
                   {(["BTC", "ETH", "SOL"] as CoinSymbol[]).map((s) => {
                     const open = priceAt(s, run.chapter, run.noise);
