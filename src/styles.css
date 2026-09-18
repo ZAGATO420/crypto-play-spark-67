@@ -1134,10 +1134,11 @@
 }
 
 /* keep the live chart readable behind the boss */
-.cy-boss-presence { opacity:.3; width:38%; }
-.cy-boss-presence.is-danger { opacity:.46; }
-.cy-boss-presence.is-winning { opacity:.34; }
-@media (max-width: 640px) { .cy-boss-presence { width:46%; opacity:.3; } }
+.cy-boss-presence { width:34%; }
+.cy-boss-presence img { opacity:.2; }
+.cy-boss-presence.is-danger img { opacity:.3; }
+.cy-boss-presence.is-winning img { opacity:.24; }
+@media (max-width: 640px) { .cy-boss-presence { width:40%; } }
 
 /* Clarity & Mobile Hierarchy Refinements */
 @media (max-width: 900px) {
