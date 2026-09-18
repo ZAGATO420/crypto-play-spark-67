@@ -390,7 +390,7 @@ export function CryptoJourney() {
   useEffect(() => {
     if (screen !== "run") return;
     const danger = crashFor(run.chapter) || run.stress > 75 || run.hunger > 75 || run.risk > 85;
-    setMood(danger ? "tense" : run.streak >= 2 ? "hype" : "calm");
+    setMood(danger || act.n === 2 ? "tense" : act.n === 3 || run.streak >= 2 ? "hype" : "calm");
   }, [screen, run.chapter, run.stress, run.hunger, run.risk, run.streak]);
 
 
