@@ -36,14 +36,14 @@ type State = {
   musicBus: GainNode | null;
   moodFilter: BiquadFilterNode | null;
   sfxBus: GainNode | null;
-  players: Partial<Record<TrackId, { el: HTMLAudioElement; gain: GainNode }>>;
+  player: { el: HTMLAudioElement; gain: GainNode } | null;
   buffers: Partial<Record<SfxId, AudioBuffer>>;
   loading: Partial<Record<SfxId, Promise<AudioBuffer | null>>>;
   track: TrackId | null;
   ready: boolean;
 };
 
-const s: State = { ctx: null, musicBus: null, moodFilter: null, sfxBus: null, players: {}, buffers: {}, loading: {}, track: null, ready: false };
+const s: State = { ctx: null, musicBus: null, moodFilter: null, sfxBus: null, player: null, buffers: {}, loading: {}, track: null, ready: false };
 
 /** The music leans with the market: hyped in a bull, thin and tense in a crash. */
 export type Mood = "calm" | "hype" | "tense";
@@ -80,9 +80,7 @@ const applyBuses = () => {
   s.musicBus.gain.setTargetAtTime(muted ? 0 : musicVol * MOOD[mood].gain, t, 0.2);
   s.sfxBus.gain.setTargetAtTime(muted ? 0 : sfxVol, t, 0.05);
   if (s.moodFilter) s.moodFilter.frequency.setTargetAtTime(MOOD[mood].cut, t, 0.6);
-  for (const current of Object.values(s.players)) {
-    if (current) current.el.playbackRate = MOOD[mood].rate;
-  }
+  if (s.player) s.player.el.playbackRate = MOOD[mood].rate;
 };
 
 /** Called by the run: bull market opens the music up, a crash chokes it. */
@@ -113,11 +111,15 @@ export function initAudio() {
 }
 
 
-function player(id: TrackId) {
+/**
+ * Exactly one music element for the whole app. Switching a track swaps the
+ * source inside it, so two loops can never physically overlap.
+ */
+function musicPlayer() {
   if (!s.ctx || !s.musicBus) return null;
-  const existing = s.players[id];
+  const existing = s.player;
   if (existing) return existing;
-  const el = new Audio(TRACKS[id]);
+  const el = new Audio();
   el.loop = true;
   el.playbackRate = MOOD[mood].rate;
   el.crossOrigin = "anonymous";
@@ -127,49 +129,48 @@ function player(id: TrackId) {
   gain.gain.value = 0;
   src.connect(gain).connect(s.musicBus);
   const made = { el, gain };
-  s.players[id] = made;
+  s.player = made;
   return made;
 }
 
+let starting = 0;
 export async function setTrack(id: TrackId | null) {
   const same = s.track === id;
   s.track = id;
   if (!s.ctx || !s.ready) return;
   // Before the first real gesture, browsers keep play() promises pending.
-  // Do not queue a menu loop that could unlock beside the game loop later.
   if (s.ctx.state !== "running") return;
-  // Never crossfade two full mixes: on small speakers that sounds like a doubled,
-  // phasey beat. Stop the previous loop before the next one starts.
+  const p = musicPlayer();
+  if (!p) return;
   const now = s.ctx.currentTime;
-  for (const key of Object.keys(s.players) as TrackId[]) {
-    if (key === id) continue;
-    const p = s.players[key];
-    if (!p) continue;
+  if (!id) {
     p.gain.gain.cancelScheduledValues(now);
     p.gain.gain.setValueAtTime(0, now);
     p.el.pause();
-    p.el.currentTime = 0;
+    return;
   }
-  if (!id) return;
-  const p = player(id);
-  if (!p) return;
-  // A repeated call for the already running loop must not start a second playback.
-  if (same && !p.el.paused) {
+  // Already running this loop: only make sure it is audible.
+  if (same && p.el.src.includes(TRACKS[id]) && !p.el.paused) {
     p.gain.gain.cancelScheduledValues(now);
     p.gain.gain.setTargetAtTime(1, now, FADE / 3);
     return;
   }
-  try { await p.el.play(); } catch { return; }
-  // A newer screen may have requested another track while play() was waiting.
-  if (s.track !== id) {
-    p.el.pause();
+  const ticket = ++starting;
+  p.el.pause();
+  if (p.el.src !== TRACKS[id]) {
+    p.el.src = TRACKS[id];
     p.el.currentTime = 0;
-    return;
   }
+  p.gain.gain.cancelScheduledValues(now);
+  p.gain.gain.setValueAtTime(0, now);
+  try { await p.el.play(); } catch { return; }
+  // A newer screen asked for another track while play() was pending.
+  if (ticket !== starting || s.track !== id) return;
   const t = s.ctx.currentTime;
   p.gain.gain.cancelScheduledValues(t);
   p.gain.gain.setTargetAtTime(1, t, FADE / 3);
 }
+
 
 async function buffer(id: SfxId) {
   if (!s.ctx) return null;
@@ -255,9 +256,11 @@ export function wireAudio() {
     window.removeEventListener("pointerdown", unlock);
     window.removeEventListener("keydown", unlock);
     window.removeEventListener("touchstart", unlock);
-    // Give React's screen change time to choose the final track. Starting the
-    // menu loop in the same PLAY NOW gesture briefly layers menu and run audio.
-    window.setTimeout(() => { void setTrack(s.track ?? "menu"); }, 120);
+    // One player, so the current screen's track can start straight away:
+    // a later screen change simply swaps the source inside it.
+    const start = () => { void setTrack(s.track ?? "menu"); };
+    if (s.ctx && s.ctx.state !== "running") void s.ctx.resume().then(start).catch(start);
+    else start();
   };
   window.addEventListener("touchstart", unlock, { once: true });
   window.addEventListener("pointerdown", unlock, { once: true });
