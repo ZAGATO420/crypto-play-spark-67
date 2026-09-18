@@ -23,4 +23,5 @@
 - [x] Launch finale: six rotating chapter modes, active missions, order-book/rug-check skill games, visible act scenes, wallet-gated prizes and shared payout ranking
 - [x] Anonymous gameplay beats persist for launch retention analysis
 - [x] Cyber-Survival HUD: integrated reactive Boss, animated live chart, compact survival status, tactile actions and layered mood audio
+- [x] Clarity rebuild: playable first-run guidance, paused opening tape, explicit chart language, clear duel stakes and simplified mobile controls
 - [ ] Final 28-quarter regression run and two-device tournament reproducibility check
