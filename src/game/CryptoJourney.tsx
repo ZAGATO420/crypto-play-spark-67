@@ -32,7 +32,7 @@ import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
-import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readWallet, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
+import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
 
 /* ------------------------------------------------------------------ types */
@@ -324,6 +324,9 @@ export function CryptoJourney() {
   useEffect(() => { wireAudio(); initAudio(); preloadSfx(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
   const [netPulse, setNetPulse] = useState<"up" | "down" | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
+  // Q1 opens straight in the live market, so its story cards are held back
+  // until the player's first action — whatever that action is.
+  const openingPlayed = useRef(false);
   const flashTimer = useRef<number | null>(null);
   const popId = useRef(1);
   const lastNet = useRef(0);
@@ -499,7 +502,7 @@ export function CryptoJourney() {
     grantXp(XP.trade, "TRADE");
     // The opening lesson lets the player act before history hits. Immediately
     // after that first BTC order, the full Q1 event queue still plays.
-    if (run.chapter === 0 && run.trades === 0) window.setTimeout(() => openChapterCards(0), 260);
+    playOpening();
   };
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
@@ -518,6 +521,7 @@ export function CryptoJourney() {
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
     playSfx("buy");
     grantXp(XP.trade + lev * 8, `${lev}x`);
+    playOpening();
   };
 
   /** Closing asks for a steady hand: the timing bar decides your fill. */
@@ -830,7 +834,18 @@ export function CryptoJourney() {
 
 
 
+  /** Opens the held-back Q1 event queue once, after the player's first action.
+   *  Returns true when it took over the screen. */
+  const playOpening = (delay = 260) => {
+    if (run.chapter !== 0 || openingPlayed.current) return false;
+    openingPlayed.current = true;
+    window.setTimeout(() => openChapterCards(0), delay);
+    return true;
+  };
+
   const endChapter = () => {
+    // Ending Q1 without ever trading must not skip the opening story beats.
+    if (playOpening(120)) return;
     playSfx("quarter");
     const from = run.chapter;
     const next = from + 1;
@@ -1112,6 +1127,7 @@ export function CryptoJourney() {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
     setRun(freshRun(config, reuse));
+    openingPlayed.current = false;
     setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
     lastAct.current = 1;
@@ -1395,7 +1411,7 @@ export function CryptoJourney() {
 
       {dialog && (
         <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
-          {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
+          {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); playOpening(0); }} />}
           {dialog.k === "sound" && <SoundSheet
             muted={muted} vols={vols}
             onMute={(v) => { setMuted(v); setMutedState(v); }}
@@ -2191,6 +2207,9 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const [wallet, setWallet] = useState(() => readWallet());
   const [walletError, setWalletError] = useState(false);
+  // Quick-start runs never pass the setup screen, so the player names the entry here.
+  const [name, setName] = useState(() => run.config.name.trim() || readName());
+  const [nameError, setNameError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const tournament = run.config.tournament;
@@ -2202,12 +2221,12 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const badge = badgeFor(run, ending, net);
   const submission = useMemo<RunSubmission>(() => ({
     clientHash: crypto.randomUUID(),
-    name: run.config.name || "anon", arch: run.config.arch, country: run.config.country,
+    name: name.trim() || run.config.name.trim() || "anon", arch: run.config.arch, country: run.config.country,
     difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(net),
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
     season: run.config.season, isTournament: tournament, playerKey: playerKey(),
-  }), [badge, net, run, score, tournament, won]);
+  }), [badge, name, net, run, score, tournament, won]);
   const punchline = useMemo(() => {
     if (won) return null;
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
@@ -2248,9 +2267,13 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
   const send = async () => {
     const trimmed = wallet.trim();
+    const player = name.trim();
+    if (!player) { setNameError(true); return; }
     if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
     if (tournament && run.config.season !== currentSeasonId()) { setStatus("rejected"); return; }
+    setNameError(false);
     setWalletError(false);
+    saveName(player);
     if (tournament && trimmed) saveWallet(trimmed);
     const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
     setStatus("sending");
@@ -2304,6 +2327,14 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
         )}
 
 
+        {status !== "done" && (
+          <div className="end-wallet">
+            <p className="journey-kicker">YOUR NAME ON THE BOARD</p>
+            <input className="setup-input" placeholder="YOUR NAME" maxLength={18} value={name} onChange={(e) => { setName(e.target.value); setNameError(false); }} aria-label="Player name" />
+            <small>{nameError ? "Enter a name so you can find your own entry on the board." : "This is how your run appears on the leaderboard."}</small>
+          </div>
+        )}
+
         {tournament && status !== "done" && (
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
@@ -2316,7 +2347,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
         <div className="start-actions end-actions">
 
-          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
+          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || !name.trim() || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
