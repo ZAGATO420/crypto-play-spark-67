@@ -1379,7 +1379,7 @@ export function CryptoJourney() {
                 <Button variant="secondary" disabled={guide === 0} onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
                 <Button variant="outline" disabled={guide === 0} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
               </div>
-              {chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
+              {guide === null && chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
               <div className="cy-toolbelt">
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
