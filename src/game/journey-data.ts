@@ -288,7 +288,7 @@ const MODE_COPY: Record<ChapterMode, Omit<ChapterPlay, "mode">> = {
   PANIC: { verb: "HIT THE EXIT", objective: "Liquidity is disappearing. Protect the bag before the clock reaches zero.", tempo: "danger" },
   HUNT: { verb: "HUNT THE DROP", objective: "A one-shot launch is live. Inspect it, size it and beat the bots.", tempo: "fast" },
   DEFEND: { verb: "MOVE FUNDS", objective: "Counterparty risk is rising. Secure the bag and keep enough cash to survive.", tempo: "danger" },
-  "BOSS DUEL": { verb: "FACE THE BOSS", objective: "He put money on the table. Read the signal and beat his skill check.", tempo: "danger" },
+  "BOSS DUEL": { verb: "SKILL DUEL", objective: "Risk a visible stake, read the signal, then beat the Boss skill check.", tempo: "danger" },
 };
 export const chapterPlayFor = (chapter: number): ChapterPlay => {
   const mode = CHAPTER_MODES[Math.max(0, Math.min(CHAPTER_MODES.length - 1, chapter))] ?? "ACCUMULATE";

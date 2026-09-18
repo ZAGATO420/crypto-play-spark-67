@@ -1221,8 +1221,8 @@ export function CryptoJourney() {
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
-        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
-        <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? "The market only moves after your decision. END QUARTER reveals the historical outcome." : `MISSION · ${mission.text} · +${mission.reward} XP`}</p>
+        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
+        <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : `MISSION · ${mission.text} · +${mission.reward} XP`}</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
         </div>
       </section>
@@ -1309,7 +1309,7 @@ export function CryptoJourney() {
                 <span><small>BAGS IN</small><strong>{custodyOf(run.custody).short}</strong></span>
                 <span><small>MOVES</small><strong>{ap}</strong></span>
               </div>
-              <div className="cy-actions"><Button className="cy-primary" onClick={() => setPhase("act")}>TAKE YOUR TURN <ChevronRight /></Button></div>
+              <div className="cy-actions"><Button className={`cy-primary${guide === 1 ? " is-guided" : ""}`} onClick={() => setPhase("act")}>TAKE YOUR TURN <ChevronRight /></Button></div>
             </article>
           )}
 
