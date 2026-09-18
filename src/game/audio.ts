@@ -133,23 +133,36 @@ function player(id: TrackId) {
 }
 
 export async function setTrack(id: TrackId | null) {
+  const same = s.track === id;
   s.track = id;
   if (!s.ctx || !s.ready) return;
+  // Only one music voice may ever be audible: stop every other loop hard, then fade the target in.
   const now = s.ctx.currentTime;
   for (const key of Object.keys(s.players) as TrackId[]) {
     if (key === id) continue;
     const p = s.players[key];
     if (!p) continue;
     p.gain.gain.cancelScheduledValues(now);
-    p.gain.gain.setTargetAtTime(0, now, FADE / 3);
-    window.setTimeout(() => { if (s.track !== key) p.el.pause(); }, FADE * 1000);
+    p.gain.gain.setTargetAtTime(0, now, 0.25);
+    window.setTimeout(() => {
+      if (s.track === key) return;
+      p.el.pause();
+      p.el.currentTime = 0;
+    }, 700);
   }
   if (!id) return;
   const p = player(id);
   if (!p) return;
+  // A repeated call for the already running loop must not start a second playback.
+  if (same && !p.el.paused) {
+    p.gain.gain.cancelScheduledValues(now);
+    p.gain.gain.setTargetAtTime(1, now, FADE / 3);
+    return;
+  }
   try { await p.el.play(); } catch { return; }
-  p.gain.gain.cancelScheduledValues(now);
-  p.gain.gain.setTargetAtTime(1, now, FADE / 3);
+  const t = s.ctx.currentTime;
+  p.gain.gain.cancelScheduledValues(t);
+  p.gain.gain.setTargetAtTime(1, t, FADE / 3);
 }
 
 async function buffer(id: SfxId) {
