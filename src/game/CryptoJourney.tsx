@@ -1127,6 +1127,7 @@ export function CryptoJourney() {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
     setRun(freshRun(config, reuse));
+    openingPlayed.current = false;
     setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
     lastAct.current = 1;
