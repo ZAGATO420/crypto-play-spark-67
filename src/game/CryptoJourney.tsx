@@ -342,6 +342,14 @@ export function CryptoJourney() {
   const [actSplash, setActSplash] = useState(true);
   const lastAct = useRef(1);
 
+  useEffect(() => {
+    if (phase !== "act" || coachDone.current || actSplash) return;
+    coachDone.current = true;
+    if (coachSeen()) return;
+    const t = window.setTimeout(() => setCoach(true), 420);
+    return () => window.clearTimeout(t);
+  }, [phase, actSplash]);
+
   const cfg = run.config;
   const arch = archOf(cfg.arch);
   const diff = diffOf(cfg.difficulty);
@@ -1413,6 +1421,7 @@ export function CryptoJourney() {
         </aside>
       </div>
 
+      {coach && <Coach steps={FIRST_RUN_STEPS} onDone={() => { setCoach(false); markCoachSeen(); }} />}
       {flash && <div className={`cy-flash tone-${flash.tone}`} role="status">{flash.text}</div>}
 
       <div className="cy-pops" aria-live="polite">
