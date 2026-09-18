@@ -30,7 +30,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { getVolumes, initAudio, isMuted, playSfx, playSfxStack, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
@@ -375,6 +375,10 @@ export function CryptoJourney() {
   const chartPath = chartPoints.map((price, i) => `${(i / 27) * 100},${92 - ((price - chartMin) / chartSpan) * 76}`).join(" ");
   const currentChartX = Math.max(0, Math.min(100, tick * 100));
   const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
+  const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
+  const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
+  const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
+  const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
 
 
   useEffect(() => {
@@ -456,9 +460,10 @@ export function CryptoJourney() {
    */
   const feel = (kind: "win" | "loss" | "liq" | "crash" | "save" | "green" | "red" | "idle", amount?: number) => {
     const salt = run.chapter * 7 + run.trades + run.moves;
-    if (kind === "win" || kind === "green" || kind === "save") { setFxFlash("gold"); playSfx(kind === "save" ? "hit" : "win"); }
-    if (kind === "loss" || kind === "red") { setFxFlash("red"); playSfx("sell"); }
-    if (kind === "liq" || kind === "crash") { setFxFlash("red"); rumble(); }
+    if (kind === "win" || kind === "green") { setFxFlash("gold"); playSfxStack("buy", "win", 72); }
+    if (kind === "save") { setFxFlash("gold"); playSfxStack("hit", "vault", 88); }
+    if (kind === "loss" || kind === "red") { setFxFlash("red"); playSfxStack("sell", "hit", 78); }
+    if (kind === "liq" || kind === "crash") { setFxFlash("red"); playSfxStack("crash", "hit", 110); setShake(true); window.setTimeout(() => setShake(false), 520); }
     if (kind === "idle") playSfx("click");
     if (amount !== undefined && Math.abs(amount) >= 1) pop(`${amount >= 0 ? "+" : "−"}${formatMoney(Math.abs(amount))}`, amount >= 0 ? "up" : "down");
     setBossTalk(bossReaction(kind, salt));
@@ -1209,11 +1214,11 @@ export function CryptoJourney() {
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
       </section>
 
-      <section className="cy-core" aria-label="Run status">
-        <span><small>NET WORTH</small><strong><Count value={net} /></strong></span>
-        <span><small>CASH</small><strong>{formatMoney(run.cash)}</strong></span>
-        <span><small>MONTH</small><strong>{Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} / {TOTAL_MONTHS}</strong></span>
-        <span><small>YOU vs BOSS</small><strong className={net >= bossNet ? "positive" : "negative"}>{net >= bossNet ? "AHEAD" : `${formatMoney(bossNet - net)} BEHIND`}</strong></span>
+      <section className={`cy-core is-${arenaState}`} aria-label="Run status">
+        <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong><em>{net >= bossNet ? "BOSS UNDER PRESSURE" : `${formatMoney(bossNet - net)} TO CATCH`}</em></span>
+        <span><small>CASH</small><strong>{formatMoney(run.cash)}</strong><em>READY</em></span>
+        <span className={run.stress >= 70 ? "is-critical" : ""}><small>STRESS</small><strong>{run.stress}%</strong><i><b style={{ width: `${run.stress}%` }} /></i></span>
+        <span className={run.hunger >= 70 ? "is-critical" : ""}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
       </section>
 
       {details && <section className="cy-meters" aria-label="Detailed run status">
@@ -1278,11 +1283,6 @@ export function CryptoJourney() {
 
 
       <div className="cy-body">
-        <aside className="cy-boss">
-          <img src={mood} alt="The crowned Crypto Final Boss watching your run" />
-          <div><p className="journey-kicker"><Crown /> THE BOSS</p><p>{bossLine}</p></div>
-        </aside>
-
         <section className="cy-stage" aria-live="polite">
           {phase === "brief" && (
             <article className="cy-card" key={`brief-${run.chapter}`}>
@@ -1301,15 +1301,21 @@ export function CryptoJourney() {
           )}
 
           {phase === "act" && (
-            <article className="cy-card cy-arena" key={`act-${run.chapter}`}>
+            <article className={`cy-card cy-arena is-${arenaState}`} key={`act-${run.chapter}`}>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
               {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT · SAME SEED · $20 / $10 / $5 $TCFB</div>}
-              <div className="cy-market-visual">
+              <div className={`cy-market-visual pulse-${marketPulse}`}>
+                <div className={`cy-boss-presence is-${arenaState}`}>
+                  <img src={mood} alt="The Crypto Final Boss reacts to your run" />
+                  <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
+                </div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} LIVE P&L` : "PICK YOUR FIRST POSITION"}</strong></div>
                 <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
                   <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
                   <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
-                  <polyline points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
+                  <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
+                  <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
+                  {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
                   <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" />
                 </svg>
@@ -1333,6 +1339,7 @@ export function CryptoJourney() {
                   })}
                 </div>
                 {attack && <p className="cy-attack"><strong>{attack.name} ·</strong> {attack.line}</p>}
+                <div className={`cy-pressure is-${arenaState}`}><span>{arenaState === "danger" ? "SURVIVAL ALERT" : arenaState === "winning" ? "MOMENTUM" : "MARKET PRESSURE"}</span><i><b style={{ width: `${Math.max(8, Math.min(100, arenaState === "danger" ? survivalDanger : Math.abs(btcMove) * 4 + 18))}%` }} /></i></div>
                 <div className="cy-signals">
                   {signals.map((s, i) => (
                     <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
