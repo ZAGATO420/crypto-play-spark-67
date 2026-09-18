@@ -968,6 +968,14 @@ export function CryptoJourney() {
     const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
+    const activeMission = missionFor(run.chapter);
+    const missionWon = activeMission.id === "grow" ? delta > 0
+      : activeMission.id === "spread" ? new Set(positions.map((p) => p.symbol)).size >= 3
+        : activeMission.id === "sniper" ? run.moves === 1
+          : activeMission.id === "profit8" ? endNet >= startNet * 1.08
+            : activeMission.id === "cashout" ? run.trades > 0 && run.realized !== realized
+              : activeMission.id === "patience" ? run.moves === 0
+                : delta > 0 && run.moves > 0;
 
     // conviction: you called the quarter, so the quarter pays or bills you double
     let convCash = 0;
@@ -1015,7 +1023,7 @@ export function CryptoJourney() {
     setFast(false);
     setVerified(false);
     setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("+1 MOVE") ? 1 : 0))));
-    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep, idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
+    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep + (missionWon ? activeMission.reward : 0), missionWon ? "MISSION COMPLETE" : idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     feel(liquidated ? "liq" : idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash);
     if (milestone) say(milestone.line, "yellow");
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
@@ -2228,9 +2236,8 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
   const send = async () => {
     const trimmed = wallet.trim();
-    // The wallet is only needed to receive a prize, never to be listed. A
-    // mandatory address stopped players from entering the board at all.
     if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
+    if (tournament && run.config.season !== currentSeasonId()) { setStatus("rejected"); return; }
     setWalletError(false);
     if (tournament && trimmed) saveWallet(trimmed);
     const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
@@ -2297,7 +2304,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
         <div className="start-actions end-actions">
 
-          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected"}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
+          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
@@ -2305,7 +2312,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
         </div>
 
         {status === "queued" && <small className="end-message">The board is unavailable. Your result is saved and will retry automatically.</small>}
-        {status === "rejected" && <small className="end-message">This result failed the board's integrity checks and cannot be submitted.</small>}
+        {status === "rejected" && <small className="end-message">{tournament && run.config.season !== currentSeasonId() ? "This season closed while you played. Your run stays saved locally, but cannot enter the new season." : "This result failed the board's integrity checks and cannot be submitted."}</small>}
 
       </section>
     </main>

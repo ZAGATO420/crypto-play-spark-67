@@ -79,9 +79,8 @@ const runSchema = z.object({
   wallet: z.string().trim().regex(WALLET).optional(),
   isTournament: z.boolean().default(false),
   playerKey: z.string().trim().min(6).max(64).optional(),
-// A wallet is only needed to get PAID, not to be ranked. Requiring it here
-// silently blocked every tournament entry from players who had no address at
-// hand, so the season board stayed empty. Season + playerKey are enough.
+// Prize-bearing tournament rows require both identities. The wallet links
+// repeat browser identities and is never returned by the public GET endpoint.
 }).refine((r) => !r.isTournament || (r.season && r.playerKey && r.wallet), {
   message: "tournament runs need season, playerKey and wallet",
 });
