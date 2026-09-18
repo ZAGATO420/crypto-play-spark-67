@@ -2226,7 +2226,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
     season: run.config.season, isTournament: tournament, playerKey: playerKey(),
-  }), [badge, net, run, score, tournament, won]);
+  }), [badge, name, net, run, score, tournament, won]);
   const punchline = useMemo(() => {
     if (won) return null;
     const lines = DEATH_PUNCHLINES[ending as keyof typeof DEATH_PUNCHLINES];
