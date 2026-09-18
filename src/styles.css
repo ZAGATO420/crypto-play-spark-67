@@ -1051,7 +1051,7 @@
   .cy-details-toggle.guide-hidden { display:none; }
   .cy-positions { display:none; }
   .cy-market-visual { min-height:218px; padding:9px; }
-  .cy-chart { height:126px; margin-top:28px; }
+  .cy-chart { height:126px; margin-top:6px; }
   .cy-boss-presence { top:52px; right:0; width:40%; height:58%; opacity:.22; }
   .cy-boss-presence div { display:none; }
   .cy-boss-presence span { font-size:8px; }
@@ -1090,13 +1090,10 @@
   .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
   .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
   .cy-shell.has-guide .cy-main-actions .cy-main-trade {
-    position:fixed;
-    z-index:40;
-    left:50%;
-    bottom:16px;
-    width:min(982px,calc(100vw - 32px));
-    transform:translateX(-50%);
-    box-shadow:0 0 0 2px color-mix(in oklab,var(--journey-yellow) 42%,transparent),0 18px 60px #000;
+    position:relative;
+    z-index:4;
+    width:100%;
+    box-shadow:0 0 0 2px color-mix(in oklab,var(--journey-yellow) 42%,transparent),0 14px 40px #000;
   }
 }
 
