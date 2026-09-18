@@ -1410,7 +1410,7 @@ export function CryptoJourney() {
 
       {dialog && (
         <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
-          {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); if (run.chapter === 0 && run.logs.length === 0) openChapterCards(0); }} />}
+          {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); playOpening(0); }} />}
           {dialog.k === "sound" && <SoundSheet
             muted={muted} vols={vols}
             onMute={(v) => { setMuted(v); setMutedState(v); }}
