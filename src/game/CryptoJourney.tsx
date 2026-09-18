@@ -1130,7 +1130,10 @@ export function CryptoJourney() {
       const liveMark = livePrice(focusSymbol, run, tickRef.current, sweeping);
       const liveY = 92 - ((liveMark - chartMin) / chartSpan) * 76;
       if (chartLineRef.current) chartLineRef.current.style.strokeDashoffset = String(100 - liveX);
-      if (chartMarkerRef.current) chartMarkerRef.current.style.transform = `translate(-50%, -50%) translate(${liveX}%, ${liveY}%)`;
+      if (chartMarkerRef.current) {
+        chartMarkerRef.current.style.left = `${liveX}%`;
+        chartMarkerRef.current.style.top = `${liveY}%`;
+      }
       if (liveClockRef.current) liveClockRef.current.style.width = `${tickRef.current * 100}%`;
       // Financial values update at a calm rate; the visual tape above moves at
       // native requestAnimationFrame speed without rerendering the whole game.
@@ -1347,7 +1350,7 @@ export function CryptoJourney() {
                     {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
                     <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   </svg>
-                  <i ref={chartMarkerRef} className="cy-now-marker" style={{ "--chart-x": `${currentChartX}%`, "--chart-y": `${currentChartY}%` } as React.CSSProperties} aria-hidden />
+                  <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
                 <div className="cy-chart-legend"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
                 <div className="cy-chart-foot"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>

@@ -976,7 +976,7 @@
 .cy-chart { display:block; width:100%; height:100%; overflow:hidden; filter:drop-shadow(0 0 7px color-mix(in oklab,var(--journey-cyan) 30%,transparent)); }
 .cy-chart-ghost { opacity:.18; }
 .cy-chart-live-line { stroke-dasharray:100; }
-.cy-now-marker { position:absolute; z-index:4; left:0; top:0; display:block; width:10px; height:10px; border:2px solid var(--background); border-radius:50%; background:var(--journey-yellow); box-shadow:0 0 12px var(--journey-yellow); pointer-events:none; transform:translate(-50%,-50%) translate(var(--chart-x),var(--chart-y)); }
+.cy-now-marker { position:absolute; z-index:4; display:block; width:10px; height:10px; border:2px solid var(--background); border-radius:50%; background:var(--journey-yellow); box-shadow:0 0 12px var(--journey-yellow); pointer-events:none; transform:translate(-50%,-50%); }
 .cy-entry-line { stroke:var(--journey-yellow); stroke-width:.55; stroke-dasharray:2 2; opacity:.72; }
 .cy-market-visual.pulse-down .cy-chart-live-line { stroke:var(--journey-pink); }
 .cy-market-visual.pulse-down { border-color:color-mix(in oklab,var(--journey-pink) 42%,var(--border)); }
