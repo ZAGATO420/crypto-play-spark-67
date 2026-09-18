@@ -1420,7 +1420,7 @@ export function CryptoJourney() {
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
           {dialog.k === "fight" && <FightSheet chapter={dialog.chapter} cash={run.cash}
             onFight={(wager, kind) => setDialog({ k: "mini", kind, pending: { t: "fight", chapter: dialog.chapter, wager } })}
-            onDuck={() => { setRun((r) => ({ ...r, stress: clamp(r.stress + 10), conviction: 0 })); say("You walked past his table. He remembers that.", "pink"); nextInQueue(); }} />}
+            onDuck={() => { setRun((r) => ({ ...r, stress: clamp(r.stress + 10), conviction: 0, fought: r.fought.includes(dialog.chapter) ? r.fought : [...r.fought, dialog.chapter] })); say("You walked past his table. He remembers that.", "pink"); nextInQueue(); }} />}
           {dialog.k === "offer" && <OfferSheet attack={dialog.attack} net={net}
             onTake={() => takeOffer(Math.max(2000, Math.round(net * 0.25)))}
             onRefuse={() => { nextInQueue(); setRun((r) => ({ ...r, conviction: clamp(r.conviction + 15) })); say("You told him no. Conviction up.", "yellow"); }} />}
