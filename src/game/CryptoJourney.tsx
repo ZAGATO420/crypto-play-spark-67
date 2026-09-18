@@ -1102,6 +1102,7 @@ export function CryptoJourney() {
 
   const continueChapter = () => {
     setResolution(null);
+    if (guide === 2) setGuide(null);
     openChapterCards(run.chapter);
   };
 
@@ -1328,9 +1329,9 @@ export function CryptoJourney() {
                   <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
                   <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
                   <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
-                  {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
+                  {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" /><text x="2" y={entryChartY - 2} className="cy-chart-label entry" fontSize="3">ENTRY</text>}
                   <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
-                  <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" />
+                  <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" /><text x={currentChartX + 3} y={currentChartY + 1} className="cy-chart-label live" fontSize="3.5">YOU</text>
                 </svg>
                 <div className="cy-chart-foot"><span>YOU BOUGHT {focusPosition ? formatMoney(focusPosition.entry) : "NOT YET"}</span><span>NOW {formatMoney(focusPrice)}</span><span>{waitingForFirstTrade ? "WAITING FOR YOU" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
