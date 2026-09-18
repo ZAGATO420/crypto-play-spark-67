@@ -135,6 +135,9 @@ export async function setTrack(id: TrackId | null) {
   const same = s.track === id;
   s.track = id;
   if (!s.ctx || !s.ready) return;
+  // Before the first real gesture, browsers keep play() promises pending.
+  // Do not queue a menu loop that could unlock beside the game loop later.
+  if (s.ctx.state !== "running") return;
   // Never crossfade two full mixes: on small speakers that sounds like a doubled,
   // phasey beat. Stop the previous loop before the next one starts.
   const now = s.ctx.currentTime;
