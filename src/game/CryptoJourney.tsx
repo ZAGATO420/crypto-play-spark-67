@@ -521,6 +521,7 @@ export function CryptoJourney() {
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
     playSfx("buy");
     grantXp(XP.trade + lev * 8, `${lev}x`);
+    playOpening();
   };
 
   /** Closing asks for a steady hand: the timing bar decides your fill. */
