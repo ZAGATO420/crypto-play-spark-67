@@ -2207,6 +2207,9 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const [wallet, setWallet] = useState(() => readWallet());
   const [walletError, setWalletError] = useState(false);
+  // Quick-start runs never pass the setup screen, so the player names the entry here.
+  const [name, setName] = useState(() => run.config.name.trim() || readName());
+  const [nameError, setNameError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const tournament = run.config.tournament;
