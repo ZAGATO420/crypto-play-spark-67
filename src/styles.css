@@ -848,6 +848,7 @@
    ============================================================ */
 
 .cy-goal {
+  position: relative;
   margin: 0.6rem 0 0.2rem;
   padding: 0.7rem 0.85rem;
   border: 1px solid color-mix(in oklab, var(--primary) 32%, transparent);
