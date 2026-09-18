@@ -19,7 +19,7 @@ import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
   ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
-  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
+  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
 
@@ -322,6 +322,8 @@ export function CryptoJourney() {
   const [fast, setFast] = useState(false);
   const [verified, setVerified] = useState(false);
   const tickRef = useRef(0);
+  const [actSplash, setActSplash] = useState(true);
+  const lastAct = useRef(1);
 
   const cfg = run.config;
   const arch = archOf(cfg.arch);
@@ -334,6 +336,8 @@ export function CryptoJourney() {
   const xpBar = xpProgress(run.xp);
   const persona = personaFor(det(run.seed, "persona"));
   const act = actFor(run.chapter);
+  const chapterPlay = chapterPlayFor(run.chapter);
+  const mission = missionFor(run.chapter);
   const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`), persona.bias);
   const sweeping = attack?.id === "SWEEP";
 
@@ -392,6 +396,14 @@ export function CryptoJourney() {
     const danger = crashFor(run.chapter) || run.stress > 75 || run.hunger > 75 || run.risk > 85;
     setMood(danger || act.n === 2 ? "tense" : act.n === 3 || run.streak >= 2 ? "hype" : "calm");
   }, [screen, run.chapter, run.stress, run.hunger, run.risk, run.streak]);
+  useEffect(() => {
+    if (screen !== "run" || lastAct.current === act.n) return;
+    lastAct.current = act.n;
+    setActSplash(true);
+    playSfx("level");
+    const id = window.setTimeout(() => setActSplash(false), 2400);
+    return () => window.clearTimeout(id);
+  }, [act.n, screen]);
 
 
   const say = (text: string, tone: Log["tone"] = "cyan") => {
@@ -502,7 +514,7 @@ export function CryptoJourney() {
     const pos = run.positions.find((p) => p.id === id);
     if (!pos) return;
     if (pos.where === "cold" && ap <= 0) { setDialog(null); return say("Cold storage needs a move to unlock. None left this quarter.", "pink"); }
-    setDialog({ k: "mini", kind: "timing", pending: { t: "close", id, fraction } });
+    setDialog({ k: "mini", kind: chapterPlay.mode === "MOMENTUM" ? "orderbook" : "timing", pending: { t: "close", id, fraction } });
   };
 
   const closePosition = (id: number, fraction: number, quality: number) => {
@@ -1082,6 +1094,9 @@ export function CryptoJourney() {
     setRun(freshRun(config, reuse));
     setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
+    lastAct.current = 1;
+    setActSplash(true);
+    window.setTimeout(() => setActSplash(false), 2400);
     trackGameBeat(reuse === undefined ? "run_started" : "rematch_started", { tournament: config.tournament });
   };
 
@@ -1120,6 +1135,10 @@ export function CryptoJourney() {
   return (
     <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}`}>
       <img className="cy-world" src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" loading="lazy" width={1600} height={900} aria-hidden />
+      {actSplash && <section className={`cy-act-splash cy-act-splash-${act.n}`} onClick={() => setActSplash(false)} aria-label={`${act.name} begins`}>
+        <img src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" />
+        <div><p>{chapterLabel(run.chapter)}</p><h2>{act.name}</h2><span>{act.line}</span></div>
+      </section>}
       {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
 
       <section className="cy-journey" aria-label={`Month ${Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} of ${TOTAL_MONTHS}`}>
@@ -1148,9 +1167,9 @@ export function CryptoJourney() {
       </header>
 
       <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}`} aria-live="polite">
-        <p className="cy-goal-head">DO THIS NOW</p>
-        <p className="cy-goal-line">{objective.goal}</p>
-        <p className="cy-goal-why">{objective.why}</p>
+        <p className="cy-goal-head">{chapterPlay.mode} · {chapterPlay.verb}</p>
+        <p className="cy-goal-line">{run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
+        <p className="cy-goal-why">MISSION · {mission.text} · +{mission.reward} XP</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
       </section>
 
@@ -1248,6 +1267,7 @@ export function CryptoJourney() {
           {phase === "act" && (
             <article className="cy-card cy-arena" key={`act-${run.chapter}`}>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
+              {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT · SAME SEED · $20 / $10 / $5 $TCFB</div>}
               <div className="cy-market-visual">
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} LIVE P&L` : "PICK YOUR FIRST POSITION"}</strong></div>
                 <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
@@ -1293,9 +1313,13 @@ export function CryptoJourney() {
                 </div>
               </div>
               <div className="cy-main-actions">
-                <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}>{focusPosition ? <><TrendingUp />ADD / TRADE</> : <><TrendingUp />BUY BTC NOW</>}<ChevronRight /></Button>
-                <Button variant="secondary" onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />SELL {focusSymbol}</> : <><History />WAIT</>}</Button>
-                <Button variant="outline" onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : "HOLD"}</Button>
+                {chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
+                  : chapterPlay.mode === "HUNT" && presale ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />HUNT {presale.name}<ChevronRight /></Button>
+                    : chapterPlay.mode === "DEFEND" ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />MOVE FUNDS<ChevronRight /></Button>
+                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />FACE THE BOSS<ChevronRight /></Button>
+                        : <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}><TrendingUp />{chapterPlay.verb}<ChevronRight /></Button>}
+                <Button variant="secondary" onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
+                <Button variant="outline" onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
               </div>
               <div className="cy-toolbelt">
                 {presale && <button className="is-hot" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />{presale.tag}</button>}
@@ -1362,7 +1386,7 @@ export function CryptoJourney() {
           {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => setDialog({ k: "trade", symbol: s })} />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
-          {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
+          {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: run.chapter % 2 === 0 ? "rugcheck" : "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
           {dialog.k === "launchResult" && <LaunchResultSheet res={dialog.res} onClose={nextInQueue} />}
           {dialog.k === "survive" && <SurviveSheet run={run} difficulty={cfg.difficulty} caps={diff.caps} onEat={() => recover("eat")} onCalm={() => recover("calm")} />}
           {dialog.k === "cashout" && <CashOutSheet run={run} net={net} score={score} onConfirm={cashOut} onClose={() => setDialog(null)} />}
@@ -1944,7 +1968,7 @@ function TournamentRules({ onClose }: { onClose: () => void }) {
         <li><b>2</b><span>Only your best run of the month counts. Play as often as you like.</span></li>
         <li><b>3</b><span>One account per player. Multiple accounts, shared wallets or duplicate entries are disqualified.</span></li>
         <li><b>4</b><span>Top 3 win {PRIZES.map((p) => `$${p}`).join(" / ")} in $TCFB, paid within 3 days after the token launch in October.</span></li>
-        <li><b>5</b><span>You only add a wallet at the end of a run. Wallets stay private.</span></li>
+        <li><b>5</b><span>A valid wallet is required to enter the prize leaderboard. Wallets stay private.</span></li>
       </ol>
       <Button className="cy-primary" onClick={onClose}>GOT IT <ChevronRight /></Button>
     </>
@@ -2206,10 +2230,10 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
     const trimmed = wallet.trim();
     // The wallet is only needed to receive a prize, never to be listed. A
     // mandatory address stopped players from entering the board at all.
-    if (tournament && trimmed && !isWallet(trimmed)) { setWalletError(true); return; }
+    if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
     setWalletError(false);
     if (tournament && trimmed) saveWallet(trimmed);
-    const payload: RunSubmission = tournament && trimmed ? { ...submission, wallet: trimmed } : submission;
+    const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
     setStatus("sending");
     savePendingSubmission(payload);
     try {
@@ -2264,8 +2288,8 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
         {tournament && status !== "done" && (
           <div className="end-wallet">
             <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
-            <input className="setup-input" placeholder="YOUR WALLET (OPTIONAL · EVM OR SOLANA)" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
-            <small>{walletError ? "That wallet address is not valid. Clear it or fix it — you can also submit without one." : "Optional: only the top 3 need a wallet to get paid. You can submit without it and add one later. Wallets stay private — prizes are paid within 3 days after the October launch."}</small>
+            <input className="setup-input" placeholder="YOUR WALLET · EVM OR SOLANA" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
+            <small>{walletError ? "Enter a valid EVM or Solana wallet to join the tournament leaderboard." : "Required for a prize-valid tournament entry. Wallets stay private — prizes are paid within 3 days after the October launch."}</small>
 
           </div>
         )}
