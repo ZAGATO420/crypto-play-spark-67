@@ -1191,3 +1191,29 @@
 }
 .cy-chart-legend .is-now { background:var(--journey-yellow); }
 .cy-chart-legend .is-entry { background:var(--journey-cyan); }
+
+/* ---- standing: one glance answer to "am I winning?" ---------------------- */
+.cy-standing { margin:0 0 10px; padding:9px 11px; border:1px solid color-mix(in oklab,var(--journey-cyan) 24%,transparent); border-radius:14px; background:color-mix(in oklab,#000 52%,transparent); }
+.cy-standing-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.cy-standing-head strong { font-size:11px; letter-spacing:.06em; color:var(--foreground); }
+.cy-standing-head button { margin-left:auto; padding:5px 9px; border:1px solid color-mix(in oklab,var(--journey-yellow) 45%,transparent); border-radius:999px; background:transparent; color:var(--journey-yellow); font-size:10px; font-weight:800; letter-spacing:.08em; }
+.cy-standing-tag { padding:4px 9px; border-radius:999px; font-size:10px; font-weight:900; letter-spacing:.1em; color:#04120c; background:var(--journey-cyan); }
+.cy-standing.is-great .cy-standing-tag { background:var(--journey-yellow); }
+.cy-standing.is-behind .cy-standing-tag,
+.cy-standing.is-bad .cy-standing-tag { background:var(--journey-pink); color:#fff; }
+.cy-standing-bar { position:relative; height:7px; margin:8px 0 6px; border-radius:999px; overflow:hidden; background:color-mix(in oklab,var(--journey-pink) 35%,transparent); }
+.cy-standing-bar i { display:block; height:100%; border-radius:999px; background:var(--journey-cyan); transition:width .45s ease; }
+.cy-standing.is-great .cy-standing-bar i { background:var(--journey-yellow); }
+.cy-standing p { margin:0; font-size:10px; font-weight:700; letter-spacing:.04em; color:color-mix(in oklab,var(--foreground) 74%,transparent); }
+
+/* ---- launch stage: presales and ICOs always get their own moment --------- */
+.cy-launch-stage { margin:10px 0 0; padding:11px; border:1px solid color-mix(in oklab,var(--journey-yellow) 40%,transparent); border-radius:16px; background:linear-gradient(160deg,color-mix(in oklab,var(--journey-yellow) 12%,transparent),color-mix(in oklab,#000 62%,transparent)); }
+.cy-launch-head { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.cy-launch-head span { padding:3px 8px; border-radius:999px; background:var(--journey-yellow); color:#12100a; font-size:9px; font-weight:900; letter-spacing:.12em; }
+.cy-launch-head strong { font-size:15px; letter-spacing:.04em; color:var(--foreground); }
+.cy-launch-stage > p { margin:7px 0 9px; font-size:11px; line-height:1.45; color:color-mix(in oklab,var(--foreground) 82%,transparent); }
+.cy-launch-facts { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:10px; }
+.cy-launch-facts span { display:flex; flex-direction:column; gap:2px; padding:6px 7px; border-radius:10px; background:color-mix(in oklab,#000 45%,transparent); }
+.cy-launch-facts small { font-size:8px; font-weight:800; letter-spacing:.1em; color:color-mix(in oklab,var(--foreground) 60%,transparent); }
+.cy-launch-facts strong { font-size:12px; font-weight:900; color:var(--journey-yellow); }
+.cy-launch-cta { width:100%; }

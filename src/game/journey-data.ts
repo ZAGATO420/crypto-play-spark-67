@@ -272,28 +272,51 @@ export const chapterOfMonth = (m: number) => Math.floor(m / 3);
 
 /* ---- chapter modes: the historical cycle changes what the player does ---- */
 export type ChapterMode = "ACCUMULATE" | "MOMENTUM" | "PANIC" | "HUNT" | "DEFEND" | "BOSS DUEL";
-export type ChapterPlay = { mode: ChapterMode; verb: string; objective: string; tempo: "calm" | "fast" | "danger" };
-const CHAPTER_MODES: ChapterMode[] = [
-  "BOSS DUEL", "HUNT", "ACCUMULATE", "HUNT",
-  "MOMENTUM", "BOSS DUEL", "MOMENTUM", "HUNT",
-  "DEFEND", "BOSS DUEL", "DEFEND", "PANIC",
-  "HUNT", "ACCUMULATE", "DEFEND", "ACCUMULATE",
-  "HUNT", "MOMENTUM", "HUNT", "BOSS DUEL",
-  "ACCUMULATE", "DEFEND", "BOSS DUEL", "MOMENTUM",
-  "HUNT", "PANIC", "HUNT", "BOSS DUEL",
-];
+export type ChapterPlay = { mode: ChapterMode; verb: string; objective: string; task: string; tempo: "calm" | "fast" | "danger" };
 const MODE_COPY: Record<ChapterMode, Omit<ChapterPlay, "mode">> = {
-  ACCUMULATE: { verb: "BUILD POSITION", objective: "Choose the strongest market and build before the crowd arrives.", tempo: "calm" },
-  MOMENTUM: { verb: "TAKE PROFIT", objective: "The tape is moving. Add with conviction or bank profit before momentum turns.", tempo: "fast" },
-  PANIC: { verb: "HIT THE EXIT", objective: "Liquidity is disappearing. Protect the bag before the clock reaches zero.", tempo: "danger" },
-  HUNT: { verb: "HUNT THE DROP", objective: "A one-shot launch is live. Inspect it, size it and beat the bots.", tempo: "fast" },
-  DEFEND: { verb: "MOVE FUNDS", objective: "Counterparty risk is rising. Secure the bag and keep enough cash to survive.", tempo: "danger" },
-  "BOSS DUEL": { verb: "SKILL DUEL", objective: "Risk a visible stake, read the signal, then beat the Boss skill check.", tempo: "danger" },
+  ACCUMULATE: { verb: "BUILD POSITION", objective: "Choose the strongest market and build before the crowd arrives.", task: "Buy cheap. Pick one coin and put cash to work.", tempo: "calm" },
+  MOMENTUM: { verb: "TAKE PROFIT", objective: "The tape is moving. Add with conviction or bank profit before momentum turns.", task: "Take profit. Sell part of your winner or let it ride.", tempo: "fast" },
+  PANIC: { verb: "HIT THE EXIT", objective: "Liquidity is disappearing. Protect the bag before the clock reaches zero.", task: "Get out. Sell before the crash takes your money.", tempo: "danger" },
+  HUNT: { verb: "HUNT THE DROP", objective: "A one-shot launch is live. Inspect it, size it and beat the bots.", task: "A launch is live. Check it, then size your ticket or pass.", tempo: "fast" },
+  DEFEND: { verb: "MOVE FUNDS", objective: "Counterparty risk is rising. Secure the bag and keep enough cash to survive.", task: "Protect your money. Move the bag somewhere safer.", tempo: "danger" },
+  "BOSS DUEL": { verb: "SKILL DUEL", objective: "Risk a visible stake, read the signal, then beat the Boss skill check.", task: "The Boss challenges you. Set a stake you can afford to lose.", tempo: "danger" },
 };
+/**
+ * The quarter's job comes from the real history of that quarter, so a presale
+ * chapter always plays as a hunt and a crash chapter always plays as panic.
+ */
 export const chapterPlayFor = (chapter: number): ChapterPlay => {
-  const mode = CHAPTER_MODES[Math.max(0, Math.min(CHAPTER_MODES.length - 1, chapter))] ?? "ACCUMULATE";
+  const mode: ChapterMode = BOSS_FIGHTS[chapter] ? "BOSS DUEL"
+    : PRESALES.some((p) => p.chapter === chapter) ? "HUNT"
+    : CRASHES[chapter] ? "PANIC"
+    : EXCHANGE_FAILURES[chapter] ? "DEFEND"
+    : chapter % 2 === 0 ? "ACCUMULATE" : "MOMENTUM";
   return { mode, ...MODE_COPY[mode] };
 };
+
+/** Plain, no-maths answer to "am I doing well?" — shown every second of the run. */
+export type Standing = { label: string; tone: "great" | "good" | "tight" | "behind" | "bad"; line: string };
+export const standingFor = (net: number, bossNet: number, chapter: number): Standing => {
+  const gap = net - bossNet;
+  const ratio = bossNet > 0 ? net / bossNet : 1;
+  const left = Math.max(0, CHAPTERS - chapter);
+  const tail = `${left} quarter${left === 1 ? "" : "s"} left.`;
+  if (ratio >= 1.5) return { label: "WAY AHEAD", tone: "great", line: `You are ${Math.round(gap).toLocaleString("en-US")} ahead of the Boss. ${tail}` };
+  if (ratio >= 1.05) return { label: "AHEAD", tone: "good", line: `Ahead of the Boss. ${tail}` };
+  if (ratio >= 0.85) return { label: "CLOSE", tone: "tight", line: `Almost level with the Boss. ${tail}` };
+  if (ratio >= 0.4) return { label: "BEHIND", tone: "behind", line: `The Boss is ${Math.round(-gap).toLocaleString("en-US")} in front. ${tail}` };
+  return { label: "ON THE EDGE", tone: "bad", line: `Far behind. One good quarter changes this. ${tail}` };
+};
+
+/** Five lines that explain the whole game. Reachable at any time in the run. */
+export const HOW_TO_PLAY: { head: string; body: string }[] = [
+  { head: "THE GOAL", body: "Survive 2020 to 2026 with real crypto prices and finish richer than the Boss." },
+  { head: "MOVES", body: "Every quarter you get 2 moves. Buying, selling, hunting a launch or a duel each cost one move." },
+  { head: "MAKE MONEY", body: "Buy low, sell into strength, and take early launch tickets that are not rugs." },
+  { head: "HOW YOU DIE", body: "Stress or hunger at 100%, a liquidation, or no money left. Eat and calm down in time." },
+  { head: "BOSS SCORE", body: "Final net worth x quarters survived x difficulty, plus a bonus for every crisis you survived." },
+];
+
 
 
 export type Presale = {

@@ -18,8 +18,8 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
-  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, xpProgress,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
+  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, standingFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
 
@@ -89,6 +89,7 @@ type Dialog =
   | { k: "year"; chapter: number }
 
   | { k: "sound" }
+  | { k: "how" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
 type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[]; inflow: Entry[]; outflow: Entry[] };
@@ -1192,6 +1193,7 @@ export function CryptoJourney() {
     taxDebt: run.taxDebt, crash: !!crashFor(run.chapter), presale: !!presaleFor(run.chapter), moves: ap, net, bossNet,
   });
   const doom = doomIn(run.chapter);
+  const standing = standingFor(net, bossNet, run.chapter);
 
 
   return (
@@ -1232,8 +1234,8 @@ export function CryptoJourney() {
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
-        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
-        <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : `MISSION · ${mission.text} · +${mission.reward} XP`}</p>
+        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
+        <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
         </div>
         {guide !== null && <div className="cy-guide-path" aria-label={`Guide step ${guide + 1} of 3`}>
@@ -1242,6 +1244,16 @@ export function CryptoJourney() {
           <span className={guide === 2 ? "is-current" : ""}><b>3</b>RESULT</span>
           <button type="button" onClick={() => setGuide(null)}>SKIP GUIDE</button>
         </div>}
+      </section>
+
+      <section className={`cy-standing is-${standing.tone}`} aria-label="How you stand against the Boss">
+        <div className="cy-standing-head">
+          <span className="cy-standing-tag">{standing.label}</span>
+          <strong>YOU {formatMoney(net)} · BOSS {formatMoney(bossNet)}</strong>
+          <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
+        </div>
+        <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
+        <p>QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1402,6 +1414,18 @@ export function CryptoJourney() {
                 <Button variant="outline" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
               </div>
               {guide === null && chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
+              {guide === null && presale && (
+                <div className="cy-launch-stage">
+                  <div className="cy-launch-head"><span>{presale.tag} LIVE</span><strong>{presale.name}</strong></div>
+                  <p>{presale.blurb}</p>
+                  <div className="cy-launch-facts">
+                    <span><small>TICKET FROM</small><strong>{formatMoney(presale.min)}</strong></span>
+                    <span><small>RUG RISK</small><strong>{Math.round(presale.rug * 100)}%</strong></span>
+                    <span><small>IF IT WORKS</small><strong>{presale.upside[0]}x – {presale.upside[1]}x</strong></span>
+                  </div>
+                  <Button className="cy-launch-cta" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />OPEN {presale.tag} · {presale.name}</Button>
+                </div>
+              )}
               <div className="cy-toolbelt">
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
@@ -1457,6 +1481,7 @@ export function CryptoJourney() {
       {dialog && (
         <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); playOpening(0); }} />}
+          {dialog.k === "how" && <HowToPlay onClose={() => setDialog(null)} />}
           {dialog.k === "sound" && <SoundSheet
             muted={muted} vols={vols}
             onMute={(v) => { setMuted(v); setMutedState(v); }}
@@ -1546,6 +1571,19 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (()
         {children}
       </div>
     </div>
+  );
+}
+
+function HowToPlay({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <p className="journey-kicker"><Crown /> FIVE LINES, THE WHOLE GAME</p>
+      <h2>HOW TO PLAY</h2>
+      <ol className="cy-steps">
+        {HOW_TO_PLAY.map((row, i) => <li key={row.head}><b>{i + 1}</b><span><strong>{row.head}</strong> — {row.body}</span></li>)}
+      </ol>
+      <Button className="cy-primary" onClick={onClose}>BACK TO THE MARKET</Button>
+    </>
   );
 }
 
