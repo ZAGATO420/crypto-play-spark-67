@@ -110,7 +110,6 @@ export function initAudio() {
   }
   void s.ctx.resume();
   applyBuses();
-  if (s.track) void setTrack(s.track);
 }
 
 
@@ -136,19 +135,20 @@ export async function setTrack(id: TrackId | null) {
   const same = s.track === id;
   s.track = id;
   if (!s.ctx || !s.ready) return;
-  // Only one music voice may ever be audible: stop every other loop hard, then fade the target in.
+  // Before the first real gesture, browsers keep play() promises pending.
+  // Do not queue a menu loop that could unlock beside the game loop later.
+  if (s.ctx.state !== "running") return;
+  // Never crossfade two full mixes: on small speakers that sounds like a doubled,
+  // phasey beat. Stop the previous loop before the next one starts.
   const now = s.ctx.currentTime;
   for (const key of Object.keys(s.players) as TrackId[]) {
     if (key === id) continue;
     const p = s.players[key];
     if (!p) continue;
     p.gain.gain.cancelScheduledValues(now);
-    p.gain.gain.setTargetAtTime(0, now, 0.25);
-    window.setTimeout(() => {
-      if (s.track === key) return;
-      p.el.pause();
-      p.el.currentTime = 0;
-    }, 700);
+    p.gain.gain.setValueAtTime(0, now);
+    p.el.pause();
+    p.el.currentTime = 0;
   }
   if (!id) return;
   const p = player(id);
@@ -160,6 +160,12 @@ export async function setTrack(id: TrackId | null) {
     return;
   }
   try { await p.el.play(); } catch { return; }
+  // A newer screen may have requested another track while play() was waiting.
+  if (s.track !== id) {
+    p.el.pause();
+    p.el.currentTime = 0;
+    return;
+  }
   const t = s.ctx.currentTime;
   p.gain.gain.cancelScheduledValues(t);
   p.gain.gain.setTargetAtTime(1, t, FADE / 3);
@@ -236,21 +242,26 @@ export const isMuted = () => muted;
 export const getVolumes = () => ({ musicVol, sfxVol });
 
 let wired = false;
+let unlocking = false;
 export function wireAudio() {
   if (wired || typeof window === "undefined") return;
   wired = true;
   readSettings();
   const unlock = () => {
+    if (unlocking) return;
+    unlocking = true;
     initAudio();
     preloadSfx();
-    if (!s.track) void setTrack("menu");
     window.removeEventListener("pointerdown", unlock);
     window.removeEventListener("keydown", unlock);
     window.removeEventListener("touchstart", unlock);
+    // Give React's screen change time to choose the final track. Starting the
+    // menu loop in the same PLAY NOW gesture briefly layers menu and run audio.
+    window.setTimeout(() => { void setTrack(s.track ?? "menu"); }, 120);
   };
-  window.addEventListener("touchstart", unlock, { once: false });
-  window.addEventListener("pointerdown", unlock, { once: false });
-  window.addEventListener("keydown", unlock, { once: false });
+  window.addEventListener("touchstart", unlock, { once: true });
+  window.addEventListener("pointerdown", unlock, { once: true });
+  window.addEventListener("keydown", unlock, { once: true });
   document.addEventListener("visibilitychange", () => {
     if (!s.ctx) return;
     if (document.hidden) void s.ctx.suspend();
