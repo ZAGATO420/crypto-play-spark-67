@@ -2267,9 +2267,13 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
   const send = async () => {
     const trimmed = wallet.trim();
+    const player = name.trim();
+    if (!player) { setNameError(true); return; }
     if (tournament && !isWallet(trimmed)) { setWalletError(true); return; }
     if (tournament && run.config.season !== currentSeasonId()) { setStatus("rejected"); return; }
+    setNameError(false);
     setWalletError(false);
+    saveName(player);
     if (tournament && trimmed) saveWallet(trimmed);
     const payload: RunSubmission = tournament ? { ...submission, wallet: trimmed } : submission;
     setStatus("sending");
