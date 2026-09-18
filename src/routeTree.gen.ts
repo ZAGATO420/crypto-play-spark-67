@@ -14,6 +14,7 @@ import { Route as ContentRouteImport } from './routes/content'
 import { Route as PrizepoolRouteImport } from './routes/prizepool'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TrailerRouteImport } from './routes/trailer'
+import { Route as ApiPublicGameAnalyticsRouteImport } from './routes/api/public/game-analytics'
 import { Route as ApiPublicLeaderboardRouteImport } from './routes/api/public/leaderboard'
 import { Route as ApiPublicPricesRouteImport } from './routes/api/public/prices'
 
@@ -42,6 +43,11 @@ const TrailerRoute = TrailerRouteImport.update({
   path: '/trailer',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicGameAnalyticsRoute = ApiPublicGameAnalyticsRouteImport.update({
+  id: '/api/public/game-analytics',
+  path: '/api/public/game-analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicLeaderboardRoute = ApiPublicLeaderboardRouteImport.update({
   id: '/api/public/leaderboard',
   path: '/api/public/leaderboard',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/prizepool': typeof PrizepoolRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trailer': typeof TrailerRoute
+  '/api/public/game-analytics': typeof ApiPublicGameAnalyticsRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
   '/api/public/prices': typeof ApiPublicPricesRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/prizepool': typeof PrizepoolRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trailer': typeof TrailerRoute
+  '/api/public/game-analytics': typeof ApiPublicGameAnalyticsRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
   '/api/public/prices': typeof ApiPublicPricesRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/prizepool': typeof PrizepoolRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/trailer': typeof TrailerRoute
+  '/api/public/game-analytics': typeof ApiPublicGameAnalyticsRoute
   '/api/public/leaderboard': typeof ApiPublicLeaderboardRoute
   '/api/public/prices': typeof ApiPublicPricesRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/prizepool'
     | '/sitemap.xml'
     | '/trailer'
+    | '/api/public/game-analytics'
     | '/api/public/leaderboard'
     | '/api/public/prices'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/prizepool'
     | '/sitemap.xml'
     | '/trailer'
+    | '/api/public/game-analytics'
     | '/api/public/leaderboard'
     | '/api/public/prices'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/prizepool'
     | '/sitemap.xml'
     | '/trailer'
+    | '/api/public/game-analytics'
     | '/api/public/leaderboard'
     | '/api/public/prices'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   PrizepoolRoute: typeof PrizepoolRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrailerRoute: typeof TrailerRoute
+  ApiPublicGameAnalyticsRoute: typeof ApiPublicGameAnalyticsRoute
   ApiPublicLeaderboardRoute: typeof ApiPublicLeaderboardRoute
   ApiPublicPricesRoute: typeof ApiPublicPricesRoute
 }
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrailerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/game-analytics': {
+      id: '/api/public/game-analytics'
+      path: '/api/public/game-analytics'
+      fullPath: '/api/public/game-analytics'
+      preLoaderRoute: typeof ApiPublicGameAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/leaderboard': {
       id: '/api/public/leaderboard'
       path: '/api/public/leaderboard'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrizepoolRoute: PrizepoolRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrailerRoute: TrailerRoute,
+  ApiPublicGameAnalyticsRoute: ApiPublicGameAnalyticsRoute,
   ApiPublicLeaderboardRoute: ApiPublicLeaderboardRoute,
   ApiPublicPricesRoute: ApiPublicPricesRoute,
 }

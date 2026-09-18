@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { bestPerPlayer, rankScore } from "@/game/ranking";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -78,11 +79,10 @@ const runSchema = z.object({
   wallet: z.string().trim().regex(WALLET).optional(),
   isTournament: z.boolean().default(false),
   playerKey: z.string().trim().min(6).max(64).optional(),
-// A wallet is only needed to get PAID, not to be ranked. Requiring it here
-// silently blocked every tournament entry from players who had no address at
-// hand, so the season board stayed empty. Season + playerKey are enough.
-}).refine((r) => !r.isTournament || (r.season && r.playerKey), {
-  message: "tournament runs need season and playerKey",
+// Prize-bearing tournament rows require both identities. The wallet links
+// repeat browser identities and is never returned by the public GET endpoint.
+}).refine((r) => !r.isTournament || (r.season && r.playerKey && r.wallet), {
+  message: "tournament runs need season, playerKey and wallet",
 });
 
 const PRIZES = [20, 10, 5];
@@ -135,30 +135,6 @@ function sanitizeName(name: string): string {
 // Ranking score: a 3-month bail-out with +$100 must not outrank a 32-month run
 // that ended slightly negative. Net worth still dominates, but survival time,
 // XP and achievements count — and unfinished mini-runs get a soft penalty.
-function rankScore(r: {
-  net_worth: number | string;
-  xp: number;
-  months_survived: number;
-  achievements: number;
-  survived: boolean;
-  mode?: string | null;
-  score?: number | string | null;
-}): number {
-  const stored = Number((r as { score?: number | string }).score) || 0;
-  if (stored > 0) return stored;
-  const net = Number(r.net_worth) || 0;
-  let score = net + r.xp * 10 + r.months_survived * 500 + r.achievements * 250;
-  if (r.survived) score += 25_000;
-  if (r.months_survived < 6) score -= 5_000;
-  // Historical runs follow the real timeline and are therefore predictable;
-  // chaos runs carry real risk. Weight them so knowledge alone cannot top a
-  // chaos run (mirrors the client's XP multipliers).
-  const mode = (r.mode || "").toLowerCase();
-  if (mode.includes("historical")) score *= 0.8;
-  else if (mode.includes("chaos")) score *= 1.2;
-  return score;
-}
-
 const SELECT_COLS =
   "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament, wallet, player_key";
 
@@ -168,54 +144,6 @@ const SELECT_COLS =
 // have a wallet run and a wallet-less run, so those identities are merged
 // (union-find) into one competitor. Nothing is deleted — every run stays in the
 // table and in the ALL TIME view.
-function bestPerPlayer(rows: any[]): any[] {
-  const parent = new Map<string, string>();
-  const find = (x: string): string => {
-    let r = x;
-    while (parent.get(r) && parent.get(r) !== r) r = parent.get(r)!;
-    parent.set(x, r);
-    return r;
-  };
-  const union = (a: string, b: string) => {
-    parent.set(a, parent.get(a) ?? a);
-    parent.set(b, parent.get(b) ?? b);
-    const ra = find(a);
-    const rb = find(b);
-    if (ra !== rb) parent.set(rb, ra);
-  };
-
-  const idsOf = (r: any) => {
-    const wallet = String(r.wallet ?? "").trim().toLowerCase();
-    const key = String(r.player_key ?? "").trim();
-    const ids: string[] = [];
-    if (wallet) ids.push(`w:${wallet}`);
-    if (key) ids.push(`k:${key}`);
-    return ids;
-  };
-
-  for (const r of rows) {
-    const ids = idsOf(r);
-    for (const id of ids) parent.set(id, parent.get(id) ?? id);
-    for (let i = 1; i < ids.length; i++) union(ids[0]!, ids[i]!);
-  }
-
-  const best = new Map<string, any>();
-  const out: any[] = [];
-  for (const r of rows) {
-    const ids = idsOf(r);
-    if (!ids.length) {
-      out.push(r);
-      continue;
-    }
-    const id = find(ids[0]!);
-    const prev = best.get(id);
-    if (!prev || rankScore(r) > rankScore(prev)) best.set(id, r);
-  }
-  return [...out, ...best.values()];
-}
-
-
-
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -359,7 +287,10 @@ export const Route = createFileRoute("/api/public/leaderboard")({
 
         const now = new Date();
         const currentSeason = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-        if (run.isTournament && run.season !== currentSeason) {
+        const graceForPreviousSeason = now.getUTCDate() === 1 && now.getUTCHours() < 6;
+        const previousMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+        const previousSeason = `${previousMonth.getUTCFullYear()}-${String(previousMonth.getUTCMonth() + 1).padStart(2, "0")}`;
+        if (run.isTournament && run.season !== currentSeason && !(graceForPreviousSeason && run.season === previousSeason)) {
           return Response.json({ error: "season closed" }, { status: 422, headers: CORS });
         }
 

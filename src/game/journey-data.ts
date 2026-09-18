@@ -270,6 +270,32 @@ export const chapterMonth = (ch: number) => Math.min(83, Math.max(0, ch * 3 + 2)
 export const chapterLabel = (ch: number) => `Q${(ch % 4) + 1} ${2020 + Math.floor(ch / 4)}`;
 export const chapterOfMonth = (m: number) => Math.floor(m / 3);
 
+/* ---- chapter modes: the historical cycle changes what the player does ---- */
+export type ChapterMode = "ACCUMULATE" | "MOMENTUM" | "PANIC" | "HUNT" | "DEFEND" | "BOSS DUEL";
+export type ChapterPlay = { mode: ChapterMode; verb: string; objective: string; tempo: "calm" | "fast" | "danger" };
+const CHAPTER_MODES: ChapterMode[] = [
+  "BOSS DUEL", "HUNT", "ACCUMULATE", "HUNT",
+  "MOMENTUM", "BOSS DUEL", "MOMENTUM", "HUNT",
+  "DEFEND", "BOSS DUEL", "DEFEND", "PANIC",
+  "HUNT", "ACCUMULATE", "DEFEND", "ACCUMULATE",
+  "HUNT", "MOMENTUM", "HUNT", "BOSS DUEL",
+  "ACCUMULATE", "DEFEND", "BOSS DUEL", "MOMENTUM",
+  "HUNT", "PANIC", "HUNT", "BOSS DUEL",
+];
+const MODE_COPY: Record<ChapterMode, Omit<ChapterPlay, "mode">> = {
+  ACCUMULATE: { verb: "BUILD POSITION", objective: "Choose the strongest market and build before the crowd arrives.", tempo: "calm" },
+  MOMENTUM: { verb: "TAKE PROFIT", objective: "The tape is moving. Add with conviction or bank profit before momentum turns.", tempo: "fast" },
+  PANIC: { verb: "HIT THE EXIT", objective: "Liquidity is disappearing. Protect the bag before the clock reaches zero.", tempo: "danger" },
+  HUNT: { verb: "HUNT THE DROP", objective: "A one-shot launch is live. Inspect it, size it and beat the bots.", tempo: "fast" },
+  DEFEND: { verb: "MOVE FUNDS", objective: "Counterparty risk is rising. Secure the bag and keep enough cash to survive.", tempo: "danger" },
+  "BOSS DUEL": { verb: "FACE THE BOSS", objective: "He put money on the table. Read the signal and beat his skill check.", tempo: "danger" },
+};
+export const chapterPlayFor = (chapter: number): ChapterPlay => {
+  const mode = CHAPTER_MODES[Math.max(0, Math.min(CHAPTER_MODES.length - 1, chapter))] ?? "ACCUMULATE";
+  return { mode, ...MODE_COPY[mode] };
+};
+
+
 export type Presale = {
   chapter: number;
   name: string;

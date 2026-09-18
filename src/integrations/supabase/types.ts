@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      game_analytics: {
+        Row: {
+          chapter: number | null
+          created_at: string
+          details: Json
+          event_name: string
+          id: string
+          is_tournament: boolean
+          viewport: string | null
+        }
+        Insert: {
+          chapter?: number | null
+          created_at?: string
+          details?: Json
+          event_name: string
+          id?: string
+          is_tournament?: boolean
+          viewport?: string | null
+        }
+        Update: {
+          chapter?: number | null
+          created_at?: string
+          details?: Json
+          event_name?: string
+          id?: string
+          is_tournament?: boolean
+          viewport?: string | null
+        }
+        Relationships: []
+      }
       leaderboard_runs: {
         Row: {
           achievements: number
