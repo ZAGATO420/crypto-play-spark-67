@@ -848,6 +848,7 @@
    ============================================================ */
 
 .cy-goal {
+  position: relative;
   margin: 0.6rem 0 0.2rem;
   padding: 0.7rem 0.85rem;
   border: 1px solid color-mix(in oklab, var(--primary) 32%, transparent);
@@ -870,6 +871,16 @@
 .cy-goal-line { margin: 0.15rem 0 0.2rem; font-weight: 800; font-size: clamp(1rem, 4.4vw, 1.25rem); line-height: 1.2; }
 .cy-goal-why { margin: 0; font-size: 0.8rem; color: var(--muted-foreground); line-height: 1.45; }
 .cy-goal-doom { margin: 0.35rem 0 0; font-size: 0.74rem; letter-spacing: 0.08em; color: color-mix(in oklab, var(--destructive) 80%, var(--foreground)); }
+.cy-guide-path { grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:5px; align-items:center; padding-top:7px; border-top:1px solid color-mix(in oklab,var(--journey-yellow) 24%,transparent); }
+.cy-guide-path span { display:flex; align-items:center; gap:4px; color:var(--muted-foreground); font-size:8px; font-weight:800; }
+.cy-guide-path span::after { content:""; flex:1; height:1px; background:var(--border); }
+.cy-guide-path span:last-of-type::after { display:none; }
+.cy-guide-path b { display:grid; place-items:center; width:18px; height:18px; border:1px solid var(--border); border-radius:50%; color:var(--muted-foreground); }
+.cy-guide-path .is-current { color:var(--journey-yellow); }
+.cy-guide-path .is-current b { border-color:var(--journey-yellow); background:var(--journey-yellow); color:var(--background); box-shadow:0 0 12px color-mix(in oklab,var(--journey-yellow) 36%,transparent); }
+.cy-guide-path .is-done { color:var(--journey-cyan); }
+.cy-guide-path .is-done b { border-color:var(--journey-cyan); color:var(--journey-cyan); }
+.cy-guide-path button { min-height:28px; padding:4px 7px; border:1px solid var(--border); border-radius:4px; color:var(--muted-foreground); font-size:8px; font-weight:800; }
 
 .cy-details-toggle {
   width: 100%;
@@ -988,6 +999,9 @@
 .cy-pressure.is-winning { color:var(--journey-yellow); }
 .cy-pressure.is-winning > i b { background:var(--journey-yellow); }
 .cy-main-actions { display:grid; grid-template-columns:1.35fr 1fr .8fr; gap:7px; }
+.cy-action-context { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:center; padding:7px 9px; border-left:3px solid var(--journey-cyan); background:color-mix(in oklab,var(--journey-cyan) 8%,transparent); }
+.cy-action-context span { color:var(--journey-cyan); font-size:8px; font-weight:900; white-space:nowrap; }
+.cy-action-context strong { color:var(--foreground); font-size:10px; line-height:1.3; }
 .cy-main-actions button { min-height:56px; font-family:var(--font-display); font-size:11px; border-bottom-width:3px; transition:transform .12s,box-shadow .2s; }
 .cy-main-actions button:active { transform:translateY(2px) scale(.99); border-bottom-width:1px; }
 .cy-main-trade { background:var(--journey-yellow); color:var(--background); border-bottom-color:color-mix(in oklab,var(--journey-yellow) 48%,var(--background)); box-shadow:0 8px 28px color-mix(in oklab,var(--journey-yellow) 24%,transparent); }
@@ -1031,12 +1045,15 @@
   .cy-top { display:none; }
   .cy-goal { margin:0; padding:8px 10px; }
   .cy-goal-why { display:block; font-size:11px; }
+  .cy-guide-path { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .cy-guide-path button { grid-column:1 / -1; justify-self:end; min-height:24px; }
   .cy-details-toggle { margin:0; }
+  .cy-details-toggle.guide-hidden { display:none; }
   .cy-positions { display:none; }
-  .cy-market-visual { min-height:245px; padding:9px; }
-  .cy-chart { height:150px; margin-top:34px; }
-  .cy-boss-presence { top:46px; width:54%; height:68%; opacity:.46; }
-  .cy-boss-presence div { right:6px; bottom:7px; max-width:155px; padding:5px 6px; }
+  .cy-market-visual { min-height:218px; padding:9px; }
+  .cy-chart { height:126px; margin-top:28px; }
+  .cy-boss-presence { top:52px; right:0; width:40%; height:58%; opacity:.22; }
+  .cy-boss-presence div { display:none; }
   .cy-boss-presence span { font-size:8px; }
   .cy-chart-title > strong { max-width:46%; text-align:right; }
   .cy-chart-foot span:first-child { display:none; }
@@ -1051,10 +1068,66 @@
   .cy-pressure { display:none; }
   .cy-chart-instruction { align-items:center; }
   .cy-chart-instruction strong { max-width:55%; text-align:right; }
+  .cy-chart-legend { position:relative; z-index:3; flex-wrap:wrap; margin-top:3px; }
+  .cy-chart-foot { padding-top:4px; }
+  .cy-action-context { grid-template-columns:1fr; gap:2px; }
   .cy-toolbelt { position:sticky; bottom:max(0px,env(safe-area-inset-bottom)); z-index:12; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); padding:7px; border:1px solid var(--border); background:color-mix(in oklab,var(--background) 94%,transparent); backdrop-filter:blur(12px); }
   .cy-toolbelt button { justify-content:center; min-height:42px; padding:5px 3px; font-size:8px; }
   .cy-toolbelt .is-danger { margin-left:0; }
   .cy-duel-stakes { grid-template-columns:1fr; }
+}
+
+@media (min-width:641px) {
+  .cy-shell.has-guide .cy-goal { padding:14px; }
+  .cy-shell.has-guide .cy-goal-doom { display:none; }
+  .cy-shell.has-guide .cy-details-toggle,
+  .cy-shell.has-guide .cy-positions,
+  .cy-shell.has-guide .cy-sidebar { display:none; }
+  .cy-shell.has-guide .cy-body { grid-template-columns:minmax(0,1fr); max-width:1008px; }
+  .cy-shell.has-guide .cy-arena { padding:12px; gap:8px; }
+  .cy-shell.has-guide .cy-market-visual { min-height:250px; }
+  .cy-shell.has-guide .cy-chart { height:150px; }
+  .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
+  .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
+  .cy-shell.has-guide .cy-main-actions .cy-main-trade {
+    position:fixed;
+    z-index:40;
+    left:50%;
+    bottom:16px;
+    width:min(982px,calc(100vw - 32px));
+    transform:translateX(-50%);
+    box-shadow:0 0 0 2px color-mix(in oklab,var(--journey-yellow) 42%,transparent),0 18px 60px #000;
+  }
+}
+
+@media (max-width:640px) {
+  .cy-shell.has-guide { gap:6px; }
+  .cy-shell.has-guide .cy-goal { grid-template-columns:34px minmax(0,1fr); gap:6px 8px; padding:6px 8px; }
+  .cy-shell.has-guide .cy-goal-avatar { width:34px; height:34px; }
+  .cy-shell.has-guide .cy-goal-head { font-size:8px; }
+  .cy-shell.has-guide .cy-goal-line { margin:2px 0; font-size:15px; }
+  .cy-shell.has-guide .cy-goal-why { font-size:9px; line-height:1.3; }
+  .cy-shell.has-guide .cy-goal-doom { display:none; }
+  .cy-shell.has-guide .cy-guide-path { padding-top:4px; }
+  .cy-shell.has-guide .cy-guide-path b { width:16px; height:16px; }
+  .cy-shell.has-guide .cy-guide-path button { position:absolute; right:17px; top:49px; }
+  .cy-shell.has-guide .cy-core { grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; }
+  .cy-shell.has-guide .cy-core > span { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-height:43px; padding:5px 6px; }
+  .cy-shell.has-guide .cy-core small,.cy-shell.has-guide .cy-core em { font-size:6px; }
+  .cy-shell.has-guide .cy-core strong { font-size:11px; }
+  .cy-shell.has-guide .cy-core > span > i { width:100%; }
+  .cy-shell.has-guide .cy-arena { padding:8px; gap:6px; }
+  .cy-shell.has-guide .cy-arena-head { padding:6px 8px; }
+  .cy-shell.has-guide .cy-tournament-live { display:none; }
+  .cy-shell.has-guide .cy-market-visual { min-height:176px; }
+  .cy-shell.has-guide .cy-chart-instruction { margin:4px 0 0; padding:4px 6px; }
+  .cy-shell.has-guide .cy-chart-title { margin-top:4px; }
+  .cy-shell.has-guide .cy-chart { height:82px; margin-top:5px; }
+  .cy-shell.has-guide .cy-boss-presence { top:45px; height:52%; }
+  .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
+  .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
+  .cy-shell.has-guide .cy-action-context { padding:5px 7px; }
+  .cy-shell.has-guide .cy-toolbelt { position:static; }
 }
 @media (prefers-reduced-motion:reduce) {
   .cy-world,.cy-journey-track i.is-now,.cy-act-splash,.cy-core > span.is-critical,.cy-chart-live-line,.cy-boss-presence { transition:none; animation:none; }
@@ -1086,27 +1159,6 @@
   }
 }
 
-.cy-chart-label {
-  font-family: var(--font-display);
-  fill: var(--journey-yellow);
-  pointer-events: none;
-  text-transform: uppercase;
-}
-.cy-chart-label.entry {
-  fill: var(--journey-cyan);
-  opacity: 0.8;
-}
-
-.cy-chart-instruction {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: color-mix(in oklab, var(--journey-panel) 80%, transparent);
-  border-bottom: 1px solid var(--border);
-  font-size: 10px;
-  font-weight: 700;
-}
-
 .cy-goal-line {
   font-weight: 800;
   color: var(--journey-yellow);
@@ -1135,3 +1187,5 @@
   border-radius: 50%;
   margin-right: 4px;
 }
+.cy-chart-legend .is-now { background:var(--journey-yellow); }
+.cy-chart-legend .is-entry { background:var(--journey-cyan); }
