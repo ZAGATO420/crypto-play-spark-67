@@ -29,6 +29,7 @@ import { readProfile, recordRun, type Profile } from "./profile";
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
+import Coach, { FIRST_RUN_STEPS, coachSeen, markCoachSeen } from "./Coach";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, playSfxStack, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
@@ -334,6 +335,8 @@ export function CryptoJourney() {
   // the live quarter: t walks 0 -> 1 while you act, then the market answers
   const [tick, setTick] = useState(0);
   const [fast, setFast] = useState(false);
+  const [coach, setCoach] = useState(false);
+  const coachDone = useRef(false);
   const [verified, setVerified] = useState(false);
   const tickRef = useRef(0);
   const [actSplash, setActSplash] = useState(true);
@@ -1405,6 +1408,7 @@ export function CryptoJourney() {
           {run.logs.length ? run.logs.slice(0, 6).map((l, i) => (
             <div className={`trail-entry tone-${l.tone}`} key={`${l.chapter}-${i}`}><span>{chapterLabel(l.chapter)}</span><strong>{l.title}</strong></div>
           )) : <p className="trail-empty">Every trade, rug and crisis lands here.</p>}
+          <button className="cy-rules" onClick={() => { coachDone.current = true; setCoach(true); }}>SHOW ME HOW TO PLAY</button>
           <button className="cy-rules" onClick={() => setDialog({ k: "rules" })}>HOW IT WORKS</button>
         </aside>
       </div>
