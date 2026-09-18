@@ -324,6 +324,9 @@ export function CryptoJourney() {
   useEffect(() => { wireAudio(); initAudio(); preloadSfx(); setMutedState(isMuted()); setVols(getVolumes()); }, []);
   const [netPulse, setNetPulse] = useState<"up" | "down" | null>(null);
   const [levelUp, setLevelUp] = useState<number | null>(null);
+  // Q1 opens straight in the live market, so its story cards are held back
+  // until the player's first action — whatever that action is.
+  const openingPlayed = useRef(false);
   const flashTimer = useRef<number | null>(null);
   const popId = useRef(1);
   const lastNet = useRef(0);
