@@ -502,7 +502,7 @@ export function CryptoJourney() {
     grantXp(XP.trade, "TRADE");
     // The opening lesson lets the player act before history hits. Immediately
     // after that first BTC order, the full Q1 event queue still plays.
-    if (run.chapter === 0 && run.trades === 0) window.setTimeout(() => openChapterCards(0), 260);
+    playOpening();
   };
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
