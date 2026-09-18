@@ -30,5 +30,5 @@ Gefundene Fehler behebe ich direkt im selben Zug und teste danach erneut, sofern
 - Playwright-Skripte unter `/tmp/browser/full-audit/`: ein Skript für den Vollrun mit Protokoll pro Quartal, eines für Entscheidungs-/Minigame-Abdeckung mit erzwungenen Ereignissen, eines für Zwei-Browser-Determinismus, eines für Eintrags- und Ablehnungsfälle.
 - Deterministik-Prüfung über den Saison-Seed in `src/game/rng.ts` / `season.ts`; verglichen werden Ereignisreihenfolge, Minigame-Rollwerte und Endwerte.
 - Abdeckungskontrolle gegen `journey-data.ts` (Decisions, Situations, Crashs, Exchange-Ausfälle, Bossfights, `chapterPlayFor`, `MISSIONS`) und `minigames.tsx` (`MiniKind`).
-- Eintragspfad: `src/routes/api/public/leaderboard.ts` (Validierung, Idempotenz, Saison-Ablehnung) gegen `src/game/ranking.ts` (`bertPerPlayer`-Union-Find) und `src/lib/prizepool.functions.ts` — beide müssen dieselbe Reihenfolge liefern.
+- Eintragspfad: `src/routes/api/public/leaderboard.ts` (Validierung, Idempotenz, Saison-Ablehnung) gegen `src/game/ranking.ts` (`bestPerPlayer`-Union-Find) und `src/lib/prizepool.functions.ts` — beide müssen dieselbe Reihenfolge liefern.
 - Überwachung während der Tests: Browser-Konsole, Netzwerkfehler, `/tmp/observability/runtime-errors.log`, Dev-Server-Log; danach `tsgo --noEmit` und Build.
