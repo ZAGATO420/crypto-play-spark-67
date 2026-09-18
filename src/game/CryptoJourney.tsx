@@ -595,6 +595,7 @@ export function CryptoJourney() {
   /** A boss fight: stake real money, land the skill moment, live with it. */
   const resolveFight = (chapter: number, wager: number, quality: number) => {
     const fight = bossFightFor(chapter);
+    setRun((r) => (r.fought.includes(chapter) ? r : { ...r, fought: [...r.fought, chapter] }));
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
       const won = Math.round(wager * 2);
