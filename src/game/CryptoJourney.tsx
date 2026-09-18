@@ -833,7 +833,18 @@ export function CryptoJourney() {
 
 
 
+  /** Opens the held-back Q1 event queue once, after the player's first action.
+   *  Returns true when it took over the screen. */
+  const playOpening = (delay = 260) => {
+    if (run.chapter !== 0 || openingPlayed.current) return false;
+    openingPlayed.current = true;
+    window.setTimeout(() => openChapterCards(0), delay);
+    return true;
+  };
+
   const endChapter = () => {
+    // Ending Q1 without ever trading must not skip the opening story beats.
+    if (playOpening(120)) return;
     playSfx("quarter");
     const from = run.chapter;
     const next = from + 1;
