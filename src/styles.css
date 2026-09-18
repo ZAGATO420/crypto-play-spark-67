@@ -1077,6 +1077,20 @@
   .cy-duel-stakes { grid-template-columns:1fr; }
 }
 
+@media (min-width:641px) {
+  .cy-shell.has-guide .cy-goal { padding:14px; }
+  .cy-shell.has-guide .cy-goal-doom { display:none; }
+  .cy-shell.has-guide .cy-details-toggle,
+  .cy-shell.has-guide .cy-positions,
+  .cy-shell.has-guide .cy-sidebar { display:none; }
+  .cy-shell.has-guide .cy-body { grid-template-columns:minmax(0,1fr); max-width:1008px; }
+  .cy-shell.has-guide .cy-arena { padding:12px; gap:8px; }
+  .cy-shell.has-guide .cy-market-visual { min-height:250px; }
+  .cy-shell.has-guide .cy-chart { height:150px; }
+  .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
+  .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
+}
+
 @media (max-width:640px) {
   .cy-shell.has-guide { gap:6px; }
   .cy-shell.has-guide .cy-goal { grid-template-columns:34px minmax(0,1fr); gap:6px 8px; padding:6px 8px; }
