@@ -2221,7 +2221,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const badge = badgeFor(run, ending, net);
   const submission = useMemo<RunSubmission>(() => ({
     clientHash: crypto.randomUUID(),
-    name: run.config.name || "anon", arch: run.config.arch, country: run.config.country,
+    name: name.trim() || run.config.name.trim() || "anon", arch: run.config.arch, country: run.config.country,
     difficulty: run.config.difficulty, mode: modeId(run.config), net: Math.round(net),
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
