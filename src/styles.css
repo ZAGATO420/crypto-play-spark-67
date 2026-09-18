@@ -1089,6 +1089,15 @@
   .cy-shell.has-guide .cy-chart { height:150px; }
   .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
   .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
+  .cy-shell.has-guide .cy-main-actions .cy-main-trade {
+    position:fixed;
+    z-index:40;
+    left:50%;
+    bottom:16px;
+    width:min(982px,calc(100vw - 32px));
+    transform:translateX(-50%);
+    box-shadow:0 0 0 2px color-mix(in oklab,var(--journey-yellow) 42%,transparent),0 18px 60px #000;
+  }
 }
 
 @media (max-width:640px) {
