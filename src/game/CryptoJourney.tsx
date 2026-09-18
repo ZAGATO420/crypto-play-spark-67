@@ -6,6 +6,9 @@ import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
 import bossStagePortrait from "@/assets/boss/stage-portrait.jpg.asset.json";
 import enragedBoss from "@/assets/boss/enraged.webp.asset.json";
 import smugBoss from "@/assets/boss/smug.webp.asset.json";
+import actMania from "@/assets/game/act-mania.jpg";
+import actCollapse from "@/assets/game/act-collapse.jpg";
+import actEndgame from "@/assets/game/act-endgame.jpg";
 import avApe from "@/assets/tcfb/av-ape.webp.asset.json";
 import avAstro from "@/assets/tcfb/av-astro.webp.asset.json";
 import avBot from "@/assets/tcfb/av-bot.webp.asset.json";
@@ -156,6 +159,25 @@ export const tournamentModifier = (season: string): ModifierId =>
 export const startCashFor = (config: Config) => {
   const base = config.tournament ? TOURNAMENT_RULES.cash : archOf(config.arch).cash;
   return Math.round(base * (config.modifier === "glass" ? 0.5 : 1));
+};
+
+const tournamentConfig = (): Config => {
+  const season = currentSeasonId();
+  return {
+    ...defaultConfig,
+    name: "anon",
+    tournament: true,
+    season,
+    modifier: tournamentModifier(season),
+    difficulty: TOURNAMENT_RULES.difficulty,
+    mode: TOURNAMENT_RULES.mode,
+    ironman: TOURNAMENT_RULES.ironman,
+  };
+};
+
+const trackGameBeat = (beat: string, detail?: Record<string, string | number | boolean>) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("tcfb:game", { detail: { beat, ...detail } }));
 };
 
 const freshRun = (config: Config, reuse?: number): Run => {
@@ -320,6 +342,21 @@ export function CryptoJourney() {
   const perkFee = run.perks.includes("CHEAP FEES") ? 0.5 : 1;
   /** During the live phase every price is the moving one. */
   const mark = (symbol: CoinSymbol) => (phase === "act" ? livePrice(symbol, run, tick, sweeping) : priceAt(symbol, run.chapter, run.noise));
+  const focusPosition = [...run.positions].sort((a, b) => b.margin - a.margin)[0];
+  const focusSymbol: CoinSymbol = focusPosition?.symbol ?? "BTC";
+  const focusPrice = mark(focusSymbol);
+  const focusPnl = focusPosition ? pnlOf(focusPosition, focusPrice) : 0;
+  const chartPoints = useMemo(() => Array.from({ length: 28 }, (_, i) => {
+    const t = i / 27;
+    const price = livePrice(focusSymbol, run, t, sweeping);
+    return price;
+  }), [focusSymbol, run.chapter, run.seed, run.noise, sweeping]);
+  const chartMin = Math.min(...chartPoints);
+  const chartMax = Math.max(...chartPoints);
+  const chartSpan = Math.max(1, chartMax - chartMin);
+  const chartPath = chartPoints.map((price, i) => `${(i / 27) * 100},${92 - ((price - chartMin) / chartSpan) * 76}`).join(" ");
+  const currentChartX = Math.max(0, Math.min(100, tick * 100));
+  const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
 
 
   useEffect(() => {
@@ -330,6 +367,10 @@ export function CryptoJourney() {
     return () => window.removeEventListener("online", retry);
   }, []);
   useEffect(() => { void setTrack(screen === "run" ? "run" : "menu"); }, [screen]);
+  useEffect(() => {
+    if (screen === "start") trackGameBeat("start_seen");
+    if (screen === "end") trackGameBeat("end_seen", { chapter: run.chapter, tournament: run.config.tournament });
+  }, [screen]);
   useEffect(() => {
     if (screen !== "run" || cfg.ironman) return;
     localStorage.setItem(SAVE_KEY, JSON.stringify({ run, phase, ap }));
@@ -431,6 +472,7 @@ export function CryptoJourney() {
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
     playSfx("buy");
+    if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
     grantXp(XP.trade, "TRADE");
   };
 
@@ -463,6 +505,7 @@ export function CryptoJourney() {
   const closePosition = (id: number, fraction: number, quality: number) => {
     setDialog(null);
     playSfx("sell");
+    if (run.realized === 0) trackGameBeat("first_exit", { chapter: run.chapter, tournament: cfg.tournament });
     const pos = run.positions.find((p) => p.id === id);
     if (!pos) return;
     const cust = custodyOf(pos.where);
@@ -950,6 +993,7 @@ export function CryptoJourney() {
       logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
     };
     setRun(nextRun);
+    if ([1, 4, 12].includes(next)) trackGameBeat(`month_${next * 3}`, { tournament: cfg.tournament });
     setResolution({ title, detail, tone, delta: delta + convCash, move, lines, inflow, outflow });
     setPhase("resolve");
     setTick(0);
@@ -1033,8 +1077,9 @@ export function CryptoJourney() {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
     setRun(freshRun(config, reuse));
-    setPhase("brief"); setAp(AP_BASE); setResolution(null); setDialog({ k: "rules" }); setFlash(null); setQueue([]);
+    setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
+    trackGameBeat(reuse === undefined ? "run_started" : "rematch_started", { tournament: config.tournament });
   };
 
 
@@ -1046,7 +1091,7 @@ export function CryptoJourney() {
     setResolution(null); setDialog(null); setScreen("run");
   };
 
-  if (screen === "start") return <StartScreen resume={resume} onStart={(t) => { setTournament(t); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
+  if (screen === "start") return <StartScreen resume={resume} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
   if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return (
@@ -1070,8 +1115,17 @@ export function CryptoJourney() {
 
 
   return (
-    <main className={`cy-shell${shake ? " is-shaking" : ""}`}>
+    <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}`}>
+      <img className="cy-world" src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" loading="lazy" width={1600} height={900} aria-hidden />
       {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
+
+      <section className="cy-journey" aria-label={`Month ${Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} of ${TOTAL_MONTHS}`}>
+        <div className="cy-journey-labels"><span>MANIA</span><span>COLLAPSE</span><span>ENDGAME</span></div>
+        <div className="cy-journey-track">
+          {Array.from({ length: TOTAL_MONTHS }, (_, i) => <i key={i} className={`${i < run.chapter * 3 ? "is-lived" : ""}${i === run.chapter * 3 ? " is-now" : ""}${i % 12 === 0 ? " is-year" : ""}`} />)}
+        </div>
+        <strong>MONTH {Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} / {TOTAL_MONTHS}</strong>
+      </section>
 
       <header className="cy-top">
         <div className="min-w-0">
@@ -1097,12 +1151,19 @@ export function CryptoJourney() {
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
       </section>
 
-      <section className="cy-meters" aria-label="Run status">
+      <section className="cy-core" aria-label="Run status">
+        <span><small>NET WORTH</small><strong><Count value={net} /></strong></span>
+        <span><small>CASH</small><strong>{formatMoney(run.cash)}</strong></span>
+        <span><small>MONTH</small><strong>{Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} / {TOTAL_MONTHS}</strong></span>
+        <span><small>YOU vs BOSS</small><strong className={net >= bossNet ? "positive" : "negative"}>{net >= bossNet ? "AHEAD" : `${formatMoney(bossNet - net)} BEHIND`}</strong></span>
+      </section>
+
+      {details && <section className="cy-meters" aria-label="Detailed run status">
         <Meter label="RISK" value={run.risk} tone={run.risk > 70 ? "pink" : "yellow"} detail={`${Math.round(run.risk)}%`} icon={<Zap />} />
         <Meter label="HUNGER" value={run.hunger} tone={run.hunger > 70 ? "pink" : "cyan"} detail={`${run.hunger}%`} icon={<Activity />} />
         <Meter label="STRESS" value={run.stress} tone={run.stress > 70 ? "pink" : "cyan"} detail={`${run.stress}%`} icon={<HeartPulse />} />
         <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
-      </section>
+      </section>}
 
       <button className="cy-details-toggle" onClick={() => setDetails((d) => !d)} aria-expanded={details}>
         {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
@@ -1182,8 +1243,19 @@ export function CryptoJourney() {
           )}
 
           {phase === "act" && (
-            <article className="cy-card" key={`act-${run.chapter}`}>
-              <p className="journey-kicker"><Zap /> LIVE · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p>
+            <article className="cy-card cy-arena" key={`act-${run.chapter}`}>
+              <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
+              <div className="cy-market-visual">
+                <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} LIVE P&L` : "PICK YOUR FIRST POSITION"}</strong></div>
+                <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
+                  <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
+                  <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
+                  <polyline points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
+                  <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
+                  <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" />
+                </svg>
+                <div className="cy-chart-foot"><span>ENTRY {focusPosition ? formatMoney(focusPosition.entry) : "—"}</span><span>{Math.round(tick * 100)}% OF QUARTER</span><span>{sweeping ? "LIQUIDITY SWEEP" : attack?.name ?? "MARKET LIVE"}</span></div>
+              </div>
               <div className="cy-live">
                 <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
                 <div className="cy-live-tape">
@@ -1217,21 +1289,19 @@ export function CryptoJourney() {
                   }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
                 </div>
               </div>
-              <h2>WHAT DO YOU DO?</h2>
-              <div className="cy-grid">
-
-                <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><strong>TRADE SPOT</strong><small>Buy or short-list a market</small></button>
-                <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}><Zap /><strong>PERP DESK</strong><small>2x · 5x · 10x, long or short</small></button>
-                <button className="cy-act" disabled={ap <= 0 || !presale} onClick={() => presale && setDialog({ k: "presale", card: presale })}><Rocket /><strong>{presale ? presale.tag : "NO LAUNCH"}</strong><small>{presale ? presale.name : "Nothing live this quarter"}</small></button>
-                <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield /><strong>CUSTODY · {custodyOf(run.custody).short}</strong><small>Exchange · hot wallet · Ledger</small></button>
-                <button className="cy-act" disabled={ap <= 0} onClick={() => setDialog({ k: "life" })}><Home /><strong>LIFE</strong><small>{jobOf(run.job).name} · {housingOf(run.housing).name}</small></button>
-                <button className="cy-act" onClick={() => setDialog({ k: "ledger" })}><Receipt /><strong>THE BOOKS</strong><small>Every dollar in and out</small></button>
-                <button className="cy-act" onClick={() => setDialog({ k: "survive" })}><HeartPulse /><strong>SURVIVE</strong><small>Eat · calm down · costs a move</small></button>
-                <button className="cy-act is-exit" onClick={() => setDialog({ k: "cashout" })}><Skull /><strong>CASH OUT</strong><small>End the run, take the bag</small></button>
-                <button className="cy-act" onClick={bank}><History /><strong>WAIT</strong><small>Bank a move, lose stress</small></button>
-                <button className={`cy-act${fast ? " is-go" : ""}`} onClick={() => { setFast(true); playSfx("click"); }}><Flame /><strong>HOLD</strong><small>{fast ? "Running the clock down" : "Fast-forward the quarter"}</small></button>
-                <button className="cy-act is-go" onClick={endChapter}><ChevronRight /><strong>END QUARTER</strong><small>Let the market answer</small></button>
-
+              <div className="cy-main-actions">
+                <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "market" })}>{focusPosition ? <><TrendingUp />ADD / TRADE</> : <><TrendingUp />BUY BTC NOW</>}<ChevronRight /></Button>
+                <Button variant="secondary" onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />SELL {focusSymbol}</> : <><History />WAIT</>}</Button>
+                <Button variant="outline" onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : "HOLD"}</Button>
+              </div>
+              <div className="cy-toolbelt">
+                {presale && <button className="is-hot" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />{presale.tag}</button>}
+                <button disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />{custodyOf(run.custody).short}</button>
+                <button onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
+                <button onClick={() => setDialog({ k: "ledger" })}><Receipt />BOOKS</button>
+                <button disabled={ap <= 0} onClick={() => setDialog({ k: "life" })}><Home />LIFE</button>
+                <button className="is-danger" onClick={() => setDialog({ k: "cashout" })}><Skull />CASH OUT</button>
+                <button onClick={endChapter}><ChevronRight />END QUARTER</button>
               </div>
             </article>
           )}
@@ -1918,7 +1988,7 @@ function EndingsSheet({ profile, onClose }: { profile: Profile; onClose: () => v
   );
 }
 
-function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; onStart: (tournament: boolean) => void; onResume: () => void; onBoard: () => void }) {
+function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { resume: boolean; onTournament: () => void; onFreeRun: () => void; onResume: () => void; onBoard: () => void }) {
   const [rules, setRules] = useState(false);
   const [endings, setEndings] = useState(false);
   // Read after mount: localStorage is not available while rendering on the server.
@@ -1937,20 +2007,19 @@ function StartScreen({ resume, onStart, onResume, onBoard }: { resume: boolean; 
         <div className="start-brand">
           <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
           <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
-          <p>Trade the cycle from 2020 to 2026. Survive every crash.</p>
+          <p>Trade the real 2020–2026 cycle. Beat the market. Survive the Boss.</p>
         </div>
         <div className="start-console">
           <SeasonBanner compact />
           {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
           <div className="start-actions">
-            <Button className="start-main" onClick={() => { playSfx("win"); onStart(true); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>
+            {resume ? <Button className="start-main" onClick={() => { playSfx("win"); onResume(); }}><Flame />CONTINUE · YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={() => { playSfx("win"); onTournament(); }}><Trophy />PLAY NOW · $10,000 <ChevronRight /></Button>}
             <div className="start-secondary">
-              <Button variant="outline" onClick={() => { playSfx("click"); onStart(false); }}>FREE RUN</Button>
+              <Button variant="outline" onClick={() => { playSfx("click"); onFreeRun(); }}>CUSTOM RUN</Button>
               <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
-              {resume && <Button variant="outline" onClick={() => { playSfx("click"); onResume(); }}>CONTINUE RUN</Button>}
             </div>
           </div>
-          <small className="start-footer">84 MONTHS · FREE TO PLAY · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
+          <small className="start-footer">84 MONTHS · REAL PRICES · SAME SEED · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
         </div>
       </section>
       {rules && <Sheet onClose={() => setRules(false)}><TournamentRules onClose={() => setRules(false)} /></Sheet>}
