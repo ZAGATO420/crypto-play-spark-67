@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Fuel, KeyRound, MousePointerClick, Target } from "lucide-react";
+import { Fuel, KeyRound, MousePointerClick, Search, Target } from "lucide-react";
 
 /**
  * Four tiny skill moments. Every one returns a quality between 0 and 1 so the
  * caller can scale a fill price, a rescue or a loss with it. One finger,
  * 3-5 seconds, no layout of its own.
  */
-export type MiniKind = "timing" | "panic" | "gas" | "seed";
+export type MiniKind = "timing" | "panic" | "gas" | "seed" | "orderbook" | "rugcheck";
 export type MiniResult = { quality: number; label: string };
 
 const SEED_WORDS = ["throne", "candle", "gorilla", "liquid", "diamond", "vault", "sniper", "ledger"];
@@ -16,6 +16,8 @@ export function Minigame({ kind, hard, roll = Math.random(), onResult }: { kind:
   if (kind === "timing") return <TimingBar hard={hard} onResult={onResult} />;
   if (kind === "panic") return <PanicTap hard={hard} onResult={onResult} />;
   if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={onResult} />;
+  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={onResult} />;
+  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={onResult} />;
   return <SeedCheck roll={roll} onResult={onResult} />;
 }
 
@@ -202,4 +204,31 @@ function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult)
       {done && <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>}
     </>
   );
+}
+
+
+function OrderBook({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
+  const target = Math.round(24 + roll * 52);
+  const [bid, setBid] = useState(50);
+  const [done, setDone] = useState(false);
+  const width = hard ? 8 : 13;
+  const place = () => {
+    const off = Math.abs(bid - target);
+    const result = off <= width / 3 ? { quality: 1, label: "MAKER FILL" } : off <= width ? { quality: .65, label: "PARTIAL FILL" } : { quality: .15, label: "MISSED LIQUIDITY" };
+    setDone(true);
+    window.setTimeout(() => onResult(result), 750);
+  };
+  return <><p className="journey-kicker"><Target /> ORDER BOOK</p><h2>PLACE THE BID</h2><p className="cy-lead">Find the liquidity pocket. Too far away misses; too close pays the spread.</p><div className="mg-depth"><i style={{ left: `${target - width}%`, width: `${width * 2}%` }} /><b style={{ left: `${bid}%` }} /></div><input className="mg-range" type="range" min={0} max={100} value={bid} disabled={done} onChange={(e) => setBid(Number(e.target.value))} aria-label="Bid position" /><Button className="cy-wide cy-primary" disabled={done} onClick={place}>PLACE ORDER</Button></>;
+}
+
+function RugCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) => void }) {
+  const clues = ["Liquidity locked", "Owner can mint", "Audited contract", "Anonymous deployer"];
+  const bad = roll < .5 ? 1 : 3;
+  const [done, setDone] = useState(false);
+  const pick = (index: number) => {
+    const result = index === bad ? { quality: 1, label: "RUG FLAGGED" } : { quality: .15, label: "YOU MISSED THE BACKDOOR" };
+    setDone(true);
+    window.setTimeout(() => onResult(result), 750);
+  };
+  return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">One detail can empty the pool. Pick the dangerous line.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={done} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
 }
