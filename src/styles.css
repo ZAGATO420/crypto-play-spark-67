@@ -1065,3 +1065,72 @@
 .cy-boss-presence.is-danger { opacity:.46; }
 .cy-boss-presence.is-winning { opacity:.34; }
 @media (max-width: 640px) { .cy-boss-presence { width:46%; opacity:.3; } }
+
+/* Clarity & Mobile Hierarchy Refinements */
+@media (max-width: 900px) {
+  .journey-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .boss-panel {
+    display: none; /* Hide on mobile to focus on the game board */
+  }
+  .journey-trail {
+    max-height: 200px;
+    order: 10;
+  }
+  .journey-nav {
+    width: calc(100% - 16px);
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.cy-chart-label {
+  font-family: var(--font-display);
+  fill: var(--journey-yellow);
+  pointer-events: none;
+  text-transform: uppercase;
+}
+.cy-chart-label.entry {
+  fill: var(--journey-cyan);
+  opacity: 0.8;
+}
+
+.cy-chart-instruction {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: color-mix(in oklab, var(--journey-panel) 80%, transparent);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.cy-goal-line {
+  font-weight: 800;
+  color: var(--journey-yellow);
+}
+
+.cy-arena-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--journey-panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.cy-chart-legend {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--muted-foreground);
+}
+.cy-chart-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
