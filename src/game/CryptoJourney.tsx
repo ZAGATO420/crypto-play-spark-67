@@ -32,7 +32,7 @@ import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
-import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readWallet, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
+import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
 
 /* ------------------------------------------------------------------ types */
@@ -2347,7 +2347,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
 
         <div className="start-actions end-actions">
 
-          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
+          <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || !name.trim() || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
