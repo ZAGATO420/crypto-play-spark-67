@@ -457,12 +457,12 @@ export const attackFor = (chapter: number, roll: number, bias?: BossAttack["id"]
 
 export type BossFight = { title: string; line: string; mini: "timing" | "panic" | "gas" | "seed"; perk: string };
 export const BOSS_FIGHTS: Record<number, BossFight> = {
-  0: { title: "ROUND 1 · BLACK THURSDAY", line: "He froze the exchanges and put your account on the table. Get an order out.", mini: "panic", perk: "STEEL NERVES" },
-  5: { title: "ROUND 2 · THE MINING BAN", line: "He is selling hashrate into your face. Land the exit or wear it.", mini: "timing", perk: "CHEAP FEES" },
-  9: { title: "ROUND 3 · LUNA", line: "A death spiral with your name on it. Out in seconds or not at all.", mini: "panic", perk: "+1 MOVE" },
-  11: { title: "ROUND 4 · FTX", line: "The withdrawal queue is a race and he is at the front of it.", mini: "gas", perk: "CHEAP FEES" },
-  19: { title: "ROUND 5 · THE ETF BID", line: "Wall Street is bidding. He wants your allocation before you can take it.", mini: "gas", perk: "+1 MOVE" },
-  22: { title: "FINAL ROUND · THE FLUSH", line: "Nineteen billion liquidated. Books are paper thin. Prove the hands.", mini: "timing", perk: "STEEL NERVES" },
+  0: { title: "BOSS DUEL · BLACK THURSDAY", line: "He froze the exchanges and put your account on the table. Get an order out.", mini: "panic", perk: "STEEL NERVES" },
+  5: { title: "BOSS DUEL · MINING BAN", line: "He is selling hashrate into your face. Land the exit or wear it.", mini: "timing", perk: "CHEAP FEES" },
+  9: { title: "BOSS DUEL · LUNA COLLAPSE", line: "A death spiral with your name on it. Out in seconds or not at all.", mini: "panic", perk: "+1 MOVE" },
+  11: { title: "BOSS DUEL · FTX COLLAPSE", line: "The withdrawal queue is a race and he is at the front of it.", mini: "gas", perk: "CHEAP FEES" },
+  19: { title: "BOSS DUEL · THE ETF BID", line: "Wall Street is bidding. He wants your allocation before you can take it.", mini: "gas", perk: "+1 MOVE" },
+  22: { title: "FINAL DUEL · THE FLUSH", line: "Nineteen billion liquidated. Books are paper thin. Prove the hands.", mini: "timing", perk: "STEEL NERVES" },
 };
 export const bossFightFor = (chapter: number) => BOSS_FIGHTS[chapter];
 export const PERK_BLURB: Record<string, string> = {

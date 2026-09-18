@@ -29,7 +29,6 @@ import { readProfile, recordRun, type Profile } from "./profile";
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
-import Coach, { FIRST_RUN_STEPS, coachSeen, markCoachSeen } from "./Coach";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
 import { getVolumes, initAudio, isMuted, playSfx, playSfxStack, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
@@ -104,6 +103,7 @@ const LEVERAGE = [2, 5, 10] as const;
 const FUNDING = 0.018; // per quarter, on notional — holding leverage is never free
 const LIVE_MS = 13_000; // one quarter runs live in front of you
 const BOSS_DRAG = 0.045; // even the Boss burns money on the throne
+const GUIDE_KEY = "tcfb_playable_guide_v1";
 
 
 export const AVATARS = [
@@ -335,20 +335,11 @@ export function CryptoJourney() {
   // the live quarter: t walks 0 -> 1 while you act, then the market answers
   const [tick, setTick] = useState(0);
   const [fast, setFast] = useState(false);
-  const [coach, setCoach] = useState(false);
-  const coachDone = useRef(false);
+  const [guide, setGuide] = useState<0 | 1 | 2 | null>(null);
   const [verified, setVerified] = useState(false);
   const tickRef = useRef(0);
   const [actSplash, setActSplash] = useState(true);
   const lastAct = useRef(1);
-
-  useEffect(() => {
-    if (phase !== "act" || coachDone.current || actSplash) return;
-    coachDone.current = true;
-    if (coachSeen()) return;
-    const t = window.setTimeout(() => setCoach(true), 420);
-    return () => window.clearTimeout(t);
-  }, [phase, actSplash]);
 
   const cfg = run.config;
   const arch = archOf(cfg.arch);
@@ -390,6 +381,8 @@ export function CryptoJourney() {
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
   const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
+  const waitingForFirstTrade = run.chapter < 2 && run.trades === 0;
+  const duelStake = Math.max(200, Math.round(run.cash * 0.1));
 
 
   useEffect(() => {
@@ -516,6 +509,7 @@ export function CryptoJourney() {
     playSfx("buy");
     if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
     grantXp(XP.trade, "TRADE");
+    if (guide === 0) setGuide(1);
     // The opening lesson lets the player act before history hits. Immediately
     // after that first BTC order, the full Q1 event queue still plays.
     playOpening();
@@ -1120,6 +1114,7 @@ export function CryptoJourney() {
    */
   useEffect(() => {
     if (screen !== "run" || phase !== "act" || dialog) return;
+    if (waitingForFirstTrade) return;
     let raf = 0;
     let last = performance.now();
     let shown = tickRef.current;
@@ -1135,7 +1130,7 @@ export function CryptoJourney() {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, phase, dialog, fast, run]);
+  }, [screen, phase, dialog, fast, run, waitingForFirstTrade]);
 
 
 
@@ -1146,6 +1141,9 @@ export function CryptoJourney() {
     openingPlayed.current = false;
     setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
+    let needsGuide = true;
+    try { needsGuide = localStorage.getItem(GUIDE_KEY) !== "1"; } catch { /* private mode */ }
+    setGuide(needsGuide ? 0 : null);
     lastAct.current = 1;
     setActSplash(true);
     window.setTimeout(() => setActSplash(false), 2400);
@@ -1218,11 +1216,14 @@ export function CryptoJourney() {
         </div>
       </header>
 
-      <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}`} aria-live="polite">
-        <p className="cy-goal-head">{chapterPlay.mode} · {chapterPlay.verb}</p>
-        <p className="cy-goal-line">{run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
-        <p className="cy-goal-why">MISSION · {mission.text} · +{mission.reward} XP</p>
+      <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}${guide !== null ? " is-guided" : ""}`} aria-live="polite">
+        <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? AVATARS[0].url} alt="Your trader" /></div>
+        <div>
+        <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
+        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
+        <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? "The market only moves after your decision. END QUARTER reveals the historical outcome." : `MISSION · ${mission.text} · +${mission.reward} XP`}</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
+        </div>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1315,12 +1316,13 @@ export function CryptoJourney() {
             <article className={`cy-card cy-arena is-${arenaState}`} key={`act-${run.chapter}`}>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
               {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT · SAME SEED · $20 / $10 / $5 $TCFB</div>}
-              <div className={`cy-market-visual pulse-${marketPulse}`}>
+              <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className={`cy-boss-presence is-${arenaState}`}>
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
                   <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
                 </div>
-                <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} LIVE P&L` : "PICK YOUR FIRST POSITION"}</strong></div>
+                <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "WATCH THE PRICE"}</span><strong>CHOOSE BELOW · DO NOT TAP THE CHART</strong></div>
+                <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
                   <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
                   <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
@@ -1330,7 +1332,7 @@ export function CryptoJourney() {
                   <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" />
                 </svg>
-                <div className="cy-chart-foot"><span>ENTRY {focusPosition ? formatMoney(focusPosition.entry) : "—"}</span><span>{Math.round(tick * 100)}% OF QUARTER</span><span>{sweeping ? "LIQUIDITY SWEEP" : attack?.name ?? "MARKET LIVE"}</span></div>
+                <div className="cy-chart-foot"><span>YOU BOUGHT {focusPosition ? formatMoney(focusPosition.entry) : "NOT YET"}</span><span>NOW {formatMoney(focusPrice)}</span><span>{waitingForFirstTrade ? "WAITING FOR YOU" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
               <div className="cy-live">
                 <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
@@ -1367,22 +1369,23 @@ export function CryptoJourney() {
                 </div>
               </div>
               <div className="cy-main-actions">
-                {chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
+                {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", 0.25)}><TrendingUp />BUY $2,500 BTC<ChevronRight /></Button>
+                  : chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
                   : chapterPlay.mode === "HUNT" && presale ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />HUNT {presale.name}<ChevronRight /></Button>
                     : chapterPlay.mode === "DEFEND" ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />MOVE FUNDS<ChevronRight /></Button>
-                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />FACE THE BOSS<ChevronRight /></Button>
+                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />DUEL · RISK {formatMoney(duelStake)}<ChevronRight /></Button>
                         : <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}><TrendingUp />{chapterPlay.verb}<ChevronRight /></Button>}
-                <Button variant="secondary" onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
-                <Button variant="outline" onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
+                <Button variant="secondary" disabled={guide === 0} onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
+                <Button variant="outline" disabled={guide === 0} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
               </div>
+              {chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
               <div className="cy-toolbelt">
-                {presale && <button className="is-hot" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />{presale.tag}</button>}
-                <button disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />{custodyOf(run.custody).short}</button>
-                <button onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
-                <button onClick={() => setDialog({ k: "ledger" })}><Receipt />BOOKS</button>
-                <button disabled={ap <= 0} onClick={() => setDialog({ k: "life" })}><Home />LIFE</button>
-                <button className="is-danger" onClick={() => setDialog({ k: "cashout" })}><Skull />CASH OUT</button>
-                <button onClick={endChapter}><ChevronRight />END QUARTER</button>
+                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
+                <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
+                <button disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
+                <button disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
+                <button className="is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
+                <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) { setGuide(2); try { localStorage.setItem(GUIDE_KEY, "1"); } catch { /* private mode */ } } endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
             </article>
           )}
@@ -1416,12 +1419,11 @@ export function CryptoJourney() {
           {run.logs.length ? run.logs.slice(0, 6).map((l, i) => (
             <div className={`trail-entry tone-${l.tone}`} key={`${l.chapter}-${i}`}><span>{chapterLabel(l.chapter)}</span><strong>{l.title}</strong></div>
           )) : <p className="trail-empty">Every trade, rug and crisis lands here.</p>}
-          <button className="cy-rules" onClick={() => { coachDone.current = true; setCoach(true); }}>SHOW ME HOW TO PLAY</button>
+          <button className="cy-rules" onClick={() => { setGuide(0); setDetails(false); }}>SHOW ME HOW TO PLAY</button>
           <button className="cy-rules" onClick={() => setDialog({ k: "rules" })}>HOW IT WORKS</button>
         </aside>
       </div>
 
-      {coach && <Coach steps={FIRST_RUN_STEPS} onDone={() => { setCoach(false); markCoachSeen(); }} />}
       {flash && <div className={`cy-flash tone-${flash.tone}`} role="status">{flash.text}</div>}
 
       <div className="cy-pops" aria-live="polite">
@@ -1738,14 +1740,15 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
   const stakes = [0.1, 0.25, 0.5].map((f) => Math.max(200, Math.round(cash * f)));
   return (
     <>
-      <p className="journey-kicker"><Crown /> BOSS FIGHT · {chapterLabel(chapter)}</p>
+      <p className="journey-kicker"><Crown /> SKILL DUEL · {chapterLabel(chapter)}</p>
       <h2>{fight.title}</h2>
       <p className="cy-lead">{fight.line}</p>
-      <p className="cy-hint"><strong>WIN ·</strong> double your stake and the perk {fight.perk} ({PERK_BLURB[fight.perk]}) · <strong>LOSE ·</strong> he keeps the stake.</p>
+      <div className="cy-duel-stakes"><span><small>YOU RISK</small><strong>Choose below</strong></span><span><small>IF YOU WIN</small><strong>Up to 2× + {fight.perk}</strong></span><span><small>IF YOU LOSE</small><strong>Stake is gone</strong></span></div>
+      <p className="cy-hint"><strong>WHAT TO DO ·</strong> Choose a stake. The next screen tells you exactly when or where to tap. {PERK_BLURB[fight.perk]}</p>
       <div className="cy-grid">
         {stakes.map((s, i) => (
           <button key={i} className="cy-act" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
-            <Zap /><strong>{formatMoney(s)}</strong><small>{["Careful", "Serious", "Everything he expects"][i]}</small>
+            <Zap /><strong>RISK {formatMoney(s)}</strong><small>{["Low stake", "Serious stake", "Maximum stake"][i]} · win up to {formatMoney(s * 2)}</small>
           </button>
         ))}
       </div>
