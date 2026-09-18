@@ -47,10 +47,10 @@ const s: State = { ctx: null, musicBus: null, moodFilter: null, sfxBus: null, pl
 
 /** The music leans with the market: hyped in a bull, thin and tense in a crash. */
 export type Mood = "calm" | "hype" | "tense";
-const MOOD: Record<Mood, { cut: number; gain: number }> = {
-  calm: { cut: 16_000, gain: 1 },
-  hype: { cut: 20_000, gain: 1.15 },
-  tense: { cut: 900, gain: 0.72 },
+const MOOD: Record<Mood, { cut: number; gain: number; rate: number }> = {
+  calm: { cut: 16_000, gain: 0.92, rate: 0.98 },
+  hype: { cut: 20_000, gain: 1.12, rate: 1.025 },
+  tense: { cut: 1_250, gain: 0.78, rate: 0.94 },
 };
 let mood: Mood = "calm";
 
@@ -80,6 +80,9 @@ const applyBuses = () => {
   s.musicBus.gain.setTargetAtTime(muted ? 0 : musicVol * MOOD[mood].gain, t, 0.2);
   s.sfxBus.gain.setTargetAtTime(muted ? 0 : sfxVol, t, 0.05);
   if (s.moodFilter) s.moodFilter.frequency.setTargetAtTime(MOOD[mood].cut, t, 0.6);
+  for (const current of Object.values(s.players)) {
+    if (current) current.el.playbackRate = MOOD[mood].rate;
+  }
 };
 
 /** Called by the run: bull market opens the music up, a crash chokes it. */
@@ -117,6 +120,7 @@ function player(id: TrackId) {
   if (existing) return existing;
   const el = new Audio(TRACKS[id]);
   el.loop = true;
+  el.playbackRate = MOOD[mood].rate;
   el.crossOrigin = "anonymous";
   el.preload = "auto";
   const src = s.ctx.createMediaElementSource(el);
@@ -188,6 +192,12 @@ export function playSfx(id: SfxId) {
     src.connect(gain).connect(s.sfxBus);
     src.start();
   })();
+}
+
+/** A short two-hit cue gives decisive moments weight without adding noisy effects. */
+export function playSfxStack(primary: SfxId, accent: SfxId, delay = 90) {
+  playSfx(primary);
+  if (typeof window !== "undefined") window.setTimeout(() => playSfx(accent), delay);
 }
 
 export function setMuted(next: boolean) {
