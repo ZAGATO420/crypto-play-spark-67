@@ -1333,7 +1333,7 @@ export function CryptoJourney() {
                   <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" /><text x={currentChartX + 3} y={currentChartY + 1} className="cy-chart-label live" fontSize="3.5">YOU</text>
                 </svg>
-                <div className="cy-chart-foot"><span>YOU BOUGHT {focusPosition ? formatMoney(focusPosition.entry) : "NOT YET"}</span><span>NOW {formatMoney(focusPrice)}</span><span>{waitingForFirstTrade ? "WAITING FOR YOU" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
+                <div className="cy-chart-legend"><span><i style={{background: "var(--journey-yellow)"}}></i>LIVE TAPE</span>{focusPosition && <span><i style={{background: "var(--journey-cyan)"}}></i>ENTRY POINT</span>}</div><div className="cy-chart-foot"><span>YOU BOUGHT {focusPosition ? formatMoney(focusPosition.entry) : "NOT YET"}</span><span>NOW {formatMoney(focusPrice)}</span><span>{waitingForFirstTrade ? "WAITING FOR YOU" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
               <div className="cy-live">
                 <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
