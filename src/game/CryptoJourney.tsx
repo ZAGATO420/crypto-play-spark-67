@@ -49,6 +49,8 @@ type Run = {
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
   boss: BossBook; conviction: number; convictionOn: boolean; perks: string[]; bossWins: number;
+  /** Chapters whose boss fight is already settled, so nobody can farm the same duel twice. */
+  fought: number[];
   /** The story of this run, in the player's own voice. Rendered on the end screen. */
   chronicle: string[];
   /** Milestone ids already lived through, so a beat never repeats. */
@@ -200,7 +202,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     ledger: mod === "debt" ? [{ chapter: 0, label: "Inherited tax debt", amount: -8000 }] : [], statuses: mod === "straight" ? [] : [modifierOf(mod).name],
     logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
-    conviction: 0, convictionOn: false, perks: [], bossWins: 0,
+    conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [],
     chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [],
 
   };
@@ -593,6 +595,7 @@ export function CryptoJourney() {
   /** A boss fight: stake real money, land the skill moment, live with it. */
   const resolveFight = (chapter: number, wager: number, quality: number) => {
     const fight = bossFightFor(chapter);
+    setRun((r) => (r.fought.includes(chapter) ? r : { ...r, fought: [...r.fought, chapter] }));
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
       const won = Math.round(wager * 2);
@@ -1333,7 +1336,7 @@ export function CryptoJourney() {
                 {chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
                   : chapterPlay.mode === "HUNT" && presale ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />HUNT {presale.name}<ChevronRight /></Button>
                     : chapterPlay.mode === "DEFEND" ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />MOVE FUNDS<ChevronRight /></Button>
-                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />FACE THE BOSS<ChevronRight /></Button>
+                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />FACE THE BOSS<ChevronRight /></Button>
                         : <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}><TrendingUp />{chapterPlay.verb}<ChevronRight /></Button>}
                 <Button variant="secondary" onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
                 <Button variant="outline" onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
@@ -1417,7 +1420,7 @@ export function CryptoJourney() {
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
           {dialog.k === "fight" && <FightSheet chapter={dialog.chapter} cash={run.cash}
             onFight={(wager, kind) => setDialog({ k: "mini", kind, pending: { t: "fight", chapter: dialog.chapter, wager } })}
-            onDuck={() => { setRun((r) => ({ ...r, stress: clamp(r.stress + 10), conviction: 0 })); say("You walked past his table. He remembers that.", "pink"); nextInQueue(); }} />}
+            onDuck={() => { setRun((r) => ({ ...r, stress: clamp(r.stress + 10), conviction: 0, fought: r.fought.includes(dialog.chapter) ? r.fought : [...r.fought, dialog.chapter] })); say("You walked past his table. He remembers that.", "pink"); nextInQueue(); }} />}
           {dialog.k === "offer" && <OfferSheet attack={dialog.attack} net={net}
             onTake={() => takeOffer(Math.max(2000, Math.round(net * 0.25)))}
             onRefuse={() => { nextInQueue(); setRun((r) => ({ ...r, conviction: clamp(r.conviction + 15) })); say("You told him no. Conviction up.", "yellow"); }} />}
