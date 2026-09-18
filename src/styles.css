@@ -967,14 +967,16 @@
 .cy-chart-title { position:relative; z-index:3; }
 .cy-chart-instruction { position:relative; z-index:3; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:4px 8px; margin:8px 0 2px; padding:6px 8px; border-left:3px solid var(--journey-yellow); background:color-mix(in oklab,var(--background) 86%,transparent); font-size:8px; font-weight:800; }
 .cy-chart-instruction span { color:var(--journey-yellow); }
-.cy-market-visual.is-paused .cy-chart-live-line,.cy-market-visual.is-paused circle { animation:cy-paused 1.1s ease-in-out infinite; }
+.cy-market-visual.is-paused .cy-chart-live-line,.cy-market-visual.is-paused .cy-now-marker { animation:cy-paused 1.1s ease-in-out infinite; }
 @keyframes cy-paused { 50% { opacity:.45; } }
 .cy-chart-title span { display:flex; align-items:center; gap:8px; font:400 20px/1 var(--font-display); }
 .cy-chart-title img { border-radius:50%; }
 .cy-chart-title > strong { font-size:11px; }
-.cy-chart { position:relative; z-index:2; display:block; width:100%; height:218px; margin-top:8px; overflow:hidden; filter:drop-shadow(0 0 7px color-mix(in oklab,var(--journey-cyan) 30%,transparent)); }
+.cy-chart-wrap { position:relative; z-index:2; width:100%; height:218px; margin-top:8px; overflow:hidden; }
+.cy-chart { display:block; width:100%; height:100%; overflow:hidden; filter:drop-shadow(0 0 7px color-mix(in oklab,var(--journey-cyan) 30%,transparent)); }
 .cy-chart-ghost { opacity:.18; }
-.cy-chart-live-line { stroke-dasharray:100; transition:stroke-dashoffset .18s linear; }
+.cy-chart-live-line { stroke-dasharray:100; transition:stroke-dashoffset .1s linear; }
+.cy-now-marker { position:absolute; z-index:4; display:block; width:10px; height:10px; border:2px solid var(--background); border-radius:50%; background:var(--journey-yellow); box-shadow:0 0 12px var(--journey-yellow); pointer-events:none; transform:translate(-50%,-50%); transition:left .1s linear,top .1s linear; }
 .cy-entry-line { stroke:var(--journey-yellow); stroke-width:.55; stroke-dasharray:2 2; opacity:.72; }
 .cy-market-visual.pulse-down .cy-chart-live-line { stroke:var(--journey-pink); }
 .cy-market-visual.pulse-down { border-color:color-mix(in oklab,var(--journey-pink) 42%,var(--border)); }
@@ -1053,7 +1055,7 @@
   .cy-details-toggle.guide-hidden { display:none; }
   .cy-positions { display:none; }
   .cy-market-visual { min-height:218px; padding:9px; }
-  .cy-chart { height:126px; margin-top:6px; }
+  .cy-chart-wrap { height:126px; margin-top:6px; }
   .cy-boss-presence { top:52px; right:0; width:40%; height:58%; }
   .cy-boss-presence div { display:none; }
   .cy-boss-presence span { font-size:8px; }
@@ -1088,7 +1090,7 @@
   .cy-shell.has-guide .cy-body { grid-template-columns:minmax(0,1fr); max-width:1008px; }
   .cy-shell.has-guide .cy-arena { padding:12px; gap:8px; }
   .cy-shell.has-guide .cy-market-visual { min-height:250px; }
-  .cy-shell.has-guide .cy-chart { height:150px; }
+  .cy-shell.has-guide .cy-chart-wrap { height:150px; }
   .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
   .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
   .cy-shell.has-guide .cy-main-actions .cy-main-trade {
@@ -1121,7 +1123,7 @@
   .cy-shell.has-guide .cy-market-visual { min-height:176px; }
   .cy-shell.has-guide .cy-chart-instruction { margin:4px 0 0; padding:4px 6px; }
   .cy-shell.has-guide .cy-chart-title { margin-top:4px; }
-  .cy-shell.has-guide .cy-chart { height:82px; margin-top:5px; }
+  .cy-shell.has-guide .cy-chart-wrap { height:82px; margin-top:5px; }
   .cy-shell.has-guide .cy-boss-presence { top:45px; height:52%; }
   .cy-shell.has-guide .cy-main-actions { grid-template-columns:1fr; }
   .cy-shell.has-guide .cy-main-actions button:not(.cy-main-trade) { display:none; }
@@ -1129,7 +1131,7 @@
   .cy-shell.has-guide .cy-toolbelt { position:static; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .cy-world,.cy-journey-track i.is-now,.cy-act-splash,.cy-core > span.is-critical,.cy-chart-live-line,.cy-boss-presence { transition:none; animation:none; }
+  .cy-world,.cy-journey-track i.is-now,.cy-act-splash,.cy-core > span.is-critical,.cy-chart-live-line,.cy-now-marker,.cy-boss-presence { transition:none; animation:none; }
   .cy-act-splash { display:none; }
 }
 

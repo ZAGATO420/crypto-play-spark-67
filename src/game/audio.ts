@@ -136,19 +136,17 @@ export async function setTrack(id: TrackId | null) {
   const same = s.track === id;
   s.track = id;
   if (!s.ctx || !s.ready) return;
-  // Only one music voice may ever be audible: stop every other loop hard, then fade the target in.
+  // Never crossfade two full mixes: on small speakers that sounds like a doubled,
+  // phasey beat. Stop the previous loop before the next one starts.
   const now = s.ctx.currentTime;
   for (const key of Object.keys(s.players) as TrackId[]) {
     if (key === id) continue;
     const p = s.players[key];
     if (!p) continue;
     p.gain.gain.cancelScheduledValues(now);
-    p.gain.gain.setTargetAtTime(0, now, 0.25);
-    window.setTimeout(() => {
-      if (s.track === key) return;
-      p.el.pause();
-      p.el.currentTime = 0;
-    }, 700);
+    p.gain.gain.setValueAtTime(0, now);
+    p.el.pause();
+    p.el.currentTime = 0;
   }
   if (!id) return;
   const p = player(id);
@@ -160,6 +158,12 @@ export async function setTrack(id: TrackId | null) {
     return;
   }
   try { await p.el.play(); } catch { return; }
+  // A newer screen may have requested another track while play() was waiting.
+  if (s.track !== id) {
+    p.el.pause();
+    p.el.currentTime = 0;
+    return;
+  }
   const t = s.ctx.currentTime;
   p.gain.gain.cancelScheduledValues(t);
   p.gain.gain.setTargetAtTime(1, t, FADE / 3);

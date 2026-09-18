@@ -1123,8 +1123,9 @@ export function CryptoJourney() {
       last = now;
       tickRef.current = Math.min(1, tickRef.current + dt / (fast ? 1_600 : LIVE_MS));
       if (tickRef.current >= 1) { tickRef.current = 0; endChapter(); return; }
-      // Repaint at ~5 fps, not 60: a full re-render every frame made the cards flicker.
-      if (tickRef.current - shown >= 0.02) { shown = tickRef.current; setTick(tickRef.current); }
+      // Repaint at ~12 fps and let CSS bridge the small gaps. Five updates per
+      // second looked visibly jerky, while a full 60 fps re-render flickers cards.
+      if (tickRef.current - shown >= 0.008) { shown = tickRef.current; setTick(tickRef.current); }
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
@@ -1328,15 +1329,17 @@ export function CryptoJourney() {
                 </div>
                 <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>CHART = DISPLAY · BUTTONS = ACTIONS</strong></div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
-                <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
-                  <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
-                  <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
-                  <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
-                  <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
-                  {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
-                  <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
-                  <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" />
-                </svg>
+                <div className="cy-chart-wrap">
+                  <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
+                    <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
+                    <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
+                    <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
+                    <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
+                    {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
+                    <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
+                  </svg>
+                  <i className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
+                </div>
                 <div className="cy-chart-legend"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
                 <div className="cy-chart-foot"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
@@ -2107,7 +2110,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
           <SeasonBanner compact />
           {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
           <div className="start-actions">
-            {resume ? <Button className="start-main" onClick={() => { playSfx("win"); onResume(); }}><Flame />CONTINUE · YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={() => { playSfx("win"); onTournament(); }}><Trophy />PLAY NOW · $10,000 <ChevronRight /></Button>}
+            {resume ? <Button className="start-main" onClick={onResume}><Flame />CONTINUE · YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={onTournament}><Trophy />PLAY NOW · $10,000 <ChevronRight /></Button>}
             <div className="start-secondary">
               <Button variant="outline" onClick={() => { playSfx("click"); onFreeRun(); }}>CUSTOM RUN</Button>
               <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
