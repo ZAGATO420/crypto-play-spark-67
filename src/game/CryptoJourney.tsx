@@ -103,7 +103,6 @@ const LEVERAGE = [2, 5, 10] as const;
 const FUNDING = 0.018; // per quarter, on notional — holding leverage is never free
 const LIVE_MS = 13_000; // one quarter runs live in front of you
 const BOSS_DRAG = 0.045; // even the Boss burns money on the throne
-const GUIDE_KEY = "tcfb_playable_guide_v1";
 
 
 export const AVATARS = [
@@ -375,7 +374,7 @@ export function CryptoJourney() {
   const chartMax = Math.max(...chartPoints);
   const chartSpan = Math.max(1, chartMax - chartMin);
   const chartPath = chartPoints.map((price, i) => `${(i / 27) * 100},${92 - ((price - chartMin) / chartSpan) * 76}`).join(" ");
-  const currentChartX = Math.max(0, Math.min(100, tick * 100));
+  const currentChartX = Math.max(2, Math.min(98, tick * 100));
   const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
   const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
@@ -1142,12 +1141,11 @@ export function CryptoJourney() {
     openingPlayed.current = false;
     setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
-    let needsGuide = true;
-    try { needsGuide = localStorage.getItem(GUIDE_KEY) !== "1"; } catch { /* private mode */ }
-    setGuide(needsGuide ? 0 : null);
+    // Every fresh run explains itself. Experienced players can skip explicitly;
+    // a stale browser flag must never hide the only onboarding.
+    setGuide(0);
     lastAct.current = 1;
-    setActSplash(true);
-    window.setTimeout(() => setActSplash(false), 2400);
+    setActSplash(false);
     trackGameBeat(reuse === undefined ? "run_started" : "rematch_started", { tournament: config.tournament });
   };
 
@@ -1225,6 +1223,12 @@ export function CryptoJourney() {
         <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : `MISSION · ${mission.text} · +${mission.reward} XP`}</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
         </div>
+        {guide !== null && <div className="cy-guide-path" aria-label={`Guide step ${guide + 1} of 3`}>
+          <span className={guide === 0 ? "is-current" : "is-done"}><b>1</b>CHOOSE</span>
+          <span className={guide === 1 ? "is-current" : guide > 1 ? "is-done" : ""}><b>2</b>WATCH</span>
+          <span className={guide === 2 ? "is-current" : ""}><b>3</b>RESULT</span>
+          <button type="button" onClick={() => setGuide(null)}>SKIP GUIDE</button>
+        </div>}
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1241,7 +1245,7 @@ export function CryptoJourney() {
         <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
       </section>}
 
-      <button className="cy-details-toggle" onClick={() => setDetails((d) => !d)} aria-expanded={details}>
+      <button className={`cy-details-toggle${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
         {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
       </button>
 
@@ -1322,18 +1326,19 @@ export function CryptoJourney() {
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
                   <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
                 </div>
-                <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "WATCH THE PRICE"}</span><strong>CHOOSE BELOW · DO NOT TAP THE CHART</strong></div>
+                <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>CHART = DISPLAY · BUTTONS = ACTIONS</strong></div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
                   <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
                   <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
                   <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
                   <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
-                  {entryChartY !== null && <><line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" /><text x="2" y={entryChartY - 2} className="cy-chart-label entry" fontSize="3">ENTRY</text></>}
+                  {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
                   <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
-                  <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" /><text x={currentChartX + 3} y={currentChartY + 1} className="cy-chart-label live" fontSize="3.5">YOU</text>
+                  <circle cx={currentChartX} cy={currentChartY} r="2.4" fill="var(--journey-yellow)" vectorEffect="non-scaling-stroke" />
                 </svg>
-                <div className="cy-chart-legend"><span><i style={{background: "var(--journey-yellow)"}}></i>LIVE TAPE</span>{focusPosition && <span><i style={{background: "var(--journey-cyan)"}}></i>ENTRY POINT</span>}</div><div className="cy-chart-foot"><span>YOU BOUGHT {focusPosition ? formatMoney(focusPosition.entry) : "NOT YET"}</span><span>NOW {formatMoney(focusPrice)}</span><span>{waitingForFirstTrade ? "WAITING FOR YOU" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
+                <div className="cy-chart-legend"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
+                <div className="cy-chart-foot"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
               <div className="cy-live">
                 <div className="cy-live-clock"><i style={{ width: `${Math.round(tick * 100)}%` }} /></div>
@@ -1369,6 +1374,7 @@ export function CryptoJourney() {
                   }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
                 </div>
               </div>
+              <div className="cy-action-context"><span>YOUR DECISION</span><strong>{guide === 0 ? "Buy Bitcoin to enter the market." : chapterPlay.mode === "PANIC" ? "Protect cash or risk the crash." : chapterPlay.mode === "HUNT" ? "Check the launch before committing cash." : chapterPlay.mode === "DEFEND" ? "Move exposed funds before the threat hits." : chapterPlay.mode === "BOSS DUEL" ? "Risk a visible stake in a skill challenge." : focusPosition ? "Add, exit, or let the position run." : "Enter the market or preserve your cash."}</strong></div>
               <div className="cy-main-actions">
                 {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", 0.25)}><TrendingUp />BUY $2,500 BTC<ChevronRight /></Button>
                   : chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
@@ -1386,7 +1392,7 @@ export function CryptoJourney() {
                 <button disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
                 <button className="is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
-                <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) { setGuide(2); try { localStorage.setItem(GUIDE_KEY, "1"); } catch { /* private mode */ } } endChapter(); }}><ChevronRight />END QUARTER</button>
+                <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
             </article>
           )}

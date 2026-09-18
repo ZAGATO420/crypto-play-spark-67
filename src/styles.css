@@ -870,6 +870,16 @@
 .cy-goal-line { margin: 0.15rem 0 0.2rem; font-weight: 800; font-size: clamp(1rem, 4.4vw, 1.25rem); line-height: 1.2; }
 .cy-goal-why { margin: 0; font-size: 0.8rem; color: var(--muted-foreground); line-height: 1.45; }
 .cy-goal-doom { margin: 0.35rem 0 0; font-size: 0.74rem; letter-spacing: 0.08em; color: color-mix(in oklab, var(--destructive) 80%, var(--foreground)); }
+.cy-guide-path { grid-column:1 / -1; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:5px; align-items:center; padding-top:7px; border-top:1px solid color-mix(in oklab,var(--journey-yellow) 24%,transparent); }
+.cy-guide-path span { display:flex; align-items:center; gap:4px; color:var(--muted-foreground); font-size:8px; font-weight:800; }
+.cy-guide-path span::after { content:""; flex:1; height:1px; background:var(--border); }
+.cy-guide-path span:last-of-type::after { display:none; }
+.cy-guide-path b { display:grid; place-items:center; width:18px; height:18px; border:1px solid var(--border); border-radius:50%; color:var(--muted-foreground); }
+.cy-guide-path .is-current { color:var(--journey-yellow); }
+.cy-guide-path .is-current b { border-color:var(--journey-yellow); background:var(--journey-yellow); color:var(--background); box-shadow:0 0 12px color-mix(in oklab,var(--journey-yellow) 36%,transparent); }
+.cy-guide-path .is-done { color:var(--journey-cyan); }
+.cy-guide-path .is-done b { border-color:var(--journey-cyan); color:var(--journey-cyan); }
+.cy-guide-path button { min-height:28px; padding:4px 7px; border:1px solid var(--border); border-radius:4px; color:var(--muted-foreground); font-size:8px; font-weight:800; }
 
 .cy-details-toggle {
   width: 100%;
@@ -988,6 +998,9 @@
 .cy-pressure.is-winning { color:var(--journey-yellow); }
 .cy-pressure.is-winning > i b { background:var(--journey-yellow); }
 .cy-main-actions { display:grid; grid-template-columns:1.35fr 1fr .8fr; gap:7px; }
+.cy-action-context { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:center; padding:7px 9px; border-left:3px solid var(--journey-cyan); background:color-mix(in oklab,var(--journey-cyan) 8%,transparent); }
+.cy-action-context span { color:var(--journey-cyan); font-size:8px; font-weight:900; white-space:nowrap; }
+.cy-action-context strong { color:var(--foreground); font-size:10px; line-height:1.3; }
 .cy-main-actions button { min-height:56px; font-family:var(--font-display); font-size:11px; border-bottom-width:3px; transition:transform .12s,box-shadow .2s; }
 .cy-main-actions button:active { transform:translateY(2px) scale(.99); border-bottom-width:1px; }
 .cy-main-trade { background:var(--journey-yellow); color:var(--background); border-bottom-color:color-mix(in oklab,var(--journey-yellow) 48%,var(--background)); box-shadow:0 8px 28px color-mix(in oklab,var(--journey-yellow) 24%,transparent); }
@@ -1086,27 +1099,6 @@
   }
 }
 
-.cy-chart-label {
-  font-family: var(--font-display);
-  fill: var(--journey-yellow);
-  pointer-events: none;
-  text-transform: uppercase;
-}
-.cy-chart-label.entry {
-  fill: var(--journey-cyan);
-  opacity: 0.8;
-}
-
-.cy-chart-instruction {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: color-mix(in oklab, var(--journey-panel) 80%, transparent);
-  border-bottom: 1px solid var(--border);
-  font-size: 10px;
-  font-weight: 700;
-}
-
 .cy-goal-line {
   font-weight: 800;
   color: var(--journey-yellow);
@@ -1135,3 +1127,5 @@
   border-radius: 50%;
   margin-right: 4px;
 }
+.cy-chart-legend .is-now { background:var(--journey-yellow); }
+.cy-chart-legend .is-entry { background:var(--journey-cyan); }
