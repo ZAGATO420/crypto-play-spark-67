@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Activity, ChevronRight, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Share2, Shield, Skull, Swords, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
+import { Activity, ChevronRight, Target, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Share2, Shield, Skull, Swords, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import crownedBoss from "@/assets/boss/crowned.webp.asset.json";
 import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
@@ -19,7 +19,7 @@ import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
   ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
-  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, standingFor, xpProgress,
+  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, skillCheckFor, standingFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
 
@@ -65,7 +65,9 @@ type Pending =
   | { t: "presale"; card: Presale; size: number }
   | { t: "crash"; chapter: number }
   | { t: "fight"; chapter: number; wager: number }
+  | { t: "skill" }
   | { t: "seed" };
+
 type Dialog =
   | { k: "rules" }
   | { k: "market" }
@@ -337,6 +339,9 @@ export function CryptoJourney() {
   const [fast, setFast] = useState(false);
   const [guide, setGuide] = useState<0 | 1 | 2 | null>(null);
   const [verified, setVerified] = useState(false);
+  /** The one skill test of the current quarter, once it has been played. */
+  const [skill, setSkill] = useState<{ chapter: number; quality: number; label: string; delta: number } | null>(null);
+
   const tickRef = useRef(0);
   const chartLineRef = useRef<SVGPolylineElement | null>(null);
   const chartMarkerRef = useRef<HTMLElement | null>(null);
@@ -825,14 +830,29 @@ export function CryptoJourney() {
     nextInQueue();
   };
 
+  /** The quarter's skill test. Plain reward, plain penalty, visible either way. */
+  const resolveSkill = (quality: number, label: string) => {
+    const check = skillCheckFor(run.chapter);
+    const stake = Math.max(300, Math.round(net * 0.02));
+    const delta = quality >= 0.6 ? Math.round(stake * quality) : -Math.round(stake * 0.5);
+    const xp = Math.round(check.reward * quality);
+    setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} · ${label}`, delta));
+    setSkill({ chapter: run.chapter, quality, label, delta });
+    pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
+    playSfx(delta >= 0 ? "win" : "hit");
+    nextInQueue();
+  };
+
   const finishMini = (pending: Pending, res: MiniResult) => {
     playSfx("hit");
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
     if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
+    if (pending.t === "skill") return resolveSkill(res.quality, res.label);
     return resolveSeed(res.quality);
   };
+
 
 
   // one card at a time: crash report, then the historical decision, then the small moment
@@ -864,6 +884,11 @@ export function CryptoJourney() {
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
+    // the quarter's skill test, reported in plain words every single time
+    lines.push(skill && skill.chapter === from
+      ? `Skill test · ${skillCheckFor(from).head}: ${skill.label} (${skill.delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(skill.delta))}).`
+      : `Skill test · ${skillCheckFor(from).head}: not played. No bonus this quarter.`);
+
     const inflow: Entry[] = [];
     const outflow: Entry[] = [];
     const spendOn = (label: string, amount: number) => { if (amount > 0) outflow.push({ chapter: next, label, amount: -amount }); };
@@ -1105,6 +1130,7 @@ export function CryptoJourney() {
 
   const continueChapter = () => {
     setResolution(null);
+    setSkill(null);
     if (guide === 2) setGuide(null);
     openChapterCards(run.chapter);
   };
@@ -1158,6 +1184,7 @@ export function CryptoJourney() {
     // Every fresh run explains itself. Experienced players can skip explicitly;
     // a stale browser flag must never hide the only onboarding.
     setGuide(0);
+    setSkill(null);
     lastAct.current = 1;
     setActSplash(false);
     trackGameBeat(reuse === undefined ? "run_started" : "rematch_started", { tournament: config.tournament });
@@ -1194,6 +1221,20 @@ export function CryptoJourney() {
   });
   const doom = doomIn(run.chapter);
   const standing = standingFor(net, bossNet, run.chapter);
+  const check = skillCheckFor(run.chapter);
+  const lastBook = run.ledger[0];
+  // Plain-words preview of the yellow button: what leaves, what arrives, what then.
+  const buyBudget = Math.floor(run.cash * 0.25);
+  const sellValue = focusPosition ? Math.round(valueOf(focusPosition, focusPrice)) : 0;
+  const preview: { gives: string; gets: string; then: string } =
+    guide === 0 ? { gives: "$2,500 of your cash", gets: `Bitcoin worth $2,500 at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose. That is the whole trade." }
+    : chapterPlay.mode === "HUNT" && presale ? { gives: `${formatMoney(presale.min)} or more as a ticket`, gets: `${presale.name} tokens before everyone else`, then: `${Math.round(presale.rug * 100)}% chance it is a rug · up to ${presale.upside[1]}x if it is not.` }
+    : chapterPlay.mode === "DEFEND" ? { gives: "One of your moves", gets: "Your coins in safer storage", then: "An exchange failure cannot reach money you already moved." }
+    : chapterPlay.mode === "BOSS DUEL" ? { gives: `${formatMoney(duelStake)} as a stake`, gets: "Up to double it, plus a perk", then: "Lose the skill moment and the stake is gone." }
+    : focusPosition ? { gives: `Your ${focusSymbol}, bought at ${formatMoney(focusPosition.entry)}`, gets: `${formatMoney(sellValue)} back as cash`, then: `You lock in ${focusPnl >= 0 ? "a profit of" : "a loss of"} ${formatMoney(Math.abs(focusPnl))}. Cash cannot fall.` }
+    : chapterPlay.mode === "PANIC" ? { gives: "Nothing", gets: "You stay in cash", then: "The crash cannot touch you, but you earn nothing either." }
+    : { gives: `${formatMoney(buyBudget)} of your cash`, gets: `${focusSymbol} worth ${formatMoney(buyBudget)} at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose." };
+
 
 
   return (
@@ -1351,7 +1392,7 @@ export function CryptoJourney() {
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
                   <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
                 </div>
-                <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>CHART = DISPLAY · BUTTONS = ACTIONS</strong></div>
+                <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>THE PRICE RUNS BY ITSELF · DO NOT TAP THE CHART</strong></div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
@@ -1402,6 +1443,22 @@ export function CryptoJourney() {
                 </div>
               </div>
               <div className="cy-action-context"><span>YOUR DECISION</span><strong>{guide === 0 ? "Buy Bitcoin to enter the market." : chapterPlay.mode === "PANIC" ? "Protect cash or risk the crash." : chapterPlay.mode === "HUNT" ? "Check the launch before committing cash." : chapterPlay.mode === "DEFEND" ? "Move exposed funds before the threat hits." : chapterPlay.mode === "BOSS DUEL" ? "Risk a visible stake in a skill challenge." : focusPosition ? "Add, exit, or let the position run." : "Enter the market or preserve your cash."}</strong></div>
+              <div className="cy-preview" aria-label="What the yellow button does">
+                <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
+                <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
+                <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
+              </div>
+              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
+              {guide === null && (
+                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
+                  <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
+                  <p>{check.ask}</p>
+                  {skill && skill.chapter === run.chapter
+                    ? <p className={`cy-skill-result ${skill.delta >= 0 ? "positive" : "negative"}`}>{skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>
+                    : <Button className="cy-skill-cta" onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />PROVE YOUR SKILL · WIN {formatMoney(Math.max(300, Math.round(net * 0.02)))}</Button>}
+                </div>
+              )}
+
               <div className="cy-main-actions">
                 {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", 0.25)}><TrendingUp />BUY $2,500 BTC<ChevronRight /></Button>
                   : guide === 1 ? <Button className="cy-main-trade is-guided" onClick={() => { setGuide(2); endChapter(); }}><ChevronRight />END QUARTER · REVEAL RESULT</Button>

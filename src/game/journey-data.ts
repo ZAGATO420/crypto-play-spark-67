@@ -310,12 +310,34 @@ export const standingFor = (net: number, bossNet: number, chapter: number): Stan
 
 /** Five lines that explain the whole game. Reachable at any time in the run. */
 export const HOW_TO_PLAY: { head: string; body: string }[] = [
-  { head: "THE GOAL", body: "Survive 2020 to 2026 with real crypto prices and finish richer than the Boss." },
-  { head: "MOVES", body: "Every quarter you get 2 moves. Buying, selling, hunting a launch or a duel each cost one move." },
-  { head: "MAKE MONEY", body: "Buy low, sell into strength, and take early launch tickets that are not rugs." },
-  { head: "HOW YOU DIE", body: "Stress or hunger at 100%, a liquidation, or no money left. Eat and calm down in time." },
-  { head: "BOSS SCORE", body: "Final net worth x quarters survived x difficulty, plus a bonus for every crisis you survived." },
+  { head: "1 · CASH AND COINS", body: "You start with cash. Buying turns cash into coins. That is the whole trade." },
+  { head: "2 · REAL PRICES", body: "Your coins move with the real price of that month between 2020 and 2026." },
+  { head: "3 · SELLING", body: "Selling turns coins back into cash. Your profit is the difference to your buy price." },
+  { head: "4 · STAYING ALIVE", body: "Eating and calming down cost money. Ignore them and the run ends early." },
+  { head: "5 · WINNING", body: "At the end your money is compared to the Boss. More than him means you won." },
 ];
+
+/* ---- one skill test per quarter: something you can actually be good at ---- */
+export type SkillCheck = { kind: "timing" | "panic" | "gas" | "seed" | "orderbook" | "rugcheck"; head: string; ask: string; reward: number };
+const SKILL_MAIN: Record<ChapterMode, SkillCheck> = {
+  ACCUMULATE: { kind: "timing", head: "CATCH THE DIP", ask: "Stop the bar inside the green zone to buy lower than the market.", reward: 600 },
+  MOMENTUM: { kind: "orderbook", head: "PLACE THE BID", ask: "Find the liquidity pocket and your sell fills at a better price.", reward: 700 },
+  PANIC: { kind: "panic", head: "BEAT THE CRASH", ask: "Push your orders out before the bids vanish.", reward: 800 },
+  HUNT: { kind: "rugcheck", head: "SPOT THE RUG", ask: "One line in the contract empties the pool. Find it.", reward: 800 },
+  DEFEND: { kind: "seed", head: "PROVE THE KEYS", ask: "Remember the four words that guard your cold storage.", reward: 700 },
+  "BOSS DUEL": { kind: "gas", head: "OUTBID THE BOTS", ask: "Pay enough gas to land the block — but not a cent more.", reward: 900 },
+};
+const SKILL_ALT: Record<SkillCheck["kind"], SkillCheck["kind"]> = { timing: "orderbook", orderbook: "timing", panic: "gas", gas: "panic", rugcheck: "seed", seed: "rugcheck" };
+/** Deterministic, and never the same test two quarters in a row. */
+export const skillCheckFor = (chapter: number): SkillCheck => {
+  const base = SKILL_MAIN[chapterPlayFor(chapter).mode];
+  if (chapter > 0) {
+    const prev = SKILL_MAIN[chapterPlayFor(chapter - 1).mode];
+    if (prev.kind === base.kind) return { ...base, kind: SKILL_ALT[base.kind] };
+  }
+  return base;
+};
+
 
 
 
