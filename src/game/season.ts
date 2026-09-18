@@ -71,3 +71,13 @@ export const readWallet = (): string => {
 export const saveWallet = (value: string) => {
   try { localStorage.setItem(WALLET_KEY, value.trim()); } catch { /* private mode */ }
 };
+
+// Quick-start runs have no setup screen, so the player names themselves on the
+// end screen instead. The last name used is remembered for the next run.
+const NAME_KEY = "tcfb_name_v1";
+export const readName = (): string => {
+  try { return localStorage.getItem(NAME_KEY) ?? ""; } catch { return ""; }
+};
+export const saveName = (value: string) => {
+  try { localStorage.setItem(NAME_KEY, value.trim().slice(0, 18)); } catch { /* private mode */ }
+};
