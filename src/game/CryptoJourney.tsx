@@ -178,6 +178,15 @@ const tournamentConfig = (): Config => {
 const trackGameBeat = (beat: string, detail?: Record<string, string | number | boolean>) => {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent("tcfb:game", { detail: { beat, ...detail } }));
+  const chapter = typeof detail?.chapter === "number" ? detail.chapter : undefined;
+  const tournament = typeof detail?.tournament === "boolean" ? detail.tournament : undefined;
+  const safeDetail = Object.fromEntries(Object.entries(detail ?? {}).filter(([key]) => key !== "chapter" && key !== "tournament"));
+  void fetch("/api/public/game-analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ beat, chapter, tournament, viewport: `${window.innerWidth}x${window.innerHeight}`, detail: safeDetail }),
+    keepalive: true,
+  }).catch(() => undefined);
 };
 
 const freshRun = (config: Config, reuse?: number): Run => {

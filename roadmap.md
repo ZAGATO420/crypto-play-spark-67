@@ -20,4 +20,6 @@
 - [x] Turnier: gleiche Bedingungen (NORMAL, CLASSIC, $10k, kein Ironman, Saison-Twist) + Server-Prüfung
 - [x] Preisreihen aller 14 Märkte auf echte Monats-Closes 2020–2026 umgestellt (Okt–Dez 2026 fiktiv)
 - [x] Launch-Rebuild: one-tap tournament start, living market arena, 84-month journey, contextual actions, act scenes and emotional feedback
+- [x] Launch finale: six rotating chapter modes, active missions, order-book/rug-check skill games, visible act scenes, wallet-gated prizes and shared payout ranking
+- [x] Anonymous gameplay beats persist for launch retention analysis
 - [ ] Final 28-quarter regression run and two-device tournament reproducibility check
