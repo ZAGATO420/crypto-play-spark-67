@@ -965,7 +965,7 @@
 .cy-market-visual::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.35; background-image:linear-gradient(color-mix(in oklab,var(--journey-cyan) 12%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in oklab,var(--journey-cyan) 12%,transparent) 1px,transparent 1px); background-size:36px 36px; }
 .cy-market-visual::after { content:""; position:absolute; inset:auto 0 0; height:45%; pointer-events:none; background:linear-gradient(0deg,color-mix(in oklab,var(--background) 94%,transparent),transparent); }
 .cy-chart-title { position:relative; z-index:3; }
-.cy-chart-instruction { position:relative; z-index:3; display:flex; justify-content:space-between; gap:8px; margin:8px 0 -16px; padding:6px 8px; border-left:3px solid var(--journey-yellow); background:color-mix(in oklab,var(--background) 74%,transparent); font-size:8px; font-weight:800; }
+.cy-chart-instruction { position:relative; z-index:3; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:4px 8px; margin:8px 0 2px; padding:6px 8px; border-left:3px solid var(--journey-yellow); background:color-mix(in oklab,var(--background) 86%,transparent); font-size:8px; font-weight:800; }
 .cy-chart-instruction span { color:var(--journey-yellow); }
 .cy-market-visual.is-paused .cy-chart-live-line,.cy-market-visual.is-paused circle { animation:cy-paused 1.1s ease-in-out infinite; }
 @keyframes cy-paused { 50% { opacity:.45; } }
