@@ -510,9 +510,9 @@ export function CryptoJourney() {
 
   const openSpot = (symbol: CoinSymbol, fraction: number) => {
     const price = mark(symbol);
-    setActiveSymbol(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} does not exist yet. Time travel has rules.`, "pink");
+    setActiveSymbol(symbol);
     const cust = custodyOf(run.custody);
     const budget = Math.floor(run.cash * fraction);
     const size = Math.floor(budget / (1 + cust.fee * perkFee));
@@ -541,9 +541,9 @@ export function CryptoJourney() {
 
   const openPerp = (symbol: CoinSymbol, dir: 1 | -1, lev: number, fraction: number) => {
     const price = mark(symbol);
-    setActiveSymbol(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} has no market in ${chapterLabel(run.chapter)}.`, "pink");
+    setActiveSymbol(symbol);
     const margin = Math.floor(run.cash * fraction);
     if (margin < 50) return say("Not enough margin. Perps eat small accounts first.", "pink");
     spend();
@@ -1212,7 +1212,13 @@ export function CryptoJourney() {
   const restore = () => {
     try {
       const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? "{}");
-      if (saved.run) { setRun({ ...freshRun(saved.run.config ?? defaultConfig), ...saved.run }); setPhase(saved.phase ?? "brief"); setAp(saved.ap ?? AP_BASE); }
+      if (saved.run) {
+        const restored = { ...freshRun(saved.run.config ?? defaultConfig), ...saved.run } as Run;
+        setRun(restored);
+        setActiveSymbol([...restored.positions].sort((a, b) => b.margin - a.margin)[0]?.symbol ?? "BTC");
+        setPhase(saved.phase ?? "brief");
+        setAp(saved.ap ?? AP_BASE);
+      }
     } catch { setRun(freshRun(defaultConfig)); }
     setResolution(null); setDialog(null); setGuide(null); setScreen("run");
   };
