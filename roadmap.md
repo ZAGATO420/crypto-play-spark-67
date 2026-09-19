@@ -25,4 +25,4 @@
 - [x] Cyber-Survival HUD: integrated reactive Boss, animated live chart, compact survival status, tactile actions and layered mood audio
 - [x] Clarity rebuild: playable first-run guidance, paused opening tape, explicit chart language, clear duel stakes and simplified mobile controls
 - [ ] Final 28-quarter regression run and two-device tournament reproducibility check
-- [ ] Chart audit: selected coin/logo, P&L animation for every market, and exact historical-mode prices
+- [x] Chart audit: selected coin/logo, P&L animation for every market, and exact historical-mode prices
