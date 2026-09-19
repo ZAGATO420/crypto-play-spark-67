@@ -43,7 +43,11 @@ export const EVENTS: Record<number, { title: string; body: string; tone: "danger
 export const XP_LEVELS = [0, 400, 1200, 2600, 4800, 8000, 12500, 18500, 26000, 36000, 50000, 70000, 95000, 130000, 180000, 250000];
 
 export const formatMoney = (value: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: Math.abs(value) < 1 ? 4 : 0 }).format(value);
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: Math.abs(value) < 0.01 ? 8 : Math.abs(value) < 1 ? 4 : 0,
+  }).format(value);
 
 export const levelFor = (xp: number) => Math.max(1, XP_LEVELS.filter((threshold) => xp >= threshold).length);
 export type Archetype = "degen" | "trader" | "influencer" | "hodler";

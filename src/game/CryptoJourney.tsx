@@ -1187,7 +1187,7 @@ export function CryptoJourney() {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, phase, dialog, fast, run, waitingForFirstTrade]);
+  }, [screen, phase, dialog, fast, run, waitingForFirstTrade, focusSymbol, chartMin, chartSpan, sweeping]);
 
 
 
