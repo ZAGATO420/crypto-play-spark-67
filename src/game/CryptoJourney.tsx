@@ -227,6 +227,19 @@ const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
 const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) => {
   const a = priceAt(symbol, r.chapter, r.noise);
   if (!a) return 0;
+  if (r.config.mode === "historical") {
+    const coin = COINS.find((candidate) => candidate.symbol === symbol);
+    if (!coin) return 0;
+    const startMonth = chapterMonth(r.chapter);
+    const endMonth = chapterMonth(Math.min(CHAPTERS - 1, r.chapter + 1));
+    const monthProgress = Math.max(0, endMonth - startMonth) * clamp(t, 0, 1);
+    const leftMonth = Math.min(endMonth, startMonth + Math.floor(monthProgress));
+    const rightMonth = Math.min(endMonth, leftMonth + 1);
+    const left = coin.prices[leftMonth] ?? a;
+    const right = coin.prices[rightMonth] || left;
+    const fraction = monthProgress - Math.floor(monthProgress);
+    return left + (right - left) * fraction;
+  }
   const b = priceAt(symbol, r.chapter + 1, r.noise) || a;
   const span = Math.abs(b / a - 1);
   const phase = det(r.seed, `wick-${r.chapter}-${symbol}`) * Math.PI * 2;
@@ -339,6 +352,7 @@ export function CryptoJourney() {
   const [fast, setFast] = useState(false);
   const [guide, setGuide] = useState<0 | 1 | 2 | null>(null);
   const [verified, setVerified] = useState(false);
+  const [activeSymbol, setActiveSymbol] = useState<CoinSymbol>("BTC");
   /** The one skill test of the current quarter, once it has been played. */
   const [skill, setSkill] = useState<{ chapter: number; quality: number; label: string; delta: number } | null>(null);
 
@@ -370,10 +384,11 @@ export function CryptoJourney() {
   const perkFee = run.perks.includes("CHEAP FEES") ? 0.5 : 1;
   /** During the live phase every price is the moving one. */
   const mark = (symbol: CoinSymbol) => (phase === "act" ? livePrice(symbol, run, tick, sweeping) : priceAt(symbol, run.chapter, run.noise));
-  const focusPosition = [...run.positions].sort((a, b) => b.margin - a.margin)[0];
-  const focusSymbol: CoinSymbol = focusPosition?.symbol ?? "BTC";
+  const focusSymbol = activeSymbol;
+  const focusPositions = run.positions.filter((position) => position.symbol === focusSymbol);
+  const focusPosition = [...focusPositions].sort((a, b) => b.margin - a.margin)[0];
   const focusPrice = mark(focusSymbol);
-  const focusPnl = focusPosition ? pnlOf(focusPosition, focusPrice) : 0;
+  const focusPnl = focusPositions.reduce((total, position) => total + pnlOf(position, focusPrice), 0);
   const chartPoints = useMemo(() => Array.from({ length: 28 }, (_, i) => {
     const t = i / 27;
     const price = livePrice(focusSymbol, run, t, sweeping);
@@ -381,7 +396,7 @@ export function CryptoJourney() {
   }), [focusSymbol, run.chapter, run.seed, run.noise, sweeping]);
   const chartMin = Math.min(...chartPoints);
   const chartMax = Math.max(...chartPoints);
-  const chartSpan = Math.max(1, chartMax - chartMin);
+  const chartSpan = Math.max(Number.EPSILON, chartMax - chartMin);
   const chartPath = chartPoints.map((price, i) => `${(i / 27) * 100},${92 - ((price - chartMin) / chartSpan) * 76}`).join(" ");
   const currentChartX = Math.max(2, Math.min(98, tick * 100));
   const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
@@ -497,6 +512,7 @@ export function CryptoJourney() {
     const price = mark(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} does not exist yet. Time travel has rules.`, "pink");
+    setActiveSymbol(symbol);
     const cust = custodyOf(run.custody);
     const budget = Math.floor(run.cash * fraction);
     const size = Math.floor(budget / (1 + cust.fee * perkFee));
@@ -527,6 +543,7 @@ export function CryptoJourney() {
     const price = mark(symbol);
     setDialog(null);
     if (!price) return say(`${symbol} has no market in ${chapterLabel(run.chapter)}.`, "pink");
+    setActiveSymbol(symbol);
     const margin = Math.floor(run.cash * fraction);
     if (margin < 50) return say("Not enough margin. Perps eat small accounts first.", "pink");
     spend();
@@ -1170,7 +1187,7 @@ export function CryptoJourney() {
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, phase, dialog, fast, run, waitingForFirstTrade]);
+  }, [screen, phase, dialog, fast, run, waitingForFirstTrade, focusSymbol, chartMin, chartSpan, sweeping]);
 
 
 
@@ -1178,6 +1195,7 @@ export function CryptoJourney() {
     localStorage.removeItem(SAVE_KEY);
     setResume(false);
     setRun(freshRun(config, reuse));
+    setActiveSymbol("BTC");
     openingPlayed.current = false;
     setPhase("act"); setAp(AP_BASE); setResolution(null); setDialog(null); setFlash(null); setQueue([]);
     setScreen("run");
@@ -1194,7 +1212,13 @@ export function CryptoJourney() {
   const restore = () => {
     try {
       const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? "{}");
-      if (saved.run) { setRun({ ...freshRun(saved.run.config ?? defaultConfig), ...saved.run }); setPhase(saved.phase ?? "brief"); setAp(saved.ap ?? AP_BASE); }
+      if (saved.run) {
+        const restored = { ...freshRun(saved.run.config ?? defaultConfig), ...saved.run } as Run;
+        setRun(restored);
+        setActiveSymbol([...restored.positions].sort((a, b) => b.margin - a.margin)[0]?.symbol ?? "BTC");
+        setPhase(saved.phase ?? "brief");
+        setAp(saved.ap ?? AP_BASE);
+      }
     } catch { setRun(freshRun(defaultConfig)); }
     setResolution(null); setDialog(null); setGuide(null); setScreen("run");
   };
@@ -1343,7 +1367,7 @@ export function CryptoJourney() {
               const liq = liqPct(p, price);
               return (
                 <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
-                  <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => setDialog({ k: "position", id: p.id })}>
+                  <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => { setActiveSymbol(p.symbol); setDialog({ k: "position", id: p.id }); }}>
                     <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
                     <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
                     <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
@@ -1356,10 +1380,10 @@ export function CryptoJourney() {
           </div>
         ) : <p className="cy-empty">No positions. Cash does not win chapters.</p>}
         {run.positions.length > 0 && (() => {
-          const p = [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
+          const p = focusPosition ?? [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
           const price = mark(p.symbol);
           const pnl = pnlOf(p, price);
-          return <p className="cy-pos-plain">Your biggest bet: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap it to sell.</p>;
+          return <p className="cy-pos-plain">Chart focus: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap a position to inspect it.</p>;
         })()}
 
       </section>
@@ -1546,7 +1570,7 @@ export function CryptoJourney() {
             onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
             onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
-          {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => setDialog({ k: "trade", symbol: s })} />}
+          {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => { setActiveSymbol(s); setDialog({ k: "trade", symbol: s }); }} />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: run.chapter % 2 === 0 ? "rugcheck" : "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
