@@ -1053,7 +1053,16 @@
   .cy-guide-path button { grid-column:1 / -1; justify-self:end; min-height:24px; }
   .cy-details-toggle { margin:0; }
   .cy-details-toggle.guide-hidden { display:none; }
-  .cy-positions { display:none; }
+  .cy-positions { padding:7px 8px; }
+  .cy-pos-head { margin-bottom:5px; font-size:9px; }
+  .cy-chips { grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:5px; }
+  .cy-chips.is-dense { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); }
+  .cy-chip { padding:6px; min-height:44px; gap:3px 5px; }
+  .cy-chip img { width:18px; height:18px; }
+  .cy-chip strong { font-size:11px; }
+  .cy-chip b { font-size:11px; }
+  .cy-chip-exit { min-height:32px; }
+  .cy-pos-plain { display:none; }
   .cy-market-visual { min-height:218px; padding:9px; }
   .cy-chart-wrap { height:126px; margin-top:6px; }
   .cy-boss-presence { top:52px; right:0; width:40%; height:58%; }
