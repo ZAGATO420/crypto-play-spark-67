@@ -1249,9 +1249,11 @@ export function CryptoJourney() {
   const lastBook = run.ledger[0];
   // Plain-words preview of the yellow button: what leaves, what arrives, what then.
   const buyBudget = Math.floor(run.cash * 0.25);
+  // Guided first buy always spends exactly this fixed amount (never a quarter of a richer wallet).
+  const guideBuy = Math.min(2500, Math.floor(run.cash));
   const sellValue = focusPosition ? Math.round(valueOf(focusPosition, focusPrice)) : 0;
   const preview: { gives: string; gets: string; then: string } =
-    guide === 0 ? { gives: "$2,500 of your cash", gets: `Bitcoin worth $2,500 at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose. That is the whole trade." }
+    guide === 0 ? { gives: `${formatMoney(guideBuy)} of your cash`, gets: `Bitcoin worth ${formatMoney(guideBuy)} at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose. That is the whole trade." }
     : chapterPlay.mode === "HUNT" && presale ? { gives: `${formatMoney(presale.min)} or more as a ticket`, gets: `${presale.name} tokens before everyone else`, then: `${Math.round(presale.rug * 100)}% chance it is a rug · up to ${presale.upside[1]}x if it is not.` }
     : chapterPlay.mode === "DEFEND" ? { gives: "One of your moves", gets: "Your coins in safer storage", then: "An exchange failure cannot reach money you already moved." }
     : chapterPlay.mode === "BOSS DUEL" ? { gives: `${formatMoney(duelStake)} as a stake`, gets: "Up to double it, plus a perk", then: "Lose the skill moment and the stake is gone." }
@@ -1299,7 +1301,7 @@ export function CryptoJourney() {
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
-        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
+        <p className="cy-goal-line">{guide === 0 ? `Buy ${formatMoney(guideBuy)} of Bitcoin below` : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
         <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
         </div>
@@ -1484,7 +1486,7 @@ export function CryptoJourney() {
               )}
 
               <div className="cy-main-actions">
-                {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", 0.25)}><TrendingUp />BUY $2,500 BTC<ChevronRight /></Button>
+                {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}><TrendingUp />BUY {formatMoney(guideBuy)} BTC<ChevronRight /></Button>
                   : guide === 1 ? <Button className="cy-main-trade is-guided" onClick={() => { setGuide(2); endChapter(); }}><ChevronRight />END QUARTER · REVEAL RESULT</Button>
                   : chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
                   : chapterPlay.mode === "HUNT" && presale ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />HUNT {presale.name}<ChevronRight /></Button>
