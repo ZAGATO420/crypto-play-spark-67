@@ -357,7 +357,7 @@ export function CryptoJourney() {
   const [skill, setSkill] = useState<{ chapter: number; quality: number; label: string; delta: number } | null>(null);
 
   const tickRef = useRef(0);
-  const chartLineRef = useRef<SVGPolylineElement | null>(null);
+  const chartRevealRef = useRef<SVGRectElement | null>(null);
   const chartMarkerRef = useRef<HTMLElement | null>(null);
   const liveClockRef = useRef<HTMLElement | null>(null);
   const [actSplash, setActSplash] = useState(true);
@@ -1173,7 +1173,7 @@ export function CryptoJourney() {
       const liveX = Math.max(2, Math.min(98, tickRef.current * 100));
       const liveMark = livePrice(focusSymbol, run, tickRef.current, sweeping);
       const liveY = 92 - ((liveMark - chartMin) / chartSpan) * 76;
-      if (chartLineRef.current) chartLineRef.current.style.strokeDashoffset = String(100 - liveX);
+      if (chartRevealRef.current) chartRevealRef.current.setAttribute("width", String(liveX));
       if (chartMarkerRef.current) {
         chartMarkerRef.current.style.left = `${liveX}%`;
         chartMarkerRef.current.style.top = `${liveY}%`;
@@ -1422,10 +1422,13 @@ export function CryptoJourney() {
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
-                    <defs><linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient></defs>
+                    <defs>
+                      <linearGradient id="cy-chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--journey-cyan)" stopOpacity=".34"/><stop offset="1" stopColor="var(--journey-cyan)" stopOpacity="0"/></linearGradient>
+                      <clipPath id="cy-chart-reveal"><rect ref={chartRevealRef} x="0" y="0" width={currentChartX} height="100" /></clipPath>
+                    </defs>
                     <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
                     <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
-                    <polyline ref={chartLineRef} className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" pathLength="100" style={{ strokeDashoffset: 100 - currentChartX }} />
+                    <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" clipPath="url(#cy-chart-reveal)" />
                     {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
                     <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   </svg>
