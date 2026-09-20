@@ -1301,7 +1301,7 @@ export function CryptoJourney() {
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
-        <p className="cy-goal-line">{guide === 0 ? "Buy $2,500 of Bitcoin below" : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
+        <p className="cy-goal-line">{guide === 0 ? `Buy ${formatMoney(guideBuy)} of Bitcoin below` : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
         <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
         {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
         </div>
