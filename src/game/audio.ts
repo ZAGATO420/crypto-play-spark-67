@@ -208,27 +208,43 @@ export function preloadSfx() {
   for (const id of Object.keys(SFX) as SfxId[]) void buffer(id);
 }
 
+/** Fades a running cue out instead of cutting it, so nothing clicks. */
+function release(v: Voice, now: number) {
+  v.gain.gain.cancelScheduledValues(now);
+  v.gain.gain.setTargetAtTime(0, now, DUCK / 3);
+  v.src.stop(now + DUCK);
+}
+
 export function playSfx(id: SfxId) {
   const ctx = s.ctx;
   if (muted || !ctx || !s.sfxBus) return;
+  const gate = ctx.currentTime;
+  // The same cue fired twice in a few frames is one moment, not two sounds.
+  if (gate - (s.lastAt[id] ?? -1) < REPEAT_GAP) return;
+  s.lastAt[id] = gate;
   void (async () => {
     if (ctx.state === "suspended") await ctx.resume().catch(() => {});
     const buf = await buffer(id);
     if (!buf || !s.ctx || !s.sfxBus || muted) return;
+    const now = s.ctx.currentTime;
+    s.voices = s.voices.filter((v) => now - v.at < buf.duration + 2);
+    while (s.voices.length >= VOICE_MAX) {
+      const oldest = s.voices.shift();
+      if (oldest) release(oldest, now);
+    }
     const src = s.ctx.createBufferSource();
     const gain = s.ctx.createGain();
-    gain.gain.value = SFX_GAIN[id];
     src.buffer = buf;
     src.connect(gain).connect(s.sfxBus);
-    src.start();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(SFX_GAIN[id], now + 0.008);
+    const voice: Voice = { src, gain, at: now };
+    src.onended = () => { s.voices = s.voices.filter((v) => v !== voice); };
+    s.voices.push(voice);
+    src.start(now);
   })();
 }
 
-/** A short two-hit cue gives decisive moments weight without adding noisy effects. */
-export function playSfxStack(primary: SfxId, accent: SfxId, delay = 90) {
-  playSfx(primary);
-  if (typeof window !== "undefined") window.setTimeout(() => playSfx(accent), delay);
-}
 
 export function setMuted(next: boolean) {
   muted = next;
