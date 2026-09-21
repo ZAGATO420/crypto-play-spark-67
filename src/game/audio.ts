@@ -31,6 +31,8 @@ const KEY_SFX = "tcfb_sfx_vol";
 const KEY_MUTE = "tcfb_muted";
 const FADE = 2;
 
+type Voice = { src: AudioBufferSourceNode; gain: GainNode; at: number };
+
 type State = {
   ctx: AudioContext | null;
   musicBus: GainNode | null;
@@ -41,9 +43,17 @@ type State = {
   loading: Partial<Record<SfxId, Promise<AudioBuffer | null>>>;
   track: TrackId | null;
   ready: boolean;
+  voices: Voice[];
+  lastAt: Partial<Record<SfxId, number>>;
 };
 
-const s: State = { ctx: null, musicBus: null, moodFilter: null, sfxBus: null, player: null, buffers: {}, loading: {}, track: null, ready: false };
+const s: State = { ctx: null, musicBus: null, moodFilter: null, sfxBus: null, player: null, buffers: {}, loading: {}, track: null, ready: false, voices: [], lastAt: {} };
+
+/** Two effects at once turn into mush, so one cue plays at a time. */
+const VOICE_MAX = 2;
+const REPEAT_GAP = 0.16;
+const DUCK = 0.035;
+
 
 /** The music leans with the market: hyped in a bull, thin and tense in a crash. */
 export type Mood = "calm" | "hype" | "tense";
