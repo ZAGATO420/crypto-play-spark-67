@@ -77,7 +77,7 @@ let musicVol = 0.35;
 let sfxVol = 0.6;
 let muted = false;
 
-export function readSettings() {
+function readSettings() {
   musicVol = num(KEY_MUSIC, 0.35);
   sfxVol = num(KEY_SFX, 0.6);
   muted = typeof localStorage !== "undefined" && localStorage.getItem(KEY_MUTE) === "1";
