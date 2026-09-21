@@ -26,19 +26,6 @@ export const COINS: Coin[] = [
   { symbol: "WIF", name: "dogwifhat", color: "yellow", prices: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4.58,2.5,3.31,2.2,2.18,1.52,2.46,2.38,3.18,1.86,1.14,0.629,0.42,0.633,0.851,0.867,0.919,0.783,0.728,0.514,0.366,0.27,0.255,0.195,0.179,0.183,0.192,0.166,0.143,0.197,0.194,0.218,0.243,0.27] },
 ];
 
-export const EVENTS: Record<number, { title: string; body: string; tone: "danger" | "win" | "boss" }> = {
-  2: { title: "BLACK THURSDAY", body: "COVID panic nukes the market. The Boss wants to know if you still have hands.", tone: "danger" },
-  4: { title: "THE HALVING", body: "Bitcoin supply tightens. Conviction is cheap before the crowd arrives.", tone: "win" },
-  12: { title: "TESLA BUYS BTC", body: "Institutions enter the arena. Euphoria is now a weapon.", tone: "win" },
-  16: { title: "MINING BAN", body: "China hits the miners. Weak hands are already running.", tone: "danger" },
-  21: { title: "BTC: $69K", body: "Everyone is a genius at the top. The Boss is smiling.", tone: "boss" },
-  28: { title: "LUNA COLLAPSE", body: "The stablecoin is not stable. Contagion is spreading.", tone: "danger" },
-  33: { title: "FTX COLLAPSE", body: "Trust is dead. Cash suddenly feels like a position.", tone: "danger" },
-  39: { title: "PEPE ARRIVES", body: "A frog enters the timeline. Fundamentals have left the chat.", tone: "win" },
-  49: { title: "ETF FEVER", body: "Wall Street wants in. The next chapter starts now.", tone: "win" },
-  58: { title: "BTC BREAKS $100K", body: "The impossible print is on the board. Do not blink.", tone: "boss" },
-  71: { title: "THE FINAL CYCLE", body: "One year remains. Every choice now writes your rank.", tone: "boss" },
-};
 
 export const XP_LEVELS = [0, 400, 1200, 2600, 4800, 8000, 12500, 18500, 26000, 36000, 50000, 70000, 95000, 130000, 180000, 250000];
 
@@ -131,19 +118,6 @@ export const COUNTRY_FLAGS: Record<string, { name: string; kind: FlagKind; color
   AU: { name: "Australia", kind: "cross", colors: ["#012169", "#ffffff"] },
 };
 export type Country = (typeof COUNTRIES)[number];
-
-export type ChanceKind = "launch" | "airdrop" | "perp" | "tax";
-export type Chance = { kind: ChanceKind; title: string; body: string; stake: number; actionLabel: string };
-
-export const CHANCES: Chance[] = [
-  { kind: "launch", title: "STEALTH LAUNCH", body: "An unaudited token opens for 60 seconds. The chart could 10x — or the deployer takes everything.", stake: 0.2, actionLabel: "SNIPE 20%" },
-  { kind: "launch", title: "PRESALE WHITELIST", body: "You got a whitelist spot nobody can verify. Fill it or walk away.", stake: 0.15, actionLabel: "FILL 15%" },
-  { kind: "airdrop", title: "AIRDROP FARM", body: "Bridge and farm this chain for a season. Costs gas now, might print later.", stake: 0.08, actionLabel: "FARM 8%" },
-  { kind: "perp", title: "LEVERAGE DESK", body: "10x perps are open. One clean candle doubles your stake, one wick liquidates it.", stake: 0.12, actionLabel: "LONG 10x" },
-  { kind: "tax", title: "THE BOSS COLLECTS", body: "The Boss demands tribute this month. Pay him, or take the stress of refusing.", stake: 0.06, actionLabel: "PAY TRIBUTE" },
-];
-
-export const RANK_TITLES = ["Early Rekt", "Certified Rekt", "Late Game Rekt", "Solid Survivor", "Top 8% Survivor", "Top 3% Diamond Hands", "Final Boss Material"] as const;
 
 export const rankTitle = (net: number, months: number, survived: boolean) => {
   if (!survived) return months < 18 ? "Early Rekt" : months < 54 ? "Certified Rekt" : "Late Game Rekt";
@@ -265,8 +239,6 @@ export const DECISIONS: Decision[] = [
       { label: "PROTECT THE BAG", result: "You protected the run and walked to the finish line with your net worth intact.", tone: "neutral", bagMul: 0.7, cashMul: 1.3, xp: 600, stress: -12 },
     ] },
 ];
-
-export const decisionFor = (month: number) => DECISIONS.find((d) => d.month === month);
 
 // ---- THE CYCLE: chapters, presales, statuses, endings -----------------------
 export const CHAPTERS = 28; // 2020 Q1 -> 2026 Q4

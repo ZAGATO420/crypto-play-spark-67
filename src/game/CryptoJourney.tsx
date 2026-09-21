@@ -30,7 +30,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, playSfxStack, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
@@ -487,10 +487,10 @@ export function CryptoJourney() {
    */
   const feel = (kind: "win" | "loss" | "liq" | "crash" | "save" | "green" | "red" | "idle", amount?: number) => {
     const salt = run.chapter * 7 + run.trades + run.moves;
-    if (kind === "win" || kind === "green") { setFxFlash("gold"); playSfxStack("buy", "win", 72); }
-    if (kind === "save") { setFxFlash("gold"); playSfxStack("hit", "vault", 88); }
-    if (kind === "loss" || kind === "red") { setFxFlash("red"); playSfxStack("sell", "hit", 78); }
-    if (kind === "liq" || kind === "crash") { setFxFlash("red"); playSfxStack("crash", "hit", 110); setShake(true); window.setTimeout(() => setShake(false), 520); }
+    if (kind === "win" || kind === "green") { setFxFlash("gold"); playSfx("win"); }
+    if (kind === "save") { setFxFlash("gold"); playSfx("vault"); }
+    if (kind === "loss" || kind === "red") { setFxFlash("red"); playSfx("hit"); }
+    if (kind === "liq" || kind === "crash") { setFxFlash("red"); playSfx("crash"); setShake(true); window.setTimeout(() => setShake(false), 520); }
     if (kind === "idle") playSfx("click");
     if (amount !== undefined && Math.abs(amount) >= 1) pop(`${amount >= 0 ? "+" : "−"}${formatMoney(Math.abs(amount))}`, amount >= 0 ? "up" : "down");
     setBossTalk(bossReaction(kind, salt));
@@ -569,7 +569,6 @@ export function CryptoJourney() {
 
   const closePosition = (id: number, fraction: number, quality: number) => {
     setDialog(null);
-    playSfx("sell");
     if (run.realized === 0) trackGameBeat("first_exit", { chapter: run.chapter, tournament: cfg.tournament });
     const pos = run.positions.find((p) => p.id === id);
     if (!pos) return;
@@ -861,7 +860,6 @@ export function CryptoJourney() {
   };
 
   const finishMini = (pending: Pending, res: MiniResult) => {
-    playSfx("hit");
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
