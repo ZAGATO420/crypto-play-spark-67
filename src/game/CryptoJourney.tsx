@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Activity, ChevronRight, Target, Crown, Flame, HeartPulse, History, Home, Receipt, Rocket, Share2, Shield, Skull, Swords, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
+import { Activity, ChevronRight, Target, Crown, Ellipsis, Flame, HeartPulse, History, Home, Receipt, Rocket, Share2, Shield, Skull, Swords, TrendingDown, TrendingUp, Trophy, Volume2, VolumeX, WalletCards, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import crownedBoss from "@/assets/boss/crowned.webp.asset.json";
 import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
@@ -76,6 +76,7 @@ type Dialog =
   | { k: "presale"; card: Presale }
   | { k: "launchResult"; res: LaunchResult }
   | { k: "survive" }
+  | { k: "more" }
   | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
@@ -1513,9 +1514,10 @@ export function CryptoJourney() {
               <div className="cy-toolbelt">
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
-                <button disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
-                <button className="is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
+                <button className="cy-tool-more" disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis />MORE</button>
+                <button className="cy-tool-extra" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
+                <button className="cy-tool-extra" disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
+                <button className="cy-tool-extra is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
                 <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
             </article>
@@ -1574,6 +1576,12 @@ export function CryptoJourney() {
             onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
           {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => { setActiveSymbol(s); setDialog({ k: "trade", symbol: s }); }} />}
+          {dialog.k === "more" && <MoreSheet
+            ap={ap}
+            onStorage={() => setDialog({ k: "custody" })}
+            onHistory={() => setDialog({ k: "ledger" })}
+            onEnd={() => setDialog({ k: "cashout" })}
+          />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: run.chapter % 2 === 0 ? "rugcheck" : "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
@@ -1754,6 +1762,20 @@ function MarketSheet({ run, onPick }: { run: Run; onPick: (s: CoinSymbol) => voi
             </button>
           );
         })}
+      </div>
+    </>
+  );
+}
+
+function MoreSheet({ ap, onStorage, onHistory, onEnd }: { ap: number; onStorage: () => void; onHistory: () => void; onEnd: () => void }) {
+  return (
+    <>
+      <p className="journey-kicker"><Ellipsis /> MORE</p>
+      <h2>RUN TOOLS</h2>
+      <div className="cy-more-grid">
+        <Button variant="secondary" disabled={ap <= 0} onClick={onStorage}><Shield />STORAGE<small>Protect exposed coins</small></Button>
+        <Button variant="secondary" onClick={onHistory}><Receipt />HISTORY<small>See every cash flow</small></Button>
+        <Button variant="destructive" onClick={onEnd}><Skull />END RUN<small>Cash out and submit</small></Button>
       </div>
     </>
   );

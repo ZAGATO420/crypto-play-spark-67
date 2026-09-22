@@ -1020,6 +1020,10 @@
 .cy-toolbelt .is-hot { color:var(--journey-yellow); border-color:color-mix(in oklab,var(--journey-yellow) 50%,var(--border)); }
 .cy-toolbelt .is-danger { color:var(--journey-pink); margin-left:auto; }
 .cy-toolbelt .is-next { color:var(--background); border-color:var(--journey-yellow); background:var(--journey-yellow); animation:cy-guide-action 1.2s ease-in-out infinite; }
+.cy-tool-more { display:none !important; }
+.cy-more-grid { display:grid; gap:8px; margin-top:14px; }
+.cy-more-grid button { min-height:58px; justify-content:flex-start; }
+.cy-more-grid button small { margin-left:auto; color:var(--muted-foreground); font:600 10px/1.2 var(--font-body); }
 .cy-duel-stakes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
 .cy-duel-stakes span { display:grid; gap:4px; padding:10px; border:1px solid var(--border); background:color-mix(in oklab,var(--background) 46%,transparent); }
 .cy-duel-stakes small { color:var(--muted-foreground); font-size:8px; font-weight:800; }
@@ -1036,34 +1040,57 @@
   .cy-trail { background:color-mix(in oklab,var(--card) 72%,transparent); backdrop-filter:blur(10px); }
 }
 @media (max-width:640px) {
-  .cy-shell { gap:8px; padding-inline:8px; }
+  .cy-shell { gap:5px; padding:6px 6px calc(76px + env(safe-area-inset-bottom)); }
   .cy-world { opacity:.42; }
-  .cy-journey { grid-template-columns:minmax(0,1fr) auto; padding:6px 7px; }
+  .cy-journey { grid-template-columns:minmax(0,1fr) auto; padding:4px 6px; }
   .cy-journey-labels { display:none; }
   .cy-journey-track { grid-row:1; }
   .cy-journey > strong { grid-row:1; font-size:10px; }
-  .cy-core { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .cy-core > span { padding:7px 8px; }
-  .cy-core strong { font-size:13px; }
+  .cy-core { grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; }
+  .cy-core > span { display:flex; min-height:40px; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; padding:4px 5px; }
+  .cy-core small,.cy-core em { font-size:6px; }
+  .cy-core strong { font-size:11px; }
+  .cy-core > span > i { width:100%; }
   .cy-top { display:none; }
-  .cy-goal { margin:0; padding:8px 10px; }
-  .cy-goal-why { display:block; font-size:11px; }
+  .cy-goal { grid-template-columns:32px minmax(0,1fr); gap:6px; margin:0; padding:5px 7px; }
+  .cy-goal-avatar { width:32px; height:32px; }
+  .cy-goal-head { font-size:7px; }
+  .cy-goal-line { margin:1px 0; font-size:13px; line-height:1.08; }
+  .cy-goal-why { display:block; max-height:26px; overflow:hidden; font-size:9px; line-height:1.35; }
+  .cy-standing { margin:0; padding:5px 7px; border-radius:7px; }
+  .cy-standing-head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:5px; }
+  .cy-standing-head strong { min-width:0; overflow:hidden; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+  .cy-standing-head button { min-height:30px; margin:0; padding:3px 6px; font-size:7px; }
+  .cy-standing-tag { padding:3px 6px; font-size:8px; }
+  .cy-standing-bar { height:4px; margin:4px 0 0; }
+  .cy-standing p { display:none; }
   .cy-guide-path { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .cy-guide-path button { grid-column:1 / -1; justify-self:end; min-height:24px; }
   .cy-details-toggle { margin:0; }
   .cy-details-toggle.guide-hidden { display:none; }
-  .cy-positions { padding:7px 8px; }
+  .cy-positions { padding:5px 6px; overflow:hidden; }
   .cy-pos-head { margin-bottom:5px; font-size:9px; }
-  .cy-chips { grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:5px; }
-  .cy-chips.is-dense { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); }
-  .cy-chip { padding:6px; min-height:44px; gap:3px 5px; }
+  .cy-chips,.cy-chips.is-dense { display:flex; gap:5px; overflow-x:auto; scrollbar-width:none; }
+  .cy-chips::-webkit-scrollbar { display:none; }
+  .cy-chip-wrap { flex:0 0 126px; }
+  .cy-chip { width:100%; padding:5px; min-height:42px; gap:2px 4px; }
   .cy-chip img { width:18px; height:18px; }
   .cy-chip strong { font-size:11px; }
   .cy-chip b { font-size:11px; }
   .cy-chip-exit { min-height:32px; }
   .cy-pos-plain { display:none; }
-  .cy-market-visual { min-height:218px; padding:9px; }
-  .cy-chart-wrap { height:126px; margin-top:6px; }
+  .cy-body { display:block; }
+  .cy-card,.cy-arena { gap:5px; padding:6px; }
+  .cy-arena-head { padding:4px 6px; }
+  .cy-tournament-live { padding:4px 6px; font-size:7px; }
+  .cy-market-visual { min-height:170px; padding:6px; }
+  .cy-chart-instruction { margin:3px 0 0; padding:3px 5px; }
+  .cy-chart-instruction strong { font-size:7px; }
+  .cy-chart-title { margin-top:2px; }
+  .cy-chart-title span { gap:5px; font-size:15px; }
+  .cy-chart-title img { width:22px; height:22px; }
+  .cy-chart-title > strong { font-size:9px; }
+  .cy-chart-wrap { height:92px; margin-top:3px; }
   .cy-boss-presence { top:52px; right:0; width:40%; height:58%; }
   .cy-boss-presence div { display:none; }
   .cy-boss-presence span { font-size:8px; }
@@ -1080,12 +1107,30 @@
   .cy-pressure { display:none; }
   .cy-chart-instruction { align-items:center; }
   .cy-chart-instruction strong { max-width:55%; text-align:right; }
-  .cy-chart-legend { position:relative; z-index:3; flex-wrap:wrap; margin-top:3px; }
-  .cy-chart-foot { padding-top:4px; }
-  .cy-action-context { grid-template-columns:1fr; gap:2px; }
-  .cy-toolbelt { position:sticky; bottom:max(0px,env(safe-area-inset-bottom)); z-index:12; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); padding:7px; border:1px solid var(--border); background:color-mix(in oklab,var(--background) 94%,transparent); backdrop-filter:blur(12px); }
-  .cy-toolbelt button { justify-content:center; min-height:42px; padding:5px 3px; font-size:8px; }
+  .cy-chart-legend { position:relative; z-index:3; flex-wrap:wrap; gap:7px; margin-top:2px; font-size:8px; }
+  .cy-chart-foot { padding-top:2px; }
+  .cy-live { margin:0; gap:3px; }
+  .cy-action-context { grid-template-columns:auto minmax(0,1fr); gap:5px; padding:4px 6px; }
+  .cy-action-context strong { overflow:hidden; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+  .cy-preview { grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px; margin:2px 0; }
+  .cy-preview span { gap:1px; padding:4px; border-radius:5px; }
+  .cy-preview small { font-size:6px; }
+  .cy-preview strong { display:-webkit-box; overflow:hidden; font-size:8px; line-height:1.15; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+  .cy-lastmove { margin:0; font-size:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cy-skill { margin:2px 0; padding:5px 6px; border-radius:6px; }
+  .cy-skill-head { flex-wrap:nowrap; justify-content:space-between; }
+  .cy-skill-head span { font-size:6px; }
+  .cy-skill-head strong { font-size:9px; }
+  .cy-skill p { display:none; }
+  .cy-skill-cta { min-height:40px; margin-top:4px; font-size:9px; }
+  .cy-toolbelt { position:fixed; left:6px; right:6px; bottom:max(4px,env(safe-area-inset-bottom)); z-index:45; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.25fr); gap:4px; width:auto; max-width:none; margin:0; padding:5px; border:1px solid color-mix(in oklab,var(--journey-cyan) 42%,var(--border)); border-radius:8px; background:var(--background); box-shadow:0 -10px 30px color-mix(in oklab,var(--background) 80%,transparent); }
+  .cy-toolbelt button { flex-direction:column; justify-content:center; gap:2px; min-height:52px; padding:4px 2px; color:var(--foreground); font-size:8px; }
+  .cy-toolbelt svg { width:18px; height:18px; }
+  .cy-toolbelt .cy-tool-more { display:inline-flex !important; }
+  .cy-toolbelt .cy-tool-extra { display:none; }
+  .cy-toolbelt button:last-child { color:var(--background); border-color:var(--journey-yellow); background:var(--journey-yellow); font-size:8px; }
   .cy-toolbelt .is-danger { margin-left:0; }
+  .cy-trail { display:none; }
   .cy-duel-stakes { grid-template-columns:1fr; }
 }
 
@@ -1245,6 +1290,5 @@
 .cy-skill-result.positive { color: var(--journey-cyan); }
 .cy-skill-result.negative { color: var(--journey-pink); }
 @media (max-width: 640px) {
-  .cy-preview { grid-template-columns: 1fr; gap: .35rem; }
-  .cy-preview strong { font-size: .76rem; }
+  .cy-more-grid button { min-height:64px; }
 }
