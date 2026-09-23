@@ -1557,6 +1557,13 @@ export function CryptoJourney() {
         </aside>
       </div>
 
+      {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
+        <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards /><span>PORTFOLIO</span></button>
+        <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse /><span>SURVIVE</span></button>
+        <button disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis /><span>MORE</span></button>
+        <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
+      </nav>}
+
       {flash && <div className={`cy-flash tone-${flash.tone}`} role="status">{flash.text}</div>}
 
       <div className="cy-pops" aria-live="polite">
