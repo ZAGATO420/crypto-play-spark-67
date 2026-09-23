@@ -1021,6 +1021,7 @@
 .cy-toolbelt .is-danger { color:var(--journey-pink); margin-left:auto; }
 .cy-toolbelt .is-next { color:var(--background); border-color:var(--journey-yellow); background:var(--journey-yellow); animation:cy-guide-action 1.2s ease-in-out infinite; }
 .cy-tool-more { display:none !important; }
+.cy-mobile-dock { display:none; }
 .cy-more-grid { display:grid; gap:8px; margin-top:14px; }
 .cy-more-grid button { min-height:58px; justify-content:flex-start; }
 .cy-more-grid button small { margin-left:auto; color:var(--muted-foreground); font:600 10px/1.2 var(--font-body); }
@@ -1123,13 +1124,14 @@
   .cy-skill-head strong { font-size:9px; }
   .cy-skill p { display:none; }
   .cy-skill-cta { min-height:40px; margin-top:4px; font-size:9px; }
-  .cy-toolbelt { position:fixed; left:6px; right:6px; bottom:max(4px,env(safe-area-inset-bottom)); z-index:45; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.25fr); gap:4px; width:auto; max-width:none; margin:0; padding:5px; border:1px solid color-mix(in oklab,var(--journey-cyan) 42%,var(--border)); border-radius:8px; background:var(--background); box-shadow:0 -10px 30px color-mix(in oklab,var(--background) 80%,transparent); }
-  .cy-toolbelt button { flex-direction:column; justify-content:center; gap:2px; min-height:52px; padding:4px 2px; color:var(--foreground); font-size:8px; }
-  .cy-toolbelt svg { width:18px; height:18px; }
-  .cy-toolbelt .cy-tool-more { display:inline-flex !important; }
-  .cy-toolbelt .cy-tool-extra { display:none; }
-  .cy-toolbelt button:last-child { color:var(--background); border-color:var(--journey-yellow); background:var(--journey-yellow); font-size:8px; }
-  .cy-toolbelt .is-danger { margin-left:0; }
+  .cy-toolbelt { display:none; }
+  .cy-mobile-dock { position:fixed; left:6px; right:6px; bottom:max(4px,env(safe-area-inset-bottom)); z-index:45; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.25fr); gap:4px; width:auto; max-width:none; margin:0; padding:5px; border:1px solid color-mix(in oklab,var(--journey-cyan) 42%,var(--border)); border-radius:8px; background:var(--background); box-shadow:0 -10px 30px color-mix(in oklab,var(--background) 80%,transparent); }
+  .cy-mobile-dock button { display:flex; min-width:0; min-height:52px; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:4px 2px; border:1px solid var(--border); border-radius:5px; color:var(--foreground); font-size:8px; font-weight:800; cursor:pointer; }
+  .cy-mobile-dock button:disabled { opacity:.35; }
+  .cy-mobile-dock button svg { width:18px; height:18px; }
+  .cy-mobile-dock button span { overflow:hidden; max-width:100%; text-overflow:ellipsis; white-space:nowrap; }
+  .cy-mobile-dock button:last-child { color:var(--background); border-color:var(--journey-yellow); background:var(--journey-yellow); }
+  .cy-mobile-dock .is-next { animation:cy-guide-action 1.2s ease-in-out infinite; }
   .cy-trail { display:none; }
   .cy-duel-stakes { grid-template-columns:1fr; }
 }
