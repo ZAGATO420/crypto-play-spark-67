@@ -1586,6 +1586,7 @@ export function CryptoJourney() {
             ap={ap}
             onStorage={() => setDialog({ k: "custody" })}
             onHistory={() => setDialog({ k: "ledger" })}
+            onGuide={() => { setGuide(0); setDetails(false); setDialog(null); }}
             onEnd={() => setDialog({ k: "cashout" })}
           />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
@@ -1773,7 +1774,7 @@ function MarketSheet({ run, onPick }: { run: Run; onPick: (s: CoinSymbol) => voi
   );
 }
 
-function MoreSheet({ ap, onStorage, onHistory, onEnd }: { ap: number; onStorage: () => void; onHistory: () => void; onEnd: () => void }) {
+function MoreSheet({ ap, onStorage, onHistory, onGuide, onEnd }: { ap: number; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void }) {
   return (
     <>
       <p className="journey-kicker"><Ellipsis /> MORE</p>
@@ -1781,6 +1782,7 @@ function MoreSheet({ ap, onStorage, onHistory, onEnd }: { ap: number; onStorage:
       <div className="cy-more-grid">
         <Button variant="secondary" disabled={ap <= 0} onClick={onStorage}><Shield />STORAGE<small>Protect exposed coins</small></Button>
         <Button variant="secondary" onClick={onHistory}><Receipt />HISTORY<small>See every cash flow</small></Button>
+        <Button variant="secondary" onClick={onGuide}><Target />SHOW ME HOW TO PLAY<small>Restart the 3-step guide</small></Button>
         <Button variant="destructive" onClick={onEnd}><Skull />END RUN<small>Cash out and submit</small></Button>
       </div>
     </>
