@@ -245,6 +245,18 @@ export function playSfx(id: SfxId) {
   })();
 }
 
+/** A headline moment owns the mix: fade every smaller cue before it starts. */
+export function playSfxExclusive(id: SfxId) {
+  const ctx = s.ctx;
+  if (ctx) {
+    const now = ctx.currentTime;
+    for (const voice of s.voices) release(voice, now);
+    s.voices = [];
+    s.lastAt[id] = -1;
+  }
+  playSfx(id);
+}
+
 
 export function setMuted(next: boolean) {
   muted = next;

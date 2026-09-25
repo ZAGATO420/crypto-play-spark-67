@@ -28,3 +28,4 @@
 - [x] Chart audit: selected coin/logo, P&L animation for every market, and exact historical-mode prices
 - [x] Live chart rendering: continuous blue line with frame-synced reveal and no dashed gaps
 - [x] Compact mobile run view with large fixed Portfolio, Survive, More and End Quarter controls
+- [x] Arcade hype pass with God Candle wins, liquidation shock, exclusive headline audio and instant feedback

@@ -30,7 +30,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
@@ -334,6 +334,11 @@ export function CryptoJourney() {
   // the feeling layer: a coloured flash over everything, and the Boss talking back
   const [fxFlash, setFxFlash] = useState<"gold" | "red" | null>(null);
   const [bossTalk, setBossTalk] = useState<string | null>(null);
+  const [arcadeFx, setArcadeFx] = useState<
+    | { kind: "god"; label: string; multiplier: number; amount?: number }
+    | { kind: "liq"; symbol: CoinSymbol; leverage: number; amount: number }
+    | null
+  >(null);
   const [details, setDetails] = useState(false);
 
   const [muted, setMutedState] = useState(false);
@@ -345,6 +350,7 @@ export function CryptoJourney() {
   // until the player's first action — whatever that action is.
   const openingPlayed = useRef(false);
   const flashTimer = useRef<number | null>(null);
+  const arcadeTimer = useRef<number | null>(null);
   const popId = useRef(1);
   const lastNet = useRef(0);
 
@@ -481,6 +487,24 @@ export function CryptoJourney() {
 
   const rumble = () => { playSfx("crash"); setShake(true); window.setTimeout(() => setShake(false), 520); };
 
+  const triggerGodCandle = (label: string, multiplier = 10, amount?: number) => {
+    if (arcadeTimer.current) window.clearTimeout(arcadeTimer.current);
+    setArcadeFx({ kind: "god", label, multiplier: Math.max(1, multiplier), amount });
+    setBossTalk("Fine. That candle was disgusting. Do it again.");
+    playSfxExclusive("win");
+    arcadeTimer.current = window.setTimeout(() => setArcadeFx(null), 2300);
+  };
+
+  const triggerLiquidationShock = (position: Pos) => {
+    if (arcadeTimer.current) window.clearTimeout(arcadeTimer.current);
+    setArcadeFx({ kind: "liq", symbol: position.symbol, leverage: position.lev, amount: Math.round(position.margin) });
+    setBossTalk("That was not leverage. That was a donation.");
+    playSfxExclusive("crash");
+    setShake(true);
+    window.setTimeout(() => setShake(false), 680);
+    arcadeTimer.current = window.setTimeout(() => setArcadeFx(null), 2500);
+  };
+
   /**
    * One place decides how a moment *feels*: sound, colour, shake, the flying
    * number and what the Boss says about it. Every action calls this instead of
@@ -597,6 +621,7 @@ export function CryptoJourney() {
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " · settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
+    if (gain > 0 && cost > 0 && gain / cost >= 9) triggerGodCandle(`${pos.symbol} TRADE`, gain / cost + 1, gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (Math.abs(gain) >= 25_000) setRun((r) => chron(r, gain >= 0
       ? `In ${chapterLabel(run.chapter)} I took ${formatMoney(gain)} out of ${pos.symbol} and felt untouchable.`
@@ -694,6 +719,7 @@ export function CryptoJourney() {
     pop(`${back >= size ? "+" : "−"}${formatMoney(Math.abs(back - size))}`, back >= size ? "up" : "down");
     grantXp(rugged ? XP.presaleRug : XP.presaleHit, rugged ? "RUG SURVIVED" : "LAUNCH HIT");
     if (rugged) rumble();
+    if (!rugged && multi >= 10 && quality < 1) triggerGodCandle(card.name, multi, back - size);
     setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size, back, multi, rugged, line } });
   };
 
@@ -861,6 +887,7 @@ export function CryptoJourney() {
   };
 
   const finishMini = (pending: Pending, res: MiniResult) => {
+    if (res.quality >= 1) triggerGodCandle(res.label, 10);
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
@@ -918,11 +945,13 @@ export function CryptoJourney() {
     let realized = run.realized;
     let lifeHunger = 0;
     let lifeStress = 0;
+    let liquidation: Pos | null = null;
     const survivors: Pos[] = [];
     for (const p of run.positions) {
       const price = priceAt(p.symbol, next, run.noise);
       if (!price) { survivors.push(p); continue; }
       if (p.kind === "perp" && pnlOf(p, price) <= -p.margin * 0.97) {
+        liquidation ??= p;
         lines.push(`${p.symbol} ${p.lev}x liquidated — ${formatMoney(p.margin)} margin gone.`);
         spendOn(`${p.symbol} ${p.lev}x liquidation`, Math.round(p.margin));
         risk = clamp(risk + 14);
@@ -1105,7 +1134,8 @@ export function CryptoJourney() {
     setVerified(false);
     setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("+1 MOVE") ? 1 : 0))));
     grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep + (missionWon ? activeMission.reward : 0), missionWon ? "MISSION COMPLETE" : idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
-    feel(liquidated ? "liq" : idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash);
+    if (liquidation) triggerLiquidationShock(liquidation);
+    else feel(idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash);
     if (milestone) say(milestone.line, "yellow");
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
 
@@ -1270,6 +1300,7 @@ export function CryptoJourney() {
         <div><p>{chapterLabel(run.chapter)}</p><h2>{act.name}</h2><span>{act.line}</span></div>
       </section>}
       {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
+      {arcadeFx && <ArcadeMoment fx={arcadeFx} boss={enragedBoss.url} />}
 
       <section className="cy-journey" aria-label={`Month ${Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} of ${TOTAL_MONTHS}`}>
         <div className="cy-journey-labels"><span>MANIA</span><span>COLLAPSE</span><span>ENDGAME</span></div>
@@ -1647,6 +1678,38 @@ function Count({ value }: { value: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
   return <>{formatMoney(Math.round(shown))}</>;
+}
+
+function ArcadeMoment({ fx, boss }: {
+  fx: { kind: "god"; label: string; multiplier: number; amount?: number } | { kind: "liq"; symbol: CoinSymbol; leverage: number; amount: number };
+  boss: string;
+}) {
+  if (fx.kind === "god") return (
+    <section className="cy-arcade-fx is-god" role="status" aria-label="God candle win">
+      <div className="cy-god-lasers" aria-hidden><i /><i /><i /><i /></div>
+      <div className="cy-candle-rain" aria-hidden>{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
+      <div className="cy-arcade-copy">
+        <span>PERFECT EXECUTION</span>
+        <strong>{fx.multiplier.toFixed(fx.multiplier >= 10 ? 1 : 2)}×</strong>
+        <h2>GOD CANDLE</h2>
+        <p>{fx.label}{fx.amount !== undefined ? ` · +${formatMoney(fx.amount)}` : " · THE BOSS FELT THAT"}</p>
+      </div>
+    </section>
+  );
+  return (
+    <section className="cy-arcade-fx is-liq" role="alert" aria-label="Liquidation shock">
+      <div className="cy-siren" aria-hidden />
+      <div className="cy-cracks" aria-hidden>{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</div>
+      <img className="cy-liq-boss" src={boss} alt="The Boss laughs at the liquidation" />
+      <div className="cy-arcade-copy">
+        <span>MARGIN ERASED</span>
+        <strong>−{formatMoney(fx.amount)}</strong>
+        <h2>LIQUIDATED</h2>
+        <p>{fx.symbol} · {fx.leverage}× LEVERAGE</p>
+        <blockquote>“That was not leverage. That was a donation.”</blockquote>
+      </div>
+    </section>
+  );
 }
 
 
