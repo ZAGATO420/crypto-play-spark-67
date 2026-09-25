@@ -489,7 +489,9 @@ export function CryptoJourney() {
 
   const triggerGodCandle = (label: string, multiplier = 10, amount?: number) => {
     if (arcadeTimer.current) window.clearTimeout(arcadeTimer.current);
-    setArcadeFx({ kind: "god", label, multiplier: Math.max(1, multiplier), amount });
+    setArcadeFx(amount === undefined
+      ? { kind: "god", label, multiplier: Math.max(1, multiplier) }
+      : { kind: "god", label, multiplier: Math.max(1, multiplier), amount });
     setBossTalk("Fine. That candle was disgusting. Do it again.");
     playSfxExclusive("win");
     arcadeTimer.current = window.setTimeout(() => setArcadeFx(null), 2300);
@@ -621,7 +623,7 @@ export function CryptoJourney() {
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " · settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
-    if (gain > 0 && cost > 0 && gain / cost >= 9) triggerGodCandle(`${pos.symbol} TRADE`, gain / cost + 1, gain);
+    if (quality < 1 && gain > 0 && cost > 0 && gain / cost >= 9) triggerGodCandle(`${pos.symbol} TRADE`, gain / cost + 1, gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (Math.abs(gain) >= 25_000) setRun((r) => chron(r, gain >= 0
       ? `In ${chapterLabel(run.chapter)} I took ${formatMoney(gain)} out of ${pos.symbol} and felt untouchable.`

@@ -64,6 +64,7 @@
   --color-journey-cyan: var(--journey-cyan);
   --color-journey-pink: var(--journey-pink);
   --color-journey-yellow: var(--journey-yellow);
+  --color-journey-green: var(--journey-green);
   --color-journey-panel: var(--journey-panel);
 }
 
@@ -104,6 +105,7 @@
   --journey-cyan: oklch(0.82 0.15 205);
   --journey-pink: oklch(0.68 0.27 348);
   --journey-yellow: oklch(0.9 0.17 97);
+  --journey-green: oklch(0.84 0.2 150);
   --journey-panel: oklch(0.18 0.02 285);
 }
 
