@@ -2367,40 +2367,68 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
   });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
   const startCash = startCashFor(config);
+  const [advanced, setAdvanced] = useState(false);
+  const [preset, setPreset] = useState<string>("classic");
+  const applyPreset = (id: string) => {
+    const p = PRESETS.find((x) => x.id === id);
+    if (!p) return;
+    playSfx("click");
+    setPreset(id);
+    setConfig((c) => ({ ...c, arch: p.arch, difficulty: p.difficulty, mode: p.mode, modifier: p.modifier, ironman: p.ironman }));
+  };
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "CUSTOM RUN"}</p><h1>{tournament ? "CHOOSE YOUR RUN" : "PICK A STYLE. PLAY."}</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       {tournament && <SeasonBanner />}
 
-      <section className="setup-block"><p className="journey-kicker">NAME & AVATAR</p>
+      <section className="setup-block setup-id"><p className="journey-kicker">YOU</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
         <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
-      <section className="setup-block"><p className="journey-kicker">ARCHETYPE{tournament ? " · SAME MONEY FOR EVERYONE" : ""}</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
       {tournament ? (
-        <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
-          <ul>
-            <li><b>SEED</b><span>{seasonLabel(season)} — same crashes, rugs, launches and minigames for all players.</span></li>
-            <li><b>MONEY</b><span>{formatMoney(startCashFor(config))} start for everyone. Your archetype is style, not an edge.</span></li>
-            <li><b>DIFFICULTY</b><span>{TOURNAMENT_RULES.difficulty}</span></li>
-            <li><b>MARKET</b><span>{modeOf(TOURNAMENT_RULES.mode).name} — real 2020–2026 prices, no chaos mode.</span></li>
-            <li><b>TWIST</b><span>{modifierOf(config.modifier).name} — {modifierOf(config.modifier).blurb}</span></li>
-            <li><b>IRONMAN</b><span>OFF</span></li>
-          </ul>
-          <small>Only handle, country and avatar are yours to pick. Want free settings? Start a FREE RUN instead.</small>
-        </section>
+        <>
+          <section className="setup-block"><p className="journey-kicker">ARCHETYPE · SAME MONEY FOR EVERYONE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
+          <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
+            <ul>
+              <li><b>SEED</b><span>{seasonLabel(season)} — same crashes, rugs, launches and minigames for all players.</span></li>
+              <li><b>MONEY</b><span>{formatMoney(startCashFor(config))} start for everyone. Your archetype is style, not an edge.</span></li>
+              <li><b>DIFFICULTY</b><span>{TOURNAMENT_RULES.difficulty}</span></li>
+              <li><b>MARKET</b><span>{modeOf(TOURNAMENT_RULES.mode).name} — real 2020–2026 prices, no chaos mode.</span></li>
+              <li><b>TWIST</b><span>{modifierOf(config.modifier).name} — {modifierOf(config.modifier).blurb}</span></li>
+              <li><b>IRONMAN</b><span>OFF</span></li>
+            </ul>
+            <small>Only handle, country and avatar are yours to pick. Want free settings? Start a CUSTOM RUN instead.</small>
+          </section>
+        </>
       ) : (
         <>
-          <section className="setup-block"><p className="journey-kicker">THE TWIST</p>
-            <div className="pick-grid">{MODIFIERS.map((m) => (
-              <button key={m.id} className={`pick-card ${config.modifier === m.id ? "is-on" : ""}`} onClick={() => set("modifier", m.id)}><strong>{m.name}</strong><em>SCORE x{m.mul.toFixed(2)}</em><small>{m.blurb}</small></button>
+          <section className="setup-block"><p className="journey-kicker">ONE TAP · PICK YOUR RUN</p>
+            <div className="preset-grid">{PRESETS.map((p) => (
+              <button key={p.id} className={`preset-card ${preset === p.id ? "is-on" : ""}`} onClick={() => applyPreset(p.id)}>
+                <strong>{p.name}</strong>
+                <em>{formatMoney(startCashFor({ ...config, arch: p.arch, modifier: p.modifier }))} START · SCORE x{(modifierOf(p.modifier).mul * diffOf(p.difficulty).cost).toFixed(2)}</em>
+                <small>{p.line}</small>
+              </button>
             ))}</div>
           </section>
-          <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
-          <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
-            <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
-          </section>
+          <button className={`setup-advanced ${advanced ? "is-on" : ""}`} onClick={() => { playSfx("click"); setAdvanced((a) => !a); }} aria-expanded={advanced}>
+            {advanced ? "HIDE THE FINE TUNING" : "FINE TUNE IT MYSELF"}
+          </button>
+          {advanced && (
+            <section className="setup-block setup-fine">
+              <p className="journey-kicker">CHARACTER</p>
+              <div className="seg-row">{ARCHETYPES.map((a) => <button key={a.id} className={config.arch === a.id ? "is-on" : ""} onClick={() => set("arch", a.id)}>{a.name}</button>)}</div>
+              <p className="journey-kicker">DIFFICULTY</p>
+              <div className="seg-row">{DIFFICULTIES.map((d) => <button key={d.id} className={config.difficulty === d.id ? "is-on" : ""} onClick={() => set("difficulty", d.id)}>{d.name}</button>)}</div>
+              <p className="journey-kicker">MARKET</p>
+              <div className="seg-row">{MODES.map((m) => <button key={m.id} className={config.mode === m.id ? "is-on" : ""} onClick={() => set("mode", m.id)}>{m.name}</button>)}</div>
+              <p className="journey-kicker">TWIST</p>
+              <div className="seg-row">{MODIFIERS.map((m) => <button key={m.id} className={config.modifier === m.id ? "is-on" : ""} onClick={() => set("modifier", m.id)}>{m.name}</button>)}</div>
+              <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
+              <p className="setup-fine-note">{modeOf(config.mode).blurb} · {diffOf(config.difficulty).blurb}</p>
+            </section>
+          )}
         </>
       )}
       <div className="setup-cta">
