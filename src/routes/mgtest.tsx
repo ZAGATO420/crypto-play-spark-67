@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Minigame, type MiniKind } from "@/game/minigames";
 
-export const Route = createFileRoute("/__mgtest")({ component: Page });
+export const Route = createFileRoute("/mgtest")({ component: Page });
 
 function Page() {
   const [kind, setKind] = useState<MiniKind>("whale");
