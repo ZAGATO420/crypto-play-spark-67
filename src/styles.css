@@ -1592,3 +1592,18 @@
 /* Sound is blocked until the first tap — this makes that obvious. */
 .cy-sound-prompt { position:fixed; z-index:40; left:50%; top:max(12px,env(safe-area-inset-top)); transform:translateX(-50%); display:flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border:1px solid var(--journey-yellow); border-radius:99px; background:color-mix(in oklab,var(--journey-yellow) 22%,oklch(0.16 0.018 290)); color:var(--journey-yellow); font:400 12px/1 var(--font-display); letter-spacing:.08em; cursor:pointer; animation:pulse-ring 1.8s ease-in-out infinite; }
 .cy-sound-prompt svg { width:18px; height:18px; }
+
+/* One quarter, one phone screen: duplicated status collapses, actions stay big. */
+@media (max-width:640px) {
+  .cy-standing { padding:0; border:0; background:none; }
+  .cy-standing-head, .cy-standing-bar { display:none; }
+  .cy-tournament-live, .cy-action-context, .cy-action-risk { display:none; }
+  .cy-shell.has-intel .cy-tournament-live,
+  .cy-shell.has-intel .cy-action-context { display:flex; }
+  .cy-shell.has-intel .cy-action-risk { display:block; }
+  /* TRADE and END QUARTER already live in the fixed dock, so one big move is enough here. */
+  .cy-main-actions { grid-template-columns:1fr; }
+  .cy-main-actions > button:not(.cy-main-trade) { display:none; }
+  .cy-shell.has-intel .cy-main-actions { grid-template-columns:1fr 1fr; }
+  .cy-shell.has-intel .cy-main-actions > button:not(.cy-main-trade) { display:inline-flex; }
+}
