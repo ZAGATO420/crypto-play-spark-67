@@ -1327,3 +1327,70 @@
 @media (max-width: 640px) {
   .cy-more-grid button { min-height:64px; }
 }
+
+/* ---------------------------------------------- trading terminal (popup) */
+.cy-term-strip { display:flex; gap:.35rem; overflow-x:auto; padding:.15rem 0 .35rem; scrollbar-width:none; }
+.cy-term-strip::-webkit-scrollbar { display:none; }
+.cy-term-strip button { display:grid; flex:0 0 auto; grid-template-columns:auto auto; align-items:center; gap:.1rem .35rem; padding:.35rem .5rem; border:1px solid var(--border); border-radius:.5rem; background:var(--background); cursor:pointer; }
+.cy-term-strip button img { grid-row:1 / span 2; }
+.cy-term-strip button strong { font-size:.7rem; letter-spacing:.06em; }
+.cy-term-strip button em { grid-column:2; font-size:.6rem; font-style:normal; font-weight:700; }
+.cy-term-strip button.is-on { border-color:var(--journey-yellow); box-shadow:0 0 0 1px var(--journey-yellow); }
+.cy-term-head { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.6rem; margin:.3rem 0 .5rem; padding:.5rem .6rem; border:1px solid var(--border); border-radius:.6rem; background:var(--background); }
+.cy-term-head strong { display:block; font-family:var(--font-display); font-size:1.05rem; }
+.cy-term-head small { display:block; font-size:.66rem; opacity:.8; }
+.cy-term-head b { font-size:.66rem; letter-spacing:.08em; color:var(--journey-cyan); }
+.cy-term-tabs { display:grid; grid-template-columns:1fr 1fr; gap:.35rem; }
+.cy-term-tabs button { min-height:42px; border:1px solid var(--border); border-radius:.5rem; background:var(--background); color:var(--muted-foreground); font-size:.66rem; font-weight:800; letter-spacing:.08em; cursor:pointer; }
+.cy-term-tabs button.is-on { border-color:var(--journey-yellow); color:var(--background); background:var(--journey-yellow); }
+.cy-term-body { display:grid; gap:.45rem; margin-top:.5rem; }
+.cy-term-note { margin:0; font-size:.68rem; line-height:1.35; opacity:.85; }
+.cy-term-sizes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.35rem; }
+.cy-term-sizes button { display:grid; gap:.1rem; min-height:54px; padding:.4rem .2rem; font-size:.7rem; }
+.cy-term-sizes button small { font-size:.58rem; font-weight:600; opacity:.85; }
+.cy-term-risk { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.35rem; }
+.cy-term-risk span { display:grid; gap:.15rem; padding:.4rem .45rem; border:1px solid var(--border); border-radius:.5rem; background:var(--background); }
+.cy-term-risk small { font-size:.54rem; letter-spacing:.1em; opacity:.7; }
+.cy-term-risk strong { font-size:.8rem; }
+.cy-term-open { margin-top:.6rem; padding-top:.5rem; border-top:1px solid var(--border); display:grid; gap:.3rem; }
+.cy-term-pos { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:.5rem; min-height:48px; padding:.35rem .5rem; border:1px solid var(--border); border-radius:.5rem; background:var(--background); text-align:left; cursor:pointer; }
+.cy-term-pos strong { display:block; font-size:.76rem; }
+.cy-term-pos small { display:block; font-size:.58rem; opacity:.75; }
+.cy-term-pos b { font-size:.76rem; }
+.cy-term-pos em { font-size:.56rem; font-style:normal; font-weight:800; letter-spacing:.1em; color:var(--journey-yellow); }
+
+/* -------------------------------------------------------- quarter loot */
+.cy-loot-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.45rem; margin:.7rem 0 .5rem; }
+.cy-loot-card { display:grid; align-content:center; gap:.25rem; min-height:132px; padding:.55rem .45rem; border:1px solid color-mix(in srgb, var(--journey-yellow) 40%, var(--border)); border-radius:.7rem; background:var(--background); text-align:center; cursor:pointer; }
+.cy-loot-card b { font-family:var(--font-display); font-size:2rem; color:var(--journey-yellow); }
+.cy-loot-card strong { font-size:.7rem; letter-spacing:.06em; color:var(--journey-yellow); }
+.cy-loot-card small { font-size:.6rem; line-height:1.25; opacity:.85; }
+.cy-loot-card em { font-size:.54rem; font-style:normal; font-weight:800; letter-spacing:.08em; color:var(--journey-cyan); }
+.cy-loot-card.is-open { border-color:var(--journey-yellow); box-shadow:0 0 0 2px color-mix(in srgb, var(--journey-yellow) 35%, transparent); }
+
+/* -------------------------------------------- custom run: presets first */
+.preset-grid { display:grid; gap:.5rem; }
+.preset-card { display:grid; gap:.2rem; padding:.75rem .8rem; border:1px solid var(--border); border-radius:.7rem; background:var(--background); text-align:left; cursor:pointer; }
+.preset-card strong { font-family:var(--font-display); font-size:1rem; letter-spacing:.04em; }
+.preset-card em { font-size:.62rem; font-style:normal; font-weight:700; letter-spacing:.08em; color:var(--journey-cyan); }
+.preset-card small { font-size:.7rem; line-height:1.3; opacity:.85; }
+.preset-card.is-on { border-color:var(--journey-yellow); box-shadow:0 0 0 2px color-mix(in srgb, var(--journey-yellow) 30%, transparent); }
+.setup-advanced { width:100%; min-height:44px; margin:.2rem 0 .4rem; border:1px dashed var(--border); border-radius:.6rem; background:transparent; color:var(--muted-foreground); font-size:.66rem; font-weight:800; letter-spacing:.1em; cursor:pointer; }
+.setup-advanced.is-on { color:var(--journey-yellow); border-color:color-mix(in srgb, var(--journey-yellow) 50%, var(--border)); }
+.seg-row { display:flex; flex-wrap:wrap; gap:.3rem; margin-bottom:.2rem; }
+.seg-row button { flex:1 1 auto; min-height:38px; padding:.3rem .55rem; border:1px solid var(--border); border-radius:.45rem; background:var(--background); color:var(--muted-foreground); font-size:.62rem; font-weight:800; letter-spacing:.06em; cursor:pointer; }
+.seg-row button.is-on { border-color:var(--journey-yellow); color:var(--background); background:var(--journey-yellow); }
+.setup-fine-note { margin:.4rem 0 0; font-size:.66rem; line-height:1.35; opacity:.8; }
+
+/* --------------------------- phone: vitals pinned, terminal does the rest */
+@media (max-width:640px) {
+  .cy-core { position:sticky; top:0; z-index:44; grid-template-columns:repeat(5,minmax(0,1fr)); background:var(--background); box-shadow:0 6px 18px color-mix(in oklab,var(--background) 85%,transparent); }
+  .cy-core-pnl strong { font-size:11px; }
+  .cy-standing p { font-size:8px; }
+  .cy-positions { display:none; }
+  .cy-loot-grid { grid-template-columns:1fr; gap:.35rem; }
+  .cy-loot-card { min-height:74px; }
+  .cy-term-sizes { grid-template-columns:1fr 1fr; }
+  .cy-term-sizes button:last-child { grid-column:1 / -1; }
+  .cy-mobile-dock .is-trade { color:var(--background); border-color:var(--journey-cyan); background:var(--journey-cyan); }
+}
