@@ -1516,3 +1516,16 @@
   .cy-xp { margin-top:2px; }
   .cy-arena { gap:6px; }
 }
+
+/* Short laptop screens: the deck stays whole, the extras step back. */
+@media (min-width:1024px) and (max-height:860px) {
+  .cy-chart-wrap { height:clamp(92px,13vh,130px); }
+  .cy-preview,.cy-skill,.cy-lastmove { display:none; }
+  .cy-market-visual { padding:7px; }
+  .cy-arena { padding:9px; gap:5px; }
+  .cy-toolbelt { padding-top:6px; }
+  .cy-toolbelt button { min-height:38px; font-size:10px; }
+  .cy-toolbelt .cy-tool-end { min-height:40px; font-size:12px; }
+  .cy-main-actions button { min-height:46px; }
+  .cy-journey-labels { display:none; }
+}
