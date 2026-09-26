@@ -1635,7 +1635,7 @@ export function CryptoJourney() {
               </div>
               {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
               {guide === null && (
-                <div className={`cy-skill cy-extra${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
+                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
                   <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
                   <p>{check.ask}</p>
                   {skill && skill.chapter === run.chapter
