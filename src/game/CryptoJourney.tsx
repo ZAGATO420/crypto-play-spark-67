@@ -38,6 +38,8 @@ import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, read
 /* ------------------------------------------------------------------ types */
 
 type Kind = "spot" | "perp";
+/** The quarter plan: how hard you are willing to be wrong. */
+type Stance = "survive" | "balanced" | "degen";
 type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number; where: CustodyId };
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
@@ -49,6 +51,8 @@ type Run = {
   custody: CustodyId; job: JobId; housing: HousingId; realized: number; taxDebt: number; moves: number; cares: number; criticals: number;
   ledger: Entry[]; statuses: string[]; logs: Log[]; noise: number[]; muted: boolean; seed: number; config: Config;
   boss: BossBook; conviction: number; convictionOn: boolean; perks: string[]; bossWins: number;
+  /** This quarter's plan, and how many quarters in a row you called it right. */
+  stance: Stance; heat: number;
   /** Chapters whose boss fight is already settled, so nobody can farm the same duel twice. */
   fought: number[];
   /** The story of this run, in the player's own voice. Rendered on the end screen. */
@@ -108,6 +112,20 @@ const LEVERAGE = [2, 5, 10] as const;
 const FUNDING = 0.018; // per quarter, on notional — holding leverage is never free
 const LIVE_MS = 13_000; // one quarter runs live in front of you
 const BOSS_DRAG = 0.045; // even the Boss burns money on the throne
+
+/**
+ * The strategy layer. Before a quarter closes you commit to a plan, and the
+ * plan changes how hard the result lands. Reading the tape right builds HEAT,
+ * which pays a rising bonus — reading it wrong resets it to zero.
+ */
+const STANCES: { id: Stance; name: string; short: string; line: string; win: number; loss: number; stress: number; xp: number }[] = [
+  { id: "survive", name: "SURVIVE", short: "SHIELD", line: "Half the damage, half the upside. Pays when the tape bleeds.", win: 0.6, loss: 0.5, stress: -7, xp: 60 },
+  { id: "balanced", name: "BALANCED", short: "STEADY", line: "Take the quarter exactly as it comes. No bonus, no penalty.", win: 1, loss: 1, stress: 0, xp: 40 },
+  { id: "degen", name: "FULL DEGEN", short: "ALL IN", line: "Every move hits 60% harder — profit and pain. Builds HEAT fastest.", win: 1.6, loss: 1.6, stress: 9, xp: 120 },
+];
+const stanceOf = (id: Stance) => STANCES.find((s) => s.id === id) ?? STANCES[1]!;
+/** Calling the quarter right stacks HEAT, and HEAT multiplies your next win. */
+const heatBonus = (heat: number) => 1 + Math.min(5, heat) * 0.12;
 
 
 export const AVATARS = [
@@ -207,7 +225,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     ledger: mod === "debt" ? [{ chapter: 0, label: "Inherited tax debt", amount: -8000 }] : [], statuses: mod === "straight" ? [] : [modifierOf(mod).name],
     logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
-    conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [],
+    conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [], stance: "balanced", heat: 0,
     chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [],
 
   };
@@ -1121,6 +1139,28 @@ export function CryptoJourney() {
         : `Conviction backfired: ${formatMoney(Math.abs(convCash))} gone. He warned you.`);
     }
 
+    // THE PLAN: your stance decides how hard this quarter lands, and whether
+    // your HEAT streak grows or dies. Reading the tape is the actual skill.
+    const plan = stanceOf(run.stance);
+    const calledRight = (run.stance === "degen" && delta > 0) || (run.stance === "survive" && delta < 0) || (run.stance === "balanced" && Math.abs(delta) < Math.max(1, startNet * 0.03));
+    const heat = calledRight ? Math.min(9, run.heat + 1) : 0;
+    let planCash = 0;
+    if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(run.heat) : 1));
+    else if (delta < 0) planCash = Math.round(Math.abs(delta) * (1 - plan.loss));
+    if (planCash !== 0) {
+      draft.cash = Math.max(0, draft.cash + planCash);
+      draft.ledger = [{ chapter: next, label: `${plan.name} plan`, amount: planCash }, ...draft.ledger].slice(0, 60);
+      lines.push(planCash >= 0
+        ? `${plan.name} plan paid ${formatMoney(planCash)} extra${calledRight && run.heat > 0 ? ` · HEAT x${run.heat} bonus` : ""}.`
+        : `${plan.name} plan cost ${formatMoney(Math.abs(planCash))} more. The plan was wrong.`);
+    } else if (delta < 0 && plan.loss < 1) {
+      lines.push(`${plan.name} plan absorbed part of the hit.`);
+    }
+    lines.push(calledRight
+      ? `You called the quarter right. HEAT x${heat} — next win pays ${Math.round((heatBonus(heat) - 1) * 100)}% more.`
+      : run.heat > 0 ? `Wrong read. HEAT streak of ${run.heat} is gone.` : "No read this quarter. HEAT stays cold.");
+    draft.stress = clamp(draft.stress + plan.stress);
+
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
     const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
@@ -1143,22 +1183,22 @@ export function CryptoJourney() {
     const milestone = MILESTONES.find((m) => !run.seen.includes(m.id) && netOf(draft) >= m.net);
 
     const nextRun: Run = {
-      ...draft, streak, boss, conviction, convictionOn: false,
+      ...draft, streak, boss, conviction, convictionOn: false, heat, stance: "balanced",
       chronicle: [...draft.chronicle, ...story, ...(milestone ? [milestone.line] : [])].slice(-14),
       seen: milestone ? [...run.seen, milestone.id] : run.seen,
       logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
     };
     setRun(nextRun);
     if ([1, 4, 12].includes(next)) trackGameBeat(`month_${next * 3}`, { tournament: cfg.tournament });
-    setResolution({ title, detail, tone, delta: delta + convCash, move, lines, inflow, outflow });
+    setResolution({ title, detail, tone, delta: delta + convCash + planCash, move, lines, inflow, outflow });
     setPhase("resolve");
     setTick(0);
     setFast(false);
     setVerified(false);
     setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("+1 MOVE") ? 1 : 0))));
-    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep + (missionWon ? activeMission.reward : 0), missionWon ? "MISSION COMPLETE" : idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
+    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep + (missionWon ? activeMission.reward : 0) + (calledRight ? plan.xp + heat * 25 : 0), calledRight ? `${plan.name} CALLED RIGHT` : missionWon ? "MISSION COMPLETE" : idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (liquidation) triggerLiquidationShock(liquidation);
-    else feel(idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash);
+    else feel(idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash + planCash);
     if (milestone) say(milestone.line, "yellow");
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
 
@@ -1559,6 +1599,22 @@ export function CryptoJourney() {
                     playSfx("click");
                   }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
                 </div>
+              </div>
+              <div className={`cy-plan heat-${Math.min(5, run.heat)}`} aria-label="Your plan for this quarter">
+                <div className="cy-plan-head">
+                  <span>YOUR PLAN FOR THIS QUARTER</span>
+                  <strong className={run.heat > 0 ? "is-hot" : ""}>HEAT x{run.heat} · WIN BONUS +{Math.round((heatBonus(run.heat) - 1) * 100)}%</strong>
+                </div>
+                <div className="cy-plan-row">
+                  {STANCES.map((s) => (
+                    <button key={s.id} type="button" className={`cy-plan-btn is-${s.id}${run.stance === s.id ? " is-on" : ""}`} disabled={guide !== null}
+                      onClick={() => { playSfx("click"); setRun((r) => ({ ...r, stance: s.id })); say(`${s.name} · ${s.line}`, s.id === "degen" ? "pink" : "cyan"); }}>
+                      <b>{s.name}</b>
+                      <small>{s.id === "survive" ? "−50% LOSS" : s.id === "degen" ? "±60% SWING" : "AS IT COMES"}</small>
+                    </button>
+                  ))}
+                </div>
+                <p>{stanceOf(run.stance).line}</p>
               </div>
               <div className="cy-action-context"><span>YOUR DECISION</span><strong>{guide === 0 ? "Buy Bitcoin to enter the market." : chapterPlay.mode === "PANIC" ? "Protect cash or risk the crash." : chapterPlay.mode === "HUNT" ? "Check the launch before committing cash." : chapterPlay.mode === "DEFEND" ? "Move exposed funds before the threat hits." : chapterPlay.mode === "BOSS DUEL" ? "Risk a visible stake in a skill challenge." : focusPosition ? "Add, exit, or let the position run." : "Enter the market or preserve your cash."}</strong></div>
               <div className="cy-main-actions">
