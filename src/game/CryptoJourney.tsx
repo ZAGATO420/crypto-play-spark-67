@@ -1954,6 +1954,25 @@ function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
   );
 }
 
+/** Quarter loot: three face-down cards, one pick, instant reward. */
+function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard) => void }) {
+  const [flipped, setFlipped] = useState<number | null>(null);
+  return (
+    <>
+      <p className="journey-kicker"><Rocket /> QUARTER SURVIVED</p>
+      <h2>PICK ONE. NO TAKE-BACKS.</h2>
+      <div className="cy-loot-grid">
+        {cards.map((c, i) => (
+          <button key={c.id} className={`cy-loot-card ${flipped === i ? "is-open" : ""}`} onClick={() => { if (flipped === i) return onPick(c); setFlipped(i); playSfx("click"); }}>
+            {flipped === i ? <><strong>{c.name}</strong><small>{c.blurb}</small><em>TAP AGAIN TO TAKE IT</em></> : <><b>?</b><small>UNKNOWN DROP</small></>}
+          </button>
+        ))}
+      </div>
+      <small className="cy-note">Every player with the same seed gets the same three cards. Only your choice differs.</small>
+    </>
+  );
+}
+
 function MoreSheet({ ap, onStorage, onHistory, onGuide, onEnd }: { ap: number; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void }) {
   return (
     <>
