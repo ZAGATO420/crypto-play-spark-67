@@ -1411,7 +1411,7 @@ export function CryptoJourney() {
         <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
       </section>}
 
-      <button className={`cy-details-toggle${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
+      <button className={`cy-details-toggle cy-extra${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
         {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
       </button>
 
