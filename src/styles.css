@@ -1176,7 +1176,7 @@
   .cy-intel-toggle { display:block; width:100%; min-height:34px; margin-top:4px; padding:5px 7px; overflow:hidden; border:1px solid color-mix(in oklab,var(--journey-cyan) 40%,var(--border)); border-radius:5px; background:transparent; color:var(--journey-cyan); font-size:8px; font-weight:800; letter-spacing:.08em; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
 }
 
-.cy-intel-toggle { display:none; }
+@media (min-width:641px) { .cy-intel-toggle { display:none; } }
 .cy-revenge { border:1px solid var(--journey-pink); background:color-mix(in oklab,var(--journey-pink) 26%,var(--card)); color:var(--foreground); font-weight:900; }
 .cy-revenge:hover { background:color-mix(in oklab,var(--journey-pink) 42%,var(--card)); }
 
