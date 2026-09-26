@@ -414,6 +414,9 @@ export function CryptoJourney() {
   const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
   /** Every open trade's profit and loss, always on screen in the status bar. */
   const openPnl = run.positions.reduce((total, position) => total + pnlOf(position, mark(position.symbol)), 0);
+  // A leveraged position within 20% of its liquidation price puts the whole screen on alert.
+  const liqAlert = run.positions.some((position) => position.kind === "perp" && liqPct(position, mark(position.symbol)) < 20);
+
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
   const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
