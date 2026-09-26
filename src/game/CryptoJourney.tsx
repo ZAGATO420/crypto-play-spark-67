@@ -2427,7 +2427,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
     let alive = true;
     setRows(null); setError(false);
     retryPendingSubmission().finally(() => {
-      loadBoard(25, view === "season" ? season : "all")
+      loadBoard(50, view === "season" ? season : "all")
         .then((r) => { if (alive) setRows(r); })
         .catch(() => { if (alive) setError(true); });
     });
