@@ -303,8 +303,15 @@ function CandleCatch({ hard, roll, onResult }: { hard: boolean; roll: number; on
 
 /** Three claim buttons drift across the screen. Only one is the real contract. */
 function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
+  // The genuine link is always the tcfb.app one; only its slot rotates.
   const real = Math.floor(roll * 3) % 3;
-  const labels = ["claim-airdrop.xyz", "app.official-claim.io", "claim.tcfb.app"];
+  const labels = useMemo(() => {
+    const fakes = ["claim-airdrop.xyz", "app.official-claim.io"];
+    const out = [...fakes];
+    out.splice(real, 0, "claim.tcfb.app");
+    return out;
+  }, [real]);
+
   const [t, setT] = useState(0);
   const [left, setLeft] = useState(hard ? 4200 : 5600);
   const [done, setDone] = useState<MiniResult | null>(null);
