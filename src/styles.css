@@ -937,7 +937,6 @@
 @keyframes cy-laser { from{opacity:0;scale:.15 1} 35%{opacity:1} to{opacity:0;scale:1 1} }
 @keyframes cy-candle-fall { from{transform:translateY(-10vh) rotate(8deg);opacity:0} 12%{opacity:1} to{transform:translateY(130vh) rotate(-8deg);opacity:0} }
 @keyframes cy-siren-sweep { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
-@keyframes cy-scan { to{transform:translateY(4px)} }
 
 .end-chronicle {
   margin: 0.9rem 0 0;
@@ -1076,7 +1075,7 @@
 }
 @media (max-width:640px) {
   .cy-shell { gap:5px; padding:6px 6px calc(76px + env(safe-area-inset-bottom)); }
-  .cy-world { opacity:.16; }
+  .cy-world { display:none; }
   .cy-journey { grid-template-columns:minmax(0,1fr) auto; padding:4px 6px; }
   .cy-journey-labels { display:none; }
   .cy-journey-track { grid-row:1; }
