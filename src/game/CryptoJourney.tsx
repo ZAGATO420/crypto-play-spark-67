@@ -1586,14 +1586,17 @@ export function CryptoJourney() {
                 </div>
               )}
               <div className="cy-toolbelt">
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
+                <button className="is-hot" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />TRADE TERMINAL</button>
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
+                <button disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : "SKILL TEST"}</button>
+                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
                 <button className="cy-tool-more" disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis />MORE</button>
                 <button className="cy-tool-extra" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
                 <button className="cy-tool-extra" disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
                 <button className="cy-tool-extra is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
-                <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
+                <button className={`cy-tool-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+
             </article>
           )}
 
