@@ -416,6 +416,18 @@ export function CryptoJourney() {
   const openPnl = run.positions.reduce((total, position) => total + pnlOf(position, mark(position.symbol)), 0);
   // A leveraged position within 20% of its liquidation price puts the whole screen on alert.
   const liqAlert = run.positions.some((position) => position.kind === "perp" && liqPct(position, mark(position.symbol)) < 20);
+  // The first moment a trade enters that danger zone: one warning cue, one Boss taunt.
+  const liqWarned = useRef(false);
+  useEffect(() => {
+    if (!liqAlert) { liqWarned.current = false; return; }
+    if (liqWarned.current) return;
+    liqWarned.current = true;
+    playSfxExclusive("hit");
+    setBossTalk("Your margin is gone in a heartbeat. Add, exit, or pray.");
+    say("LIQUIDATION CLOSE · protect the position", "pink");
+  }, [liqAlert]);
+
+
 
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
