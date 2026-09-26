@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Fuel, KeyRound, MousePointerClick, Search, Target } from "lucide-react";
+import { Fuel, Gift, KeyRound, MousePointerClick, Search, Shield, Target, Waves } from "lucide-react";
 
 /**
- * Four tiny skill moments. Every one returns a quality between 0 and 1 so the
+ * Tiny skill moments. Every one returns a quality between 0 and 1 so the
  * caller can scale a fill price, a rescue or a loss with it. One finger,
  * 3-5 seconds, no layout of its own.
  */
-export type MiniKind = "timing" | "panic" | "gas" | "seed" | "orderbook" | "rugcheck";
+export type MiniKind = "timing" | "panic" | "gas" | "seed" | "orderbook" | "rugcheck" | "whale" | "airdrop" | "hodl";
 export type MiniResult = { quality: number; label: string };
 
 const SEED_WORDS = ["throne", "candle", "gorilla", "liquid", "diamond", "vault", "sniper", "ledger"];
@@ -18,6 +18,9 @@ export function Minigame({ kind, hard, roll = Math.random(), onResult }: { kind:
   if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={onResult} />;
   if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={onResult} />;
   if (kind === "rugcheck") return <RugCheck roll={roll} onResult={onResult} />;
+  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={onResult} />;
+  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={onResult} />;
+  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={onResult} />;
   return <SeedCheck roll={roll} onResult={onResult} />;
 }
 
