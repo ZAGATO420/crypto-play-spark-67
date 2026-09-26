@@ -1200,7 +1200,7 @@
   .cy-shell.has-guide .cy-guide-path { padding-top:4px; }
   .cy-shell.has-guide .cy-guide-path b { width:16px; height:16px; }
   .cy-shell.has-guide .cy-guide-path button { position:absolute; right:17px; top:49px; }
-  .cy-shell.has-guide .cy-core { grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; }
+  .cy-shell.has-guide .cy-core { grid-template-columns:repeat(5,minmax(0,1fr)); gap:3px; }
   .cy-shell.has-guide .cy-core > span { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-height:43px; padding:5px 6px; }
   .cy-shell.has-guide .cy-core small,.cy-shell.has-guide .cy-core em { font-size:6px; }
   .cy-shell.has-guide .cy-core strong { font-size:11px; }
