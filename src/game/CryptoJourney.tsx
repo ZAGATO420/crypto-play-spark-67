@@ -2785,7 +2785,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || !name.trim() || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
-          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
+          <Button className="cy-revenge" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />REVENGE RUN · 1 TAP</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}NEW RUN</Button>
         </div>
 
