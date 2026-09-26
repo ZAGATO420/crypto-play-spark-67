@@ -341,6 +341,9 @@ export function CryptoJourney() {
     | null
   >(null);
   const [details, setDetails] = useState(false);
+  // On phones the secondary explainers collapse so one quarter fits a single screen.
+  const [intel, setIntel] = useState(false);
+
 
   const [muted, setMutedState] = useState(false);
   const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
