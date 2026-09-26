@@ -1367,7 +1367,9 @@ export function CryptoJourney() {
         </div>
       </header>
 
+      <div className="cy-rail">
       <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}${guide !== null ? " is-guided" : ""}`} aria-live="polite">
+
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
