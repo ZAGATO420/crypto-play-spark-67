@@ -416,6 +416,18 @@ export function CryptoJourney() {
   const openPnl = run.positions.reduce((total, position) => total + pnlOf(position, mark(position.symbol)), 0);
   // A leveraged position within 20% of its liquidation price puts the whole screen on alert.
   const liqAlert = run.positions.some((position) => position.kind === "perp" && liqPct(position, mark(position.symbol)) < 20);
+  // The first moment a trade enters that danger zone: one warning cue, one Boss taunt.
+  const liqWarned = useRef(false);
+  useEffect(() => {
+    if (!liqAlert) { liqWarned.current = false; return; }
+    if (liqWarned.current) return;
+    liqWarned.current = true;
+    playSfxExclusive("hit");
+    setBossTalk("Your margin is gone in a heartbeat. Add, exit, or pray.");
+    say("LIQUIDATION CLOSE · protect the position", "pink");
+  }, [liqAlert]);
+
+
 
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
@@ -1367,7 +1379,9 @@ export function CryptoJourney() {
         </div>
       </header>
 
+      <div className="cy-rail">
       <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}${guide !== null ? " is-guided" : ""}`} aria-live="polite">
+
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
@@ -1463,9 +1477,10 @@ export function CryptoJourney() {
         })()}
 
       </section>
-
+      </div>
 
       <div className="cy-body">
+
         <section className="cy-stage" aria-live="polite">
           {phase === "brief" && (
             <article className="cy-card" key={`brief-${run.chapter}`}>
@@ -1586,14 +1601,17 @@ export function CryptoJourney() {
                 </div>
               )}
               <div className="cy-toolbelt">
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
+                <button className="is-hot" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />TRADE TERMINAL</button>
                 <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
+                <button disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : "SKILL TEST"}</button>
+                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
                 <button className="cy-tool-more" disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis />MORE</button>
                 <button className="cy-tool-extra" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
                 <button className="cy-tool-extra" disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
                 <button className="cy-tool-extra is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
-                <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
+                <button className={`cy-tool-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+
             </article>
           )}
 
