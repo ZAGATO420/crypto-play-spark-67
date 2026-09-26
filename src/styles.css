@@ -1552,8 +1552,8 @@
   .cy-market-visual { padding:7px; }
   .cy-arena { padding:9px; gap:5px; }
   .cy-toolbelt { padding-top:6px; }
-  .cy-toolbelt button { min-height:38px; font-size:10px; }
-  .cy-toolbelt .cy-tool-end { min-height:40px; font-size:12px; }
-  .cy-main-actions button { min-height:46px; }
+  .cy-toolbelt button { min-height:34px; font-size:10px; }
+  .cy-toolbelt .cy-tool-end { min-height:36px; font-size:12px; }
+  .cy-main-actions button { min-height:42px; }
   .cy-journey-labels { display:none; }
 }
