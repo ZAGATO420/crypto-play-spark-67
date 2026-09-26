@@ -1634,6 +1634,7 @@ export function CryptoJourney() {
       {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
         <button className="is-trade" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><span>TRADE</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse /><span>SURVIVE</span></button>
+        <button className="is-skill" disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target /><span>{skill && skill.chapter === run.chapter ? "DONE" : "SKILL"}</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis /><span>MORE</span></button>
         <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
       </nav>}
