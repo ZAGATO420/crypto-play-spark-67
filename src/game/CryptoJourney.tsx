@@ -113,6 +113,20 @@ const FUNDING = 0.018; // per quarter, on notional — holding leverage is never
 const LIVE_MS = 13_000; // one quarter runs live in front of you
 const BOSS_DRAG = 0.045; // even the Boss burns money on the throne
 
+/**
+ * The strategy layer. Before a quarter closes you commit to a plan, and the
+ * plan changes how hard the result lands. Reading the tape right builds HEAT,
+ * which pays a rising bonus — reading it wrong resets it to zero.
+ */
+const STANCES: { id: Stance; name: string; short: string; line: string; win: number; loss: number; stress: number; xp: number }[] = [
+  { id: "survive", name: "SURVIVE", short: "SHIELD", line: "Half the damage, half the upside. Pays when the tape bleeds.", win: 0.6, loss: 0.5, stress: -7, xp: 60 },
+  { id: "balanced", name: "BALANCED", short: "STEADY", line: "Take the quarter exactly as it comes. No bonus, no penalty.", win: 1, loss: 1, stress: 0, xp: 40 },
+  { id: "degen", name: "FULL DEGEN", short: "ALL IN", line: "Every move hits 60% harder — profit and pain. Builds HEAT fastest.", win: 1.6, loss: 1.6, stress: 9, xp: 120 },
+];
+const stanceOf = (id: Stance) => STANCES.find((s) => s.id === id) ?? STANCES[1]!;
+/** Calling the quarter right stacks HEAT, and HEAT multiplies your next win. */
+const heatBonus = (heat: number) => 1 + Math.min(5, heat) * 0.12;
+
 
 export const AVATARS = [
   { id: "ape", url: avApe.url }, { id: "astro", url: avAstro.url }, { id: "bot", url: avBot.url }, { id: "coder", url: avCoder.url },
