@@ -1454,7 +1454,7 @@ export function CryptoJourney() {
               );
             })}
           </div>
-        ) : <p className="cy-empty">No positions. Cash does not win chapters.</p>}
+        ) : <p className="cy-empty cy-extra">No positions. Cash does not win chapters.</p>}
         {run.positions.length > 0 && (() => {
           const p = focusPosition ?? [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
           const price = mark(p.symbol);
