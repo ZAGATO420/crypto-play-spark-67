@@ -1178,10 +1178,39 @@ export function CryptoJourney() {
     setQueue(cards.slice(1));
   };
 
+  /**
+   * One blind pick for every survived quarter. Pure bonus on top of the run —
+   * the same seed deals every tournament player the same three cards.
+   */
+  const takeLoot = (card: LootCard) => {
+    const id = `loot-${run.chapter}`;
+    const bonus = Math.max(500, Math.round(net * 0.02));
+    setRun((r) => {
+      const seen = Array.from(new Set([...r.seen, id]));
+      if (card.kind === "cash") return book({ ...r, seen, cash: r.cash + bonus }, `Loot · ${card.name}`, bonus);
+      if (card.kind === "tcfb") return book({ ...r, seen, cash: r.cash + bonus, statuses: Array.from(new Set([...r.statuses, "$TCFB HOLDER"])) }, `Loot · ${card.name}`, bonus);
+      if (card.kind === "calm") return { ...r, seen, stress: clamp(r.stress - 25) };
+      if (card.kind === "fed") return { ...r, seen, hunger: clamp(r.hunger - 25) };
+      if (card.kind === "move") return { ...r, seen, perks: Array.from(new Set([...r.perks, "+1 MOVE"])) };
+      return { ...r, seen };
+    });
+    if (card.kind === "xp") grantXp(400, "ALPHA LEAK");
+    if (card.kind === "tcfb") grantXp(250, "$TCFB");
+    if (card.kind === "move") setAp((a) => Math.min(AP_CAP, a + 1));
+    playSfx("win");
+    say(`${card.name} · ${card.blurb}`, "yellow");
+    setDialog(null);
+    openChapterCards(run.chapter);
+  };
+
   const continueChapter = () => {
     setResolution(null);
     setSkill(null);
     if (guide === 2) setGuide(null);
+    if (run.chapter >= 1 && !run.seen.includes(`loot-${run.chapter}`)) {
+      setDialog({ k: "loot", cards: lootDraw((salt) => det(run.seed, salt), run.chapter) });
+      return;
+    }
     openChapterCards(run.chapter);
   };
 
