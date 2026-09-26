@@ -1488,5 +1488,19 @@
   .cy-goal-line { font-size:16px; line-height:1.15; }
   .cy-standing-head strong { font-size:10px; }
   .cy-arena { height:100%; }
-  .cy-chart-wrap { height:clamp(120px,26vh,240px); }
+  .cy-chart-wrap { height:clamp(110px,20vh,190px); }
+  .cy-market-visual { padding:8px; }
+  .cy-chart-instruction { margin:6px 0 0; padding:4px 7px; }
+  .cy-preview { margin:.3rem 0; }
+  .cy-preview span { padding:.35rem .5rem; }
+  .cy-preview strong { font-size:.66rem; }
+  .cy-lastmove { margin:0 0 .3rem; }
+  .cy-skill { margin:.3rem 0; padding:.5rem .6rem; }
+  .cy-skill p { font-size:.68rem; }
+  .cy-skill-cta { min-height:40px; }
+  .cy-toolbelt { grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; padding-top:8px; }
+  .cy-toolbelt button { min-height:44px; }
+  .cy-toolbelt .cy-tool-end { grid-column:3 / -1; min-height:46px; }
+  .cy-main-actions button { min-height:52px; }
+  .cy-action-context { padding:6px 9px; }
 }
