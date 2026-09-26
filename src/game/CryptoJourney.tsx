@@ -1327,7 +1327,7 @@ export function CryptoJourney() {
 
 
   return (
-    <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}${guide !== null ? " has-guide" : ""}`}>
+    <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}${guide !== null ? " has-guide" : ""}${intel ? " has-intel" : ""}${liqAlert ? " is-liqalert" : ""}`}>
       <img className="cy-world" src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" loading="lazy" width={1600} height={900} aria-hidden />
       {actSplash && <section className={`cy-act-splash cy-act-splash-${act.n}`} onClick={() => setActSplash(false)} aria-label={`${act.name} begins`}>
         <img src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" />
