@@ -1387,7 +1387,6 @@
   .cy-core { position:sticky; top:0; z-index:44; grid-template-columns:repeat(5,minmax(0,1fr)); background:var(--background); box-shadow:0 6px 18px color-mix(in oklab,var(--background) 85%,transparent); }
   .cy-core-pnl strong { font-size:11px; }
   .cy-standing p { font-size:8px; }
-  .cy-positions { display:none; }
   .cy-loot-grid { grid-template-columns:1fr; gap:.35rem; }
   .cy-loot-card { min-height:74px; }
   .cy-term-sizes { grid-template-columns:1fr 1fr; }
