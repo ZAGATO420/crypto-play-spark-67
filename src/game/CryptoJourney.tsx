@@ -341,6 +341,9 @@ export function CryptoJourney() {
     | null
   >(null);
   const [details, setDetails] = useState(false);
+  // On phones the secondary explainers collapse so one quarter fits a single screen.
+  const [intel, setIntel] = useState(false);
+
 
   const [muted, setMutedState] = useState(false);
   const [vols, setVols] = useState({ musicVol: 0.35, sfxVol: 0.6 });
@@ -411,6 +414,9 @@ export function CryptoJourney() {
   const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
   /** Every open trade's profit and loss, always on screen in the status bar. */
   const openPnl = run.positions.reduce((total, position) => total + pnlOf(position, mark(position.symbol)), 0);
+  // A leveraged position within 20% of its liquidation price puts the whole screen on alert.
+  const liqAlert = run.positions.some((position) => position.kind === "perp" && liqPct(position, mark(position.symbol)) < 20);
+
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
   const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
@@ -1327,7 +1333,7 @@ export function CryptoJourney() {
 
 
   return (
-    <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}${guide !== null ? " has-guide" : ""}`}>
+    <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}${guide !== null ? " has-guide" : ""}${intel ? " has-intel" : ""}${liqAlert ? " is-liqalert" : ""}`}>
       <img className="cy-world" src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" loading="lazy" width={1600} height={900} aria-hidden />
       {actSplash && <section className={`cy-act-splash cy-act-splash-${act.n}`} onClick={() => setActSplash(false)} aria-label={`${act.name} begins`}>
         <img src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" />
@@ -1366,8 +1372,8 @@ export function CryptoJourney() {
         <div>
         <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
         <p className="cy-goal-line">{guide === 0 ? `Buy ${formatMoney(guideBuy)} of Bitcoin below` : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
-        <p className="cy-goal-why">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
-        {doom !== null && <p className="cy-goal-doom">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
+        <p className="cy-goal-why cy-extra">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
+        {doom !== null && <p className="cy-goal-doom cy-extra">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
         </div>
         {guide !== null && <div className="cy-guide-path" aria-label={`Guide step ${guide + 1} of 3`}>
           <span className={guide === 0 ? "is-current" : "is-done"}><b>1</b>CHOOSE</span>
@@ -1384,7 +1390,10 @@ export function CryptoJourney() {
           <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
-        <p>QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
+        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
+        <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
+          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} · ${mission.text.slice(0, 26)} · SHOW BRIEFING`}
+        </button>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1402,7 +1411,7 @@ export function CryptoJourney() {
         <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
       </section>}
 
-      <button className={`cy-details-toggle${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
+      <button className={`cy-details-toggle cy-extra${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
         {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
       </button>
 
@@ -1445,12 +1454,12 @@ export function CryptoJourney() {
               );
             })}
           </div>
-        ) : <p className="cy-empty">No positions. Cash does not win chapters.</p>}
+        ) : <p className="cy-empty cy-extra">No positions. Cash does not win chapters.</p>}
         {run.positions.length > 0 && (() => {
           const p = focusPosition ?? [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
           const price = mark(p.symbol);
           const pnl = pnlOf(p, price);
-          return <p className="cy-pos-plain">Chart focus: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap a position to inspect it.</p>;
+          return <p className="cy-pos-plain cy-extra">Chart focus: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap a position to inspect it.</p>;
         })()}
 
       </section>
@@ -1548,14 +1557,14 @@ export function CryptoJourney() {
                 <Button variant="secondary" disabled={guide !== null} onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
                 <Button variant="outline" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
               </div>
-              <div className="cy-preview" aria-label="What the yellow button does">
+              <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
                 <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
                 <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
               </div>
-              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
+              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
               {guide === null && (
-                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
+                <div className={`cy-skill cy-extra${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
                   <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
                   <p>{check.ask}</p>
                   {skill && skill.chapter === run.chapter
@@ -1565,7 +1574,7 @@ export function CryptoJourney() {
               )}
               {guide === null && chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
               {guide === null && presale && (
-                <div className="cy-launch-stage">
+                <div className="cy-launch-stage cy-extra">
                   <div className="cy-launch-head"><span>{presale.tag} LIVE</span><strong>{presale.name}</strong></div>
                   <p>{presale.blurb}</p>
                   <div className="cy-launch-facts">
@@ -1625,6 +1634,7 @@ export function CryptoJourney() {
       {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
         <button className="is-trade" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><span>TRADE</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse /><span>SURVIVE</span></button>
+        <button className="is-skill" disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target /><span>{skill && skill.chapter === run.chapter ? "DONE" : "SKILL"}</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis /><span>MORE</span></button>
         <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
       </nav>}
@@ -2775,7 +2785,7 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || !name.trim() || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
-          <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />SAME SEED REMATCH</Button>
+          <Button className="cy-revenge" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />REVENGE RUN · 1 TAP</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}NEW RUN</Button>
         </div>
 

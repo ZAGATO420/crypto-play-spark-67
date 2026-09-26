@@ -37,5 +37,8 @@
 - [x] Popup trading terminal: spot + perp (long/short, 2/5/10x, liquidation preview), close from same sheet
 - [x] Quarter loot drop: three blind cards, one pick, deterministic per seed
 - [x] Leaderboard shows top 50
-- [ ] Boss trash talk on big P&L swings (next pass)
-- [ ] $TCFB launch event chapter (next pass)
+- [x] Boss trash talk on big P&L swings (bossReaction wired through feel())
+- [x] $TCFB presence in the run: loot allocation card + live tournament prize ticker
+- [x] Phone cockpit: one quarter fits one screen, briefing collapses behind a single visible toggle
+- [x] Dock gets the skill test; near-liquidation heartbeat alert on the arena
+- [x] End screen leads with REVENGE RUN (same seed, one tap)
