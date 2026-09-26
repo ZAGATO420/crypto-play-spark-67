@@ -1459,7 +1459,7 @@ export function CryptoJourney() {
           const p = focusPosition ?? [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
           const price = mark(p.symbol);
           const pnl = pnlOf(p, price);
-          return <p className="cy-pos-plain">Chart focus: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap a position to inspect it.</p>;
+          return <p className="cy-pos-plain cy-extra">Chart focus: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap a position to inspect it.</p>;
         })()}
 
       </section>
