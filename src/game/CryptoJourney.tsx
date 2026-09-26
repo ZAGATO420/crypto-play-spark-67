@@ -1623,7 +1623,7 @@ export function CryptoJourney() {
       </div>
 
       {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
-        <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards /><span>PORTFOLIO</span></button>
+        <button className="is-trade" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><span>TRADE</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse /><span>SURVIVE</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis /><span>MORE</span></button>
         <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
