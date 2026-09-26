@@ -411,7 +411,10 @@ function HoldTheLine({ hard, roll, onResult }: { hard: boolean; roll: number; on
       <Button className="cy-wide cy-primary" disabled={!!done}
         onPointerDown={() => { holding.current = true; }}
         onPointerUp={() => { holding.current = false; }}
+        onPointerCancel={() => { holding.current = false; }}
+        onLostPointerCapture={() => { holding.current = false; }}
         onPointerLeave={() => { holding.current = false; }}>HOLD TO DEFEND</Button>
+
       {done && <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>}
     </>
   );
