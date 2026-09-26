@@ -1488,7 +1488,7 @@
   .cy-goal-line { font-size:16px; line-height:1.15; }
   .cy-standing-head strong { font-size:10px; }
   .cy-arena { height:100%; }
-  .cy-chart-wrap { height:clamp(110px,20vh,190px); }
+  .cy-chart-wrap { height:clamp(104px,15vh,150px); }
   .cy-market-visual { padding:8px; }
   .cy-chart-instruction { margin:6px 0 0; padding:4px 7px; }
   .cy-preview { margin:.3rem 0; }
@@ -1507,7 +1507,10 @@
   .cy-skill { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; }
   .cy-skill p { display:none; }
   .cy-skill-cta { width:auto; min-height:34px; padding:0 12px; }
-  .cy-action-risk { padding:5px 9px; font-size:9px; }
+  .cy-action-risk { display:none; }
+  .cy-preview span { padding:.3rem .45rem; }
+  .cy-toolbelt button { min-height:40px; }
+  .cy-toolbelt .cy-tool-end { min-height:42px; }
   .cy-top { padding:0; }
   .cy-top h1.cy-net { display:none; }
   .cy-xp { margin-top:2px; }
