@@ -1139,6 +1139,28 @@ export function CryptoJourney() {
         : `Conviction backfired: ${formatMoney(Math.abs(convCash))} gone. He warned you.`);
     }
 
+    // THE PLAN: your stance decides how hard this quarter lands, and whether
+    // your HEAT streak grows or dies. Reading the tape is the actual skill.
+    const plan = stanceOf(run.stance);
+    const calledRight = (run.stance === "degen" && delta > 0) || (run.stance === "survive" && delta < 0) || (run.stance === "balanced" && Math.abs(delta) < Math.max(1, startNet * 0.03));
+    const heat = calledRight ? Math.min(9, run.heat + 1) : 0;
+    let planCash = 0;
+    if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(run.heat) : 1));
+    else if (delta < 0) planCash = Math.round(Math.abs(delta) * (1 - plan.loss));
+    if (planCash !== 0) {
+      draft.cash = Math.max(0, draft.cash + planCash);
+      draft.ledger = [{ chapter: next, label: `${plan.name} plan`, amount: planCash }, ...draft.ledger].slice(0, 60);
+      lines.push(planCash >= 0
+        ? `${plan.name} plan paid ${formatMoney(planCash)} extra${calledRight && run.heat > 0 ? ` · HEAT x${run.heat} bonus` : ""}.`
+        : `${plan.name} plan cost ${formatMoney(Math.abs(planCash))} more. The plan was wrong.`);
+    } else if (delta < 0 && plan.loss < 1) {
+      lines.push(`${plan.name} plan absorbed part of the hit.`);
+    }
+    lines.push(calledRight
+      ? `You called the quarter right. HEAT x${heat} — next win pays ${Math.round((heatBonus(heat) - 1) * 100)}% more.`
+      : run.heat > 0 ? `Wrong read. HEAT streak of ${run.heat} is gone.` : "No read this quarter. HEAT stays cold.");
+    draft.stress = clamp(draft.stress + plan.stress);
+
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
     const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
