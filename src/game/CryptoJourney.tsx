@@ -1463,9 +1463,10 @@ export function CryptoJourney() {
         })()}
 
       </section>
-
+      </div>
 
       <div className="cy-body">
+
         <section className="cy-stage" aria-live="polite">
           {phase === "brief" && (
             <article className="cy-card" key={`brief-${run.chapter}`}>
