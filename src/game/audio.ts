@@ -280,32 +280,44 @@ export function setSfxVol(v: number) {
 export const isMuted = () => muted;
 export const getVolumes = () => ({ musicVol, sfxVol });
 
+/** True once the browser really lets us make noise. Drives the sound prompt. */
+export const audioLive = () => !!s.ctx && s.ctx.state === "running" && !muted;
+
+/**
+ * Called from a real user gesture. The first attempt often fails silently on
+ * iOS and on desktop autoplay blocks, so this stays callable and keeps retrying
+ * instead of arming itself once and giving up.
+ */
+export function unlockAudio() {
+  if (typeof window === "undefined") return;
+  initAudio();
+  preloadSfx();
+  const start = () => { void setTrack(s.track ?? "menu"); };
+  if (s.ctx && s.ctx.state !== "running") void s.ctx.resume().then(start).catch(start);
+  else start();
+}
+
 let wired = false;
-let unlocking = false;
 export function wireAudio() {
   if (wired || typeof window === "undefined") return;
   wired = true;
   readSettings();
+  // Every gesture retries until the audio context is genuinely running, so a
+  // blocked first tap can never leave the whole game silent.
   const unlock = () => {
-    if (unlocking) return;
-    unlocking = true;
-    initAudio();
-    preloadSfx();
-    window.removeEventListener("pointerdown", unlock);
-    window.removeEventListener("keydown", unlock);
-    window.removeEventListener("touchstart", unlock);
-    // One player, so the current screen's track can start straight away:
-    // a later screen change simply swaps the source inside it.
-    const start = () => { void setTrack(s.track ?? "menu"); };
-    if (s.ctx && s.ctx.state !== "running") void s.ctx.resume().then(start).catch(start);
-    else start();
+    unlockAudio();
+    if (s.ctx && s.ctx.state === "running" && s.player && !s.player.el.paused) {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("touchstart", unlock);
+    }
   };
-  window.addEventListener("touchstart", unlock, { once: true });
-  window.addEventListener("pointerdown", unlock, { once: true });
-  window.addEventListener("keydown", unlock, { once: true });
+  window.addEventListener("touchstart", unlock);
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("keydown", unlock);
   document.addEventListener("visibilitychange", () => {
     if (!s.ctx) return;
     if (document.hidden) void s.ctx.suspend();
-    else void s.ctx.resume();
+    else void s.ctx.resume().then(() => { if (s.track) void setTrack(s.track); }).catch(() => {});
   });
 }

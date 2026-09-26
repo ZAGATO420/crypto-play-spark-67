@@ -46,3 +46,9 @@
 - [x] Desktop command deck: two-column cockpit, no scrolling on 720p/900p, large lit control buttons
 - [x] Near-liquidation warning cue plus Boss taunt when a leveraged trade enters the danger zone
 - [x] Strategy layer: quarterly plan (SURVIVE / BALANCED / FULL DEGEN) scales win/loss, stress and XP; HEAT streak pays a rising bonus for reading the tape right
+
+## Session: sound + compact mobile + new skill games
+- [x] Sound unlock retries on every gesture; visible "TAP FOR SOUND" prompt on the start screen.
+- [x] Mobile cockpit compacted: duplicate standing block, tournament line and risk notes fold into SHOW BRIEFING; one big action plus the fixed dock.
+- [x] Three new skill games: CATCH THE GREEN (whale candles), CLAIM THE REAL ONE (airdrop phishing), HOLD THE LINE (margin defence). All grant XP via the existing skill reward.
+- [x] Sheets close with Escape or a tap on the backdrop.

@@ -30,7 +30,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, unlockAudio, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
@@ -923,6 +923,7 @@ export function CryptoJourney() {
     setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} · ${label}`, delta));
     setSkill({ chapter: run.chapter, quality, label, delta });
     pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
+    if (xp > 0) pop(`+${xp} XP · ${label}`, "xp");
     playSfx(delta >= 0 ? "win" : "hit");
     nextInQueue();
   };
@@ -1547,7 +1548,7 @@ export function CryptoJourney() {
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
                   <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
                 </div>
-                <div className="cy-chart-instruction"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>THE PRICE RUNS BY ITSELF · DO NOT TAP THE CHART</strong></div>
+                <div className="cy-chart-instruction cy-extra"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>THE PRICE RUNS BY ITSELF · DO NOT TAP THE CHART</strong></div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
@@ -1563,10 +1564,10 @@ export function CryptoJourney() {
                   </svg>
                   <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
-                <div className="cy-chart-legend"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
-                <div className="cy-chart-foot"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
+                <div className="cy-chart-legend cy-extra"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
+                <div className="cy-chart-foot cy-extra"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
-              <div className="cy-live">
+              <div className="cy-live cy-extra">
                 <div className="cy-live-clock"><i ref={liveClockRef} style={{ width: `${Math.round(tick * 100)}%` }} /></div>
                 <div className="cy-live-tape">
                   {(["BTC", "ETH", "SOL"] as CoinSymbol[]).map((s) => {
@@ -1635,7 +1636,7 @@ export function CryptoJourney() {
               </div>
               {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
               {guide === null && (
-                <div className={`cy-skill cy-extra${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
+                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
                   <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
                   <p>{check.ask}</p>
                   {skill && skill.chapter === run.chapter
@@ -1849,8 +1850,15 @@ function Meter({ label, value, icon, tone, detail }: { label: string; value: num
 }
 
 function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (() => void) | undefined }) {
+  // Escape and a tap on the dark backdrop both get you out — nobody should feel trapped.
+  useEffect(() => {
+    if (!onClose) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [onClose]);
   return (
-    <div className="cy-scrim" role="dialog" aria-modal="true">
+    <div className="cy-scrim" role="dialog" aria-modal="true" onClick={onClose ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}>
       <div className="cy-sheet">
         {onClose && <button className="cy-close" aria-label="Close" onClick={onClose}><X /></button>}
         {children}
@@ -1858,6 +1866,7 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (()
     </div>
   );
 }
+
 
 function HowToPlay({ onClose }: { onClose: () => void }) {
   return (
@@ -2416,6 +2425,23 @@ function PriceTape() {
   );
 }
 
+/** A visible way in: browsers block sound until a tap, so we ask for that tap. */
+function SoundPrompt() {
+  const [live, setLive] = useState(true);
+  useEffect(() => {
+    const check = () => setLive(audioLive());
+    check();
+    const id = window.setInterval(check, 800);
+    return () => window.clearInterval(id);
+  }, []);
+  if (live) return null;
+  return (
+    <button className="cy-sound-prompt" type="button" onClick={() => { setMuted(false); unlockAudio(); playSfx("click"); setLive(audioLive()); }}>
+      <Volume2 />TAP FOR SOUND
+    </button>
+  );
+}
+
 function MenuSound() {
   const [open, setOpen] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -2423,7 +2449,7 @@ function MenuSound() {
   useEffect(() => { setMutedState(isMuted()); setVols(getVolumes()); }, [open]);
   return (
     <>
-      <button className="menu-sound" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => { initAudio(); preloadSfx(); playSfx("click"); setOpen(true); }}>
+      <button className="menu-sound" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => { unlockAudio(); playSfx("click"); setOpen(true); }}>
         {muted ? <VolumeX /> : <Volume2 />}
       </button>
       {open && (
@@ -2547,6 +2573,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
       <div className="start-vignette" />
       <PriceTape />
       <MenuSound />
+      <SoundPrompt />
       <section className="start-stage">
         <div className="start-brand">
           <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
