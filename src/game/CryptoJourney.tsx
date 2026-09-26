@@ -77,6 +77,7 @@ type Dialog =
   | { k: "launchResult"; res: LaunchResult }
   | { k: "survive" }
   | { k: "more" }
+  | { k: "loot"; cards: LootCard[] }
   | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
