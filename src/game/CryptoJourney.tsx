@@ -1574,7 +1574,7 @@ export function CryptoJourney() {
               )}
               {guide === null && chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
               {guide === null && presale && (
-                <div className="cy-launch-stage">
+                <div className="cy-launch-stage cy-extra">
                   <div className="cy-launch-head"><span>{presale.tag} LIVE</span><strong>{presale.name}</strong></div>
                   <p>{presale.blurb}</p>
                   <div className="cy-launch-facts">
