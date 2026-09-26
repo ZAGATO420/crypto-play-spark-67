@@ -1183,14 +1183,14 @@ export function CryptoJourney() {
     const milestone = MILESTONES.find((m) => !run.seen.includes(m.id) && netOf(draft) >= m.net);
 
     const nextRun: Run = {
-      ...draft, streak, boss, conviction, convictionOn: false,
+      ...draft, streak, boss, conviction, convictionOn: false, heat, stance: "balanced",
       chronicle: [...draft.chronicle, ...story, ...(milestone ? [milestone.line] : [])].slice(-14),
       seen: milestone ? [...run.seen, milestone.id] : run.seen,
       logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
     };
     setRun(nextRun);
     if ([1, 4, 12].includes(next)) trackGameBeat(`month_${next * 3}`, { tournament: cfg.tournament });
-    setResolution({ title, detail, tone, delta: delta + convCash, move, lines, inflow, outflow });
+    setResolution({ title, detail, tone, delta: delta + convCash + planCash, move, lines, inflow, outflow });
     setPhase("resolve");
     setTick(0);
     setFast(false);
