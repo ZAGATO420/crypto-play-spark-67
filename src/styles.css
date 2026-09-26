@@ -1533,6 +1533,11 @@
   .cy-top h1.cy-net { display:none; }
   .cy-xp { margin-top:2px; }
   .cy-arena { gap:6px; }
+  /* THE PLAN stays on screen without stealing height from the chart */
+  .cy-plan { padding:5px 8px; gap:4px; }
+  .cy-plan > p { display:none; }
+  .cy-plan-btn { min-height:32px; padding:3px 4px; }
+  .cy-preview { display:none; }
 }
 
 /* Short laptop screens: the deck stays whole, the extras step back. */
