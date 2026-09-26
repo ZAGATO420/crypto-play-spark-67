@@ -429,7 +429,7 @@
 .cy-ap i.is-on { background: var(--journey-cyan); border-color: var(--journey-cyan); box-shadow: 0 0 10px color-mix(in oklab, var(--journey-cyan) 45%, transparent) }
 .cy-meters { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 7px }
 
-.cy-positions { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: color-mix(in oklab, var(--card) 90%, transparent) }
+.cy-positions { padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card) }
 .cy-pos-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--muted-foreground); font: 700 10px/1 var(--font-body); letter-spacing: .05em }
 .cy-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 7px }
 .cy-chips.is-dense { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) }
@@ -1283,7 +1283,7 @@
 .cy-chart-legend .is-entry { background:var(--journey-cyan); }
 
 /* ---- standing: one glance answer to "am I winning?" ---------------------- */
-.cy-standing { margin:0 0 10px; padding:9px 11px; border:1px solid color-mix(in oklab,var(--journey-cyan) 24%,transparent); border-radius:14px; background:color-mix(in oklab,#000 52%,transparent); }
+.cy-standing { margin:0 0 10px; padding:9px 11px; border:1px solid color-mix(in oklab,var(--journey-cyan) 24%,transparent); border-radius:14px; background:var(--background); }
 .cy-standing-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .cy-standing-head strong { font-size:11px; letter-spacing:.06em; color:var(--foreground); }
 .cy-standing-head button { margin-left:auto; padding:5px 9px; border:1px solid color-mix(in oklab,var(--journey-yellow) 45%,transparent); border-radius:999px; background:transparent; color:var(--journey-yellow); font-size:10px; font-weight:800; letter-spacing:.08em; }
