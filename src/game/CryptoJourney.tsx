@@ -1850,8 +1850,15 @@ function Meter({ label, value, icon, tone, detail }: { label: string; value: num
 }
 
 function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (() => void) | undefined }) {
+  // Escape and a tap on the dark backdrop both get you out — nobody should feel trapped.
+  useEffect(() => {
+    if (!onClose) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [onClose]);
   return (
-    <div className="cy-scrim" role="dialog" aria-modal="true">
+    <div className="cy-scrim" role="dialog" aria-modal="true" onClick={onClose ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}>
       <div className="cy-sheet">
         {onClose && <button className="cy-close" aria-label="Close" onClick={onClose}><X /></button>}
         {children}
@@ -1859,6 +1866,7 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (()
     </div>
   );
 }
+
 
 function HowToPlay({ onClose }: { onClose: () => void }) {
   return (
