@@ -1358,6 +1358,7 @@ export function CryptoJourney() {
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
         <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong><em>{net >= bossNet ? "BOSS UNDER PRESSURE" : `${formatMoney(bossNet - net)} TO CATCH`}</em></span>
         <span><small>CASH</small><strong>{formatMoney(run.cash)}</strong><em>READY</em></span>
+        <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}>{openPnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</strong><em>{run.positions.length ? `${run.positions.length} OPEN` : "NO TRADE"}</em></span>
         <span className={run.stress >= 70 ? "is-critical" : ""}><small>STRESS</small><strong>{run.stress}%</strong><i><b style={{ width: `${run.stress}%` }} /></i></span>
         <span className={run.hunger >= 70 ? "is-critical" : ""}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
       </section>
