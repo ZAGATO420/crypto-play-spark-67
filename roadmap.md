@@ -45,3 +45,4 @@
 
 - [x] Desktop command deck: two-column cockpit, no scrolling on 720p/900p, large lit control buttons
 - [x] Near-liquidation warning cue plus Boss taunt when a leveraged trade enters the danger zone
+- [x] Strategy layer: quarterly plan (SURVIVE / BALANCED / FULL DEGEN) scales win/loss, stress and XP; HEAT streak pays a rising bonus for reading the tape right
