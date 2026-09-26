@@ -1196,9 +1196,9 @@ export function CryptoJourney() {
     setFast(false);
     setVerified(false);
     setAp(Math.max(1, Math.min(AP_CAP, AP_BASE + job.ap + ap - (critical ? 1 : 0) + (run.perks.includes("+1 MOVE") ? 1 : 0))));
-    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep + (missionWon ? activeMission.reward : 0), missionWon ? "MISSION COMPLETE" : idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
+    grantXp((idle ? 0 : XP.chapter) + (delta >= 0 && !idle ? XP.greenQuarter : 0) + streak * XP.streakStep + (missionWon ? activeMission.reward : 0) + (calledRight ? plan.xp + heat * 25 : 0), calledRight ? `${plan.name} CALLED RIGHT` : missionWon ? "MISSION COMPLETE" : idle ? "IDLE QUARTER" : delta >= 0 ? "GREEN QUARTER" : "MONTHS SURVIVED");
     if (liquidation) triggerLiquidationShock(liquidation);
-    else feel(idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash);
+    else feel(idle ? "idle" : delta >= 0 ? "green" : "red", delta + convCash + planCash);
     if (milestone) say(milestone.line, "yellow");
     if (critical) { setShake(true); window.setTimeout(() => setShake(false), 520); }
 
