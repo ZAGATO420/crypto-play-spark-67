@@ -1557,14 +1557,14 @@ export function CryptoJourney() {
                 <Button variant="secondary" disabled={guide !== null} onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
                 <Button variant="outline" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
               </div>
-              <div className="cy-preview" aria-label="What the yellow button does">
+              <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
                 <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
                 <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
               </div>
-              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
+              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
               {guide === null && (
-                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
+                <div className={`cy-skill cy-extra${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
                   <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
                   <p>{check.ask}</p>
                   {skill && skill.chapter === run.chapter
