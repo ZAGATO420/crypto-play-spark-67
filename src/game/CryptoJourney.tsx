@@ -1617,7 +1617,11 @@ export function CryptoJourney() {
             onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
             onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
-          {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => { setActiveSymbol(s); setDialog({ k: "trade", symbol: s }); }} />}
+          {dialog.k === "market" && <TerminalSheet run={run} start={activeSymbol}
+            onSpot={(s, f) => openSpot(s, f)}
+            onPerp={(s, d, l, f) => openPerp(s, d, l, f)}
+            onPosition={(id) => setDialog({ k: "position", id })} />}
+          {dialog.k === "loot" && <LootSheet cards={dialog.cards} onPick={(card) => takeLoot(card)} />}
           {dialog.k === "more" && <MoreSheet
             ap={ap}
             onStorage={() => setDialog({ k: "custody" })}
