@@ -42,3 +42,6 @@
 - [x] Phone cockpit: one quarter fits one screen, briefing collapses behind a single visible toggle
 - [x] Dock gets the skill test; near-liquidation heartbeat alert on the arena
 - [x] End screen leads with REVENGE RUN (same seed, one tap)
+
+- [x] Desktop command deck: two-column cockpit, no scrolling on 720p/900p, large lit control buttons
+- [x] Near-liquidation warning cue plus Boss taunt when a leveraged trade enters the danger zone
