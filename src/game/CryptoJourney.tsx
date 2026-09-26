@@ -225,7 +225,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     ledger: mod === "debt" ? [{ chapter: 0, label: "Inherited tax debt", amount: -8000 }] : [], statuses: mod === "straight" ? [] : [modifierOf(mod).name],
     logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
-    conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [],
+    conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [], stance: "balanced", heat: 0,
     chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [],
 
   };
