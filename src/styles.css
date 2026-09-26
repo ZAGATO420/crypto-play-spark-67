@@ -394,7 +394,7 @@
 .cy-shell { --background: oklch(0.16 0.018 290); --foreground: oklch(0.97 0.01 100); --card: oklch(0.2 0.022 286); --card-foreground: oklch(0.97 0.01 100); --muted: oklch(0.25 0.02 286); --muted-foreground: oklch(0.72 0.035 265); --border: oklch(0.34 0.035 275); --primary: var(--journey-cyan); --primary-foreground: oklch(0.16 0.018 290); --secondary: oklch(0.27 0.035 287); --secondary-foreground: oklch(0.97 0.01 100); --accent: oklch(0.3 0.04 286); --accent-foreground: oklch(0.97 0.01 100);
   min-height: 100dvh; display: flex; flex-direction: column; gap: 12px; padding: max(14px, env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
   background: var(--background); color: var(--foreground); font-family: var(--font-body); color-scheme: dark; overflow-x: hidden;
-  background-image: linear-gradient(color-mix(in oklab, var(--journey-cyan) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--journey-cyan) 4%, transparent) 1px, transparent 1px); background-size: 28px 28px;
+  background-image: none;
 }
 .cy-shell > * { width: min(100%, 1180px); margin-inline: auto; }
 .cy-top { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; }
@@ -996,7 +996,7 @@
 .cy-tournament-live { display:flex; align-items:center; gap:7px; padding:7px 9px; border-left:3px solid var(--journey-yellow); background:color-mix(in oklab,var(--journey-yellow) 9%,transparent); color:var(--journey-yellow); font-size:9px; font-weight:800; }
 .cy-tournament-live svg { width:13px; height:13px; }
 .cy-market-visual { position:relative; min-height:300px; padding:12px; overflow:hidden; border:1px solid color-mix(in oklab,var(--journey-cyan) 34%,var(--border)); border-radius:7px; background:linear-gradient(180deg,color-mix(in oklab,var(--background) 88%,var(--journey-panel)),var(--background)); }
-.cy-market-visual::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.35; background-image:linear-gradient(color-mix(in oklab,var(--journey-cyan) 12%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in oklab,var(--journey-cyan) 12%,transparent) 1px,transparent 1px); background-size:36px 36px; }
+.cy-market-visual::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.18; background-image:linear-gradient(90deg,color-mix(in oklab,var(--journey-cyan) 10%,transparent) 1px,transparent 1px); background-size:36px 36px; }
 .cy-market-visual::after { content:""; position:absolute; inset:auto 0 0; height:45%; pointer-events:none; background:linear-gradient(0deg,color-mix(in oklab,var(--background) 94%,transparent),transparent); }
 .cy-chart-title { position:relative; z-index:3; }
 .cy-chart-instruction { position:relative; z-index:3; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:4px 8px; margin:8px 0 2px; padding:6px 8px; border-left:3px solid var(--journey-yellow); background:var(--background); font-size:8px; font-weight:800; }
