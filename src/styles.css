@@ -1393,3 +1393,15 @@
   .cy-term-sizes button:last-child { grid-column:1 / -1; }
   .cy-mobile-dock .is-trade { color:var(--background); border-color:var(--journey-cyan); background:var(--journey-cyan); }
 }
+
+/* -------------------------- setup identity: one compact row, no scroll wall */
+.avatar-row { display:flex; gap:.35rem; overflow-x:auto; padding-bottom:.25rem; scrollbar-width:none; }
+.avatar-row::-webkit-scrollbar { display:none; }
+.avatar-row .avatar-pick { flex:0 0 auto; }
+.setup-block .chip-row { display:flex; flex-wrap:nowrap; gap:.3rem; overflow-x:auto; padding-bottom:.25rem; scrollbar-width:none; }
+.setup-block .chip-row::-webkit-scrollbar { display:none; }
+.setup-block .chip-row .chip { flex:0 0 auto; }
+@media (max-width:640px) {
+  .avatar-row .avatar-pick { width:46px; height:46px; }
+  .setup-block .chip-row .chip { padding:.25rem .45rem; font-size:.6rem; }
+}
