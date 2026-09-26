@@ -30,7 +30,7 @@ import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
 import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
-import { getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, wireAudio } from "./audio";
+import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, unlockAudio, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 
@@ -2416,6 +2416,23 @@ function PriceTape() {
   );
 }
 
+/** A visible way in: browsers block sound until a tap, so we ask for that tap. */
+function SoundPrompt() {
+  const [live, setLive] = useState(true);
+  useEffect(() => {
+    const check = () => setLive(audioLive());
+    check();
+    const id = window.setInterval(check, 800);
+    return () => window.clearInterval(id);
+  }, []);
+  if (live) return null;
+  return (
+    <button className="cy-sound-prompt" type="button" onClick={() => { setMuted(false); unlockAudio(); playSfx("click"); setLive(audioLive()); }}>
+      <Volume2 />TAP FOR SOUND
+    </button>
+  );
+}
+
 function MenuSound() {
   const [open, setOpen] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -2423,7 +2440,7 @@ function MenuSound() {
   useEffect(() => { setMutedState(isMuted()); setVols(getVolumes()); }, [open]);
   return (
     <>
-      <button className="menu-sound" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => { initAudio(); preloadSfx(); playSfx("click"); setOpen(true); }}>
+      <button className="menu-sound" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => { unlockAudio(); playSfx("click"); setOpen(true); }}>
         {muted ? <VolumeX /> : <Volume2 />}
       </button>
       {open && (
