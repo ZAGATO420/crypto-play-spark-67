@@ -1471,3 +1471,23 @@
   .cy-toolbelt .cy-tool-end:hover:not(:disabled) { background:color-mix(in oklab,var(--journey-cyan) 84%,#fff); box-shadow:0 10px 28px color-mix(in oklab,var(--journey-cyan) 34%,transparent); }
   .cy-main-actions button { min-height:58px; font-size:12px; }
 }
+
+/* Desktop: left side plays, right rail holds the cockpit — nothing scrolls. */
+@media (min-width:1024px) {
+  .cy-shell { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:8px 12px; align-content:start; }
+  .cy-journey { grid-area:1 / 1 / 2 / -1; }
+  .cy-top { grid-area:2 / 1 / 3 / -1; }
+  .cy-body { grid-area:3 / 1 / -1 / 2; display:grid; grid-template-columns:minmax(0,1fr); }
+  .cy-goal { grid-area:3 / 2; }
+  .cy-standing { grid-area:4 / 2; }
+  .cy-core { grid-area:5 / 2; position:static; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .cy-core .cy-core-money { grid-column:1 / -1; }
+  .cy-positions { grid-area:6 / 2; }
+  .cy-meters,.cy-versus,.cy-details-toggle { grid-column:2; }
+  .cy-trail { display:none; }
+  .cy-core strong { font-size:clamp(14px,1.3vw,19px); }
+  .cy-goal-line { font-size:16px; line-height:1.15; }
+  .cy-standing-head strong { font-size:10px; }
+  .cy-arena { height:100%; }
+  .cy-chart-wrap { height:clamp(120px,26vh,240px); }
+}
