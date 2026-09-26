@@ -1506,7 +1506,7 @@
   .cy-goal-line { font-size:16px; line-height:1.15; }
   .cy-standing-head strong { font-size:10px; }
   .cy-arena { height:100%; }
-  .cy-chart-wrap { height:clamp(104px,15vh,150px); }
+  .cy-chart-wrap { height:clamp(94px,13.5vh,138px); }
   .cy-market-visual { padding:8px; }
   .cy-chart-instruction { margin:6px 0 0; padding:4px 7px; }
   .cy-preview { margin:.3rem 0; }
