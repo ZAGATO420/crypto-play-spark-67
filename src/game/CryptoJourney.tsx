@@ -38,6 +38,8 @@ import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, read
 /* ------------------------------------------------------------------ types */
 
 type Kind = "spot" | "perp";
+/** The quarter plan: how hard you are willing to be wrong. */
+type Stance = "survive" | "balanced" | "degen";
 type Pos = { id: number; symbol: CoinSymbol; kind: Kind; dir: 1 | -1; lev: number; margin: number; entry: number; qty: number; where: CustodyId };
 type Log = { chapter: number; title: string; detail: string; tone: "cyan" | "pink" | "yellow" };
 type Entry = { chapter: number; label: string; amount: number };
