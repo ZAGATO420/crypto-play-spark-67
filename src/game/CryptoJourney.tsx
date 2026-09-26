@@ -923,6 +923,7 @@ export function CryptoJourney() {
     setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} · ${label}`, delta));
     setSkill({ chapter: run.chapter, quality, label, delta });
     pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
+    if (xp > 0) pop(`+${xp} XP · ${label}`, "xp");
     playSfx(delta >= 0 ? "win" : "hit");
     nextInQueue();
   };
@@ -2564,6 +2565,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
       <div className="start-vignette" />
       <PriceTape />
       <MenuSound />
+      <SoundPrompt />
       <section className="start-stage">
         <div className="start-brand">
           <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
