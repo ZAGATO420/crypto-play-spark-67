@@ -749,6 +749,42 @@ export const MILESTONES: { id: string; net: number; line: string }[] = [
   { id: "m1m", net: 1_000_000, line: "A million. Nobody in my family would believe the number, so I never said it." },
 ];
 
+/* ---- quarter loot: one blind pick after every survived quarter ---------
+ * Purely a bonus on top of the run. It never touches historical prices,
+ * the tournament seed or the boss score formula — the same seed hands every
+ * tournament player the exact same three cards in the same quarter. */
+
+export type LootKind = "cash" | "calm" | "fed" | "xp" | "move" | "tcfb";
+export type LootCard = { id: string; name: string; blurb: string; kind: LootKind };
+
+export const LOOT: LootCard[] = [
+  { id: "whale", name: "WHALE SHIELD", blurb: "A whale bids under you. Stress drops hard.", kind: "calm" },
+  { id: "alpha", name: "ALPHA LEAK", blurb: "A locked group chat opens. Straight XP.", kind: "xp" },
+  { id: "adrenaline", name: "ADRENALINE SHOT", blurb: "One more move next quarter.", kind: "move" },
+  { id: "airdrop", name: "SURPRISE AIRDROP", blurb: "Dust from an old wallet turns into real cash.", kind: "cash" },
+  { id: "delivery", name: "NOODLE DELIVERY", blurb: "Somebody feeds you. Hunger drops.", kind: "fed" },
+  { id: "tcfb", name: "$TCFB ALLOCATION", blurb: "The Boss token finds your wallet. Cash and XP.", kind: "tcfb" },
+];
+
+/** Deterministic three-card draw. Same seed and quarter = same three cards. */
+export const lootDraw = (roll: (salt: string) => number, chapter: number): LootCard[] => {
+  const pool = [...LOOT];
+  const out: LootCard[] = [];
+  for (let i = 0; i < 3 && pool.length; i++) {
+    const idx = Math.floor(roll(`loot-${chapter}-${i}`) * pool.length) % pool.length;
+    out.push(pool.splice(idx, 1)[0]!);
+  }
+  return out;
+};
+
+/* ---- one-tap run presets: no reading wall before the first trade ------- */
+
+export const PRESETS: { id: string; name: string; line: string; difficulty: Difficulty; mode: BaseMode; modifier: ModifierId; ironman: boolean; arch: Archetype }[] = [
+  { id: "degen", name: "DEGEN EXPRESS", line: "Chaos market · half the money · every score counts double", difficulty: "BOSS", mode: "chaos", modifier: "glass", ironman: false, arch: "degen" },
+  { id: "classic", name: "CLASSIC SURVIVOR", line: "The real 2020–2026 prices · the honest run", difficulty: "NORMAL", mode: "historical", modifier: "straight", ironman: false, arch: "trader" },
+  { id: "ironman", name: "HARDCORE IRONMAN", line: "One life · no saves · nightmare costs", difficulty: "NIGHTMARE", mode: "classic", modifier: "straight", ironman: true, arch: "hodler" },
+];
+
 /** How many quarters until history hits again — the dread, without the spoiler. */
 export const doomIn = (chapter: number) => {
   for (let c = chapter + 1; c <= CHAPTERS; c++) if (CRASHES[c] || EXCHANGE_FAILURES[c]) return c - chapter;

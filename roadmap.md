@@ -30,3 +30,12 @@
 - [x] Compact mobile run view with large fixed Portfolio, Survive, More and End Quarter controls
 - [x] Arcade hype pass with God Candle wins, liquidation shock, exclusive headline audio and instant feedback
 - [x] Remove unintended transparency across the complete game UI and verify on phone
+
+## Masterplan (TCFB launch)
+- [x] Custom run: 3 one-tap presets + compact fine-tune, identity row scrolls instead of stacking
+- [x] Sticky phone HUD: net worth, cash, open P&L, stress, hunger always visible
+- [x] Popup trading terminal: spot + perp (long/short, 2/5/10x, liquidation preview), close from same sheet
+- [x] Quarter loot drop: three blind cards, one pick, deterministic per seed
+- [x] Leaderboard shows top 50
+- [ ] Boss trash talk on big P&L swings (next pass)
+- [ ] $TCFB launch event chapter (next pass)

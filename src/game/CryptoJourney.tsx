@@ -18,9 +18,9 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
-  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, skillCheckFor, standingFor, xpProgress,
-  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type ModifierId, type Presale, type Situation,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, PRESETS, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
+  actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, lootDraw, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, skillCheckFor, standingFor, xpProgress,
+  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type LootCard, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
 
 import { readProfile, recordRun, type Profile } from "./profile";
@@ -77,6 +77,7 @@ type Dialog =
   | { k: "launchResult"; res: LaunchResult }
   | { k: "survive" }
   | { k: "more" }
+  | { k: "loot"; cards: LootCard[] }
   | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
@@ -408,6 +409,8 @@ export function CryptoJourney() {
   const currentChartX = Math.max(2, Math.min(98, tick * 100));
   const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
   const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
+  /** Every open trade's profit and loss, always on screen in the status bar. */
+  const openPnl = run.positions.reduce((total, position) => total + pnlOf(position, mark(position.symbol)), 0);
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
   const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
@@ -1176,10 +1179,39 @@ export function CryptoJourney() {
     setQueue(cards.slice(1));
   };
 
+  /**
+   * One blind pick for every survived quarter. Pure bonus on top of the run —
+   * the same seed deals every tournament player the same three cards.
+   */
+  const takeLoot = (card: LootCard) => {
+    const id = `loot-${run.chapter}`;
+    const bonus = Math.max(500, Math.round(net * 0.02));
+    setRun((r) => {
+      const seen = Array.from(new Set([...r.seen, id]));
+      if (card.kind === "cash") return book({ ...r, seen, cash: r.cash + bonus }, `Loot · ${card.name}`, bonus);
+      if (card.kind === "tcfb") return book({ ...r, seen, cash: r.cash + bonus, statuses: Array.from(new Set([...r.statuses, "$TCFB HOLDER"])) }, `Loot · ${card.name}`, bonus);
+      if (card.kind === "calm") return { ...r, seen, stress: clamp(r.stress - 25) };
+      if (card.kind === "fed") return { ...r, seen, hunger: clamp(r.hunger - 25) };
+      if (card.kind === "move") return { ...r, seen, perks: Array.from(new Set([...r.perks, "+1 MOVE"])) };
+      return { ...r, seen };
+    });
+    if (card.kind === "xp") grantXp(400, "ALPHA LEAK");
+    if (card.kind === "tcfb") grantXp(250, "$TCFB");
+    if (card.kind === "move") setAp((a) => Math.min(AP_CAP, a + 1));
+    playSfx("win");
+    say(`${card.name} · ${card.blurb}`, "yellow");
+    setDialog(null);
+    openChapterCards(run.chapter);
+  };
+
   const continueChapter = () => {
     setResolution(null);
     setSkill(null);
     if (guide === 2) setGuide(null);
+    if (run.chapter >= 1 && !run.seen.includes(`loot-${run.chapter}`)) {
+      setDialog({ k: "loot", cards: lootDraw((salt) => det(run.seed, salt), run.chapter) });
+      return;
+    }
     openChapterCards(run.chapter);
   };
 
@@ -1358,6 +1390,7 @@ export function CryptoJourney() {
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
         <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong><em>{net >= bossNet ? "BOSS UNDER PRESSURE" : `${formatMoney(bossNet - net)} TO CATCH`}</em></span>
         <span><small>CASH</small><strong>{formatMoney(run.cash)}</strong><em>READY</em></span>
+        <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}>{openPnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</strong><em>{run.positions.length ? `${run.positions.length} OPEN` : "NO TRADE"}</em></span>
         <span className={run.stress >= 70 ? "is-critical" : ""}><small>STRESS</small><strong>{run.stress}%</strong><i><b style={{ width: `${run.stress}%` }} /></i></span>
         <span className={run.hunger >= 70 ? "is-critical" : ""}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
       </section>
@@ -1590,7 +1623,7 @@ export function CryptoJourney() {
       </div>
 
       {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
-        <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards /><span>PORTFOLIO</span></button>
+        <button className="is-trade" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><span>TRADE</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse /><span>SURVIVE</span></button>
         <button disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis /><span>MORE</span></button>
         <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
@@ -1604,7 +1637,7 @@ export function CryptoJourney() {
       {levelUp !== null && <div className="cy-levelup" role="status">LEVEL {levelUp}<small>The Boss raised an eyebrow.</small></div>}
 
       {dialog && (
-        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
+        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" || dialog.k === "loot" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); playOpening(0); }} />}
           {dialog.k === "how" && <HowToPlay onClose={() => setDialog(null)} />}
           {dialog.k === "sound" && <SoundSheet
@@ -1614,7 +1647,11 @@ export function CryptoJourney() {
             onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
             onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
-          {dialog.k === "market" && <MarketSheet run={run} onPick={(s) => { setActiveSymbol(s); setDialog({ k: "trade", symbol: s }); }} />}
+          {dialog.k === "market" && <TerminalSheet run={run} start={activeSymbol}
+            onSpot={(s, f) => openSpot(s, f)}
+            onPerp={(s, d, l, f) => openPerp(s, d, l, f)}
+            onPosition={(id) => setDialog({ k: "position", id })} />}
+          {dialog.k === "loot" && <LootSheet cards={dialog.cards} onPick={(card) => takeLoot(card)} />}
           {dialog.k === "more" && <MoreSheet
             ap={ap}
             onStorage={() => setDialog({ k: "custody" })}
@@ -1815,26 +1852,123 @@ function ScoreSheet({ net, chapters, diff, crises, streak, score, onClose }: { n
   );
 }
 
-function MarketSheet({ run, onPick }: { run: Run; onPick: (s: CoinSymbol) => void }) {
+/**
+ * The trading terminal. Everything a trade needs lives in this one popup:
+ * the market strip, spot versus perp, leverage, the liquidation price in
+ * plain numbers, and every open position with a one-tap exit.
+ */
+function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
+  run: Run; start: CoinSymbol;
+  onSpot: (s: CoinSymbol, f: number) => void;
+  onPerp: (s: CoinSymbol, d: 1 | -1, l: number, f: number) => void;
+  onPosition: (id: number) => void;
+}) {
+  const live = COINS.filter((c) => priceAt(c.symbol, run.chapter, run.noise) > 0);
+  const [symbol, setSymbol] = useState<CoinSymbol>(live.some((c) => c.symbol === start) ? start : (live[0]?.symbol ?? "BTC"));
+  const [tab, setTab] = useState<Kind>("spot");
+  const [dir, setDir] = useState<1 | -1>(1);
+  const [lev, setLev] = useState<number>(5);
+  const price = priceAt(symbol, run.chapter, run.noise);
+  const before = priceAt(symbol, Math.max(0, run.chapter - 1), run.noise);
+  const move = before && price ? (price / before - 1) * 100 : 0;
+  const liqPrice = price * (1 - (dir / lev) * 0.92);
+  const fmt = (v: number) => formatMoney(v);
+
   return (
     <>
-      <p className="journey-kicker"><TrendingUp /> {chapterLabel(run.chapter)} · THE EXCHANGE</p>
-      <h2>PICK A MARKET</h2>
-      <div className="cy-market">
-        {COINS.map((c) => {
-          const price = priceAt(c.symbol, run.chapter, run.noise);
-          const before = priceAt(c.symbol, Math.max(0, run.chapter - 1), run.noise);
-          const move = before && price ? (price / before - 1) * 100 : 0;
+      <p className="journey-kicker"><Zap /> TRADING TERMINAL · {chapterLabel(run.chapter)}</p>
+      <div className="cy-term-strip" role="tablist" aria-label="Markets">
+        {live.map((c) => {
+          const p = priceAt(c.symbol, run.chapter, run.noise);
+          const b = priceAt(c.symbol, Math.max(0, run.chapter - 1), run.noise);
+          const m = b && p ? (p / b - 1) * 100 : 0;
           return (
-            <button key={c.symbol} className={`cy-market-row ${price ? "" : "is-off"}`} disabled={!price} onClick={() => onPick(c.symbol)}>
-              <img src={COIN_LOGO[c.symbol]} alt="" width={26} height={26} />
-              <span><strong>{c.symbol}</strong><small>{c.name}</small></span>
-              <b>{price ? formatMoney(price) : "not live"}</b>
-              <em className={move >= 0 ? "positive" : "negative"}>{price ? `${move >= 0 ? "+" : ""}${move.toFixed(1)}%` : "—"}</em>
+            <button key={c.symbol} className={symbol === c.symbol ? "is-on" : ""} onClick={() => { setSymbol(c.symbol); playSfx("click"); }}>
+              <img src={COIN_LOGO[c.symbol]} alt="" width={20} height={20} />
+              <strong>{c.symbol}</strong>
+              <em className={m >= 0 ? "positive" : "negative"}>{m >= 0 ? "+" : ""}{m.toFixed(1)}%</em>
             </button>
           );
         })}
       </div>
+
+      <div className="cy-term-head">
+        <img src={COIN_LOGO[symbol]} alt="" width={40} height={40} />
+        <span><strong>{symbol}</strong><small>{fmt(price)} · this quarter {move >= 0 ? "+" : ""}{move.toFixed(1)}%</small></span>
+        <b>CASH {fmt(run.cash)}</b>
+      </div>
+
+      <div className="cy-term-tabs">
+        <button className={tab === "spot" ? "is-on" : ""} onClick={() => { setTab("spot"); playSfx("click"); }}>SPOT · YOU OWN IT</button>
+        <button className={tab === "perp" ? "is-on" : ""} onClick={() => { setTab("perp"); playSfx("click"); }}>PERP · LEVERAGE</button>
+      </div>
+
+      {tab === "spot" ? (
+        <div className="cy-term-body">
+          <p className="cy-term-note">You buy the coin and keep it. No liquidation — the worst case is the price falling.</p>
+          <div className="cy-term-sizes">
+            <Button variant="secondary" onClick={() => onSpot(symbol, 0.25)}>BUY 25%<small>{fmt(run.cash * 0.25)}</small></Button>
+            <Button variant="secondary" onClick={() => onSpot(symbol, 0.5)}>BUY 50%<small>{fmt(run.cash * 0.5)}</small></Button>
+            <Button className="cy-primary" onClick={() => onSpot(symbol, 1)}>ALL IN<small>{fmt(run.cash)}</small></Button>
+          </div>
+        </div>
+      ) : (
+        <div className="cy-term-body">
+          <div className="cy-toggle">
+            <button className={dir === 1 ? "is-on is-long" : ""} onClick={() => { setDir(1); playSfx("click"); }}><TrendingUp />LONG · PRICE UP</button>
+            <button className={dir === -1 ? "is-on is-short" : ""} onClick={() => { setDir(-1); playSfx("click"); }}><TrendingDown />SHORT · PRICE DOWN</button>
+          </div>
+          <div className="cy-toggle">{LEVERAGE.map((l) => <button key={l} className={lev === l ? "is-on" : ""} onClick={() => { setLev(l); playSfx("click"); }}>{l}x</button>)}</div>
+          <div className="cy-term-risk">
+            <span><small>ENTRY PRICE</small><strong>{fmt(price)}</strong></span>
+            <span><small>LIQUIDATION AT</small><strong className="negative">{fmt(liqPrice)}</strong></span>
+            <span><small>10% MOVE PAYS</small><strong className="positive">{(10 * lev).toFixed(0)}%</strong></span>
+          </div>
+          <p className="cy-term-note">If {symbol} reaches {fmt(liqPrice)}, the margin is gone. Funding is charged every quarter.</p>
+          <div className="cy-term-sizes">
+            <Button variant="secondary" onClick={() => onPerp(symbol, dir, lev, 0.25)}>OPEN 25%<small>{fmt(run.cash * 0.25)} margin</small></Button>
+            <Button variant="secondary" onClick={() => onPerp(symbol, dir, lev, 0.5)}>OPEN 50%<small>{fmt(run.cash * 0.5)} margin</small></Button>
+            <Button className="cy-primary" onClick={() => onPerp(symbol, dir, lev, 1)}>MAX<small>{fmt(run.cash)} margin</small></Button>
+          </div>
+        </div>
+      )}
+
+      {run.positions.length > 0 && (
+        <div className="cy-term-open">
+          <p className="journey-kicker">YOUR OPEN POSITIONS</p>
+          {run.positions.map((p) => {
+            const now = priceAt(p.symbol, run.chapter, run.noise);
+            const pnl = pnlOf(p, now);
+            return (
+              <button key={p.id} className="cy-term-pos" onClick={() => onPosition(p.id)}>
+                <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
+                <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "LONG" : "SHORT"} ${p.lev}x`} · from {fmt(p.entry)}</small></span>
+                <b className={pnl >= 0 ? "positive" : "negative"}>{pnl >= 0 ? "+" : "−"}{fmt(Math.abs(pnl))}</b>
+                <em>CLOSE</em>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Quarter loot: three face-down cards, one pick, instant reward. */
+function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard) => void }) {
+  const [flipped, setFlipped] = useState<number | null>(null);
+  return (
+    <>
+      <p className="journey-kicker"><Rocket /> QUARTER SURVIVED</p>
+      <h2>PICK ONE. NO TAKE-BACKS.</h2>
+      <div className="cy-loot-grid">
+        {cards.map((c, i) => (
+          <button key={c.id} className={`cy-loot-card ${flipped === i ? "is-open" : ""}`} onClick={() => { if (flipped === i) return onPick(c); setFlipped(i); playSfx("click"); }}>
+            {flipped === i ? <><strong>{c.name}</strong><small>{c.blurb}</small><em>TAP AGAIN TO TAKE IT</em></> : <><b>?</b><small>UNKNOWN DROP</small></>}
+          </button>
+        ))}
+      </div>
+      <small className="cy-note">Every player with the same seed gets the same three cards. Only your choice differs.</small>
     </>
   );
 }
@@ -2367,40 +2501,68 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
   });
   const set = <K extends keyof Config>(key: K, value: Config[K]) => { if (key !== "name") playSfx("click"); setConfig((c) => ({ ...c, [key]: value })); };
   const startCash = startCashFor(config);
+  const [advanced, setAdvanced] = useState(false);
+  const [preset, setPreset] = useState<string>("classic");
+  const applyPreset = (id: string) => {
+    const p = PRESETS.find((x) => x.id === id);
+    if (!p) return;
+    playSfx("click");
+    setPreset(id);
+    setConfig((c) => ({ ...c, arch: p.arch, difficulty: p.difficulty, mode: p.mode, modifier: p.modifier, ironman: p.ironman }));
+  };
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "FREE RUN"}</p><h1>CHOOSE YOUR RUN</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "CUSTOM RUN"}</p><h1>{tournament ? "CHOOSE YOUR RUN" : "PICK A STYLE. PLAY."}</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       {tournament && <SeasonBanner />}
 
-      <section className="setup-block"><p className="journey-kicker">NAME & AVATAR</p>
+      <section className="setup-block setup-id"><p className="journey-kicker">YOU</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
         <div className="avatar-row">{AVATARS.map((a) => <button key={a.id} className={`avatar-pick ${config.avatar === a.id ? "is-on" : ""}`} aria-label={`Avatar ${a.id}`} onClick={() => set("avatar", a.id)}><img src={a.url} alt={`${a.id} avatar`} /></button>)}</div>
         <div className="chip-row">{COUNTRIES.map((c) => <button key={c} className={`chip ${config.country === c ? "is-on" : ""}`} onClick={() => set("country", c)}><Flag code={c} size={18} />{c}</button>)}</div>
       </section>
-      <section className="setup-block"><p className="journey-kicker">ARCHETYPE{tournament ? " · SAME MONEY FOR EVERYONE" : ""}</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
       {tournament ? (
-        <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
-          <ul>
-            <li><b>SEED</b><span>{seasonLabel(season)} — same crashes, rugs, launches and minigames for all players.</span></li>
-            <li><b>MONEY</b><span>{formatMoney(startCashFor(config))} start for everyone. Your archetype is style, not an edge.</span></li>
-            <li><b>DIFFICULTY</b><span>{TOURNAMENT_RULES.difficulty}</span></li>
-            <li><b>MARKET</b><span>{modeOf(TOURNAMENT_RULES.mode).name} — real 2020–2026 prices, no chaos mode.</span></li>
-            <li><b>TWIST</b><span>{modifierOf(config.modifier).name} — {modifierOf(config.modifier).blurb}</span></li>
-            <li><b>IRONMAN</b><span>OFF</span></li>
-          </ul>
-          <small>Only handle, country and avatar are yours to pick. Want free settings? Start a FREE RUN instead.</small>
-        </section>
+        <>
+          <section className="setup-block"><p className="journey-kicker">ARCHETYPE · SAME MONEY FOR EVERYONE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
+          <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
+            <ul>
+              <li><b>SEED</b><span>{seasonLabel(season)} — same crashes, rugs, launches and minigames for all players.</span></li>
+              <li><b>MONEY</b><span>{formatMoney(startCashFor(config))} start for everyone. Your archetype is style, not an edge.</span></li>
+              <li><b>DIFFICULTY</b><span>{TOURNAMENT_RULES.difficulty}</span></li>
+              <li><b>MARKET</b><span>{modeOf(TOURNAMENT_RULES.mode).name} — real 2020–2026 prices, no chaos mode.</span></li>
+              <li><b>TWIST</b><span>{modifierOf(config.modifier).name} — {modifierOf(config.modifier).blurb}</span></li>
+              <li><b>IRONMAN</b><span>OFF</span></li>
+            </ul>
+            <small>Only handle, country and avatar are yours to pick. Want free settings? Start a CUSTOM RUN instead.</small>
+          </section>
+        </>
       ) : (
         <>
-          <section className="setup-block"><p className="journey-kicker">THE TWIST</p>
-            <div className="pick-grid">{MODIFIERS.map((m) => (
-              <button key={m.id} className={`pick-card ${config.modifier === m.id ? "is-on" : ""}`} onClick={() => set("modifier", m.id)}><strong>{m.name}</strong><em>SCORE x{m.mul.toFixed(2)}</em><small>{m.blurb}</small></button>
+          <section className="setup-block"><p className="journey-kicker">ONE TAP · PICK YOUR RUN</p>
+            <div className="preset-grid">{PRESETS.map((p) => (
+              <button key={p.id} className={`preset-card ${preset === p.id ? "is-on" : ""}`} onClick={() => applyPreset(p.id)}>
+                <strong>{p.name}</strong>
+                <em>{formatMoney(startCashFor({ ...config, arch: p.arch, modifier: p.modifier }))} START · SCORE x{(modifierOf(p.modifier).mul * diffOf(p.difficulty).cost).toFixed(2)}</em>
+                <small>{p.line}</small>
+              </button>
             ))}</div>
           </section>
-          <section className="setup-block"><p className="journey-kicker">DIFFICULTY</p><div className="pick-grid">{DIFFICULTIES.map((d) => <button key={d.id} className={`pick-card ${config.difficulty === d.id ? "is-on" : ""}`} onClick={() => set("difficulty", d.id)}><strong>{d.name}</strong><em>SCORE x{d.cost.toFixed(2)}</em><small>{d.blurb}</small></button>)}</div></section>
-          <section className="setup-block"><p className="journey-kicker">MODE</p><div className="pick-grid">{MODES.map((m) => <button key={m.id} className={`pick-card ${config.mode === m.id ? "is-on" : ""}`} onClick={() => set("mode", m.id)}><strong>{m.name}</strong><em>{m.blurb}</em><small>{m.xpLabel}</small></button>)}</div>
-            <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
-          </section>
+          <button className={`setup-advanced ${advanced ? "is-on" : ""}`} onClick={() => { playSfx("click"); setAdvanced((a) => !a); }} aria-expanded={advanced}>
+            {advanced ? "HIDE THE FINE TUNING" : "FINE TUNE IT MYSELF"}
+          </button>
+          {advanced && (
+            <section className="setup-block setup-fine">
+              <p className="journey-kicker">CHARACTER</p>
+              <div className="seg-row">{ARCHETYPES.map((a) => <button key={a.id} className={config.arch === a.id ? "is-on" : ""} onClick={() => set("arch", a.id)}>{a.name}</button>)}</div>
+              <p className="journey-kicker">DIFFICULTY</p>
+              <div className="seg-row">{DIFFICULTIES.map((d) => <button key={d.id} className={config.difficulty === d.id ? "is-on" : ""} onClick={() => set("difficulty", d.id)}>{d.name}</button>)}</div>
+              <p className="journey-kicker">MARKET</p>
+              <div className="seg-row">{MODES.map((m) => <button key={m.id} className={config.mode === m.id ? "is-on" : ""} onClick={() => set("mode", m.id)}>{m.name}</button>)}</div>
+              <p className="journey-kicker">TWIST</p>
+              <div className="seg-row">{MODIFIERS.map((m) => <button key={m.id} className={config.modifier === m.id ? "is-on" : ""} onClick={() => set("modifier", m.id)}>{m.name}</button>)}</div>
+              <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
+              <p className="setup-fine-note">{modeOf(config.mode).blurb} · {diffOf(config.difficulty).blurb}</p>
+            </section>
+          )}
         </>
       )}
       <div className="setup-cta">
@@ -2427,7 +2589,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
     let alive = true;
     setRows(null); setError(false);
     retryPendingSubmission().finally(() => {
-      loadBoard(25, view === "season" ? season : "all")
+      loadBoard(50, view === "season" ? season : "all")
         .then((r) => { if (alive) setRows(r); })
         .catch(() => { if (alive) setError(true); });
     });
