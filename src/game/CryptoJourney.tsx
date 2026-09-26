@@ -1815,26 +1815,104 @@ function ScoreSheet({ net, chapters, diff, crises, streak, score, onClose }: { n
   );
 }
 
-function MarketSheet({ run, onPick }: { run: Run; onPick: (s: CoinSymbol) => void }) {
+/**
+ * The trading terminal. Everything a trade needs lives in this one popup:
+ * the market strip, spot versus perp, leverage, the liquidation price in
+ * plain numbers, and every open position with a one-tap exit.
+ */
+function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
+  run: Run; start: CoinSymbol;
+  onSpot: (s: CoinSymbol, f: number) => void;
+  onPerp: (s: CoinSymbol, d: 1 | -1, l: number, f: number) => void;
+  onPosition: (id: number) => void;
+}) {
+  const live = COINS.filter((c) => priceAt(c.symbol, run.chapter, run.noise) > 0);
+  const [symbol, setSymbol] = useState<CoinSymbol>(live.some((c) => c.symbol === start) ? start : (live[0]?.symbol ?? "BTC"));
+  const [tab, setTab] = useState<Kind>("spot");
+  const [dir, setDir] = useState<1 | -1>(1);
+  const [lev, setLev] = useState<number>(5);
+  const price = priceAt(symbol, run.chapter, run.noise);
+  const before = priceAt(symbol, Math.max(0, run.chapter - 1), run.noise);
+  const move = before && price ? (price / before - 1) * 100 : 0;
+  const liqPrice = price * (1 - (dir / lev) * 0.92);
+  const fmt = (v: number) => formatMoney(v);
+
   return (
     <>
-      <p className="journey-kicker"><TrendingUp /> {chapterLabel(run.chapter)} · THE EXCHANGE</p>
-      <h2>PICK A MARKET</h2>
-      <div className="cy-market">
-        {COINS.map((c) => {
-          const price = priceAt(c.symbol, run.chapter, run.noise);
-          const before = priceAt(c.symbol, Math.max(0, run.chapter - 1), run.noise);
-          const move = before && price ? (price / before - 1) * 100 : 0;
+      <p className="journey-kicker"><Zap /> TRADING TERMINAL · {chapterLabel(run.chapter)}</p>
+      <div className="cy-term-strip" role="tablist" aria-label="Markets">
+        {live.map((c) => {
+          const p = priceAt(c.symbol, run.chapter, run.noise);
+          const b = priceAt(c.symbol, Math.max(0, run.chapter - 1), run.noise);
+          const m = b && p ? (p / b - 1) * 100 : 0;
           return (
-            <button key={c.symbol} className={`cy-market-row ${price ? "" : "is-off"}`} disabled={!price} onClick={() => onPick(c.symbol)}>
-              <img src={COIN_LOGO[c.symbol]} alt="" width={26} height={26} />
-              <span><strong>{c.symbol}</strong><small>{c.name}</small></span>
-              <b>{price ? formatMoney(price) : "not live"}</b>
-              <em className={move >= 0 ? "positive" : "negative"}>{price ? `${move >= 0 ? "+" : ""}${move.toFixed(1)}%` : "—"}</em>
+            <button key={c.symbol} className={symbol === c.symbol ? "is-on" : ""} onClick={() => { setSymbol(c.symbol); playSfx("click"); }}>
+              <img src={COIN_LOGO[c.symbol]} alt="" width={20} height={20} />
+              <strong>{c.symbol}</strong>
+              <em className={m >= 0 ? "positive" : "negative"}>{m >= 0 ? "+" : ""}{m.toFixed(1)}%</em>
             </button>
           );
         })}
       </div>
+
+      <div className="cy-term-head">
+        <img src={COIN_LOGO[symbol]} alt="" width={40} height={40} />
+        <span><strong>{symbol}</strong><small>{fmt(price)} · this quarter {move >= 0 ? "+" : ""}{move.toFixed(1)}%</small></span>
+        <b>CASH {fmt(run.cash)}</b>
+      </div>
+
+      <div className="cy-term-tabs">
+        <button className={tab === "spot" ? "is-on" : ""} onClick={() => { setTab("spot"); playSfx("click"); }}>SPOT · YOU OWN IT</button>
+        <button className={tab === "perp" ? "is-on" : ""} onClick={() => { setTab("perp"); playSfx("click"); }}>PERP · LEVERAGE</button>
+      </div>
+
+      {tab === "spot" ? (
+        <div className="cy-term-body">
+          <p className="cy-term-note">You buy the coin and keep it. No liquidation — the worst case is the price falling.</p>
+          <div className="cy-term-sizes">
+            <Button variant="secondary" onClick={() => onSpot(symbol, 0.25)}>BUY 25%<small>{fmt(run.cash * 0.25)}</small></Button>
+            <Button variant="secondary" onClick={() => onSpot(symbol, 0.5)}>BUY 50%<small>{fmt(run.cash * 0.5)}</small></Button>
+            <Button className="cy-primary" onClick={() => onSpot(symbol, 1)}>ALL IN<small>{fmt(run.cash)}</small></Button>
+          </div>
+        </div>
+      ) : (
+        <div className="cy-term-body">
+          <div className="cy-toggle">
+            <button className={dir === 1 ? "is-on is-long" : ""} onClick={() => { setDir(1); playSfx("click"); }}><TrendingUp />LONG · PRICE UP</button>
+            <button className={dir === -1 ? "is-on is-short" : ""} onClick={() => { setDir(-1); playSfx("click"); }}><TrendingDown />SHORT · PRICE DOWN</button>
+          </div>
+          <div className="cy-toggle">{LEVERAGE.map((l) => <button key={l} className={lev === l ? "is-on" : ""} onClick={() => { setLev(l); playSfx("click"); }}>{l}x</button>)}</div>
+          <div className="cy-term-risk">
+            <span><small>ENTRY PRICE</small><strong>{fmt(price)}</strong></span>
+            <span><small>LIQUIDATION AT</small><strong className="negative">{fmt(liqPrice)}</strong></span>
+            <span><small>10% MOVE PAYS</small><strong className="positive">{(10 * lev).toFixed(0)}%</strong></span>
+          </div>
+          <p className="cy-term-note">If {symbol} reaches {fmt(liqPrice)}, the margin is gone. Funding is charged every quarter.</p>
+          <div className="cy-term-sizes">
+            <Button variant="secondary" onClick={() => onPerp(symbol, dir, lev, 0.25)}>OPEN 25%<small>{fmt(run.cash * 0.25)} margin</small></Button>
+            <Button variant="secondary" onClick={() => onPerp(symbol, dir, lev, 0.5)}>OPEN 50%<small>{fmt(run.cash * 0.5)} margin</small></Button>
+            <Button className="cy-primary" onClick={() => onPerp(symbol, dir, lev, 1)}>MAX<small>{fmt(run.cash)} margin</small></Button>
+          </div>
+        </div>
+      )}
+
+      {run.positions.length > 0 && (
+        <div className="cy-term-open">
+          <p className="journey-kicker">YOUR OPEN POSITIONS</p>
+          {run.positions.map((p) => {
+            const now = priceAt(p.symbol, run.chapter, run.noise);
+            const pnl = pnlOf(p, now);
+            return (
+              <button key={p.id} className="cy-term-pos" onClick={() => onPosition(p.id)}>
+                <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
+                <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "LONG" : "SHORT"} ${p.lev}x`} · from {fmt(p.entry)}</small></span>
+                <b className={pnl >= 0 ? "positive" : "negative"}>{pnl >= 0 ? "+" : "−"}{fmt(Math.abs(pnl))}</b>
+                <em>CLOSE</em>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 }
