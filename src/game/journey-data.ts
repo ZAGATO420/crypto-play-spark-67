@@ -294,16 +294,19 @@ export const HOW_TO_PLAY: { head: string; body: string }[] = [
 ];
 
 /* ---- one skill test per quarter: something you can actually be good at ---- */
-export type SkillCheck = { kind: "timing" | "panic" | "gas" | "seed" | "orderbook" | "rugcheck"; head: string; ask: string; reward: number };
+export type SkillCheck = { kind: "timing" | "panic" | "gas" | "seed" | "orderbook" | "rugcheck" | "whale" | "airdrop" | "hodl"; head: string; ask: string; reward: number };
 const SKILL_MAIN: Record<ChapterMode, SkillCheck> = {
-  ACCUMULATE: { kind: "timing", head: "CATCH THE DIP", ask: "Stop the bar inside the green zone to buy lower than the market.", reward: 600 },
+  ACCUMULATE: { kind: "whale", head: "CATCH THE GREEN", ask: "Tap the green candles the whale prints, never the red dumps.", reward: 600 },
   MOMENTUM: { kind: "orderbook", head: "PLACE THE BID", ask: "Find the liquidity pocket and your sell fills at a better price.", reward: 700 },
   PANIC: { kind: "panic", head: "BEAT THE CRASH", ask: "Push your orders out before the bids vanish.", reward: 800 },
-  HUNT: { kind: "rugcheck", head: "SPOT THE RUG", ask: "One line in the contract empties the pool. Find it.", reward: 800 },
-  DEFEND: { kind: "seed", head: "PROVE THE KEYS", ask: "Remember the four words that guard your cold storage.", reward: 700 },
+  HUNT: { kind: "airdrop", head: "CLAIM THE REAL ONE", ask: "Two claim links drain wallets. Hit the genuine one in time.", reward: 800 },
+  DEFEND: { kind: "hodl", head: "HOLD THE LINE", ask: "Hold your shield inside the moving band to defend your margin.", reward: 700 },
   "BOSS DUEL": { kind: "gas", head: "OUTBID THE BOTS", ask: "Pay enough gas to land the block — but not a cent more.", reward: 900 },
 };
-const SKILL_ALT: Record<SkillCheck["kind"], SkillCheck["kind"]> = { timing: "orderbook", orderbook: "timing", panic: "gas", gas: "panic", rugcheck: "seed", seed: "rugcheck" };
+const SKILL_ALT: Record<SkillCheck["kind"], SkillCheck["kind"]> = {
+  timing: "orderbook", orderbook: "whale", panic: "gas", gas: "panic",
+  rugcheck: "airdrop", seed: "hodl", whale: "timing", airdrop: "rugcheck", hodl: "seed",
+};
 /** Deterministic, and never the same test two quarters in a row. */
 export const skillCheckFor = (chapter: number): SkillCheck => {
   const base = SKILL_MAIN[chapterPlayFor(chapter).mode];
