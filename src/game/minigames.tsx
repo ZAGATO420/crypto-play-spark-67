@@ -235,3 +235,177 @@ function RugCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) 
   };
   return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">One detail can empty the pool. Pick the dangerous line.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={done} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
 }
+
+/* ------------------------------------------------------- candle catch (whale) */
+
+/**
+ * Green candles print, red candles dump. Tap the green ones, leave the red ones
+ * alone. Animated, thumb-sized, over in five seconds.
+ */
+type Drop = { id: number; x: number; y: number; green: boolean; hit: boolean };
+function CandleCatch({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
+  const need = hard ? 7 : 5;
+  const [drops, setDrops] = useState<Drop[]>([]);
+  const [caught, setCaught] = useState(0);
+  const [missed, setMissed] = useState(0);
+  const [left, setLeft] = useState(5200);
+  const [done, setDone] = useState<MiniResult | null>(null);
+  const seed = useRef(Math.floor(roll * 1e6) + 7);
+  const next = () => { seed.current = (seed.current * 1103515245 + 12345) % 2147483648; return seed.current / 2147483648; };
+  const id = useRef(1);
+
+  useEffect(() => {
+    if (done) return;
+    const spawn = window.setInterval(() => {
+      setDrops((list) => [...list, { id: id.current++, x: 6 + next() * 84, y: -12, green: next() > (hard ? 0.45 : 0.35), hit: false }].slice(-14));
+    }, hard ? 340 : 420);
+    const move = window.setInterval(() => {
+      setDrops((list) => list.map((d) => ({ ...d, y: d.y + (hard ? 7 : 5.5) })).filter((d) => d.y < 108));
+    }, 60);
+    const clock = window.setInterval(() => setLeft((l) => Math.max(0, l - 100)), 100);
+    return () => { window.clearInterval(spawn); window.clearInterval(move); window.clearInterval(clock); };
+  }, [done, hard]);
+
+  useEffect(() => {
+    if (done || left > 0) return;
+    const q = Math.max(0, Math.min(1, (caught - missed * 0.5) / need));
+    const res: MiniResult = q >= 0.95 ? { quality: 1, label: "EVERY GREEN CANDLE" } : q >= 0.6 ? { quality: 0.65, label: "GOOD HANDS" } : { quality: 0.15, label: "YOU CHASED RED" };
+    setDone(res);
+    window.setTimeout(() => onResult(res), 800);
+  }, [left, done, caught, missed, need, onResult]);
+
+  const tap = (d: Drop) => {
+    if (done || d.hit) return;
+    setDrops((list) => list.map((x) => (x.id === d.id ? { ...x, hit: true } : x)));
+    if (d.green) setCaught((c) => c + 1);
+    else setMissed((m) => m + 1);
+  };
+
+  return (
+    <>
+      <p className="journey-kicker"><Waves /> WHALE WAVE</p>
+      <h2>CATCH THE GREEN</h2>
+      <p className="cy-lead">Green candles are the whale buying. Red ones are the dump. Tap green, never red — {need} green wins it.</p>
+      <div className="mg-timer"><i style={{ width: `${(left / 5200) * 100}%` }} /></div>
+      <div className="mg-field" aria-label="Falling candles">
+        {drops.map((d) => (
+          <button key={d.id} type="button" className={`mg-candle ${d.green ? "is-green" : "is-red"}${d.hit ? " is-hit" : ""}`}
+            style={{ left: `${d.x}%`, top: `${d.y}%` }} onPointerDown={() => tap(d)} aria-label={d.green ? "Green candle" : "Red candle"} />
+        ))}
+        <span className="mg-field-score"><strong>{caught}</strong>/{need} GREEN · {missed} RED HIT</span>
+      </div>
+      {done && <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>}
+    </>
+  );
+}
+
+/* ---------------------------------------------------------- airdrop claim */
+
+/** Three claim buttons drift across the screen. Only one is the real contract. */
+function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
+  const real = Math.floor(roll * 3) % 3;
+  const labels = ["claim-airdrop.xyz", "app.official-claim.io", "claim.tcfb.app"];
+  const [t, setT] = useState(0);
+  const [left, setLeft] = useState(hard ? 4200 : 5600);
+  const [done, setDone] = useState<MiniResult | null>(null);
+
+  useEffect(() => {
+    if (done) return;
+    const move = window.setInterval(() => setT((v) => v + 0.05), 50);
+    const clock = window.setInterval(() => setLeft((l) => Math.max(0, l - 100)), 100);
+    return () => { window.clearInterval(move); window.clearInterval(clock); };
+  }, [done]);
+
+  useEffect(() => {
+    if (done || left > 0) return;
+    const res: MiniResult = { quality: 0.1, label: "CLAIM WINDOW CLOSED" };
+    setDone(res);
+    window.setTimeout(() => onResult(res), 800);
+  }, [left, done, onResult]);
+
+  const pick = (index: number) => {
+    if (done) return;
+    const res: MiniResult = index === real
+      ? { quality: 1, label: "AIRDROP CLAIMED" }
+      : { quality: 0.15, label: "PHISHING SITE · WALLET DRAINED" };
+    setDone(res);
+    window.setTimeout(() => onResult(res), 850);
+  };
+
+  return (
+    <>
+      <p className="journey-kicker"><Gift /> AIRDROP WINDOW</p>
+      <h2>CLAIM THE REAL ONE</h2>
+      <p className="cy-lead">Two of these links drain wallets. The genuine one ends in <strong>tcfb.app</strong>. Claim before the window shuts.</p>
+      <div className="mg-timer"><i style={{ width: `${(left / (hard ? 4200 : 5600)) * 100}%` }} /></div>
+      <div className="mg-drift">
+        {labels.map((label, index) => (
+          <button key={label} type="button" className={`mg-drift-btn${done && index === real ? " is-real" : ""}`} disabled={!!done}
+            style={{ transform: `translateX(${Math.sin(t + index * 1.7) * (hard ? 26 : 16)}px)` }} onClick={() => pick(index)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {done && <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>}
+    </>
+  );
+}
+
+/* ---------------------------------------------------------- hold the line */
+
+/** Hold to defend your margin: keep the shield inside the moving danger band. */
+function HoldTheLine({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
+  const [pos, setPos] = useState(50);
+  const [band, setBand] = useState(50);
+  const [held, setHeld] = useState(0);
+  const [left, setLeft] = useState(5000);
+  const [done, setDone] = useState<MiniResult | null>(null);
+  const holding = useRef(false);
+  const width = hard ? 13 : 19;
+  const need = hard ? 2600 : 2200;
+
+  useEffect(() => {
+    if (done) return;
+    let t = roll * 6;
+    const loop = window.setInterval(() => {
+      t += hard ? 0.08 : 0.055;
+      setBand(50 + Math.sin(t) * 32 + Math.sin(t * 2.3) * 9);
+      setPos((p) => Math.max(0, Math.min(100, p + (holding.current ? 2.4 : -2.4))));
+      setLeft((l) => Math.max(0, l - 50));
+    }, 50);
+    return () => window.clearInterval(loop);
+  }, [done, hard, roll]);
+
+  useEffect(() => {
+    if (done) return;
+    if (Math.abs(pos - band) <= width) setHeld((h) => h + 50);
+  }, [pos, band, width, done]);
+
+  useEffect(() => {
+    if (done || left > 0) return;
+    const q = Math.min(1, held / need);
+    const res: MiniResult = q >= 0.95 ? { quality: 1, label: "MARGIN HELD" } : q >= 0.55 ? { quality: 0.6, label: "SHAKEN, NOT LIQUIDATED" } : { quality: 0.1, label: "MARGIN CALL" };
+    setDone(res);
+    window.setTimeout(() => onResult(res), 850);
+  }, [left, done, held, need, onResult]);
+
+  const inZone = Math.abs(pos - band) <= width;
+  return (
+    <>
+      <p className="journey-kicker"><Shield /> MARGIN DEFENCE</p>
+      <h2>HOLD THE LINE</h2>
+      <p className="cy-lead">Press and hold to push your shield up, release to let it fall. Keep it inside the moving band to defend your margin.</p>
+      <div className="mg-timer"><i style={{ width: `${(left / 5000) * 100}%` }} /></div>
+      <div className={`mg-line${inZone ? " is-safe" : ""}`}>
+        <i className="mg-line-band" style={{ bottom: `${Math.max(0, band - width)}%`, height: `${width * 2}%` }} />
+        <b className="mg-line-shield" style={{ bottom: `${pos}%` }} />
+        <span className="mg-line-score">{Math.round((held / need) * 100)}%</span>
+      </div>
+      <Button className="cy-wide cy-primary" disabled={!!done}
+        onPointerDown={() => { holding.current = true; }}
+        onPointerUp={() => { holding.current = false; }}
+        onPointerLeave={() => { holding.current = false; }}>HOLD TO DEFEND</Button>
+      {done && <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>}
+    </>
+  );
+}
