@@ -29,3 +29,4 @@
 - [x] Live chart rendering: continuous blue line with frame-synced reveal and no dashed gaps
 - [x] Compact mobile run view with large fixed Portfolio, Survive, More and End Quarter controls
 - [x] Arcade hype pass with God Candle wins, liquidation shock, exclusive headline audio and instant feedback
+- [x] Remove unintended transparency across the complete game UI and verify on phone
