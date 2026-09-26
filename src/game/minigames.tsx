@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Fuel, Gift, KeyRound, MousePointerClick, Search, Shield, Target, Waves } from "lucide-react";
 
