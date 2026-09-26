@@ -1542,11 +1542,13 @@
 
 /* Short laptop screens: the deck stays whole, the extras step back. */
 @media (min-width:1024px) and (max-height:860px) {
-  .cy-chart-wrap { height:clamp(92px,13vh,130px); }
+  .cy-chart-wrap { height:clamp(80px,11vh,116px); }
   .cy-preview,.cy-skill,.cy-lastmove { display:none; }
-  .cy-plan { padding:5px 7px; gap:3px; }
+  .cy-plan { padding:4px 7px; gap:2px; }
   .cy-plan > p { display:none; }
-  .cy-plan-btn { min-height:34px; padding:4px; }
+  .cy-plan-btn { min-height:28px; padding:2px 4px; }
+  .cy-plan-btn small { display:none; }
+  .cy-chart-legend,.cy-chart-foot { font-size:7px; }
   .cy-market-visual { padding:7px; }
   .cy-arena { padding:9px; gap:5px; }
   .cy-toolbelt { padding-top:6px; }
