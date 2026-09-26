@@ -1588,3 +1588,7 @@
   .cy-skill-head strong { font-size:11px; }
   .cy-skill-cta { min-height:44px; }
 }
+
+/* Sound is blocked until the first tap — this makes that obvious. */
+.cy-sound-prompt { position:fixed; z-index:40; left:50%; top:max(12px,env(safe-area-inset-top)); transform:translateX(-50%); display:flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border:1px solid var(--journey-yellow); border-radius:99px; background:color-mix(in oklab,var(--journey-yellow) 22%,oklch(0.16 0.018 290)); color:var(--journey-yellow); font:400 12px/1 var(--font-display); letter-spacing:.08em; cursor:pointer; animation:pulse-ring 1.8s ease-in-out infinite; }
+.cy-sound-prompt svg { width:18px; height:18px; }
