@@ -780,9 +780,9 @@ export const lootDraw = (roll: (salt: string) => number, chapter: number): LootC
 /* ---- one-tap run presets: no reading wall before the first trade ------- */
 
 export const PRESETS: { id: string; name: string; line: string; difficulty: Difficulty; mode: BaseMode; modifier: ModifierId; ironman: boolean; arch: Archetype }[] = [
-  { id: "degen", name: "DEGEN EXPRESS", line: "Chaos market · max leverage energy", difficulty: "HARD", mode: "chaos", modifier: "glass", ironman: false, arch: "degen" },
-  { id: "classic", name: "CLASSIC SURVIVOR", line: "Real 2020–2026 prices · the honest run", difficulty: "NORMAL", mode: "historical", modifier: "straight", ironman: false, arch: "trader" },
-  { id: "ironman", name: "HARDCORE IRONMAN", line: "One life · no saves · no mercy", difficulty: "HARD", mode: "classic", modifier: "night", ironman: true, arch: "worker" },
+  { id: "degen", name: "DEGEN EXPRESS", line: "Chaos market · half the money · every score counts double", difficulty: "BOSS", mode: "chaos", modifier: "glass", ironman: false, arch: "degen" },
+  { id: "classic", name: "CLASSIC SURVIVOR", line: "The real 2020–2026 prices · the honest run", difficulty: "NORMAL", mode: "historical", modifier: "straight", ironman: false, arch: "trader" },
+  { id: "ironman", name: "HARDCORE IRONMAN", line: "One life · no saves · nightmare costs", difficulty: "NIGHTMARE", mode: "classic", modifier: "straight", ironman: true, arch: "hodler" },
 ];
 
 /** How many quarters until history hits again — the dread, without the spoiler. */
