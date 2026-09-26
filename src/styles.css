@@ -1503,4 +1503,13 @@
   .cy-toolbelt .cy-tool-end { grid-column:3 / -1; min-height:46px; }
   .cy-main-actions button { min-height:52px; }
   .cy-action-context { padding:6px 9px; }
+  /* the skill test collapses to one line — the deck button opens it */
+  .cy-skill { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; }
+  .cy-skill p { display:none; }
+  .cy-skill-cta { width:auto; min-height:34px; padding:0 12px; }
+  .cy-action-risk { padding:5px 9px; font-size:9px; }
+  .cy-top { padding:0; }
+  .cy-top h1.cy-net { display:none; }
+  .cy-xp { margin-top:2px; }
+  .cy-arena { gap:6px; }
 }
