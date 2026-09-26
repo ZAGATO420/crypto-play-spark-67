@@ -1390,7 +1390,10 @@ export function CryptoJourney() {
           <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
-        <p>QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
+        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
+        <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
+          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} · ${mission.text.slice(0, 26)} · SHOW BRIEFING`}
+        </button>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
