@@ -1600,6 +1600,22 @@ export function CryptoJourney() {
                   }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
                 </div>
               </div>
+              <div className={`cy-plan heat-${Math.min(5, run.heat)}`} aria-label="Your plan for this quarter">
+                <div className="cy-plan-head">
+                  <span>YOUR PLAN FOR THIS QUARTER</span>
+                  <strong className={run.heat > 0 ? "is-hot" : ""}>HEAT x{run.heat} · WIN BONUS +{Math.round((heatBonus(run.heat) - 1) * 100)}%</strong>
+                </div>
+                <div className="cy-plan-row">
+                  {STANCES.map((s) => (
+                    <button key={s.id} type="button" className={`cy-plan-btn is-${s.id}${run.stance === s.id ? " is-on" : ""}`} disabled={guide !== null}
+                      onClick={() => { playSfx("click"); setRun((r) => ({ ...r, stance: s.id })); say(`${s.name} · ${s.line}`, s.id === "degen" ? "pink" : "cyan"); }}>
+                      <b>{s.name}</b>
+                      <small>{s.id === "survive" ? "−50% LOSS" : s.id === "degen" ? "±60% SWING" : "AS IT COMES"}</small>
+                    </button>
+                  ))}
+                </div>
+                <p>{stanceOf(run.stance).line}</p>
+              </div>
               <div className="cy-action-context"><span>YOUR DECISION</span><strong>{guide === 0 ? "Buy Bitcoin to enter the market." : chapterPlay.mode === "PANIC" ? "Protect cash or risk the crash." : chapterPlay.mode === "HUNT" ? "Check the launch before committing cash." : chapterPlay.mode === "DEFEND" ? "Move exposed funds before the threat hits." : chapterPlay.mode === "BOSS DUEL" ? "Risk a visible stake in a skill challenge." : focusPosition ? "Add, exit, or let the position run." : "Enter the market or preserve your cash."}</strong></div>
               <div className="cy-main-actions">
                 {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}><TrendingUp />BUY {formatMoney(guideBuy)} BTC<ChevronRight /></Button>
