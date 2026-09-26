@@ -1575,3 +1575,16 @@
 .mg-line-band { position: absolute; inset-inline: 0; background: color-mix(in oklab, var(--journey-cyan) 22%, transparent); }
 .mg-line-shield { position: absolute; inset-inline: 12%; height: 8px; border-radius: 99px; background: var(--journey-yellow); box-shadow: 0 0 20px var(--journey-yellow); }
 .mg-line-score { position: absolute; right: 10px; top: 8px; color: var(--journey-yellow); font: 400 20px/1 var(--font-display); }
+
+/* Collapsed extras keep their own layout when the briefing is opened on phones. */
+@media (max-width:640px) {
+  .cy-shell.has-intel .cy-live { display:grid !important; }
+  .cy-shell.has-intel .cy-chart-legend,
+  .cy-shell.has-intel .cy-chart-foot,
+  .cy-shell.has-intel .cy-chart-instruction { display:flex !important; }
+  /* The skill game is the fun part, so it stays visible and compact on phones. */
+  .cy-skill { padding:8px 10px; }
+  .cy-skill p { display:none; }
+  .cy-skill-head strong { font-size:11px; }
+  .cy-skill-cta { min-height:44px; }
+}
