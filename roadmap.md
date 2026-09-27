@@ -58,3 +58,9 @@
 - Phasen-Branding: Farbwelt + Banner pro Phase (MODE_THEME), PANIC pulsiert.
 - Boss spricht wieder auf dem Handy (CSS-Ausblendung entfernt).
 - Toter Code entfernt (details-State, Meter, cy-meters/cy-versus).
+
+## Kernbildschirm-Diät (erledigt 27.09.)
+- Hauptebene: Stand, Chart, 2 Züge, SKILL TEST, RUN TAPE/MORE/END QUARTER (Handy 7 Elemente, kein Scrollen)
+- SURVIVE springt bei Hunger/Stress >= 70% auf die Hauptebene (rot pulsierend)
+- Presale/Boss-Duell: Einsatz, Rug-Risiko, Upside-Range stehen im Klartext auf der Risiko-Karte
+- Alles andere (Stance, Terminal, Storage, History, Verify, Guide, End Run) hinter MORE
