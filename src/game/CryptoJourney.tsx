@@ -1483,33 +1483,41 @@ export function CryptoJourney() {
   const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
   // survival only takes screen space when the body is actually failing
   const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
-  /** MOMENTUM pilot: the risky move is played, not clicked. Stake is visible up front. */
-  const trendStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
-  const trendPilot = chapterPlay.mode === "MOMENTUM" && guide === null && trendStake > 0;
-  // when a launch or a duel IS the risky move, its terms stay readable on the card
-  const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
-    : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
-      : trendPilot ? `PRESS THE TREND | ${formatMoney(trendStake)}`
+  /** Every phase: the risky move is played, not clicked. Stake is visible up front. */
+  const phaseRisk = PHASE_RISK[chapterPlay.mode];
+  const phaseStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
+  const huntTicket = presale ? Math.min(Math.max(presale.min, Math.round(net * 0.05)), Math.max(presale.min, Math.round(run.cash * 0.25))) : 0;
+  const stakePilot = guide === null && phaseStake > 0
+    && (chapterPlay.mode === "ACCUMULATE" || chapterPlay.mode === "MOMENTUM" || chapterPlay.mode === "PANIC" || chapterPlay.mode === "DEFEND");
+  const huntPilot = chapterPlay.mode === "HUNT" && !!presale && guide === null && run.cash >= huntTicket;
+  const duelPilot = chapterPlay.mode === "BOSS DUEL" && duelOpen && guide === null;
+  const skillPilot = stakePilot || huntPilot || duelPilot;
+  // the stake, the game and what a fumble costs stay readable on the card itself
+  const riskLabel = huntPilot && presale ? `APE INTO ${presale.name} | ${formatMoney(huntTicket)}`
+    : duelPilot ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
+      : stakePilot ? `${moves.risk.label} | ${formatMoney(phaseStake)}`
         : moves.risk.label;
-  const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen) || trendPilot;
-  const riskWhy = chapterPlay.mode === "HUNT" && presale
-    ? `Ticket from ${formatMoney(presale.min)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
-    : chapterPlay.mode === "BOSS DUEL" && duelOpen
-      ? `Stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
-      : trendPilot
-        ? `${check.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(trendStake * 1.4))} | fumble costs ${formatMoney(Math.round(trendStake * 0.5))}`
+  const riskTerms = skillPilot;
+  const riskWhy = huntPilot && presale
+    ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
+    : duelPilot
+      ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
+      : stakePilot
+        ? `${phaseRisk.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(phaseStake * 1.4))} | fumble costs ${formatMoney(Math.round(phaseStake * 0.5))}`
         : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
+    if (stakePilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
+    if (huntPilot && presale) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "presale", card: presale, size: huntTicket } });
+    if (duelPilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
     switch (chapterPlay.mode) {
       case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
       case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
       case "DEFEND": say("Funds stay where they trade. Fast to move, first to burn.", "pink"); bank(); break;
       case "BOSS DUEL": setDialog({ k: "fight", chapter: run.chapter }); break;
       case "MOMENTUM":
-        if (trendPilot) setDialog({ k: "mini", kind: check.kind, pending: { t: "trendRisk", stake: trendStake } });
-        else if (focusPosition) setDialog({ k: "market" });
+        if (focusPosition) setDialog({ k: "market" });
         else openSpot(focusSymbol, 0.25);
         break;
       default: openSpot(focusSymbol, 0.25);
