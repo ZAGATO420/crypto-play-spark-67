@@ -1616,6 +1616,11 @@ export function CryptoJourney() {
                   ))}
                 </div>
                 <p>{stanceOf(run.stance).line}</p>
+                <div className="cy-conviction">
+                  <span>CONVICTION {Math.round(run.conviction)}%</span>
+                  <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
+                  <button type="button" className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} disabled={guide !== null} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+                </div>
               </div>
               {guide !== null ? (
                 <div className="cy-moves is-guided-row">
