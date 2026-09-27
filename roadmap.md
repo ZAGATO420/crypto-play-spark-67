@@ -71,3 +71,5 @@
 - [x] KI-Tells weg: ALL-CAPS-Eyebrows -> [TERMINAL TAGS], Mittelpunkt-Ketten -> Mono-Pipes, weiche Glows -> 2px Hardware-Kanten + Scanlines.
 - [x] EIN Signature Moment: Boss Interruption (SYSTEM OVERRIDE, Stempel REJECTED / LIQUIDATED / THRONE THREATENED).
 - [x] Trophy-Karte als Terminal-Audit-Report.
+
+- [x] Sichtbare Zielmarke: Platz-1-Netto wird einmal pro Seite geladen und eingefroren; Startscreen-Banner, HUD-Zeile "VS RANK 1" unter der Boss-Anzeige (auch mobil), Endscreen-Urteil und Share-Zeile.
