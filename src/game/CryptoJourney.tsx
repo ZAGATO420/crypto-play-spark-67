@@ -1651,7 +1651,7 @@ export function CryptoJourney() {
               )}
               <div className="cy-tape-row">
                 <button type="button" className="cy-tape-btn" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE FOR IT" : "RUN THE TAPE"}</button>
-                <button type="button" className="cy-tape-btn" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
+                <button type="button" className="cy-tape-btn cy-tape-more" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
                 <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
 
