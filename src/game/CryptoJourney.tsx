@@ -1393,6 +1393,7 @@ export function CryptoJourney() {
   const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
     : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM · STAKE ${formatMoney(duelStake)}`
       : moves.risk.label;
+  const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen);
   const riskWhy = chapterPlay.mode === "HUNT" && presale
     ? `Ticket from ${formatMoney(presale.min)} · rug risk ${Math.round(presale.rug * 100)}% · upside ${presale.upside[0]}x–${presale.upside[1]}x`
     : chapterPlay.mode === "BOSS DUEL" && duelOpen
@@ -1620,7 +1621,7 @@ export function CryptoJourney() {
                 </div>
               ) : (
                 <div className="cy-moves" aria-label="Your two moves this quarter">
-                  <button type="button" className="cy-move is-risk" disabled={riskLocked} onClick={riskMove}>
+                  <button type="button" className={`cy-move is-risk${riskTerms ? " has-terms" : ""}`} disabled={riskLocked} onClick={riskMove}>
                     <span><Flame />TAKE THE RISK</span>
                     <strong>{riskLabel}</strong>
                     <small>{moves.risk.sub}</small>
