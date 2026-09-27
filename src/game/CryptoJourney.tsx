@@ -630,7 +630,9 @@ export function CryptoJourney() {
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
+    showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin · entry ${formatMoney(price)}`, "perp");
     playSfx("buy");
+
     grantXp(XP.trade + lev * 8, `${lev}x`);
     playOpening();
   };
