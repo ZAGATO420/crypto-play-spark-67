@@ -1177,7 +1177,7 @@
   .cy-skill p { display:block; margin:3px 0 4px; font-size:9px; line-height:1.3; }
   .cy-skill-cta { min-height:40px; margin-top:4px; font-size:9px; }
   .cy-toolbelt { display:none; }
-  .cy-mobile-dock { position:fixed; left:6px; right:6px; bottom:max(4px,env(safe-area-inset-bottom)); z-index:45; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.2fr); gap:4px; width:auto; max-width:none; margin:0; padding:5px; border:1px solid color-mix(in oklab,var(--journey-cyan) 42%,var(--border)); border-radius:8px; background:var(--background); box-shadow:0 -10px 30px color-mix(in oklab,var(--background) 80%,transparent); }
+  .cy-mobile-dock { position:fixed; left:6px; right:6px; bottom:max(4px,env(safe-area-inset-bottom)); z-index:45; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); gap:4px; width:auto; max-width:none; margin:0; padding:5px; border:1px solid color-mix(in oklab,var(--journey-cyan) 42%,var(--border)); border-radius:8px; background:var(--background); box-shadow:0 -10px 30px color-mix(in oklab,var(--background) 80%,transparent); }
   .cy-mobile-dock button { display:flex; min-width:0; min-height:52px; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:4px 2px; border:1px solid var(--border); border-radius:5px; color:var(--foreground); font-size:8px; font-weight:800; cursor:pointer; }
   .cy-mobile-dock button:disabled { opacity:.35; }
   .cy-mobile-dock button svg { width:18px; height:18px; }
