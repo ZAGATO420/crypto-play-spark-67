@@ -2741,6 +2741,7 @@ function SetupScreen({ tournament, mark, onBack, onStart }: { tournament: boolea
     <main className="journey-setup">
       <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT | ${seasonLabel(config.season)}` : "CUSTOM RUN"}</p><h1>{tournament ? "CHOOSE YOUR RUN" : "PICK A STYLE. PLAY."}</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       {tournament && <SeasonBanner />}
+      <TargetMark mark={mark} />
 
       <section className="setup-block setup-id"><p className="journey-kicker">YOU</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
