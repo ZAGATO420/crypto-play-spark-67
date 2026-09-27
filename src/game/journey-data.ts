@@ -270,6 +270,53 @@ export const chapterPlayFor = (chapter: number): ChapterPlay => {
   return { mode, ...MODE_COPY[mode] };
 };
 
+/**
+ * Every phase gets its own colour world and its own headline, so the player
+ * SEES which of the six jobs the quarter is asking for before reading a word.
+ */
+export type ModeTheme = { slug: string; badge: string; tag: string };
+export const MODE_THEME: Record<ChapterMode, ModeTheme> = {
+  ACCUMULATE: { slug: "accumulate", badge: "ACCUMULATION PHASE", tag: "QUIET TAPE · CHEAP COINS" },
+  MOMENTUM: { slug: "momentum", badge: "MOMENTUM PHASE", tag: "EVERYTHING PUMPS · GREED RISING" },
+  PANIC: { slug: "panic", badge: "PANIC PHASE", tag: "BIDS VANISHING · GET OUT" },
+  HUNT: { slug: "hunt", badge: "HUNTING PHASE", tag: "LAUNCH LIVE · RUG RISK" },
+  DEFEND: { slug: "defend", badge: "DEFENCE PHASE", tag: "COUNTERPARTY RISK · SECURE THE BAG" },
+  "BOSS DUEL": { slug: "duel", badge: "BOSS DUEL", tag: "HE WANTS YOUR STACK" },
+};
+
+/**
+ * Two visible moves per quarter — one that takes risk, one that protects.
+ * This is the whole strategy loop: the player always sees both paths and
+ * what each one costs before committing.
+ */
+export type MoveCopy = { label: string; sub: string; why: string };
+export const MODE_MOVES: Record<ChapterMode, { risk: MoveCopy; safe: MoveCopy }> = {
+  ACCUMULATE: {
+    risk: { label: "BUILD POSITION", sub: "Put a quarter of your cash to work", why: "Cheap coins now pay for the whole cycle later." },
+    safe: { label: "SIT IN CASH", sub: "Buy nothing this quarter", why: "Cash never bleeds, but it never compounds either." },
+  },
+  MOMENTUM: {
+    risk: { label: "ADD TO THE WINNER", sub: "Press the trend while it runs", why: "Momentum pays fast — and reverses faster." },
+    safe: { label: "TAKE PROFIT", sub: "Close your best position", why: "Realised profit cannot be taken back by the market." },
+  },
+  PANIC: {
+    risk: { label: "HOLD THROUGH IT", sub: "Ride the crash, buy the bottom", why: "Survive the wick and you own the rebound." },
+    safe: { label: "HIT THE EXIT", sub: "Close out before the bids go", why: "You keep your money and miss the bounce." },
+  },
+  HUNT: {
+    risk: { label: "TAKE THE TICKET", sub: "Size into the live launch", why: "Lottery odds: rug risk against a real multiple." },
+    safe: { label: "PASS ON IT", sub: "Let the launch go", why: "Most launches end at zero. Boring beats broke." },
+  },
+  DEFEND: {
+    risk: { label: "STAY LIQUID", sub: "Leave funds where they trade", why: "Fast to move, first to burn if the venue fails." },
+    safe: { label: "MOVE TO COLD", sub: "Secure the bag off-venue", why: "A failure cannot reach money you already moved." },
+  },
+  "BOSS DUEL": {
+    risk: { label: "ACCEPT THE DUEL", sub: "Stake money on your skill", why: "Beat him and double the stake plus a perk." },
+    safe: { label: "REFUSE THE DUEL", sub: "Protect your net worth", why: "No stake lost, no perk gained, no ground made up." },
+  },
+};
+
 /** Plain, no-maths answer to "am I doing well?" — shown every second of the run. */
 export type Standing = { label: string; tone: "great" | "good" | "tight" | "behind" | "bad"; line: string };
 export const standingFor = (net: number, bossNet: number, chapter: number): Standing => {
