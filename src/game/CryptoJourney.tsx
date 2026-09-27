@@ -1837,18 +1837,6 @@ function ArcadeMoment({ fx, boss }: {
 }
 
 
-function Meter({ label, value, icon, tone, detail }: { label: string; value: number; icon: React.ReactNode; tone: string; detail: string }) {
-  return (
-    <div className={`journey-meter tone-${tone}`}>
-      <span className="meter-icon">{icon}</span>
-      <div className="min-w-0">
-        <div className="meter-label"><strong>{label}</strong><span>{detail}</span></div>
-        <div className="meter-track"><i style={{ width: `${Math.max(3, Math.min(100, value))}%` }} /></div>
-      </div>
-    </div>
-  );
-}
-
 function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (() => void) | undefined }) {
   // Escape and a tap on the dark backdrop both get you out — nobody should feel trapped.
   useEffect(() => {
