@@ -1705,11 +1705,34 @@ export function CryptoJourney() {
           {dialog.k === "loot" && <LootSheet cards={dialog.cards} onPick={(card) => takeLoot(card)} />}
           {dialog.k === "more" && <MoreSheet
             ap={ap}
+            stance={run.stance}
+            heat={run.heat}
+            conviction={run.conviction}
+            convictionOn={run.convictionOn}
+            verified={verified}
+            verifyCost={Math.max(150, Math.round(net * 0.01))}
+            skillDone={!!(skill && skill.chapter === run.chapter)}
+            skillHead={check.head}
+            skillPrize={Math.max(300, Math.round(net * 0.02))}
+            onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} · ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
+            onConviction={toggleConviction}
+            onTerminal={() => setDialog({ k: "market" })}
+            onSurvive={() => setDialog({ k: "survive" })}
+            onSkill={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}
+            onVerify={() => {
+              if (verified) return;
+              const fee = Math.max(150, Math.round(net * 0.01));
+              if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
+              setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
+              setVerified(true);
+              playSfx("click");
+            }}
             onStorage={() => setDialog({ k: "custody" })}
             onHistory={() => setDialog({ k: "ledger" })}
             onGuide={() => { setGuide(0); setDialog(null); }}
             onEnd={() => setDialog({ k: "cashout" })}
           />}
+
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: run.chapter % 2 === 0 ? "rugcheck" : "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
