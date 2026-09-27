@@ -1764,7 +1764,7 @@ export function CryptoJourney() {
             ap={ap}
             onStorage={() => setDialog({ k: "custody" })}
             onHistory={() => setDialog({ k: "ledger" })}
-            onGuide={() => { setGuide(0); setDetails(false); setDialog(null); }}
+            onGuide={() => { setGuide(0); setDialog(null); }}
             onEnd={() => setDialog({ k: "cashout" })}
           />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
