@@ -1945,3 +1945,35 @@
 .cy-shell { background-image: none; }
 .cy-shell .cy-arena, .cy-shell .cy-move, .cy-shell .cy-chip, .cy-shell .cy-card,
 .cy-shell .cy-meter, .cy-shell .cy-panel { border-radius: 2px; }
+
+/* ---- Pit hardware pass: sharp steel instead of soft neon glass ---- */
+.cy-shell [class*="cy-"] { border-radius: 2px; }
+.cy-shell .cy-card, .cy-shell .cy-arena, .cy-shell .cy-move, .cy-shell .cy-core,
+.cy-shell .cy-goal, .cy-shell .cy-standing, .cy-shell .cy-positions, .cy-shell .cy-trail,
+.cy-shell .cy-tape-btn, .cy-shell .cy-quick-btn, .cy-shell .cy-mobile-dock {
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--pit-steel) 88%, transparent), color-mix(in oklab, var(--pit-bg) 72%, transparent));
+}
+.cy-shell .cy-arena { border-width: 1px; }
+/* Faint cathode scanlines over the whole pit — flat, never animated. */
+.cy-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, color-mix(in oklab, var(--pit-bg) 22%, transparent) 0 1px, transparent 2px 3px);
+  opacity: 0.55;
+}
+/* Tape data in mono, amber for the money that matters. */
+.cy-net, .cy-score, .cy-core-money, .cy-core-pnl, .cy-xp-num, .cy-ap, .cy-standing-tag,
+.cy-live-tape, .cy-signal, .cy-goal-line, .cy-chart-title, .cy-preview, .cy-pos-head {
+  font-family: var(--font-mono);
+  letter-spacing: 0.01em;
+}
+.cy-net strong, .cy-core-money strong { color: var(--pit-amber); }
+.cy-standing-tag { border-radius: 0; border-left: 2px solid currentColor; }
+.cy-move strong { text-transform: uppercase; }
+.cy-move.is-risk { border-color: var(--pit-shock); }
+.cy-move.is-safe { border-color: color-mix(in oklab, var(--pit-mint) 60%, var(--pit-edge)); }
+.cy-tape-btn { font-family: var(--font-mono); letter-spacing: 0.1em; }
