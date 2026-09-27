@@ -1726,3 +1726,45 @@
 .end-trophy-actions { display: flex; flex-wrap: wrap; gap: 8px }
 .end-trophy-actions button { flex: 1 1 140px }
 @media (max-width: 640px) { .end-grid { font-size: 13px } }
+
+/* Loud confirmation that a position actually opened (1-click buy clarity). */
+.cy-fill {
+  position: fixed;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 12px 20px;
+  border-radius: 14px;
+  text-align: center;
+  pointer-events: none;
+  border: 2px solid hsl(var(--cy-gold, 45 100% 60%));
+  background: color-mix(in srgb, hsl(var(--background)) 82%, transparent);
+  box-shadow: 0 0 34px -8px hsl(var(--cy-gold, 45 100% 60%) / 0.75);
+  animation: cy-fill-in 0.22s ease-out, cy-fill-out 0.3s ease-in 1.2s forwards;
+}
+.cy-fill strong {
+  font-size: clamp(1rem, 4.6vw, 1.55rem);
+  letter-spacing: 0.04em;
+  color: hsl(var(--cy-gold, 45 100% 60%));
+}
+.cy-fill small {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+.cy-fill.tone-perp {
+  border-color: hsl(var(--cy-pink, 330 90% 62%));
+  box-shadow: 0 0 34px -8px hsl(var(--cy-pink, 330 90% 62%) / 0.75);
+}
+.cy-fill.tone-perp strong { color: hsl(var(--cy-pink, 330 90% 62%)); }
+@keyframes cy-fill-in {
+  from { opacity: 0; transform: translateX(-50%) scale(0.86); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+@keyframes cy-fill-out {
+  to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
