@@ -61,6 +61,40 @@ export async function loadBoard(limit = 25, season?: string): Promise<BoardRow[]
   return (await res.json()) as BoardRow[];
 }
 
+/**
+ * The visible target of a run: the net worth the current season leader holds.
+ * Loaded once per page, then frozen, so a run never chases a moving number.
+ */
+export type TopMark = { net: number; name: string; source: "season" | "alltime" | "benchmark" };
+
+/** Nothing on the board yet (fresh season, offline): a real benchmark to beat. */
+export const BENCHMARK_MARK = 500_000;
+
+let markCache: Promise<TopMark> | null = null;
+
+export function loadTopMark(season: string): Promise<TopMark> {
+  markCache ??= (async (): Promise<TopMark> => {
+    const pick = async (s?: string): Promise<BoardRow | undefined> => {
+      try {
+        const rows = await loadBoard(1, s);
+        return rows[0];
+      } catch {
+        return undefined;
+      }
+    };
+    const leader = await pick(season);
+    if (leader && leader.netWorth > 0) {
+      return { net: Math.round(leader.netWorth), name: leader.name, source: "season" };
+    }
+    const allTime = await pick();
+    if (allTime && allTime.netWorth > 0) {
+      return { net: Math.round(allTime.netWorth), name: allTime.name, source: "alltime" };
+    }
+    return { net: BENCHMARK_MARK, name: "THE BOSS' OWN BOOK", source: "benchmark" };
+  })();
+  return markCache;
+}
+
 export async function submitRun(run: RunSubmission): Promise<void> {
   if (typeof navigator !== "undefined" && !navigator.onLine) {
     throw new SubmitRunError("offline", "No connection");

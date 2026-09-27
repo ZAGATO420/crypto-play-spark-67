@@ -29,7 +29,7 @@ import { readProfile, recordRun, type Profile } from "./profile";
 import { COIN_LOGO } from "./coin-logos";
 import { Flag } from "./flags";
 import { Minigame, type MiniKind, type MiniResult } from "./minigames";
-import { loadBoard, submitRun, SubmitRunError, type BoardRow, type RunSubmission } from "./leaderboard";
+import { loadBoard, loadTopMark, submitRun, SubmitRunError, type BoardRow, type RunSubmission, type TopMark } from "./leaderboard";
 import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, unlockAudio, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
@@ -347,6 +347,9 @@ export function CryptoJourney() {
   const [ending, setEnding] = useState<EndingKey>("SURVIVOR");
   const [resume, setResume] = useState(false);
   const [tournament, setTournament] = useState(false);
+  // The real target of a run: what the current season leader holds. Fetched once
+  // per page and then frozen, so nobody chases a number that moves mid-run.
+  const topMark = useTopMark(currentSeasonId());
 
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
@@ -1371,12 +1374,12 @@ export function CryptoJourney() {
     setResolution(null); setDialog(null); setGuide(null); setScreen("run");
   };
 
-  if (screen === "start") return <StartScreen resume={resume} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
-  if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
+  if (screen === "start") return <StartScreen resume={resume} mark={topMark} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
+  if (screen === "setup") return <SetupScreen tournament={tournament} mark={topMark} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return (
     <EndScreen
-      run={run} net={net} score={score} ending={ending}
+      run={run} net={net} score={score} ending={ending} mark={topMark}
       onRestart={() => setScreen("setup")}
       onRematch={() => begin(run.config, run.seed)}
       onBoard={() => setScreen("board")} />
@@ -1522,6 +1525,14 @@ export function CryptoJourney() {
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
         <p className="cy-standing-line">{standing.line}</p>
+        {topMark && (
+          <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
+            <span className="cy-rank1-tag">VS RANK 1</span>
+            <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD | YOU LEAD` : `−${formatMoney(topMark.net - net)} TO RANK 1`}</strong>
+            <span className="cy-rank1-goal">{formatMoney(topMark.net)}{topMark.source === "season" ? ` | ${topMark.name}` : ""}</span>
+            <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
+          </div>
+        )}
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
         </button>
@@ -2543,6 +2554,33 @@ function MenuSound() {
   );
 }
 
+/** Loads the season leader's net worth once, then hands the same frozen value to every screen. */
+function useTopMark(season: string): TopMark | null {
+  const [mark, setMark] = useState<TopMark | null>(null);
+  useEffect(() => {
+    let live = true;
+    void loadTopMark(season).then((m) => { if (live) setMark(m); });
+    return () => { live = false; };
+  }, [season]);
+  return mark;
+}
+
+const markTag = (mark: TopMark): string =>
+  mark.source === "season" ? "CURRENT SEASON LEADER" : mark.source === "alltime" ? "ALL-TIME BEST MARK" : "MARK TO BEAT";
+
+/** The target, stated in plain numbers, before a run starts. */
+function TargetMark({ mark }: { mark: TopMark | null }) {
+  if (!mark) return null;
+  return (
+    <div className="cy-mark" aria-label="Target to beat">
+      <span className="cy-mark-tag">[ {markTag(mark)} ]</span>
+      <strong>{formatMoney(mark.net)}</strong>
+      <em>{mark.source === "benchmark" ? "No entry yet this season — clear this mark and the board is yours." : `by ${mark.name} — beat him.`}</em>
+    </div>
+  );
+}
+
+
 function SeasonBanner({ onStart, compact }: { onStart?: (() => void) | undefined; compact?: boolean }) {
   const season = currentSeasonId();
   const ends = seasonEnd(season);
@@ -2635,7 +2673,7 @@ function EndingsSheet({ profile, onClose }: { profile: Profile; onClose: () => v
   );
 }
 
-function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { resume: boolean; onTournament: () => void; onFreeRun: () => void; onResume: () => void; onBoard: () => void }) {
+function StartScreen({ resume, mark, onTournament, onFreeRun, onResume, onBoard }: { resume: boolean; mark: TopMark | null; onTournament: () => void; onFreeRun: () => void; onResume: () => void; onBoard: () => void }) {
   const [rules, setRules] = useState(false);
   const [endings, setEndings] = useState(false);
   // Read after mount: localStorage is not available while rendering on the server.
@@ -2659,6 +2697,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
         </div>
         <div className="start-console">
           <SeasonBanner compact />
+          <TargetMark mark={mark} />
           {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
           <div className="start-actions">
             {resume ? <Button className="start-main" onClick={onResume}><Flame />CONTINUE | YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={onTournament}><Trophy />PLAY NOW | $10,000 <ChevronRight /></Button>}
@@ -2679,7 +2718,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
 
 
 
-function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onBack: () => void; onStart: (config: Config) => void }) {
+function SetupScreen({ tournament, mark, onBack, onStart }: { tournament: boolean; mark: TopMark | null; onBack: () => void; onStart: (config: Config) => void }) {
   const season = currentSeasonId();
   // In the tournament everyone plays the same twist, so nobody picks an easier one.
   const locked = tournament ? tournamentModifier(season) : null;
@@ -2702,6 +2741,7 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
     <main className="journey-setup">
       <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT | ${seasonLabel(config.season)}` : "CUSTOM RUN"}</p><h1>{tournament ? "CHOOSE YOUR RUN" : "PICK A STYLE. PLAY."}</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       {tournament && <SeasonBanner />}
+      <TargetMark mark={mark} />
 
       <section className="setup-block setup-id"><p className="journey-kicker">YOU</p>
         <input className="setup-input" maxLength={18} placeholder="YOUR HANDLE" value={config.name} onChange={(e) => set("name", e.target.value)} aria-label="Player name" />
@@ -2816,7 +2856,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 }
 
 
-function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onRematch: () => void; onBoard: () => void }) {
+function EndScreen({ run, net, score, ending, mark, onRestart, onRematch, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; mark: TopMark | null; onRestart: () => void; onRematch: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const [wallet, setWallet] = useState(() => readWallet());
   const [walletError, setWalletError] = useState(false);
@@ -2883,7 +2923,7 @@ ${won ? "" : "REKT | "}${ENDINGS[ending].title} | ${badge}
 Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
 Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
 Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}
-NET ${formatMoney(net)} | SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}
+NET ${formatMoney(net)} | SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}${mark ? `\nVS RANK 1 ${net >= mark.net ? `👑 CRACKED +${formatMoney(net - mark.net)}` : `−${formatMoney(mark.net - net)} short`}` : ""}
 Beat my run: thecryptofinalboss.app`;
   const share = async () => {
     playSfx("click");
@@ -3044,6 +3084,13 @@ Beat my run: thecryptofinalboss.app`;
           </div>
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
           {newRecord && <p className="end-record">NEW PERSONAL RECORD | beat {before?.bestScore.toLocaleString("en-US")}</p>}
+          {mark && (
+            <p className={`end-rank1 ${net >= mark.net ? "is-ahead" : "is-behind"}`}>
+              {net >= mark.net
+                ? `RANK 1 CRACKED | ${formatMoney(net - mark.net)} above the mark of ${formatMoney(mark.net)}${mark.source === "season" ? ` (${mark.name})` : ""}.`
+                : `You were ${formatMoney(mark.net - net)} short of rank 1 | mark ${formatMoney(mark.net)}${mark.source === "season" ? ` by ${mark.name}` : ""}.`}
+            </p>
+          )}
           {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
           {profile && <small className="end-progress">RUN {profile.runs} | ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} | BEST {formatMoney(profile.bestNet)}</small>}
         </div>

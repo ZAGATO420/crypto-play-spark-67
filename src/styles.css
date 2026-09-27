@@ -1658,6 +1658,26 @@
 .cy-conv-btn:disabled { opacity:.35; cursor:not-allowed; }
 .cy-standing-line { margin:3px 0 0; font-size:10px; opacity:.8; }
 
+/* ===== THE TARGET: the number that actually wins the season ===== */
+.cy-rank1 { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:6px; margin:5px 0 0; padding:5px 8px; border:1px solid color-mix(in oklab,var(--pit-amber) 42%,transparent); border-radius:2px; background:color-mix(in oklab,var(--pit-amber) 9%,var(--pit-steel)); }
+.cy-rank1-tag { font:400 8px/1 var(--font-mono); letter-spacing:.14em; color:var(--pit-tape); }
+.cy-rank1 strong { min-width:0; overflow:hidden; font:400 11px/1.1 var(--font-mono); letter-spacing:.04em; text-overflow:ellipsis; white-space:nowrap; color:var(--pit-amber); }
+.cy-rank1.is-ahead strong { color:var(--pit-mint); }
+.cy-rank1-goal { font:400 9px/1 var(--font-mono); color:var(--pit-tape); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:38vw; }
+.cy-rank1 i { grid-column:1/-1; display:block; height:3px; background:color-mix(in oklab,var(--pit-tape) 28%,transparent); }
+.cy-rank1 i b { display:block; height:100%; background:var(--pit-amber); transition:width .4s ease; }
+.cy-rank1.is-ahead i b { background:var(--pit-mint); }
+
+/* Pre-run: the mark you are chasing, stated once, in full. */
+.cy-mark { display:grid; gap:2px; margin:0 0 8px; padding:8px 10px; border:1px solid color-mix(in oklab,var(--pit-amber) 45%,transparent); border-left:3px solid var(--pit-amber); border-radius:2px; background:color-mix(in oklab,var(--pit-amber) 8%,var(--pit-steel)); text-align:left; }
+.cy-mark-tag { font:400 8px/1 var(--font-mono); letter-spacing:.16em; color:var(--pit-tape); }
+.cy-mark strong { font:400 22px/1 var(--font-mono); color:var(--pit-amber); }
+.cy-mark em { font-style:normal; font-size:10px; letter-spacing:.04em; color:color-mix(in oklab,var(--foreground) 76%,transparent); }
+
+.end-rank1 { margin:4px 0 0; padding:6px 9px; border:1px solid color-mix(in oklab,var(--pit-amber) 40%,transparent); border-radius:2px; font:400 11px/1.35 var(--font-mono); color:var(--pit-amber); }
+.end-rank1.is-ahead { border-color:color-mix(in oklab,var(--pit-mint) 50%,transparent); color:var(--pit-mint); }
+@media (max-width:640px) { .cy-mark strong { font-size:18px; } .cy-rank1 strong { font-size:10px; } }
+
 /* ================= PHASE IDENTITY ================= */
 .cy-phase-banner { display:grid; gap:1px; margin-bottom:6px; padding:6px 10px; border-left:4px solid var(--phase); border-radius:8px; background:linear-gradient(90deg,color-mix(in oklab,var(--phase) 26%,transparent),transparent); }
 .cy-phase-banner span { color:var(--phase); font-size:9px; font-weight:900; letter-spacing:.16em; }
