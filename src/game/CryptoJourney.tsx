@@ -349,7 +349,7 @@ export function CryptoJourney() {
   const [tournament, setTournament] = useState(false);
   // The real target of a run: what the current season leader holds. Fetched once
   // per page and then frozen, so nobody chases a number that moves mid-run.
-  const mark = useTopMark(currentSeasonId());
+  const topMark = useTopMark(currentSeasonId());
 
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
@@ -1374,12 +1374,12 @@ export function CryptoJourney() {
     setResolution(null); setDialog(null); setGuide(null); setScreen("run");
   };
 
-  if (screen === "start") return <StartScreen resume={resume} mark={mark} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
-  if (screen === "setup") return <SetupScreen tournament={tournament} mark={mark} onBack={() => setScreen("start")} onStart={begin} />;
+  if (screen === "start") return <StartScreen resume={resume} mark={topMark} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
+  if (screen === "setup") return <SetupScreen tournament={tournament} mark={topMark} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return (
     <EndScreen
-      run={run} net={net} score={score} ending={ending} mark={mark}
+      run={run} net={net} score={score} ending={ending} mark={topMark}
       onRestart={() => setScreen("setup")}
       onRematch={() => begin(run.config, run.seed)}
       onBoard={() => setScreen("board")} />
@@ -1525,12 +1525,12 @@ export function CryptoJourney() {
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
         <p className="cy-standing-line">{standing.line}</p>
-        {mark && (
-          <div className={`cy-rank1 ${net >= mark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
+        {topMark && (
+          <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
             <span className="cy-rank1-tag">VS RANK 1</span>
-            <strong>{net >= mark.net ? `+${formatMoney(net - mark.net)} AHEAD | YOU LEAD` : `−${formatMoney(mark.net - net)} TO RANK 1`}</strong>
-            <span className="cy-rank1-goal">{formatMoney(mark.net)}{mark.source === "season" ? ` | ${mark.name}` : ""}</span>
-            <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, mark.net)) * 100)))}%` }} /></i>
+            <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD | YOU LEAD` : `−${formatMoney(topMark.net - net)} TO RANK 1`}</strong>
+            <span className="cy-rank1-goal">{formatMoney(topMark.net)}{topMark.source === "season" ? ` | ${topMark.name}` : ""}</span>
+            <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
           </div>
         )}
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
