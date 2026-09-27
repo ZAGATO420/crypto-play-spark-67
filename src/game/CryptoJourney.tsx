@@ -1445,10 +1445,11 @@ export function CryptoJourney() {
           <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
-        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
+        <p className="cy-standing-line">{standing.line}</p>
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} · ${mission.text.slice(0, 26)} · SHOW BRIEFING`}
         </button>
+        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · MISSION · {mission.text} · +{mission.reward} XP</p>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1459,33 +1460,7 @@ export function CryptoJourney() {
         <span className={run.hunger >= 70 ? "is-critical" : ""}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
       </section>
 
-      {details && <section className="cy-meters" aria-label="Detailed run status">
-        <Meter label="RISK" value={run.risk} tone={run.risk > 70 ? "pink" : "yellow"} detail={`${Math.round(run.risk)}%`} icon={<Zap />} />
-        <Meter label="HUNGER" value={run.hunger} tone={run.hunger > 70 ? "pink" : "cyan"} detail={`${run.hunger}%`} icon={<Activity />} />
-        <Meter label="STRESS" value={run.stress} tone={run.stress > 70 ? "pink" : "cyan"} detail={`${run.stress}%`} icon={<HeartPulse />} />
-        <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
-      </section>}
 
-      <button className={`cy-details-toggle cy-extra${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
-        {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
-      </button>
-
-      {details && (
-        <section className="cy-versus" aria-label="You against the Boss">
-          <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs {persona.name}</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
-          <p className="cy-versus-help">{EXPLAIN["boss"]}</p>
-          <div className="cy-versus-bar">
-            <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
-          </div>
-          <div className="cy-versus-num"><strong>{formatMoney(net)}</strong><strong className="boss">{formatMoney(bossNet)}</strong></div>
-          <div className="cy-conviction">
-            <span>CONVICTION</span>
-            <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
-            <button className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
-          </div>
-          <p className="cy-versus-help">{EXPLAIN["conviction"]}</p>
-        </section>
-      )}
 
 
       <section className="cy-positions" aria-label="Open positions">
