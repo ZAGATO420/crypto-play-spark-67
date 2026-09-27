@@ -360,6 +360,15 @@ export function CryptoJourney() {
   >(null);
   // On phones the secondary explainers collapse so one quarter fits a single screen.
   const [intel, setIntel] = useState(false);
+  // A loud, unmistakable confirmation that a position really opened.
+  const [fillFx, setFillFx] = useState<{ head: string; sub: string; tone: "buy" | "perp" } | null>(null);
+  const fillTimer = useRef<number | null>(null);
+  const showFill = (head: string, sub: string, tone: "buy" | "perp") => {
+    if (fillTimer.current) window.clearTimeout(fillTimer.current);
+    setFillFx({ head, sub, tone });
+    fillTimer.current = window.setTimeout(() => setFillFx(null), 1500);
+  };
+
 
 
   const [muted, setMutedState] = useState(false);
@@ -595,7 +604,9 @@ export function CryptoJourney() {
     });
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
+    showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN · ${cust.short} · entry ${formatMoney(price)}`, "buy");
     playSfx("buy");
+
     if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
     grantXp(XP.trade, "TRADE");
     if (guide === 0) setGuide(1);
@@ -619,7 +630,9 @@ export function CryptoJourney() {
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
+    showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin · entry ${formatMoney(price)}`, "perp");
     playSfx("buy");
+
     grantXp(XP.trade + lev * 8, `${lev}x`);
     playOpening();
   };
@@ -1431,6 +1444,8 @@ export function CryptoJourney() {
       </section>}
       {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
       {arcadeFx && <ArcadeMoment fx={arcadeFx} boss={enragedBoss.url} />}
+      {fillFx && <div className={`cy-fill tone-${fillFx.tone}`} role="status"><strong>{fillFx.head}</strong><small>{fillFx.sub}</small></div>}
+
 
       <section className="cy-journey" aria-label={`Month ${Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} of ${TOTAL_MONTHS}`}>
         <div className="cy-journey-labels"><span>MANIA</span><span>COLLAPSE</span><span>ENDGAME</span></div>
