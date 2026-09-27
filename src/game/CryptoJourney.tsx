@@ -1391,18 +1391,18 @@ export function CryptoJourney() {
     playSfx("click");
     switch (chapterPlay.mode) {
       case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
-      case "HUNT": presale ? setDialog({ k: "presale", card: presale }) : setDialog({ k: "market" }); break;
+      case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
       case "DEFEND": say("Funds stay where they trade. Fast to move, first to burn.", "pink"); bank(); break;
       case "BOSS DUEL": setDialog({ k: "fight", chapter: run.chapter }); break;
-      case "MOMENTUM": focusPosition ? setDialog({ k: "market" }) : openSpot(focusSymbol, 0.25); break;
+      case "MOMENTUM": if (focusPosition) setDialog({ k: "market" }); else openSpot(focusSymbol, 0.25); break;
       default: openSpot(focusSymbol, 0.25);
     }
   };
   const safeMove = () => {
     playSfx("click");
     switch (chapterPlay.mode) {
-      case "MOMENTUM": focusPosition ? quickClose(focusPosition.id) : bank(); break;
-      case "PANIC": focusPosition ? askClose(focusPosition.id, 1) : bank(); break;
+      case "MOMENTUM": if (focusPosition) quickClose(focusPosition.id); else bank(); break;
+      case "PANIC": if (focusPosition) askClose(focusPosition.id, 1); else bank(); break;
       case "DEFEND": setDialog({ k: "custody" }); break;
       default: bank();
     }
