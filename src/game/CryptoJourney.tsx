@@ -347,6 +347,9 @@ export function CryptoJourney() {
   const [ending, setEnding] = useState<EndingKey>("SURVIVOR");
   const [resume, setResume] = useState(false);
   const [tournament, setTournament] = useState(false);
+  // The real target of a run: what the current season leader holds. Fetched once
+  // per page and then frozen, so nobody chases a number that moves mid-run.
+  const mark = useTopMark(currentSeasonId());
 
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
