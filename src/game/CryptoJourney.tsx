@@ -1625,47 +1625,17 @@ export function CryptoJourney() {
               )}
               <div className="cy-tape-row">
                 <button type="button" className="cy-tape-btn" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE FOR IT" : "RUN THE TAPE"}</button>
-                <button type="button" className="cy-tape-btn" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />FULL TERMINAL</button>
+                <button type="button" className="cy-tape-btn" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
+                <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+              {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL · {skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
                 <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
                 <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
               </div>
               {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
-              {guide === null && (
-                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
-                  <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
-                  <p>{check.ask}</p>
-                  {skill && skill.chapter === run.chapter
-                    ? <p className={`cy-skill-result ${skill.delta >= 0 ? "positive" : "negative"}`}>{skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>
-                    : <Button className="cy-skill-cta" onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />PROVE YOUR SKILL · WIN {formatMoney(Math.max(300, Math.round(net * 0.02)))}</Button>}
-                </div>
-              )}
-              {guide === null && chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
-              {guide === null && presale && (
-                <div className="cy-launch-stage cy-extra">
-                  <div className="cy-launch-head"><span>{presale.tag} LIVE</span><strong>{presale.name}</strong></div>
-                  <p>{presale.blurb}</p>
-                  <div className="cy-launch-facts">
-                    <span><small>TICKET FROM</small><strong>{formatMoney(presale.min)}</strong></span>
-                    <span><small>RUG RISK</small><strong>{Math.round(presale.rug * 100)}%</strong></span>
-                    <span><small>IF IT WORKS</small><strong>{presale.upside[0]}x – {presale.upside[1]}x</strong></span>
-                  </div>
-                  <Button className="cy-launch-cta" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />OPEN {presale.tag} · {presale.name}</Button>
-                </div>
-              )}
-              <div className="cy-toolbelt">
-                <button className="is-hot" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />TRADE TERMINAL</button>
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
-                <button disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : "SKILL TEST"}</button>
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
-                <button className="cy-tool-more" disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis />MORE</button>
-                <button className="cy-tool-extra" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
-                <button className="cy-tool-extra" disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
-                <button className="cy-tool-extra is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
-                <button className={`cy-tool-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
-              </div>
+
 
             </article>
           )}
