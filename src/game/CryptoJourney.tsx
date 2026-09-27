@@ -70,6 +70,7 @@ type Pending =
   | { t: "crash"; chapter: number }
   | { t: "fight"; chapter: number; wager: number }
   | { t: "skill" }
+  | { t: "trendRisk"; stake: number }
   | { t: "seed" };
 
 type Dialog =
@@ -957,6 +958,38 @@ export function CryptoJourney() {
     nextInQueue();
   };
 
+  /**
+   * MOMENTUM pilot: pressing the trend IS the skill moment. The minigame
+   * quality scales the payout of the risky move itself, using the same
+   * scaling the separate skill test used for its bonus.
+   */
+  const resolveTrendRisk = (stake: number, quality: number, label: string) => {
+    spend();
+    const delta = quality >= 0.9 ? Math.round(stake * quality * 1.4)
+      : quality >= 0.6 ? Math.round(stake * quality)
+        : -Math.round(stake * 0.5);
+    const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
+    setRun((r) => book({
+      ...r,
+      cash: Math.max(0, r.cash + delta),
+      xp: r.xp + xp,
+      heat: quality >= 0.9 ? r.heat + 1 : quality >= 0.6 ? r.heat : 0,
+      stress: clamp(r.stress + (quality >= 0.6 ? 0 : 8)),
+    }, `Momentum press | ${label}`, delta));
+    setSkill({ chapter: run.chapter, quality, label, delta });
+    pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
+    pop(`+${xp} XP | ${label}`, "xp");
+    say(quality >= 0.9
+      ? `${label} — you caught the breakout and pressed it clean.`
+      : quality >= 0.6
+        ? `${label} — a solid momentum trade, nothing wasted.`
+        : `${label} — you bought the local top and paid the spread.`,
+      quality >= 0.6 ? "yellow" : "pink");
+    playSfx(delta >= 0 ? "win" : "hit");
+    feel(delta >= 0 ? "win" : "loss");
+    nextInQueue();
+  };
+
   const finishMini = (pending: Pending, res: MiniResult) => {
     if (res.quality >= 1) triggerGodCandle(res.label, 10);
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
@@ -964,6 +997,7 @@ export function CryptoJourney() {
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
     if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
     if (pending.t === "skill") return resolveSkill(res.quality, res.label);
+    if (pending.t === "trendRisk") return resolveTrendRisk(pending.stake, res.quality, res.label);
     return resolveSeed(res.quality);
   };
 
@@ -1419,16 +1453,22 @@ export function CryptoJourney() {
   const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
   // survival only takes screen space when the body is actually failing
   const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
+  /** MOMENTUM pilot: the risky move is played, not clicked. Stake is visible up front. */
+  const trendStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
+  const trendPilot = chapterPlay.mode === "MOMENTUM" && guide === null && trendStake > 0;
   // when a launch or a duel IS the risky move, its terms stay readable on the card
   const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
     : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
-      : moves.risk.label;
-  const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen);
+      : trendPilot ? `PRESS THE TREND | ${formatMoney(trendStake)}`
+        : moves.risk.label;
+  const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen) || trendPilot;
   const riskWhy = chapterPlay.mode === "HUNT" && presale
     ? `Ticket from ${formatMoney(presale.min)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
     : chapterPlay.mode === "BOSS DUEL" && duelOpen
       ? `Stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
-      : moves.risk.why;
+      : trendPilot
+        ? `${check.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(trendStake * 1.4))} | fumble costs ${formatMoney(Math.round(trendStake * 0.5))}`
+        : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
@@ -1437,7 +1477,11 @@ export function CryptoJourney() {
       case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
       case "DEFEND": say("Funds stay where they trade. Fast to move, first to burn.", "pink"); bank(); break;
       case "BOSS DUEL": setDialog({ k: "fight", chapter: run.chapter }); break;
-      case "MOMENTUM": if (focusPosition) setDialog({ k: "market" }); else openSpot(focusSymbol, 0.25); break;
+      case "MOMENTUM":
+        if (trendPilot) setDialog({ k: "mini", kind: check.kind, pending: { t: "trendRisk", stake: trendStake } });
+        else if (focusPosition) setDialog({ k: "market" });
+        else openSpot(focusSymbol, 0.25);
+        break;
       default: openSpot(focusSymbol, 0.25);
     }
   };
@@ -1689,13 +1733,15 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
-              {guide === null && (
+              {guide === null && (!trendPilot || surviveUrgent) && (
                 <div className="cy-quick-row">
-                  <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
-                    disabled={!!(skill && skill.chapter === run.chapter)}
-                    onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
-                    <Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : `SKILL TEST | WIN ${formatMoney(Math.max(300, Math.round(net * 0.02)))}`}
-                  </button>
+                  {!trendPilot && (
+                    <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
+                      disabled={!!(skill && skill.chapter === run.chapter)}
+                      onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
+                      <Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : `SKILL TEST | WIN ${formatMoney(Math.max(300, Math.round(net * 0.02)))}`}
+                    </button>
+                  )}
                   {surviveUrgent && (
                     <button type="button" className="cy-quick-btn is-urgent" onClick={() => { playSfx("click"); setDialog({ k: "survive" }); }}>
                       <HeartPulse />SURVIVE | {run.hunger >= 70 ? `HUNGER ${run.hunger}%` : `STRESS ${run.stress}%`}
@@ -1793,6 +1839,7 @@ export function CryptoJourney() {
             verified={verified}
             verifyCost={Math.max(150, Math.round(net * 0.01))}
             skillDone={!!(skill && skill.chapter === run.chapter)}
+            skillHidden={trendPilot}
             skillHead={check.head}
             skillPrize={Math.max(300, Math.round(net * 0.02))}
             onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
@@ -2124,9 +2171,9 @@ function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard)
   );
 }
 
-function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verifyCost, skillDone, skillHead, skillPrize, onStance, onConviction, onTerminal, onSurvive, onSkill, onVerify, onStorage, onHistory, onGuide, onEnd }: {
+function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verifyCost, skillDone, skillHidden, skillHead, skillPrize, onStance, onConviction, onTerminal, onSurvive, onSkill, onVerify, onStorage, onHistory, onGuide, onEnd }: {
   ap: number; stance: Run["stance"]; heat: number; conviction: number; convictionOn: boolean;
-  verified: boolean; verifyCost: number; skillDone: boolean; skillHead: string; skillPrize: number;
+  verified: boolean; verifyCost: number; skillDone: boolean; skillHidden?: boolean; skillHead: string; skillPrize: number;
   onStance: (id: Run["stance"]) => void; onConviction: () => void; onTerminal: () => void; onSurvive: () => void;
   onSkill: () => void; onVerify: () => void; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void;
 }) {
@@ -2157,7 +2204,7 @@ function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verif
       <div className="cy-more-grid">
         <Button variant="secondary" disabled={ap <= 0} onClick={onTerminal}><TrendingUp />TRADE TERMINAL<small>All coins, spot and leverage</small></Button>
         <Button variant="secondary" onClick={onSurvive}><HeartPulse />SURVIVE<small>Eat, calm down, pay life</small></Button>
-        <Button variant="secondary" disabled={skillDone} onClick={onSkill}><Target />{skillDone ? "SKILL DONE" : "SKILL TEST"}<small>{skillDone ? "Already played this quarter" : `${skillHead} | win ${formatMoney(skillPrize)}`}</small></Button>
+        {!skillHidden && <Button variant="secondary" disabled={skillDone} onClick={onSkill}><Target />{skillDone ? "SKILL DONE" : "SKILL TEST"}<small>{skillDone ? "Already played this quarter" : `${skillHead} | win ${formatMoney(skillPrize)}`}</small></Button>}
         <Button variant="secondary" disabled={verified} onClick={onVerify}><Zap />{verified ? "SIGNALS CHECKED" : "VERIFY SIGNALS"}<small>{verified ? "One of them was a lie" : `Costs ${formatMoney(verifyCost)}`}</small></Button>
         <Button variant="secondary" disabled={ap <= 0} onClick={onStorage}><Shield />STORAGE<small>Protect exposed coins</small></Button>
         <Button variant="secondary" onClick={onHistory}><Receipt />HISTORY<small>See every cash flow</small></Button>
