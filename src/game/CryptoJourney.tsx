@@ -369,6 +369,17 @@ export function CryptoJourney() {
     fillTimer.current = window.setTimeout(() => setFillFx(null), 1500);
   };
 
+  // THE ONE SIGNATURE MOMENT: the terminal is overridden for a single second,
+  // the Boss rams himself into frame and stamps his verdict. Rare on purpose —
+  // only real turning points (duel won, duel lost, margin erased) fire it.
+  const [interrupt, setInterrupt] = useState<{ stamp: string; line: string; img: string; tone: "good" | "bad" } | null>(null);
+  const interruptTimer = useRef<number | null>(null);
+  const bossInterrupt = (stamp: string, line: string, tone: "good" | "bad") => {
+    if (interruptTimer.current) window.clearTimeout(interruptTimer.current);
+    setInterrupt({ stamp, line, tone, img: tone === "good" ? crownedBoss.url : enragedBoss.url });
+    interruptTimer.current = window.setTimeout(() => setInterrupt(null), 1250);
+  };
+
 
 
   const [muted, setMutedState] = useState(false);
