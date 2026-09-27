@@ -1701,7 +1701,7 @@ export function CryptoJourney() {
           {run.logs.length ? run.logs.slice(0, 6).map((l, i) => (
             <div className={`trail-entry tone-${l.tone}`} key={`${l.chapter}-${i}`}><span>{chapterLabel(l.chapter)}</span><strong>{l.title}</strong></div>
           )) : <p className="trail-empty">Every trade, rug and crisis lands here.</p>}
-          <button className="cy-rules" onClick={() => { setGuide(0); setDetails(false); }}>SHOW ME HOW TO PLAY</button>
+          <button className="cy-rules" onClick={() => setGuide(0)}>SHOW ME HOW TO PLAY</button>
           <button className="cy-rules" onClick={() => setDialog({ k: "rules" })}>HOW IT WORKS</button>
         </aside>
       </div>
