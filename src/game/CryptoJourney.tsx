@@ -1594,7 +1594,7 @@ export function CryptoJourney() {
 
               </div>
               {run.stance !== "balanced" || run.convictionOn || run.heat > 0 ? (
-                <p className="cy-stance-line">{run.stance !== "balanceh" ? "" : ""}{stanceOf(run.stance).name} PLAN{run.convictionOn ? " · CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` · HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+                <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " · CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` · HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
               ) : null}
 
               {guide !== null ? (
