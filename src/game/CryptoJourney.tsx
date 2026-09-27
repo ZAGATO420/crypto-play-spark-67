@@ -2697,6 +2697,7 @@ function StartScreen({ resume, mark, onTournament, onFreeRun, onResume, onBoard 
         </div>
         <div className="start-console">
           <SeasonBanner compact />
+          <TargetMark mark={mark} />
           {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
           <div className="start-actions">
             {resume ? <Button className="start-main" onClick={onResume}><Flame />CONTINUE | YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={onTournament}><Trophy />PLAY NOW | $10,000 <ChevronRight /></Button>}
