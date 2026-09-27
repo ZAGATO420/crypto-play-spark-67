@@ -19,8 +19,9 @@
  */
 
 @theme inline {
-  --font-display: "Archivo Black", sans-serif;
-  --font-body: "Hind", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
