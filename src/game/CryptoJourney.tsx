@@ -1634,11 +1634,26 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
+              {guide === null && (
+                <div className="cy-quick-row">
+                  <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
+                    disabled={!!(skill && skill.chapter === run.chapter)}
+                    onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
+                    <Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : `SKILL TEST · WIN ${formatMoney(Math.max(300, Math.round(net * 0.02)))}`}
+                  </button>
+                  {surviveUrgent && (
+                    <button type="button" className="cy-quick-btn is-urgent" onClick={() => { playSfx("click"); setDialog({ k: "survive" }); }}>
+                      <HeartPulse />SURVIVE · {run.hunger >= 70 ? `HUNGER ${run.hunger}%` : `STRESS ${run.stress}%`}
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="cy-tape-row">
                 <button type="button" className="cy-tape-btn" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE FOR IT" : "RUN THE TAPE"}</button>
                 <button type="button" className="cy-tape-btn" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
                 <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+
               {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL · {skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
