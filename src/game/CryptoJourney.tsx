@@ -1383,6 +1383,31 @@ export function CryptoJourney() {
     : chapterPlay.mode === "PANIC" ? { gives: "Nothing", gets: "You stay in cash", then: "The crash cannot touch you, but you earn nothing either." }
     : { gives: `${formatMoney(buyBudget)} of your cash`, gets: `${focusSymbol} worth ${formatMoney(buyBudget)} at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose." };
 
+  // ---- the two visible moves of this quarter: one takes risk, one protects ----
+  const theme = MODE_THEME[chapterPlay.mode];
+  const moves = MODE_MOVES[chapterPlay.mode];
+  const duelOpen = !!bossFightFor(run.chapter) && !run.fought.includes(run.chapter);
+  const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
+  const riskMove = () => {
+    playSfx("click");
+    switch (chapterPlay.mode) {
+      case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
+      case "HUNT": presale ? setDialog({ k: "presale", card: presale }) : setDialog({ k: "market" }); break;
+      case "DEFEND": say("Funds stay where they trade. Fast to move, first to burn.", "pink"); bank(); break;
+      case "BOSS DUEL": setDialog({ k: "fight", chapter: run.chapter }); break;
+      case "MOMENTUM": focusPosition ? setDialog({ k: "market" }) : openSpot(focusSymbol, 0.25); break;
+      default: openSpot(focusSymbol, 0.25);
+    }
+  };
+  const safeMove = () => {
+    playSfx("click");
+    switch (chapterPlay.mode) {
+      case "MOMENTUM": focusPosition ? quickClose(focusPosition.id) : bank(); break;
+      case "PANIC": focusPosition ? askClose(focusPosition.id, 1) : bank(); break;
+      case "DEFEND": setDialog({ k: "custody" }); break;
+      default: bank();
+    }
+  };
 
 
   return (
