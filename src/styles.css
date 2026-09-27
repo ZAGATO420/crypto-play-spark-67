@@ -19,8 +19,9 @@
  */
 
 @theme inline {
-  --font-display: "Archivo Black", sans-serif;
-  --font-body: "Hind", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -1768,3 +1769,212 @@
 @keyframes cy-fill-out {
   to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
 }
+
+/* ============================================================
+   THE PIT 2021 — visual identity
+   Bunker Slate #0B1117 / Terminal Steel #16222F / Hardware Border #24364A
+   Gorilla Amber #F5A623 / God Candle Mint #00E599 / Margin Shock #FF3366
+   Tape Grey #8B9EB0. Hard 1px hardware edges, no soft AI shadows,
+   monospace tape data, one single signature moment (boss interruption).
+   ============================================================ */
+
+.journey-shell, .journey-start, .journey-end, .cy-shell, .cy-scrim, .cy-sheet {
+  --pit-bg: oklch(0.174 0.017 251);
+  --pit-steel: oklch(0.262 0.024 251);
+  --pit-edge: oklch(0.362 0.036 252);
+  --pit-amber: oklch(0.772 0.148 72);
+  --pit-mint: oklch(0.832 0.185 163);
+  --pit-shock: oklch(0.652 0.238 15);
+  --pit-tape: oklch(0.688 0.028 250);
+  --journey-cyan: var(--pit-mint);
+  --journey-green: var(--pit-mint);
+  --journey-yellow: var(--pit-amber);
+  --journey-pink: var(--pit-shock);
+  --journey-panel: var(--pit-steel);
+  --background: var(--pit-bg);
+  --foreground: oklch(0.965 0.006 250);
+  --card: var(--pit-steel);
+  --card-foreground: oklch(0.965 0.006 250);
+  --muted: oklch(0.31 0.026 251);
+  --muted-foreground: var(--pit-tape);
+  --border: var(--pit-edge);
+  --secondary: oklch(0.3 0.026 251);
+  --accent: oklch(0.33 0.03 251);
+  --primary: var(--pit-mint);
+  --primary-foreground: var(--pit-bg);
+  --cy-gold: 40 91% 55%;
+  --cy-pink: 348 100% 60%;
+}
+
+/* Bunker grid instead of the old cyan haze. */
+.journey-shell {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--pit-edge) 42%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--pit-edge) 42%, transparent) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+/* Terminal tape: every former eyebrow label becomes a hardware tag. */
+.journey-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in oklab, var(--pit-edge) 90%, transparent);
+  border-left: 2px solid var(--pit-amber);
+  border-radius: 0;
+  background: color-mix(in oklab, var(--pit-steel) 70%, transparent);
+  color: var(--pit-tape);
+  font: 500 10px/1.25 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.journey-kicker::before { content: "["; color: var(--pit-amber); }
+.journey-kicker::after { content: "]"; color: var(--pit-amber); }
+.journey-kicker svg { width: 12px; height: 12px; color: var(--pit-amber); }
+
+/* Monospace tape for every data surface; Space Grotesk stays for display. */
+.journey-shell, .journey-start, .journey-end { font-family: var(--font-body); }
+.meter-label, .card-stats, .card-stats small, .cy-hint, .cy-stance-line, .cy-move small,
+.cy-move em, .cy-chip, .cy-lastmove, .cy-quick-btn, .cy-tape-row button, .end-grid,
+.end-score small, .end-scoreline small, .end-progress, .cy-status-row span, .cy-fill small,
+.trail-entry, .cy-preview, .cy-attack, .journey-status .cy-standing, .cy-standing {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.journey-shell h1, .journey-shell h2, .journey-shell h3, .journey-start h1, .journey-end h1,
+.journey-card-copy h2, .journey-sheet h2, .coin-mark, .cy-move strong, .price-orbit span,
+.end-worth strong, .end-scoreline strong, .cy-fill strong, .cy-arcade-copy h2, .cy-arcade-copy strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-synthesis: none;
+}
+
+/* Hardware edges: sharp 1px steel, no diffuse AI glow. */
+.journey-card, .boss-panel, .journey-trail, .cy-move, .cy-sheet, .journey-meter {
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--pit-bg) 60%, transparent);
+}
+.journey-card {
+  border-color: var(--pit-edge);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--pit-steel) 96%, var(--pit-amber)), var(--pit-bg));
+}
+.journey-card::after {
+  background: repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in oklab, var(--pit-bg) 34%, transparent) 4px);
+}
+
+/* ---- THE SIGNATURE MOMENT: The Boss Interruption ---- */
+.pit-interrupt {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--pit-bg) 82%, transparent);
+  animation: pit-cut 0.08s steps(2) 3, pit-fade 0.26s ease-in 0.95s forwards;
+}
+.pit-interrupt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, color-mix(in oklab, var(--pit-mint) 9%, transparent) 0 1px, transparent 2px 4px);
+  animation: pit-scan 0.6s linear infinite;
+}
+.pit-interrupt img {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: min(74vw, 470px);
+  opacity: 0.92;
+  filter: contrast(1.15) saturate(0.7) brightness(1.02);
+  animation: pit-ram 0.22s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.pit-interrupt div {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 720px);
+  padding: 14px 16px;
+  border-top: 1px solid var(--pit-amber);
+  border-bottom: 1px solid var(--pit-amber);
+  background: color-mix(in oklab, var(--pit-bg) 88%, transparent);
+  text-align: left;
+}
+.pit-interrupt small {
+  display: block;
+  color: var(--pit-tape);
+  font: 500 10px/1.4 var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.pit-interrupt strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--pit-amber);
+  font: 700 clamp(30px, 11vw, 74px)/0.95 var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.pit-interrupt.is-bad strong { color: var(--pit-shock); }
+.pit-interrupt.is-good strong { color: var(--pit-mint); }
+.pit-interrupt p {
+  margin-top: 6px;
+  color: var(--pit-tape);
+  font: 500 11px/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+@keyframes pit-cut { 50% { opacity: 0.55; transform: translateY(-2px); } }
+@keyframes pit-fade { to { opacity: 0; } }
+@keyframes pit-scan { to { transform: translateY(4px); } }
+@keyframes pit-ram {
+  from { transform: translateX(34%) skewX(-6deg); opacity: 0; }
+  to { transform: translateX(0) skewX(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pit-interrupt, .pit-interrupt img, .pit-interrupt::before { animation-duration: 0.01ms; animation-iteration-count: 1; }
+}
+
+/* Phase colours live inside the Pit palette so the six phases stay readable
+   without drifting into neon: no purple, no magenta. */
+.cy-arena.mode-accumulate { --phase: var(--pit-amber); }
+.cy-arena.mode-momentum { --phase: var(--pit-mint); }
+.cy-arena.mode-panic { --phase: var(--pit-shock); }
+.cy-arena.mode-hunt { --phase: oklch(0.74 0.17 48); }
+.cy-arena.mode-defend { --phase: oklch(0.74 0.09 236); }
+.cy-arena.mode-duel { --phase: var(--pit-shock); }
+.cy-shell { background-image: none; }
+.cy-shell .cy-arena, .cy-shell .cy-move, .cy-shell .cy-chip, .cy-shell .cy-card,
+.cy-shell .cy-meter, .cy-shell .cy-panel { border-radius: 2px; }
+
+/* ---- Pit hardware pass: sharp steel instead of soft neon glass ---- */
+.cy-shell [class*="cy-"] { border-radius: 2px; }
+.cy-shell .cy-card, .cy-shell .cy-arena, .cy-shell .cy-move, .cy-shell .cy-core,
+.cy-shell .cy-goal, .cy-shell .cy-standing, .cy-shell .cy-positions, .cy-shell .cy-trail,
+.cy-shell .cy-tape-btn, .cy-shell .cy-quick-btn, .cy-shell .cy-mobile-dock {
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--pit-steel) 88%, transparent), color-mix(in oklab, var(--pit-bg) 72%, transparent));
+}
+.cy-shell .cy-arena { border-width: 1px; }
+/* Faint cathode scanlines over the whole pit — flat, never animated. */
+.cy-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, color-mix(in oklab, var(--pit-bg) 22%, transparent) 0 1px, transparent 2px 3px);
+  opacity: 0.55;
+}
+/* Tape data in mono, amber for the money that matters. */
+.cy-net, .cy-score, .cy-core-money, .cy-core-pnl, .cy-xp-num, .cy-ap, .cy-standing-tag,
+.cy-live-tape, .cy-signal, .cy-goal-line, .cy-chart-title, .cy-preview, .cy-pos-head {
+  font-family: var(--font-mono);
+  letter-spacing: 0.01em;
+}
+.cy-net strong, .cy-core-money strong { color: var(--pit-amber); }
+.cy-standing-tag { border-radius: 0; border-left: 2px solid currentColor; }
+.cy-move strong { text-transform: uppercase; }
+.cy-move.is-risk { border-color: var(--pit-shock); }
+.cy-move.is-safe { border-color: color-mix(in oklab, var(--pit-mint) 60%, var(--pit-edge)); }
+.cy-tape-btn { font-family: var(--font-mono); letter-spacing: 0.1em; }

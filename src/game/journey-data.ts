@@ -163,77 +163,77 @@ export type DecisionOption = {
 export type Decision = { month: number; kicker: string; title: string; body: string; options: DecisionOption[] };
 
 export const DECISIONS: Decision[] = [
-  { month: 2, kicker: "MAR 2020 · BLACK THURSDAY", title: "BITCOIN IS DOWN 50% IN A DAY", body: "COVID panic. BTC prints $3,800. Everyone on your timeline says it goes to zero. The Boss just watches your hands.",
+  { month: 2, kicker: "MAR 2020 | BLACK THURSDAY", title: "BITCOIN IS DOWN 50% IN A DAY", body: "COVID panic. BTC prints $3,800. Everyone on your timeline says it goes to zero. The Boss just watches your hands.",
     options: [
       { label: "BUY THE PANIC", result: "You bought blood. Sixty percent of your cash went in at the exact bottom nobody believed in. History says thank you.", tone: "win", cashMul: 0.4, bagMul: 1.6, xp: 700, stress: 12 },
       { label: "SELL EVERYTHING", result: "You panicked with the crowd and locked in the loss. Classic. The chart never asked your permission to recover.", tone: "danger", bagMul: 0.55, cashMul: 1.15, xp: 120, stress: 8 },
       { label: "DO NOTHING", result: "Frozen. Not wrong, not brave. You survived the day with your hands in your pockets.", tone: "neutral", xp: 200, stress: 6 },
     ] },
-  { month: 4, kicker: "MAY 2020 · THE HALVING", title: "BLOCK REWARD CUTS IN HALF", body: "Miner supply drops overnight. Every cycle before this one paid the patient. Every cycle also ate the impatient.",
+  { month: 4, kicker: "MAY 2020 | THE HALVING", title: "BLOCK REWARD CUTS IN HALF", body: "Miner supply drops overnight. Every cycle before this one paid the patient. Every cycle also ate the impatient.",
     options: [
       { label: "STACK HARD", result: "You bought supply shock before it was a Twitter thread. Slow money, real money.", tone: "win", cashMul: 0.55, bagMul: 1.35, xp: 600, stress: 6 },
       { label: "STAY IN CASH", result: "Dry powder feels smart right up to the moment the candle leaves without you.", tone: "neutral", xp: 150, stress: 4 },
     ] },
-  { month: 12, kicker: "JAN 2021 · TESLA BUYS BTC", title: "$1.5 BILLION FROM ONE COMPANY", body: "Wall Street finally shows up. Retail is euphoric. The Boss loves euphoria, it makes exits expensive.",
+  { month: 12, kicker: "JAN 2021 | TESLA BUYS BTC", title: "$1.5 BILLION FROM ONE COMPANY", body: "Wall Street finally shows up. Retail is euphoric. The Boss loves euphoria, it makes exits expensive.",
     options: [
       { label: "RIDE THE HYPE", result: "You added into institutional FOMO and the market handed you the easiest money of the cycle.", tone: "win", cashMul: 0.5, bagMul: 1.45, xp: 700, stress: 14 },
       { label: "TRIM 30%", result: "You sold strength into strength. Boring, profitable, adult behaviour.", tone: "neutral", bagMul: 0.7, cashMul: 1.35, xp: 350, stress: -6 },
     ] },
-  { month: 16, kicker: "MAY 2021 · CHINA BANS MINING", title: "HALF THE HASHRATE GOES DARK", body: "Miners flee, the chart drops 50% in weeks, and the group chat is very quiet.",
+  { month: 16, kicker: "MAY 2021 | CHINA BANS MINING", title: "HALF THE HASHRATE GOES DARK", body: "Miners flee, the chart drops 50% in weeks, and the group chat is very quiet.",
     options: [
       { label: "BUY THE FEAR", result: "You bought a state-level ban. Brave. It paid — eventually, and painfully.", tone: "win", cashMul: 0.5, bagMul: 1.25, xp: 550, stress: 18 },
       { label: "DE-RISK TO CASH", result: "You cut size before the summer bleed. The Boss hates admitting you were right.", tone: "win", bagMul: 0.5, cashMul: 1.4, xp: 400, stress: -8 },
       { label: "HOLD AND PRAY", result: "You held through -50% on pure hopium. Your stomach paid the fee.", tone: "neutral", xp: 220, stress: 20 },
     ] },
-  { month: 21, kicker: "NOV 2021 · BTC $69,000", title: "THE TOP NOBODY SELLS", body: "Every account is a genius. NFTs of rocks cost more than houses. This is the exact month legends were supposed to take profit.",
+  { month: 21, kicker: "NOV 2021 | BTC $69,000", title: "THE TOP NOBODY SELLS", body: "Every account is a genius. NFTs of rocks cost more than houses. This is the exact month legends were supposed to take profit.",
     options: [
       { label: "SELL THE TOP", result: "You actually sold the top. One in a thousand does this. The Boss removes his crown for a second.", tone: "win", bagMul: 0.25, cashMul: 2.1, xp: 1400, stress: -10 },
       { label: "SELL HALF", result: "Half off the table at the top. Nobody ever went broke doing this.", tone: "win", bagMul: 0.5, cashMul: 1.55, xp: 800, stress: -4 },
       { label: "IT GOES TO $100K", result: "It did not go to $100K. Not that year. You are now a long term investor by accident.", tone: "danger", xp: 200, stress: 24 },
     ] },
-  { month: 28, kicker: "MAY 2022 · LUNA COLLAPSE", title: "UST BREAKS THE PEG", body: "A $40 billion 'stablecoin' unpegs live. Anchor still shows 19.5% APY. There is a queue to buy the dip on LUNA at $1.",
+  { month: 28, kicker: "MAY 2022 | LUNA COLLAPSE", title: "UST BREAKS THE PEG", body: "A $40 billion 'stablecoin' unpegs live. Anchor still shows 19.5% APY. There is a queue to buy the dip on LUNA at $1.",
     options: [
       { label: "BUY LUNA AT $1", result: "LUNA went to $0.0001. You caught the falling knife with both hands and your teeth.", tone: "danger", cashMul: 0.35, xp: 200, stress: 30 },
       { label: "EXIT ALL DEFI", result: "You pulled out before contagion ate the lenders. Boring hands, still-alive portfolio.", tone: "win", bagMul: 0.75, cashMul: 1.3, xp: 900, stress: -6 },
       { label: "SHORT THE CONTAGION", result: "You shorted the collapse and got paid by the funeral. Cold. Effective.", tone: "win", cashMul: 1.75, xp: 1100, stress: 16 },
     ] },
-  { month: 31, kicker: "AUG 2022 · 3AC & CELSIUS", title: "THE LENDERS ARE INSOLVENT", body: "Celsius freezes withdrawals. 3AC is gone. Your coins on that yield platform are 'safe', they say.",
+  { month: 31, kicker: "AUG 2022 | 3AC & CELSIUS", title: "THE LENDERS ARE INSOLVENT", body: "Celsius freezes withdrawals. 3AC is gone. Your coins on that yield platform are 'safe', they say.",
     options: [
       { label: "WITHDRAW EVERYTHING", result: "Not your keys, not your coins. You got out days before the freeze became forever.", tone: "win", xp: 850, stress: -6 },
       { label: "KEEP EARNING 9%", result: "The 9% cost you the principal. Withdrawals are paused. Permanently.", tone: "danger", bagMul: 0.6, cashMul: 0.8, xp: 150, stress: 28 },
     ] },
-  { month: 33, kicker: "NOV 2022 · FTX COLLAPSE", title: "THE SECOND BIGGEST EXCHANGE IS A HOLE", body: "$8 billion missing. SBF is tweeting one letter at a time. Your balance still shows on the app.",
+  { month: 33, kicker: "NOV 2022 | FTX COLLAPSE", title: "THE SECOND BIGGEST EXCHANGE IS A HOLE", body: "$8 billion missing. SBF is tweeting one letter at a time. Your balance still shows on the app.",
     options: [
       { label: "WITHDRAW NOW", result: "You got your funds out while the withdrawal queue still moved. Ten minutes later it never moved again.", tone: "win", xp: 1200, stress: 10 },
       { label: "BELIEVE THE TWEETS", result: "'Assets are fine.' They were not fine. Your exchange balance is now a bankruptcy claim.", tone: "danger", cashMul: 0.45, bagMul: 0.5, xp: 150, stress: 34 },
       { label: "BUY THE BOTTOM", result: "$15,500 BTC in the middle of maximum fear. This was the cycle low. Enjoy the next two years.", tone: "win", cashMul: 0.45, bagMul: 1.7, xp: 1300, stress: 20 },
     ] },
-  { month: 39, kicker: "MAY 2023 · PEPE ARRIVES", title: "A FROG WITH NO UTILITY", body: "A meme coin does $1 billion in weeks. Fundamentals have left the building. So has your patience.",
+  { month: 39, kicker: "MAY 2023 | PEPE ARRIVES", title: "A FROG WITH NO UTILITY", body: "A meme coin does $1 billion in weeks. Fundamentals have left the building. So has your patience.",
     options: [
       { label: "APE THE FROG", result: "You aped a frog and it printed. Nobody respects you. Your balance does.", tone: "win", cashMul: 0.7, bagMul: 1.5, xp: 600, stress: 12 },
       { label: "STAY SERIOUS", result: "You stayed serious while a frog outperformed your whole thesis. Dignity intact.", tone: "neutral", xp: 250, stress: 8 },
     ] },
-  { month: 49, kicker: "JAN 2024 · SPOT ETF APPROVED", title: "BLACKROCK GETS THE GREEN LIGHT", body: "Eleven ETFs go live at once. The 'sell the news' crowd is loud. The inflow numbers are louder.",
+  { month: 49, kicker: "JAN 2024 | SPOT ETF APPROVED", title: "BLACKROCK GETS THE GREEN LIGHT", body: "Eleven ETFs go live at once. The 'sell the news' crowd is loud. The inflow numbers are louder.",
     options: [
       { label: "FRONT-RUN THE INFLOWS", result: "You bought before the biggest bid in crypto history showed up daily. That was the trade.", tone: "win", cashMul: 0.5, bagMul: 1.4, xp: 900, stress: 10 },
       { label: "SELL THE NEWS", result: "You sold the news and watched the news buy every dip for a year.", tone: "danger", bagMul: 0.5, cashMul: 1.25, xp: 250, stress: 14 },
     ] },
-  { month: 58, kicker: "OCT 2024 · MEME SUPERCYCLE", title: "PUMP.FUN PRINTS 20,000 TOKENS A DAY", body: "Solana is on fire. 97% of these tokens rug within a day. The other 3% make life-changing money.",
+  { month: 58, kicker: "OCT 2024 | MEME SUPERCYCLE", title: "PUMP.FUN PRINTS 20,000 TOKENS A DAY", body: "Solana is on fire. 97% of these tokens rug within a day. The other 3% make life-changing money.",
     options: [
       { label: "FARM THE CASINO", result: "You played the casino with size and the casino paid this time. Do not tell your accountant.", tone: "win", cashMul: 0.65, bagMul: 1.45, xp: 700, stress: 22 },
       { label: "BUY MAJORS ONLY", result: "Majors, no drama, no 4am charts. You slept and still made money.", tone: "win", cashMul: 0.7, bagMul: 1.2, xp: 450, stress: -4 },
     ] },
-  { month: 62, kicker: "DEC 2024 · BTC BREAKS $100,000", title: "SIX FIGURES IS ON THE BOARD", body: "The number that was a joke in 2017 is printed. Leverage across the market is at an all-time high.",
+  { month: 62, kicker: "DEC 2024 | BTC BREAKS $100,000", title: "SIX FIGURES IS ON THE BOARD", body: "The number that was a joke in 2017 is printed. Leverage across the market is at an all-time high.",
     options: [
       { label: "TAKE REAL PROFIT", result: "You took profit at six figures. The people who did not are still explaining themselves.", tone: "win", bagMul: 0.55, cashMul: 1.6, xp: 950, stress: -8 },
       { label: "MAX LONG", result: "You levered into euphoria. It worked for a few glorious weeks, then the wick found you.", tone: "danger", cashMul: 0.6, bagMul: 1.15, xp: 400, stress: 26 },
     ] },
-  { month: 70, kicker: "AUG 2025 · THE LEVERAGE FLUSH", title: "$19 BILLION LIQUIDATED IN 24 HOURS", body: "The largest liquidation cascade ever recorded. Order books go paper thin. Your positions are still open.",
+  { month: 70, kicker: "AUG 2025 | THE LEVERAGE FLUSH", title: "$19 BILLION LIQUIDATED IN 24 HOURS", body: "The largest liquidation cascade ever recorded. Order books go paper thin. Your positions are still open.",
     options: [
       { label: "BUY THE WICK", result: "You bid the wick everyone else got liquidated into. Ruthless. Correct.", tone: "win", cashMul: 0.5, bagMul: 1.5, xp: 1000, stress: 24 },
       { label: "GO FULL CASH", result: "You raised cash into chaos and slept through the worst week of the year.", tone: "neutral", bagMul: 0.6, cashMul: 1.35, xp: 400, stress: -10 },
     ] },
-  { month: 78, kicker: "JUL 2026 · THE LAST SETUP", title: "ONE CYCLE LEFT TO DECIDE YOUR RANK", body: "Six months on the clock. The Boss has your whole run on his desk. Whatever you do now is what people remember.",
+  { month: 78, kicker: "JUL 2026 | THE LAST SETUP", title: "ONE CYCLE LEFT TO DECIDE YOUR RANK", body: "Six months on the clock. The Boss has your whole run on his desk. Whatever you do now is what people remember.",
     options: [
       { label: "GO FOR THE LEADERBOARD", result: "All-in on the final stretch. Glory or a story. Either way the Boss is entertained.", tone: "win", cashMul: 0.35, bagMul: 1.65, xp: 1200, stress: 26 },
       { label: "PROTECT THE BAG", result: "You protected the run and walked to the finish line with your net worth intact.", tone: "neutral", bagMul: 0.7, cashMul: 1.3, xp: 600, stress: -12 },
@@ -276,11 +276,11 @@ export const chapterPlayFor = (chapter: number): ChapterPlay => {
  */
 export type ModeTheme = { slug: string; badge: string; tag: string };
 export const MODE_THEME: Record<ChapterMode, ModeTheme> = {
-  ACCUMULATE: { slug: "accumulate", badge: "ACCUMULATION PHASE", tag: "QUIET TAPE · CHEAP COINS" },
-  MOMENTUM: { slug: "momentum", badge: "MOMENTUM PHASE", tag: "EVERYTHING PUMPS · GREED RISING" },
-  PANIC: { slug: "panic", badge: "PANIC PHASE", tag: "BIDS VANISHING · GET OUT" },
-  HUNT: { slug: "hunt", badge: "HUNTING PHASE", tag: "LAUNCH LIVE · RUG RISK" },
-  DEFEND: { slug: "defend", badge: "DEFENCE PHASE", tag: "COUNTERPARTY RISK · SECURE THE BAG" },
+  ACCUMULATE: { slug: "accumulate", badge: "ACCUMULATION PHASE", tag: "QUIET TAPE | CHEAP COINS" },
+  MOMENTUM: { slug: "momentum", badge: "MOMENTUM PHASE", tag: "EVERYTHING PUMPS | GREED RISING" },
+  PANIC: { slug: "panic", badge: "PANIC PHASE", tag: "BIDS VANISHING | GET OUT" },
+  HUNT: { slug: "hunt", badge: "HUNTING PHASE", tag: "LAUNCH LIVE | RUG RISK" },
+  DEFEND: { slug: "defend", badge: "DEFENCE PHASE", tag: "COUNTERPARTY RISK | SECURE THE BAG" },
   "BOSS DUEL": { slug: "duel", badge: "BOSS DUEL", tag: "HE WANTS YOUR STACK" },
 };
 
@@ -333,11 +333,11 @@ export const standingFor = (net: number, bossNet: number, chapter: number): Stan
 
 /** Five lines that explain the whole game. Reachable at any time in the run. */
 export const HOW_TO_PLAY: { head: string; body: string }[] = [
-  { head: "1 · CASH AND COINS", body: "You start with cash. Buying turns cash into coins. That is the whole trade." },
-  { head: "2 · REAL PRICES", body: "Your coins move with the real price of that month between 2020 and 2026." },
-  { head: "3 · SELLING", body: "Selling turns coins back into cash. Your profit is the difference to your buy price." },
-  { head: "4 · STAYING ALIVE", body: "Eating and calming down cost money. Ignore them and the run ends early." },
-  { head: "5 · WINNING", body: "At the end your money is compared to the Boss. More than him means you won." },
+  { head: "1 | CASH AND COINS", body: "You start with cash. Buying turns cash into coins. That is the whole trade." },
+  { head: "2 | REAL PRICES", body: "Your coins move with the real price of that month between 2020 and 2026." },
+  { head: "3 | SELLING", body: "Selling turns coins back into cash. Your profit is the difference to your buy price." },
+  { head: "4 | STAYING ALIVE", body: "Eating and calming down cost money. Ignore them and the run ends early." },
+  { head: "5 | WINNING", body: "At the end your money is compared to the Boss. More than him means you won." },
 ];
 
 /* ---- one skill test per quarter: something you can actually be good at ---- */
@@ -499,9 +499,9 @@ export const personaFor = (roll: number) => PERSONAS[Math.floor(roll * PERSONAS.
 /* ---- three acts, rising pressure ------------------------------------- */
 
 export const ACTS = [
-  { n: 1, name: "ACT I · THE BOOM", from: 0, line: "Money is easy, everyone is a genius. Build something before it breaks." },
-  { n: 2, name: "ACT II · THE COLLAPSE", from: 8, line: "Luna, Celsius, FTX. Counterparties matter more than charts now." },
-  { n: 3, name: "ACT III · THE ENDGAME", from: 14, line: "ETFs, six figures, record leverage. The Boss is writing your rank." },
+  { n: 1, name: "ACT I | THE BOOM", from: 0, line: "Money is easy, everyone is a genius. Build something before it breaks." },
+  { n: 2, name: "ACT II | THE COLLAPSE", from: 8, line: "Luna, Celsius, FTX. Counterparties matter more than charts now." },
+  { n: 3, name: "ACT III | THE ENDGAME", from: 14, line: "ETFs, six figures, record leverage. The Boss is writing your rank." },
 ] as const;
 export const actFor = (chapter: number) => [...ACTS].reverse().find((a) => chapter >= a.from) ?? ACTS[0];
 
@@ -528,12 +528,12 @@ export const attackFor = (chapter: number, roll: number, bias?: BossAttack["id"]
 
 export type BossFight = { title: string; line: string; mini: "timing" | "panic" | "gas" | "seed"; perk: string };
 export const BOSS_FIGHTS: Record<number, BossFight> = {
-  0: { title: "BOSS DUEL · BLACK THURSDAY", line: "He froze the exchanges and put your account on the table. Get an order out.", mini: "panic", perk: "STEEL NERVES" },
-  5: { title: "BOSS DUEL · MINING BAN", line: "He is selling hashrate into your face. Land the exit or wear it.", mini: "timing", perk: "CHEAP FEES" },
-  9: { title: "BOSS DUEL · LUNA COLLAPSE", line: "A death spiral with your name on it. Out in seconds or not at all.", mini: "panic", perk: "+1 MOVE" },
-  11: { title: "BOSS DUEL · FTX COLLAPSE", line: "The withdrawal queue is a race and he is at the front of it.", mini: "gas", perk: "CHEAP FEES" },
-  19: { title: "BOSS DUEL · THE ETF BID", line: "Wall Street is bidding. He wants your allocation before you can take it.", mini: "gas", perk: "+1 MOVE" },
-  22: { title: "FINAL DUEL · THE FLUSH", line: "Nineteen billion liquidated. Books are paper thin. Prove the hands.", mini: "timing", perk: "STEEL NERVES" },
+  0: { title: "BOSS DUEL | BLACK THURSDAY", line: "He froze the exchanges and put your account on the table. Get an order out.", mini: "panic", perk: "STEEL NERVES" },
+  5: { title: "BOSS DUEL | MINING BAN", line: "He is selling hashrate into your face. Land the exit or wear it.", mini: "timing", perk: "CHEAP FEES" },
+  9: { title: "BOSS DUEL | LUNA COLLAPSE", line: "A death spiral with your name on it. Out in seconds or not at all.", mini: "panic", perk: "+1 MOVE" },
+  11: { title: "BOSS DUEL | FTX COLLAPSE", line: "The withdrawal queue is a race and he is at the front of it.", mini: "gas", perk: "CHEAP FEES" },
+  19: { title: "BOSS DUEL | THE ETF BID", line: "Wall Street is bidding. He wants your allocation before you can take it.", mini: "gas", perk: "+1 MOVE" },
+  22: { title: "FINAL DUEL | THE FLUSH", line: "Nineteen billion liquidated. Books are paper thin. Prove the hands.", mini: "timing", perk: "STEEL NERVES" },
 };
 export const bossFightFor = (chapter: number) => BOSS_FIGHTS[chapter];
 export const PERK_BLURB: Record<string, string> = {
@@ -599,73 +599,73 @@ export const xpProgress = (xp: number) => {
 export type Situation = { chapter: number; kicker: string; title: string; body: string; options: DecisionOption[] };
 
 export const SITUATIONS: Situation[] = [
-  { chapter: 2, kicker: "JUL 2020 · DEFI SUMMER", title: "A FARM PAYS 4,000% APY", body: "The contract is unaudited, the dev is a cartoon avatar, and your timeline is already rich.",
+  { chapter: 2, kicker: "JUL 2020 | DEFI SUMMER", title: "A FARM PAYS 4,000% APY", body: "The contract is unaudited, the dev is a cartoon avatar, and your timeline is already rich.",
     options: [
       { label: "FARM IT", result: "You farmed the yield and got out before the rebase bug. Degenerate genius.", tone: "win", cashMul: 1.35, xp: 420, stress: 10 },
       { label: "READ THE CODE", result: "You read the contract, found the mint function, and walked away. Nerd. Alive.", tone: "neutral", xp: 300, stress: 2 },
     ] },
-  { chapter: 3, kicker: "OCT 2020 · SQUARE BUYS BTC", title: "A PAYMENTS GIANT BUYS $50M OF BTC", body: "The suits are testing the water. Your feed calls it the beginning.",
+  { chapter: 3, kicker: "OCT 2020 | SQUARE BUYS BTC", title: "A PAYMENTS GIANT BUYS $50M OF BTC", body: "The suits are testing the water. Your feed calls it the beginning.",
     options: [
       { label: "ADD TO THE BAG", result: "You bought before the institutional wave. That was the cheap seat.", tone: "win", cashMul: 0.75, bagMul: 1.2, xp: 380, stress: 4 },
       { label: "WAIT FOR A DIP", result: "The dip never came. You waited yourself out of the trade.", tone: "neutral", xp: 120, stress: 6 },
     ] },
-  { chapter: 6, kicker: "AUG 2021 · ELON TWEETS", title: "ELON TWEETS A DOGE PICTURE", body: "No caption. No context. DOGE is up 30% in eleven minutes and your phone will not stop.",
+  { chapter: 6, kicker: "AUG 2021 | ELON TWEETS", title: "ELON TWEETS A DOGE PICTURE", body: "No caption. No context. DOGE is up 30% in eleven minutes and your phone will not stop.",
     options: [
       { label: "APE DOGE NOW", result: "You bought the tweet in the first minute and sold into the crowd. Free money, zero dignity.", tone: "win", cashMul: 1.4, xp: 400, stress: 14 },
       { label: "SHORT THE HYPE", result: "You shorted a billionaire's meme. It squeezed you first, then it worked. Barely.", tone: "danger", cashMul: 0.85, xp: 220, stress: 20 },
       { label: "IGNORE IT", result: "You ignored a dog picture and kept your plan. The Boss respects it and finds it boring.", tone: "neutral", xp: 160, stress: -4 },
     ] },
-  { chapter: 8, kicker: "JAN 2022 · THE TAX LETTER", title: "YOUR COUNTRY WANTS ITS CUT", body: "A very official envelope lists trades you forgot you made. Paying is expensive. Not paying is a different kind of expensive.",
+  { chapter: 8, kicker: "JAN 2022 | THE TAX LETTER", title: "YOUR COUNTRY WANTS ITS CUT", body: "A very official envelope lists trades you forgot you made. Paying is expensive. Not paying is a different kind of expensive.",
     options: [
       { label: "PAY IN FULL", result: "You paid, you are clean, you sleep at night. Cash hurts, stress drops.", tone: "neutral", cashMul: 0.82, xp: 260, stress: -8 },
       { label: "GHOST THEM", result: "You ignored the letter. Stress climbs, and the letters get bigger.", tone: "danger", xp: 100, stress: 22 },
     ] },
-  { chapter: 12, kicker: "APR 2023 · THE FRIEND CALL", title: "YOUR COUSIN WANTS A COIN TIP", body: "He has $5,000 of savings and zero patience. He will tell everyone whose fault it was.",
+  { chapter: 12, kicker: "APR 2023 | THE FRIEND CALL", title: "YOUR COUSIN WANTS A COIN TIP", body: "He has $5,000 of savings and zero patience. He will tell everyone whose fault it was.",
     options: [
       { label: "TELL HIM BITCOIN", result: "Boring advice, decent outcome, family intact. Reputation up.", tone: "win", xp: 300, stress: -4 },
       { label: "SHILL HIM A MEME", result: "It rugged in nine hours. You are now the family's crypto guy. Forever.", tone: "danger", xp: 120, stress: 18 },
     ] },
-  { chapter: 14, kicker: "SEP 2023 · THE INFLUENCER DEAL", title: "A PROJECT OFFERS YOU $20,000 TO POST", body: "They want one thread. They do not want you to read the tokenomics.",
+  { chapter: 14, kicker: "SEP 2023 | THE INFLUENCER DEAL", title: "A PROJECT OFFERS YOU $20,000 TO POST", body: "They want one thread. They do not want you to read the tokenomics.",
     options: [
       { label: "TAKE THE BAG", result: "You took the money, the token dumped 90%, and the replies remember everything.", tone: "danger", cash: 20000, xp: 200, stress: 20 },
       { label: "DECLINE", result: "You said no to easy money to keep your name. Rare. The Boss notices.", tone: "win", xp: 420, stress: -6 },
     ] },
-  { chapter: 15, kicker: "DEC 2023 · THE HACK", title: "YOUR WALLET APPROVAL GETS DRAINED", body: "You signed something months ago. A bot just remembered it.",
+  { chapter: 15, kicker: "DEC 2023 | THE HACK", title: "YOUR WALLET APPROVAL GETS DRAINED", body: "You signed something months ago. A bot just remembered it.",
     options: [
       { label: "REVOKE EVERYTHING", result: "You revoked in time and lost only gas. Paranoia paid again.", tone: "win", cashMul: 0.96, xp: 380, stress: 12 },
       { label: "IGNORE THE WARNING", result: "The bot took a slice of your bag while you scrolled. Signed, sealed, gone.", tone: "danger", bagMul: 0.85, xp: 80, stress: 24 },
     ] },
-  { chapter: 17, kicker: "JUN 2024 · THE INSIDER GROUP", title: "A PAID GROUP PROMISES 'EARLY CALLS'", body: "$2,000 a month for alpha. The screenshots are definitely real. Definitely.",
+  { chapter: 17, kicker: "JUN 2024 | THE INSIDER GROUP", title: "A PAID GROUP PROMISES 'EARLY CALLS'", body: "$2,000 a month for alpha. The screenshots are definitely real. Definitely.",
     options: [
       { label: "JOIN THE GROUP", result: "You paid for the privilege of being someone's exit liquidity. Twice.", tone: "danger", cashMul: 0.9, xp: 120, stress: 12 },
       { label: "TRADE YOUR OWN PLAN", result: "You kept the money and your own read. Slower, cleaner, yours.", tone: "win", xp: 340, stress: -4 },
     ] },
-  { chapter: 18, kicker: "SEP 2024 · THE POWER BILL", title: "YOUR MINING RIG IS EATING YOUR RENT", body: "Two GPUs, one hot room, one very angry electricity provider.",
+  { chapter: 18, kicker: "SEP 2024 | THE POWER BILL", title: "YOUR MINING RIG IS EATING YOUR RENT", body: "Two GPUs, one hot room, one very angry electricity provider.",
     options: [
       { label: "SELL THE RIG", result: "You sold the hardware into strong demand and kept the cash. Adult decision.", tone: "win", cash: 3500, xp: 260, stress: -6 },
       { label: "KEEP MINING", result: "You kept mining at a loss because stopping felt like quitting. It was quitting, with extra steps.", tone: "danger", cashMul: 0.93, xp: 140, stress: 10 },
     ] },
-  { chapter: 21, kicker: "JUN 2025 · THE EXCHANGE FREEZE", title: "WITHDRAWALS ARE 'TEMPORARILY PAUSED'", body: "Support says it is a maintenance window. The CEO is tweeting about hiring.",
+  { chapter: 21, kicker: "JUN 2025 | THE EXCHANGE FREEZE", title: "WITHDRAWALS ARE 'TEMPORARILY PAUSED'", body: "Support says it is a maintenance window. The CEO is tweeting about hiring.",
     options: [
       { label: "MOVE TO SELF CUSTODY", result: "You got out during the window. Not your keys, not your coins — you finally learned it.", tone: "win", xp: 460, stress: 8 },
       { label: "TRUST THE ANNOUNCEMENT", result: "The maintenance window is still open. So is the bankruptcy filing.", tone: "danger", cashMul: 0.7, xp: 90, stress: 26 },
     ] },
-  { chapter: 22, kicker: "SEP 2025 · THE AI AGENT MANIA", title: "AI AGENTS ARE LAUNCHING THEIR OWN TOKENS", body: "A bot with 400,000 followers just deployed a coin about itself. It is up 60x.",
+  { chapter: 22, kicker: "SEP 2025 | THE AI AGENT MANIA", title: "AI AGENTS ARE LAUNCHING THEIR OWN TOKENS", body: "A bot with 400,000 followers just deployed a coin about itself. It is up 60x.",
     options: [
       { label: "APE THE AGENT", result: "You bought a robot's memecoin and it printed. The future is stupid and profitable.", tone: "win", cashMul: 1.45, xp: 380, stress: 16 },
       { label: "STAY IN MAJORS", result: "You skipped the robot casino. Slept fine, missed a 60x, kept your stack.", tone: "neutral", xp: 200, stress: -4 },
     ] },
-  { chapter: 24, kicker: "MAR 2026 · THE BOSS OFFER", title: "THE BOSS OFFERS YOU A SEAT", body: "Hand him 20% of your net worth and he guarantees you finish the run. Guarantees, in his words.",
+  { chapter: 24, kicker: "MAR 2026 | THE BOSS OFFER", title: "THE BOSS OFFERS YOU A SEAT", body: "Hand him 20% of your net worth and he guarantees you finish the run. Guarantees, in his words.",
     options: [
       { label: "PAY THE BOSS", result: "You paid the crown tax. Stress gone, wallet lighter, and he is still smiling.", tone: "neutral", cashMul: 0.8, xp: 300, stress: -20 },
       { label: "TELL HIM NO", result: "You told the Final Boss no. He respects it and makes the next quarter personal.", tone: "win", xp: 520, stress: 14 },
     ] },
-  { chapter: 25, kicker: "JUN 2026 · THE LAST BULL TRAP", title: "EVERYONE CALLS FOR A BLOW-OFF TOP", body: "Funding is extreme, your feed is euphoric, and your own bag is deep in profit.",
+  { chapter: 25, kicker: "JUN 2026 | THE LAST BULL TRAP", title: "EVERYONE CALLS FOR A BLOW-OFF TOP", body: "Funding is extreme, your feed is euphoric, and your own bag is deep in profit.",
     options: [
       { label: "TAKE PROFIT NOW", result: "You banked real money into euphoria. The Boss hates how correct that was.", tone: "win", bagMul: 0.6, cashMul: 1.5, xp: 480, stress: -10 },
       { label: "RIDE IT OUT", result: "You rode the euphoria with your whole book. Brave. Expensive if wrong.", tone: "danger", xp: 220, stress: 20 },
     ] },
-  { chapter: 27, kicker: "DEC 2026 · THE FINAL WORD", title: "LAST QUARTER. LAST DECISION.", body: "The Boss has your whole run on his desk and one question left: do you cash out or swing once more?",
+  { chapter: 27, kicker: "DEC 2026 | THE FINAL WORD", title: "LAST QUARTER. LAST DECISION.", body: "The Boss has your whole run on his desk and one question left: do you cash out or swing once more?",
     options: [
       { label: "CASH OUT CLEAN", result: "You closed the cycle on your terms with your money in your hands.", tone: "win", bagMul: 0.5, cashMul: 1.45, xp: 560, stress: -14 },
       { label: "ONE LAST SWING", result: "You swung one last time for the leaderboard. Legends and cautionary tales come from the same move.", tone: "danger", cashMul: 0.6, bagMul: 1.6, xp: 620, stress: 22 },
@@ -830,9 +830,9 @@ export const lootDraw = (roll: (salt: string) => number, chapter: number): LootC
 /* ---- one-tap run presets: no reading wall before the first trade ------- */
 
 export const PRESETS: { id: string; name: string; line: string; difficulty: Difficulty; mode: BaseMode; modifier: ModifierId; ironman: boolean; arch: Archetype }[] = [
-  { id: "degen", name: "DEGEN EXPRESS", line: "Chaos market · half the money · every score counts double", difficulty: "BOSS", mode: "chaos", modifier: "glass", ironman: false, arch: "degen" },
-  { id: "classic", name: "CLASSIC SURVIVOR", line: "The real 2020–2026 prices · the honest run", difficulty: "NORMAL", mode: "historical", modifier: "straight", ironman: false, arch: "trader" },
-  { id: "ironman", name: "HARDCORE IRONMAN", line: "One life · no saves · nightmare costs", difficulty: "NIGHTMARE", mode: "classic", modifier: "straight", ironman: true, arch: "hodler" },
+  { id: "degen", name: "DEGEN EXPRESS", line: "Chaos market | half the money | every score counts double", difficulty: "BOSS", mode: "chaos", modifier: "glass", ironman: false, arch: "degen" },
+  { id: "classic", name: "CLASSIC SURVIVOR", line: "The real 2020–2026 prices | the honest run", difficulty: "NORMAL", mode: "historical", modifier: "straight", ironman: false, arch: "trader" },
+  { id: "ironman", name: "HARDCORE IRONMAN", line: "One life | no saves | nightmare costs", difficulty: "NIGHTMARE", mode: "classic", modifier: "straight", ironman: true, arch: "hodler" },
 ];
 
 /** How many quarters until history hits again — the dread, without the spoiler. */
