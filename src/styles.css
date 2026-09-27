@@ -1144,7 +1144,8 @@
   .cy-chart-title > strong { font-size:9px; }
   .cy-chart-wrap { height:92px; margin-top:3px; }
   .cy-boss-presence { top:52px; right:0; width:40%; height:58%; }
-  .cy-boss-presence div { display:none; }
+  .cy-boss-presence { top:44px; right:0; width:52%; height:auto; }
+  .cy-boss-presence div { display:block; max-width:100%; padding:4px 6px; font-size:8px; line-height:1.2; }
   .cy-boss-presence span { font-size:8px; }
   .cy-chart-title > strong { max-width:46%; text-align:right; }
   .cy-chart-foot span:first-child { display:none; }
@@ -1606,4 +1607,73 @@
   .cy-main-actions > button:not(.cy-main-trade) { display:none; }
   .cy-shell.has-intel .cy-main-actions { grid-template-columns:1fr 1fr; }
   .cy-shell.has-intel .cy-main-actions > button:not(.cy-main-trade) { display:inline-flex; }
+}
+
+
+/* ================= THE TWO MOVES ================= */
+.cy-moves { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0 4px; }
+.cy-moves.is-guided-row { grid-template-columns:1fr; }
+.cy-move { display:grid; gap:2px; min-height:92px; padding:10px 12px; border:2px solid var(--border); border-radius:12px; background:var(--card); color:var(--foreground); text-align:left; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; }
+.cy-move:hover:not(:disabled) { transform:translateY(-2px); }
+.cy-move:disabled { opacity:.4; cursor:not-allowed; }
+.cy-move > span { display:flex; align-items:center; gap:5px; font-size:9px; font-weight:900; letter-spacing:.12em; opacity:.9; }
+.cy-move > span svg { width:13px; height:13px; }
+.cy-move > strong { font-size:15px; font-weight:900; letter-spacing:.02em; line-height:1.1; }
+.cy-move > small { font-size:10px; opacity:.85; }
+.cy-move > em { font-size:9px; font-style:normal; opacity:.6; line-height:1.25; }
+.cy-move.is-risk { border-color:color-mix(in oklab,var(--journey-pink) 60%,var(--border)); background:color-mix(in oklab,var(--journey-pink) 14%,var(--card)); }
+.cy-move.is-risk:hover:not(:disabled) { background:color-mix(in oklab,var(--journey-pink) 26%,var(--card)); box-shadow:0 0 22px color-mix(in oklab,var(--journey-pink) 30%,transparent); }
+.cy-move.is-safe { border-color:color-mix(in oklab,var(--journey-cyan) 60%,var(--border)); background:color-mix(in oklab,var(--journey-cyan) 12%,var(--card)); }
+.cy-move.is-safe:hover:not(:disabled) { background:color-mix(in oklab,var(--journey-cyan) 24%,var(--card)); box-shadow:0 0 22px color-mix(in oklab,var(--journey-cyan) 28%,transparent); }
+.cy-move.is-guided { border-color:var(--journey-yellow); background:color-mix(in oklab,var(--journey-yellow) 20%,var(--card)); animation:cy-guide-action 1.2s ease-in-out infinite; }
+
+.cy-tape-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.cy-tape-btn { display:flex; align-items:center; justify-content:center; gap:5px; min-height:38px; padding:6px 8px; border:1px solid var(--border); border-radius:8px; background:transparent; color:var(--foreground); font-size:9px; font-weight:900; letter-spacing:.1em; cursor:pointer; }
+.cy-tape-btn svg { width:13px; height:13px; }
+.cy-tape-btn:hover:not(:disabled) { border-color:var(--journey-cyan); color:var(--journey-cyan); }
+.cy-tape-btn:disabled { opacity:.35; cursor:not-allowed; }
+
+.cy-conviction { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:7px; margin-top:6px; }
+.cy-conviction > span { font-size:8px; font-weight:900; letter-spacing:.1em; opacity:.8; }
+.cy-conv-track { height:6px; overflow:hidden; border-radius:99px; background:color-mix(in oklab,var(--foreground) 14%,transparent); }
+.cy-conv-track i { display:block; height:100%; background:var(--journey-cyan); transition:width .3s ease; }
+.cy-conv-track i.is-armed { background:var(--journey-pink); }
+.cy-conv-btn { min-height:30px; padding:4px 10px; border:1px solid color-mix(in oklab,var(--journey-pink) 50%,var(--border)); border-radius:7px; background:transparent; color:var(--journey-pink); font-size:8px; font-weight:900; letter-spacing:.1em; cursor:pointer; }
+.cy-conv-btn.is-on { background:var(--journey-pink); color:var(--background); }
+.cy-conv-btn:disabled { opacity:.35; cursor:not-allowed; }
+.cy-standing-line { margin:3px 0 0; font-size:10px; opacity:.8; }
+
+/* ================= PHASE IDENTITY ================= */
+.cy-phase-banner { display:grid; gap:1px; margin-bottom:6px; padding:6px 10px; border-left:4px solid var(--phase); border-radius:8px; background:linear-gradient(90deg,color-mix(in oklab,var(--phase) 26%,transparent),transparent); }
+.cy-phase-banner span { color:var(--phase); font-size:9px; font-weight:900; letter-spacing:.16em; }
+.cy-phase-banner strong { font-size:13px; font-weight:900; line-height:1.15; }
+.cy-phase-banner small { font-size:8px; letter-spacing:.1em; opacity:.6; }
+.cy-arena.mode-accumulate { --phase:var(--journey-yellow); }
+.cy-arena.mode-momentum { --phase:var(--journey-green,#39ff88); }
+.cy-arena.mode-panic { --phase:var(--journey-pink); }
+.cy-arena.mode-hunt { --phase:#b26bff; }
+.cy-arena.mode-defend { --phase:var(--journey-cyan); }
+.cy-arena.mode-duel { --phase:#ff2d55; }
+.cy-arena[class*="mode-"] { border-color:color-mix(in oklab,var(--phase) 50%,var(--border)); box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--phase) 18%,transparent), 0 0 30px color-mix(in oklab,var(--phase) 12%,transparent); }
+.cy-arena[class*="mode-"] .cy-move.is-risk { border-color:color-mix(in oklab,var(--phase) 70%,var(--border)); background:color-mix(in oklab,var(--phase) 16%,var(--card)); }
+.cy-arena[class*="mode-"] .cy-move.is-risk > span { color:var(--phase); }
+.cy-arena.mode-panic { animation:cy-phase-pulse 1.6s ease-in-out infinite; }
+@keyframes cy-phase-pulse { 0%,100% { box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--phase) 20%,transparent); } 50% { box-shadow:inset 0 0 0 2px color-mix(in oklab,var(--phase) 55%,transparent), 0 0 34px color-mix(in oklab,var(--phase) 26%,transparent); } }
+
+@media (max-width:640px) {
+  .cy-moves { grid-template-columns:1fr 1fr; gap:5px; margin:5px 0 3px; }
+  .cy-move { min-height:74px; padding:7px 8px; border-radius:9px; }
+  .cy-move > span { font-size:7px; }
+  .cy-move > strong { font-size:11px; }
+  .cy-move > small { font-size:8px; }
+  .cy-move > em { display:none; }
+  .cy-tape-row { gap:4px; }
+  .cy-tape-btn { min-height:32px; font-size:8px; }
+  .cy-conviction { gap:5px; margin-top:4px; }
+  .cy-conv-btn { min-height:26px; font-size:7px; }
+  .cy-phase-banner { margin-bottom:4px; padding:4px 7px; border-radius:6px; }
+  .cy-phase-banner span { font-size:7px; }
+  .cy-phase-banner strong { font-size:10px; }
+  .cy-phase-banner small { display:none; }
+  .cy-standing-line { font-size:8px; }
 }
