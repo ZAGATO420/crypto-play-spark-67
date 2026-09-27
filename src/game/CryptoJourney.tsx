@@ -563,6 +563,7 @@ export function CryptoJourney() {
     setShake(true);
     window.setTimeout(() => setShake(false), 680);
     arcadeTimer.current = window.setTimeout(() => setArcadeFx(null), 2500);
+    bossInterrupt("LIQUIDATED", `${position.symbol} ${position.lev}x | margin erased`, "bad");
   };
 
   /**
@@ -734,6 +735,7 @@ export function CryptoJourney() {
         statuses: Array.from(new Set([...r.statuses, "BOSS BEATEN"])),
       }, `${fight.title} | won`, won), `I beat him at ${fight.title.replace(/^.*\| /, "")} and took ${formatMoney(won)} off his table.`));
       say(`You took ${formatMoney(won)} off the Boss. Perk unlocked: ${fight.perk}.`, "yellow");
+      bossInterrupt("THRONE THREATENED", `${fight.title} | you took ${formatMoney(won)} off his table`, "good");
       feel("win", won);
       grantXp(XP_EXTRA.escape * 2, "BOSS BEATEN");
     } else if (quality >= 0.5) {
@@ -747,6 +749,7 @@ export function CryptoJourney() {
         boss: { ...r.boss, cash: r.boss.cash + wager, line: "He counted your money in front of you." },
       }, `${fight.title} | lost`, -wager), `He took ${formatMoney(wager)} off me in ${chapterLabel(chapter)} and made sure the room saw it.`));
       say(`He took ${formatMoney(wager)} and told the room about it.`, "pink");
+      bossInterrupt("REJECTED", `${fight.title} | ${formatMoney(wager)} stake gone`, "bad");
       feel("liq", -wager);
     }
 
@@ -1455,6 +1458,16 @@ export function CryptoJourney() {
       </section>}
       {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
       {arcadeFx && <ArcadeMoment fx={arcadeFx} boss={enragedBoss.url} />}
+      {interrupt && (
+        <section className={`pit-interrupt is-${interrupt.tone}`} role="alert" aria-label="Boss interruption">
+          <img src={interrupt.img} alt="" aria-hidden />
+          <div>
+            <small>[ SYSTEM OVERRIDE // BOSS SIGNATURE DETECTED ]</small>
+            <strong>{interrupt.stamp}</strong>
+            <p>{interrupt.line}</p>
+          </div>
+        </section>
+      )}
       {fillFx && <div className={`cy-fill tone-${fillFx.tone}`} role="status"><strong>{fillFx.head}</strong><small>{fillFx.sub}</small></div>}
 
 
