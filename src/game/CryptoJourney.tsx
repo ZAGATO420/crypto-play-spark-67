@@ -2923,7 +2923,7 @@ ${won ? "" : "REKT | "}${ENDINGS[ending].title} | ${badge}
 Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
 Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
 Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}
-NET ${formatMoney(net)} | SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}
+NET ${formatMoney(net)} | SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}${mark ? `\nVS RANK 1 ${net >= mark.net ? `👑 CRACKED +${formatMoney(net - mark.net)}` : `−${formatMoney(mark.net - net)} short`}` : ""}
 Beat my run: thecryptofinalboss.app`;
   const share = async () => {
     playSfx("click");
