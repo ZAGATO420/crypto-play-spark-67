@@ -1622,9 +1622,10 @@ export function CryptoJourney() {
                 <div className="cy-moves" aria-label="Your two moves this quarter">
                   <button type="button" className="cy-move is-risk" disabled={riskLocked} onClick={riskMove}>
                     <span><Flame />TAKE THE RISK</span>
-                    <strong>{moves.risk.label}</strong>
+                    <strong>{riskLabel}</strong>
                     <small>{moves.risk.sub}</small>
-                    <em>{moves.risk.why}</em>
+                    <em>{riskWhy}</em>
+
                   </button>
                   <button type="button" className="cy-move is-safe" disabled={ap <= 0} onClick={safeMove}>
                     <span><Shield />PLAY IT SAFE</span>
