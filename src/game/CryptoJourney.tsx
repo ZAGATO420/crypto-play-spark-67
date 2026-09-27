@@ -3084,6 +3084,13 @@ Beat my run: thecryptofinalboss.app`;
           </div>
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
           {newRecord && <p className="end-record">NEW PERSONAL RECORD | beat {before?.bestScore.toLocaleString("en-US")}</p>}
+          {mark && (
+            <p className={`end-rank1 ${net >= mark.net ? "is-ahead" : "is-behind"}`}>
+              {net >= mark.net
+                ? `RANK 1 CRACKED | ${formatMoney(net - mark.net)} above the mark of ${formatMoney(mark.net)}${mark.source === "season" ? ` (${mark.name})` : ""}.`
+                : `You were ${formatMoney(mark.net - net)} short of rank 1 | mark ${formatMoney(mark.net)}${mark.source === "season" ? ` by ${mark.name}` : ""}.`}
+            </p>
+          )}
           {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
           {profile && <small className="end-progress">RUN {profile.runs} | ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} | BEST {formatMoney(profile.bestNet)}</small>}
         </div>
