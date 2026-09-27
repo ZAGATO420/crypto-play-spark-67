@@ -2043,12 +2043,41 @@ function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard)
   );
 }
 
-function MoreSheet({ ap, onStorage, onHistory, onGuide, onEnd }: { ap: number; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void }) {
+function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verifyCost, skillDone, skillHead, skillPrize, onStance, onConviction, onTerminal, onSurvive, onSkill, onVerify, onStorage, onHistory, onGuide, onEnd }: {
+  ap: number; stance: Run["stance"]; heat: number; conviction: number; convictionOn: boolean;
+  verified: boolean; verifyCost: number; skillDone: boolean; skillHead: string; skillPrize: number;
+  onStance: (id: Run["stance"]) => void; onConviction: () => void; onTerminal: () => void; onSurvive: () => void;
+  onSkill: () => void; onVerify: () => void; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void;
+}) {
   return (
     <>
       <p className="journey-kicker"><Ellipsis /> MORE</p>
       <h2>RUN TOOLS</h2>
+      <div className="cy-more-plan" aria-label="Your plan for this quarter">
+        <div className="cy-plan-head">
+          <span>YOUR PLAN FOR THIS QUARTER</span>
+          <strong className={heat > 0 ? "is-hot" : ""}>HEAT x{heat} · WIN BONUS +{Math.round((heatBonus(heat) - 1) * 100)}%</strong>
+        </div>
+        <div className="cy-plan-row">
+          {STANCES.map((s) => (
+            <button key={s.id} type="button" className={`cy-plan-btn is-${s.id}${stance === s.id ? " is-on" : ""}`} onClick={() => onStance(s.id)}>
+              <b>{s.name}</b>
+              <small>{s.id === "survive" ? "−50% LOSS" : s.id === "degen" ? "±60% SWING" : "AS IT COMES"}</small>
+            </button>
+          ))}
+        </div>
+        <p>{stanceOf(stance).line}</p>
+        <div className="cy-conviction">
+          <span>CONVICTION {Math.round(conviction)}%</span>
+          <div className="cy-conv-track"><i className={convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(conviction)}%` }} /></div>
+          <button type="button" className={`cy-conv-btn${convictionOn ? " is-on" : ""}`} onClick={onConviction}>{convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+        </div>
+      </div>
       <div className="cy-more-grid">
+        <Button variant="secondary" disabled={ap <= 0} onClick={onTerminal}><TrendingUp />TRADE TERMINAL<small>All coins, spot and leverage</small></Button>
+        <Button variant="secondary" onClick={onSurvive}><HeartPulse />SURVIVE<small>Eat, calm down, pay life</small></Button>
+        <Button variant="secondary" disabled={skillDone} onClick={onSkill}><Target />{skillDone ? "SKILL DONE" : "SKILL TEST"}<small>{skillDone ? "Already played this quarter" : `${skillHead} · win ${formatMoney(skillPrize)}`}</small></Button>
+        <Button variant="secondary" disabled={verified} onClick={onVerify}><Zap />{verified ? "SIGNALS CHECKED" : "VERIFY SIGNALS"}<small>{verified ? "One of them was a lie" : `Costs ${formatMoney(verifyCost)}`}</small></Button>
         <Button variant="secondary" disabled={ap <= 0} onClick={onStorage}><Shield />STORAGE<small>Protect exposed coins</small></Button>
         <Button variant="secondary" onClick={onHistory}><Receipt />HISTORY<small>See every cash flow</small></Button>
         <Button variant="secondary" onClick={onGuide}><Target />SHOW ME HOW TO PLAY<small>Restart the 3-step guide</small></Button>
@@ -2057,6 +2086,7 @@ function MoreSheet({ ap, onStorage, onHistory, onGuide, onEnd }: { ap: number; o
     </>
   );
 }
+
 
 function TradeSheet({ run, symbol, onSpot, onPerp }: { run: Run; symbol: CoinSymbol; onSpot: (f: number) => void; onPerp: (d: 1 | -1, l: number, f: number) => void }) {
   const [dir, setDir] = useState<1 | -1>(1);
