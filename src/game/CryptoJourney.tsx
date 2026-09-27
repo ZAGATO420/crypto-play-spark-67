@@ -2901,29 +2901,82 @@ Beat my run: thecryptofinalboss.app`;
     c.width = 1200; c.height = 675;
     const g = c.getContext("2d");
     if (!g) return null;
-    const bg = g.createLinearGradient(0, 0, 1200, 675);
-    bg.addColorStop(0, "#08070f"); bg.addColorStop(1, won ? "#141033" : "#2a0a12");
-    g.fillStyle = bg; g.fillRect(0, 0, 1200, 675);
-    g.strokeStyle = won ? "#f7c948" : "#ff4d6d"; g.lineWidth = 6; g.strokeRect(18, 18, 1164, 639);
-    g.fillStyle = won ? "#f7c948" : "#ff4d6d";
-    g.font = "700 34px system-ui, sans-serif";
-    g.fillText("THE CRYPTO FINAL BOSS", 60, 100);
-    g.fillStyle = "#ffffff"; g.font = "800 84px system-ui, sans-serif";
-    g.fillText(end.title, 60, 200);
-    g.fillStyle = "#b9b6d6"; g.font = "500 30px system-ui, sans-serif";
-    g.fillText(`${badge} | ${monthsDone}/${TOTAL_MONTHS} MONTHS`, 60, 250);
-    g.font = "600 42px system-ui, sans-serif"; g.fillStyle = "#ffffff";
-    g.fillText(`Crashes ${crashRow}`, 60, 340);
-    g.fillText(`Boss    ${duelRow}`, 60, 410);
-    g.fillText(`Months  ${monthRow}`, 60, 480);
-    g.fillStyle = won ? "#4ade80" : "#ff4d6d"; g.font = "800 58px system-ui, sans-serif";
-    g.fillText(`NET ${formatMoney(net)}`, 60, 570);
-    g.fillStyle = "#b9b6d6"; g.font = "500 28px system-ui, sans-serif";
-    g.fillText(`SCORE ${score.toLocaleString("en-US")} | thecryptofinalboss.app`, 60, 620);
+    const BG = "#0B1117", STEEL = "#16222F", EDGE = "#24364A";
+    const AMBER = "#F5A623", MINT = "#00E599", SHOCK = "#FF3366", TAPE = "#8B9EB0";
+    const key = won ? MINT : SHOCK;
+    const mono = (size: number, weight = 500) => `${weight} ${size}px "JetBrains Mono", ui-monospace, monospace`;
+    const display = (size: number) => `700 ${size}px "Space Grotesk", sans-serif`;
+
+    // Bunker slate plate with hard hardware edges and terminal scanlines.
+    g.fillStyle = BG; g.fillRect(0, 0, 1200, 675);
+    g.fillStyle = STEEL; g.fillRect(40, 40, 1120, 595);
+    g.globalAlpha = 0.16; g.fillStyle = TAPE;
+    for (let y = 40; y < 635; y += 4) g.fillRect(40, y, 1120, 1);
+    g.globalAlpha = 1;
+    g.strokeStyle = EDGE; g.lineWidth = 2; g.strokeRect(40, 40, 1120, 595);
+    g.strokeStyle = key; g.lineWidth = 4; g.beginPath();
+    g.moveTo(40, 40); g.lineTo(40, 635); g.stroke();
+    // corner cut marks
+    g.strokeStyle = AMBER; g.lineWidth = 2;
+    for (const [x, y, dx, dy] of [[40, 40, 1, 1], [1160, 40, -1, 1], [40, 635, 1, -1], [1160, 635, -1, -1]] as const) {
+      g.beginPath(); g.moveTo(x + dx * 26, y); g.lineTo(x, y); g.lineTo(x, y + dy * 26); g.stroke();
+    }
+
+    // Header tape
+    g.fillStyle = AMBER; g.font = mono(20, 700);
+    g.fillText("[ TERMINAL AUDIT // THE CRYPTO FINAL BOSS ]", 78, 92);
+    g.fillStyle = TAPE; g.font = mono(16);
+    g.fillText(`RUN ${monthsDone}/${TOTAL_MONTHS} MONTHS  |  ${run.config.difficulty.toUpperCase()}  |  RANK ${badge.toUpperCase()}`, 78, 120);
+
+    // Verdict
+    g.fillStyle = "#FFFFFF"; g.font = display(96);
+    g.fillText(end.title.toUpperCase(), 74, 222);
+    g.fillStyle = key; g.font = mono(18, 700);
+    g.fillText(won ? ">> THE BOSS CONCEDED GROUND" : ">> THE BOSS KEPT THE CHAIR", 78, 258);
+
+    // Tape rows: crashes / duels / months as hardware segments
+    const row = (label: string, filled: number, total: number, y: number, colour: string) => {
+      g.fillStyle = TAPE; g.font = mono(15);
+      g.fillText(label, 78, y - 22);
+      for (let i = 0; i < total; i++) {
+        const x = 78 + i * 62;
+        g.fillStyle = i < filled ? colour : EDGE;
+        g.fillRect(x, y, 50, 26);
+        g.strokeStyle = EDGE; g.lineWidth = 1; g.strokeRect(x, y, 50, 26);
+      }
+      g.fillStyle = "#FFFFFF"; g.font = mono(16, 700);
+      g.fillText(`${filled}/${total}`, 78 + total * 62 + 10, y + 20);
+    };
+    row("CRASHES SURVIVED", Math.min(run.crises, crashTotal), crashTotal, 320, MINT);
+    row("BOSS DUELS WON", Math.min(run.bossWins, duelTotal), duelTotal, 400, AMBER);
+    row("MONTHS ON THE TAPE", Math.round((monthsDone / TOTAL_MONTHS) * monthCells), monthCells, 480, key);
+
+    // Net / score block
+    g.strokeStyle = EDGE; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(700, 300); g.lineTo(700, 560); g.stroke();
+    g.fillStyle = TAPE; g.font = mono(15);
+    g.fillText("FINAL TREASURY", 740, 322);
+    g.fillStyle = key; g.font = display(64);
+    g.fillText(formatMoney(net), 736, 386);
+    g.fillStyle = TAPE; g.font = mono(15);
+    g.fillText("BOSS SCORE", 740, 446);
+    g.fillStyle = "#FFFFFF"; g.font = display(46);
+    g.fillText(score.toLocaleString("en-US"), 736, 494);
+    g.fillStyle = AMBER; g.font = mono(15, 700);
+    g.fillText(`XP ${run.xp.toLocaleString("en-US")}  |  LVL ${levelFor(run.xp)}`, 740, 540);
+
+    // Footer tape
+    g.fillStyle = EDGE; g.fillRect(40, 588, 1120, 1);
+    g.fillStyle = TAPE; g.font = mono(16);
+    g.fillText("VERIFIED RUN // thecryptofinalboss.app", 78, 618);
+    g.fillStyle = AMBER; g.font = mono(16, 700);
+    g.fillText("$TCFB", 1060, 618);
     return c;
   };
   const shareCard = async () => {
     playSfx("click");
+    // The card must never fall back to a system font — wait for the webfonts.
+    try { await document.fonts.ready; } catch { /* older browsers just draw */ }
     const c = drawCard();
     if (!c) return;
     const blob = await new Promise<Blob | null>((res) => c.toBlob((b) => res(b), "image/png"));
