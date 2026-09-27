@@ -1637,6 +1637,14 @@
 .cy-stance-line { color:var(--journey-yellow); font-size:8px; font-weight:900; letter-spacing:.1em; }
 .cy-more-plan { display:grid; gap:6px; margin-top:12px; padding:9px; border:1px solid color-mix(in oklab,var(--journey-yellow) 34%,transparent); border-radius:10px; background:linear-gradient(140deg,color-mix(in oklab,var(--journey-yellow) 9%,transparent),transparent 70%); }
 .cy-more-plan > p { color:var(--muted-foreground); font-size:9px; line-height:1.4; }
+.cy-quick-row { display:grid; grid-auto-flow:column; gap:6px; }
+.cy-quick-btn { display:flex; align-items:center; justify-content:center; gap:5px; min-height:36px; padding:6px 8px; border:1px solid color-mix(in oklab,var(--journey-cyan) 45%,var(--border)); border-radius:8px; background:color-mix(in oklab,var(--journey-cyan) 8%,transparent); color:var(--journey-cyan); font-size:9px; font-weight:900; letter-spacing:.08em; cursor:pointer; }
+.cy-quick-btn svg { width:13px; height:13px; flex:none; }
+.cy-quick-btn:hover:not(:disabled) { border-color:var(--journey-cyan); box-shadow:0 0 18px -8px var(--journey-cyan); }
+.cy-quick-btn.is-done, .cy-quick-btn:disabled { opacity:.4; color:var(--muted-foreground); border-color:var(--border); background:transparent; cursor:not-allowed; }
+.cy-quick-btn.is-urgent { border-color:var(--journey-pink); background:color-mix(in oklab,var(--journey-pink) 14%,transparent); color:var(--journey-pink); animation:cy-quick-alarm 1.3s ease-in-out infinite; }
+@keyframes cy-quick-alarm { 50% { box-shadow:0 0 22px -6px var(--journey-pink); } }
+
 
 
 .cy-conviction { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:7px; margin-top:6px; }
