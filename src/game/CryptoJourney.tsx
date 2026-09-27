@@ -1444,6 +1444,8 @@ export function CryptoJourney() {
       </section>}
       {fxFlash && <div className={`cy-fx cy-fx-${fxFlash}`} aria-hidden />}
       {arcadeFx && <ArcadeMoment fx={arcadeFx} boss={enragedBoss.url} />}
+      {fillFx && <div className={`cy-fill tone-${fillFx.tone}`} role="status"><strong>{fillFx.head}</strong><small>{fillFx.sub}</small></div>}
+
 
       <section className="cy-journey" aria-label={`Month ${Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} of ${TOTAL_MONTHS}`}>
         <div className="cy-journey-labels"><span>MANIA</span><span>COLLAPSE</span><span>ENDGAME</span></div>
