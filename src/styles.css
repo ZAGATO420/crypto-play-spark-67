@@ -1778,7 +1778,7 @@
    monospace tape data, one single signature moment (boss interruption).
    ============================================================ */
 
-.journey-shell, .journey-start, .journey-end, .cy-scrim, .cy-sheet {
+.journey-shell, .journey-start, .journey-end, .cy-shell, .cy-scrim, .cy-sheet {
   --pit-bg: oklch(0.174 0.017 251);
   --pit-steel: oklch(0.262 0.024 251);
   --pit-edge: oklch(0.362 0.036 252);
@@ -1933,3 +1933,15 @@
 @media (prefers-reduced-motion: reduce) {
   .pit-interrupt, .pit-interrupt img, .pit-interrupt::before { animation-duration: 0.01ms; animation-iteration-count: 1; }
 }
+
+/* Phase colours live inside the Pit palette so the six phases stay readable
+   without drifting into neon: no purple, no magenta. */
+.cy-arena.mode-accumulate { --phase: var(--pit-amber); }
+.cy-arena.mode-momentum { --phase: var(--pit-mint); }
+.cy-arena.mode-panic { --phase: var(--pit-shock); }
+.cy-arena.mode-hunt { --phase: oklch(0.74 0.17 48); }
+.cy-arena.mode-defend { --phase: oklch(0.74 0.09 236); }
+.cy-arena.mode-duel { --phase: var(--pit-shock); }
+.cy-shell { background-image: none; }
+.cy-shell .cy-arena, .cy-shell .cy-move, .cy-shell .cy-chip, .cy-shell .cy-card,
+.cy-shell .cy-meter, .cy-shell .cy-panel { border-radius: 2px; }
