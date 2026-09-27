@@ -52,3 +52,9 @@
 - [x] Mobile cockpit compacted: duplicate standing block, tournament line and risk notes fold into SHOW BRIEFING; one big action plus the fixed dock.
 - [x] Three new skill games: CATCH THE GREEN (whale candles), CLAIM THE REAL ONE (airdrop phishing), HOLD THE LINE (margin defence). All grant XP via the existing skill reward.
 - [x] Sheets close with Escape or a tap on the backdrop.
+
+## Strategie-Umbau (erledigt)
+- Zwei sichtbare Züge pro Quartal: TAKE THE RISK / PLAY IT SAFE, pro Phase eigener Text + Begründung (MODE_MOVES).
+- Phasen-Branding: Farbwelt + Banner pro Phase (MODE_THEME), PANIC pulsiert.
+- Boss spricht wieder auf dem Handy (CSS-Ausblendung entfernt).
+- Toter Code entfernt (details-State, Meter, cy-meters/cy-versus).
