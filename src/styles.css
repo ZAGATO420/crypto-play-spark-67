@@ -1683,6 +1683,9 @@
   .cy-move > em { display:none; }
   .cy-tape-row { gap:4px; }
   .cy-tape-btn { min-height:32px; font-size:8px; }
+  .cy-quick-row { gap:4px; }
+  .cy-quick-btn { min-height:32px; padding:5px 6px; font-size:8px; }
+
   .cy-conviction { gap:5px; margin-top:4px; }
   .cy-conv-btn { min-height:26px; font-size:7px; }
   .cy-phase-banner { margin-bottom:4px; padding:4px 7px; border-radius:6px; }
