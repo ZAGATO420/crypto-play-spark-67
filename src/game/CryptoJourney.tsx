@@ -1376,7 +1376,7 @@ export function CryptoJourney() {
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return (
     <EndScreen
-      run={run} net={net} score={score} ending={ending}
+      run={run} net={net} score={score} ending={ending} mark={mark}
       onRestart={() => setScreen("setup")}
       onRematch={() => begin(run.config, run.seed)}
       onBoard={() => setScreen("board")} />
