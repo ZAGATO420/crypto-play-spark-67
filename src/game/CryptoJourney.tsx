@@ -1593,27 +1593,10 @@ export function CryptoJourney() {
                 </div>
 
               </div>
-              <div className={`cy-plan heat-${Math.min(5, run.heat)}`} aria-label="Your plan for this quarter">
-                <div className="cy-plan-head">
-                  <span>YOUR PLAN FOR THIS QUARTER</span>
-                  <strong className={run.heat > 0 ? "is-hot" : ""}>HEAT x{run.heat} · WIN BONUS +{Math.round((heatBonus(run.heat) - 1) * 100)}%</strong>
-                </div>
-                <div className="cy-plan-row">
-                  {STANCES.map((s) => (
-                    <button key={s.id} type="button" className={`cy-plan-btn is-${s.id}${run.stance === s.id ? " is-on" : ""}`} disabled={guide !== null}
-                      onClick={() => { playSfx("click"); setRun((r) => ({ ...r, stance: s.id })); say(`${s.name} · ${s.line}`, s.id === "degen" ? "pink" : "cyan"); }}>
-                      <b>{s.name}</b>
-                      <small>{s.id === "survive" ? "−50% LOSS" : s.id === "degen" ? "±60% SWING" : "AS IT COMES"}</small>
-                    </button>
-                  ))}
-                </div>
-                <p>{stanceOf(run.stance).line}</p>
-                <div className="cy-conviction">
-                  <span>CONVICTION {Math.round(run.conviction)}%</span>
-                  <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
-                  <button type="button" className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} disabled={guide !== null} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
-                </div>
-              </div>
+              {run.stance !== "balanced" || run.convictionOn || run.heat > 0 ? (
+                <p className="cy-stance-line">{run.stance !== "balanceh" ? "" : ""}{stanceOf(run.stance).name} PLAN{run.convictionOn ? " · CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` · HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+              ) : null}
+
               {guide !== null ? (
                 <div className="cy-moves is-guided-row">
                   {guide === 0
