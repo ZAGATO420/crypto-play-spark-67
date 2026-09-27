@@ -2956,6 +2956,19 @@ Beat my run: thecryptofinalboss.app`;
           {profile && <small className="end-progress">RUN {profile.runs} · ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} · BEST {formatMoney(profile.bestNet)}</small>}
         </div>
 
+        <div className="end-trophy">
+          <p className="journey-kicker">YOUR TROPHY · SPOILER-FREE</p>
+          <pre className="end-grid">{`Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
+Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
+Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}`}</pre>
+          <div className="end-trophy-actions">
+            <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "COPY TO SHARE"}</Button>
+            <Button variant="outline" onClick={() => void shareCard()}>{cardStatus === "copied" ? "CARD COPIED" : cardStatus === "saved" ? "CARD SAVED" : "TROPHY CARD 📸"}</Button>
+          </div>
+        </div>
+
+
+
         {run.chronicle.length > 1 && (
           <div className="end-chronicle">
             <p className="journey-kicker">HOW IT WENT</p>
