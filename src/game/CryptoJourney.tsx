@@ -2673,7 +2673,7 @@ function EndingsSheet({ profile, onClose }: { profile: Profile; onClose: () => v
   );
 }
 
-function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { resume: boolean; onTournament: () => void; onFreeRun: () => void; onResume: () => void; onBoard: () => void }) {
+function StartScreen({ resume, mark, onTournament, onFreeRun, onResume, onBoard }: { resume: boolean; mark: TopMark | null; onTournament: () => void; onFreeRun: () => void; onResume: () => void; onBoard: () => void }) {
   const [rules, setRules] = useState(false);
   const [endings, setEndings] = useState(false);
   // Read after mount: localStorage is not available while rendering on the server.
@@ -2717,7 +2717,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
 
 
 
-function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onBack: () => void; onStart: (config: Config) => void }) {
+function SetupScreen({ tournament, mark, onBack, onStart }: { tournament: boolean; mark: TopMark | null; onBack: () => void; onStart: (config: Config) => void }) {
   const season = currentSeasonId();
   // In the tournament everyone plays the same twist, so nobody picks an easier one.
   const locked = tournament ? tournamentModifier(season) : null;
@@ -2854,7 +2854,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
 }
 
 
-function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; onRestart: () => void; onRematch: () => void; onBoard: () => void }) {
+function EndScreen({ run, net, score, ending, mark, onRestart, onRematch, onBoard }: { run: Run; net: number; score: number; ending: EndingKey; mark: TopMark | null; onRestart: () => void; onRematch: () => void; onBoard: () => void }) {
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "queued" | "rejected">("idle");
   const [wallet, setWallet] = useState(() => readWallet());
   const [walletError, setWalletError] = useState(false);
