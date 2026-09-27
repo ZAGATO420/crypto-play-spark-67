@@ -127,7 +127,7 @@ function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResul
   const send = () => {
     const { lo, w } = band.current;
     const res: MiniResult = gas < lo
-      ? { quality: 0.05, label: "TOO CHEAP · MISSED THE MINT" }
+      ? { quality: 0.05, label: "TOO CHEAP | MISSED THE MINT" }
       : gas > lo + w
         ? { quality: 0.45, label: "OVERPAID FOR GAS" }
         : { quality: 1, label: "FIRST BLOCK" };
@@ -198,7 +198,7 @@ function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult)
     <>
       <p className="journey-kicker"><KeyRound /> SEED PHRASE</p>
       <h2>{show ? "MEMORISE THIS" : "TAP THEM IN ORDER"}</h2>
-      <p className="cy-lead">{show ? "Four words, three seconds. Your cold storage depends on it." : `Word ${Math.min(step + 1, 4)} of 4 · ${3 - wrong} tries left`}</p>
+      <p className="cy-lead">{show ? "Four words, three seconds. Your cold storage depends on it." : `Word ${Math.min(step + 1, 4)} of 4 | ${3 - wrong} tries left`}</p>
       <div className="mg-seed">
         {(show ? order.current : shuffled.current).map((w, i) => (
           <button key={w} disabled={show || !!done} onClick={() => pick(w)}>{show ? `${i + 1}. ${w}` : w}</button>
@@ -292,7 +292,7 @@ function CandleCatch({ hard, roll, onResult }: { hard: boolean; roll: number; on
           <button key={d.id} type="button" className={`mg-candle ${d.green ? "is-green" : "is-red"}${d.hit ? " is-hit" : ""}`}
             style={{ left: `${d.x}%`, top: `${d.y}%` }} onPointerDown={() => tap(d)} aria-label={d.green ? "Green candle" : "Red candle"} />
         ))}
-        <span className="mg-field-score"><strong>{caught}</strong>/{need} GREEN · {missed} RED HIT</span>
+        <span className="mg-field-score"><strong>{caught}</strong>/{need} GREEN | {missed} RED HIT</span>
       </div>
       {done && <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>}
     </>
@@ -334,7 +334,7 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
     if (done) return;
     const res: MiniResult = index === real
       ? { quality: 1, label: "AIRDROP CLAIMED" }
-      : { quality: 0.15, label: "PHISHING SITE · WALLET DRAINED" };
+      : { quality: 0.15, label: "PHISHING SITE | WALLET DRAINED" };
     setDone(res);
     window.setTimeout(() => onResult(res), 850);
   };

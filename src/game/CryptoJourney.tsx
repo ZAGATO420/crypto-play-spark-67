@@ -450,7 +450,7 @@ export function CryptoJourney() {
     liqWarned.current = true;
     playSfxExclusive("hit");
     setBossTalk("Your margin is gone in a heartbeat. Add, exit, or pray.");
-    say("LIQUIDATION CLOSE · protect the position", "pink");
+    say("LIQUIDATION CLOSE | protect the position", "pink");
   }, [liqAlert]);
 
 
@@ -529,7 +529,7 @@ export function CryptoJourney() {
       }
       return { ...r, xp: next };
     });
-    pop(`+${gain} XP${label ? ` · ${label}` : ""}`, "xp");
+    pop(`+${gain} XP${label ? ` | ${label}` : ""}`, "xp");
   };
 
   const rumble = () => { playSfx("crash"); setShake(true); window.setTimeout(() => setShake(false), 520); };
@@ -602,9 +602,9 @@ export function CryptoJourney() {
         nextId: r.nextId + 1,
       }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee);
     });
-    log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
+    log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} | held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
-    showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN · ${cust.short} · entry ${formatMoney(price)}`, "buy");
+    showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN | ${cust.short} | entry ${formatMoney(price)}`, "buy");
     playSfx("buy");
 
     if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
@@ -630,7 +630,7 @@ export function CryptoJourney() {
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
-    showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin · entry ${formatMoney(price)}`, "perp");
+    showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin | entry ${formatMoney(price)}`, "perp");
     playSfx("buy");
 
     grantXp(XP.trade + lev * 8, `${lev}x`);
@@ -671,8 +671,8 @@ export function CryptoJourney() {
         ? r.positions.filter((p) => p.id !== id)
         : r.positions.map((p) => (p.id === id ? { ...p, margin: p.margin * (1 - fraction), qty: p.qty * (1 - fraction) } : p)),
     }, `Closed ${pos.symbol}`, back), `${cust.short} fee`, -fee));
-    log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " · settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
-    say(`${pos.symbol} closed for ${formatMoney(back)} · ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
+    log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " | settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
+    say(`${pos.symbol} closed for ${formatMoney(back)} | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
     if (quality < 1 && gain > 0 && cost > 0 && gain / cost >= 9) triggerGodCandle(`${pos.symbol} TRADE`, gain / cost + 1, gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
@@ -698,7 +698,7 @@ export function CryptoJourney() {
     if (run.conviction < 100 && !run.convictionOn) return say("Conviction is not full yet. Win quarters, fill the bar.", "pink");
     playSfx("hit");
     setRun((r) => ({ ...r, convictionOn: !r.convictionOn }));
-    say(run.convictionOn ? "Conviction back in the holster." : "CONVICTION ARMED · this quarter counts 1.5x, win or lose.", "yellow");
+    say(run.convictionOn ? "Conviction back in the holster." : "CONVICTION ARMED | this quarter counts 1.5x, win or lose.", "yellow");
   };
 
   const takeOffer = (amount: number) => {
@@ -721,7 +721,7 @@ export function CryptoJourney() {
         boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
         perks: Array.from(new Set([...r.perks, fight.perk])),
         statuses: Array.from(new Set([...r.statuses, "BOSS BEATEN"])),
-      }, `${fight.title} · won`, won), `I beat him at ${fight.title.replace(/^.*· /, "")} and took ${formatMoney(won)} off his table.`));
+      }, `${fight.title} | won`, won), `I beat him at ${fight.title.replace(/^.*· /, "")} and took ${formatMoney(won)} off his table.`));
       say(`You took ${formatMoney(won)} off the Boss. Perk unlocked: ${fight.perk}.`, "yellow");
       feel("win", won);
       grantXp(XP_EXTRA.escape * 2, "BOSS BEATEN");
@@ -734,7 +734,7 @@ export function CryptoJourney() {
       setRun((r) => chron(book({
         ...r, cash: Math.max(0, r.cash - wager), stress: clamp(r.stress + 16), conviction: 0, convictionOn: false,
         boss: { ...r.boss, cash: r.boss.cash + wager, line: "He counted your money in front of you." },
-      }, `${fight.title} · lost`, -wager), `He took ${formatMoney(wager)} off me in ${chapterLabel(chapter)} and made sure the room saw it.`));
+      }, `${fight.title} | lost`, -wager), `He took ${formatMoney(wager)} off me in ${chapterLabel(chapter)} and made sure the room saw it.`));
       say(`He took ${formatMoney(wager)} and told the room about it.`, "pink");
       feel("liq", -wager);
     }
@@ -748,8 +748,8 @@ export function CryptoJourney() {
     spend();
     if (quality < 0.2) {
       const gas = Math.round(size * 0.06);
-      setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} · missed mint (gas)`, -gas));
-      log({ chapter: run.chapter, title: `MISSED · ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
+      setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} | missed mint (gas)`, -gas));
+      log({ chapter: run.chapter, title: `MISSED | ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
       return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
     }
     const rugged = det(run.seed, `rug-${run.chapter}-${card.name}`) < card.rug / (arch.risk || 1);
@@ -768,7 +768,7 @@ export function CryptoJourney() {
       : multi > 6
         ? "That is the one you will tell people about for years. Loudly."
         : "Not life changing, but green is green.";
-    log({ chapter: run.chapter, title: `${title} · ${card.name}`, detail: `${formatMoney(size)} in · ${formatMoney(back)} out.`, tone: rugged ? "pink" : "yellow" });
+    log({ chapter: run.chapter, title: `${title} | ${card.name}`, detail: `${formatMoney(size)} in | ${formatMoney(back)} out.`, tone: rugged ? "pink" : "yellow" });
     pop(`${back >= size ? "+" : "−"}${formatMoney(Math.abs(back - size))}`, back >= size ? "up" : "down");
     grantXp(rugged ? XP.presaleRug : XP.presaleHit, rugged ? "RUG SURVIVED" : "LAUNCH HIT");
     if (rugged) rumble();
@@ -842,7 +842,7 @@ export function CryptoJourney() {
       positions: r.positions.map((p) => (p.kind === "spot" ? { ...p, where: id } : p)),
       statuses: id === "cold" ? Array.from(new Set([...r.statuses, "SELF CUSTODY"])) : r.statuses,
     }, `Moved bags to ${custodyOf(id).short}`, -fee));
-    log({ chapter: run.chapter, title: `CUSTODY · ${custodyOf(id).short}`, detail: `${formatMoney(value)} moved for ${formatMoney(fee)} in fees.`, tone: "cyan" });
+    log({ chapter: run.chapter, title: `CUSTODY | ${custodyOf(id).short}`, detail: `${formatMoney(value)} moved for ${formatMoney(fee)} in fees.`, tone: "cyan" });
     say(`Bags now in ${custodyOf(id).name}. ${custodyOf(id).blurb}`, "cyan");
     grantXp(XP_EXTRA.custody, "CUSTODY MOVE");
   };
@@ -853,8 +853,8 @@ export function CryptoJourney() {
     if (ap <= 0) return say("Changing your life costs a move. None left.", "pink");
     spend();
     setRun((r) => ({ ...r, job, housing, stress: clamp(r.stress + (job === "fulltime" ? 8 : 0)) }));
-    log({ chapter: run.chapter, title: "LIFE CHANGED", detail: `${jobOf(job).name} · ${housingOf(housing).name}.`, tone: "cyan" });
-    say(`${jobOf(job).name} · ${housingOf(housing).name}. Costs and income updated.`, "cyan");
+    log({ chapter: run.chapter, title: "LIFE CHANGED", detail: `${jobOf(job).name} | ${housingOf(housing).name}.`, tone: "cyan" });
+    say(`${jobOf(job).name} | ${housingOf(housing).name}. Costs and income updated.`, "cyan");
     grantXp(XP_EXTRA.life, "LIFE CHOICE");
   };
 
@@ -932,10 +932,10 @@ export function CryptoJourney() {
     const stake = Math.max(300, Math.round(net * 0.02));
     const delta = quality >= 0.6 ? Math.round(stake * quality) : -Math.round(stake * 0.5);
     const xp = Math.round(check.reward * quality);
-    setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} · ${label}`, delta));
+    setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} | ${label}`, delta));
     setSkill({ chapter: run.chapter, quality, label, delta });
     pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
-    if (xp > 0) pop(`+${xp} XP · ${label}`, "xp");
+    if (xp > 0) pop(`+${xp} XP | ${label}`, "xp");
     playSfx(delta >= 0 ? "win" : "hit");
     nextInQueue();
   };
@@ -983,8 +983,8 @@ export function CryptoJourney() {
     const lines: string[] = [];
     // the quarter's skill test, reported in plain words every single time
     lines.push(skill && skill.chapter === from
-      ? `Skill test · ${skillCheckFor(from).head}: ${skill.label} (${skill.delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(skill.delta))}).`
-      : `Skill test · ${skillCheckFor(from).head}: not played. No bonus this quarter.`);
+      ? `Skill test | ${skillCheckFor(from).head}: ${skill.label} (${skill.delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(skill.delta))}).`
+      : `Skill test | ${skillCheckFor(from).head}: not played. No bonus this quarter.`);
 
     const inflow: Entry[] = [];
     const outflow: Entry[] = [];
@@ -1018,7 +1018,7 @@ export function CryptoJourney() {
         const returned = Math.round(valueOf(p, priceAt(p.symbol, next, run.noise)));
         cash += returned;
         earnFrom(`${p.symbol} ${p.lev}x force-close`, returned);
-        lines.push(`Risk overheated: ${p.symbol} ${p.lev}x force-closed · ${formatMoney(returned)} returned.`);
+        lines.push(`Risk overheated: ${p.symbol} ${p.lev}x force-closed | ${formatMoney(returned)} returned.`);
       }
     }
     let positions = run.risk >= 95 ? survivors.filter((p) => p.kind !== "perp") : survivors;
@@ -1027,7 +1027,7 @@ export function CryptoJourney() {
     // perp funding: leverage is rented, never owned — and the Boss can raise the rent
     const squeeze = attack?.id === "SQUEEZE" ? 2.2 : 1;
     const funding = Math.round(positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev * FUNDING * squeeze, 0));
-    if (funding > 0) { cash -= funding; spendOn(squeeze > 1 ? "Perp funding · squeezed" : "Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}${squeeze > 1 ? " — he doubled the rate." : "."}`); }
+    if (funding > 0) { cash -= funding; spendOn(squeeze > 1 ? "Perp funding | squeezed" : "Perp funding", funding); lines.push(`Perp funding: ${formatMoney(funding)}${squeeze > 1 ? " — he doubled the rate." : "."}`); }
 
     // the price of taking his money
     if (run.statuses.includes("BOSS DEBT")) {
@@ -1077,9 +1077,9 @@ export function CryptoJourney() {
     const rent = Math.round(house.rent * diff.cost);
     const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
     cash -= rent + food;
-    spendOn(`Rent · ${house.name}`, rent);
+    spendOn(`Rent | ${house.name}`, rent);
     spendOn("Food & living", food);
-    lines.push(`Rent ${formatMoney(rent)} · living ${formatMoney(food)} · income ${formatMoney(job.income)}.`);
+    lines.push(`Rent ${formatMoney(rent)} | living ${formatMoney(food)} | income ${formatMoney(job.income)}.`);
 
     // tax once a year on what you actually realised
     if (isTaxChapter(next) && realized > 0) {
@@ -1090,7 +1090,7 @@ export function CryptoJourney() {
       if (paid < bill) {
         const unpaid = Math.round((bill - paid) * 1.2);
         taxDebt += unpaid;
-        lines.push(`Tax bill ${formatMoney(bill)} · ${formatMoney(paid)} paid · ${formatMoney(unpaid)} debt after penalty.`);
+        lines.push(`Tax bill ${formatMoney(bill)} | ${formatMoney(paid)} paid | ${formatMoney(unpaid)} debt after penalty.`);
       } else lines.push(`Tax bill paid: ${formatMoney(bill)}.`);
       realized = 0;
     }
@@ -1164,7 +1164,7 @@ export function CryptoJourney() {
       draft.cash = Math.max(0, draft.cash + planCash);
       draft.ledger = [{ chapter: next, label: `${plan.name} plan`, amount: planCash }, ...draft.ledger].slice(0, 60);
       lines.push(planCash >= 0
-        ? `${plan.name} plan paid ${formatMoney(planCash)} extra${calledRight && run.heat > 0 ? ` · HEAT x${run.heat} bonus` : ""}.`
+        ? `${plan.name} plan paid ${formatMoney(planCash)} extra${calledRight && run.heat > 0 ? ` | HEAT x${run.heat} bonus` : ""}.`
         : `${plan.name} plan cost ${formatMoney(Math.abs(planCash))} more. The plan was wrong.`);
     } else if (delta < 0 && plan.loss < 1) {
       lines.push(`${plan.name} plan absorbed part of the hit.`);
@@ -1176,8 +1176,8 @@ export function CryptoJourney() {
 
     const streak = delta > 0 && !idle ? run.streak + 1 : 0;
     const move = pctMove("BTC", draft);
-    const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER · STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
-    const detail = `${chapterLabel(next)} · ${monthRangeLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
+    const title = delta >= 0 ? (streak >= 3 ? `GREEN QUARTER | STREAK x${streak}` : "GREEN QUARTER") : "RED QUARTER";
+    const detail = `${chapterLabel(next)} | ${monthRangeLabel(next)}: BTC ${move >= 0 ? "+" : ""}${move.toFixed(1)}%. Your book ${delta >= 0 ? "gained" : "lost"} ${formatMoney(Math.abs(delta))}.`;
     const tone: Log["tone"] = delta >= 0 ? (streak >= 3 ? "yellow" : "cyan") : "pink";
 
     // the Boss trades his own book against yours, every single quarter
@@ -1259,8 +1259,8 @@ export function CryptoJourney() {
     const bonus = Math.max(500, Math.round(net * 0.02));
     setRun((r) => {
       const seen = Array.from(new Set([...r.seen, id]));
-      if (card.kind === "cash") return book({ ...r, seen, cash: r.cash + bonus }, `Loot · ${card.name}`, bonus);
-      if (card.kind === "tcfb") return book({ ...r, seen, cash: r.cash + bonus, statuses: Array.from(new Set([...r.statuses, "$TCFB HOLDER"])) }, `Loot · ${card.name}`, bonus);
+      if (card.kind === "cash") return book({ ...r, seen, cash: r.cash + bonus }, `Loot | ${card.name}`, bonus);
+      if (card.kind === "tcfb") return book({ ...r, seen, cash: r.cash + bonus, statuses: Array.from(new Set([...r.statuses, "$TCFB HOLDER"])) }, `Loot | ${card.name}`, bonus);
       if (card.kind === "calm") return { ...r, seen, stress: clamp(r.stress - 25) };
       if (card.kind === "fed") return { ...r, seen, hunger: clamp(r.hunger - 25) };
       if (card.kind === "move") return { ...r, seen, perks: Array.from(new Set([...r.perks, "+1 MOVE"])) };
@@ -1270,7 +1270,7 @@ export function CryptoJourney() {
     if (card.kind === "tcfb") grantXp(250, "$TCFB");
     if (card.kind === "move") setAp((a) => Math.min(AP_CAP, a + 1));
     playSfx("win");
-    say(`${card.name} · ${card.blurb}`, "yellow");
+    say(`${card.name} | ${card.blurb}`, "yellow");
     setDialog(null);
     openChapterCards(run.chapter);
   };
@@ -1388,7 +1388,7 @@ export function CryptoJourney() {
   const sellValue = focusPosition ? Math.round(valueOf(focusPosition, focusPrice)) : 0;
   const preview: { gives: string; gets: string; then: string } =
     guide === 0 ? { gives: `${formatMoney(guideBuy)} of your cash`, gets: `Bitcoin worth ${formatMoney(guideBuy)} at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose. That is the whole trade." }
-    : chapterPlay.mode === "HUNT" && presale ? { gives: `${formatMoney(presale.min)} or more as a ticket`, gets: `${presale.name} tokens before everyone else`, then: `${Math.round(presale.rug * 100)}% chance it is a rug · up to ${presale.upside[1]}x if it is not.` }
+    : chapterPlay.mode === "HUNT" && presale ? { gives: `${formatMoney(presale.min)} or more as a ticket`, gets: `${presale.name} tokens before everyone else`, then: `${Math.round(presale.rug * 100)}% chance it is a rug | up to ${presale.upside[1]}x if it is not.` }
     : chapterPlay.mode === "DEFEND" ? { gives: "One of your moves", gets: "Your coins in safer storage", then: "An exchange failure cannot reach money you already moved." }
     : chapterPlay.mode === "BOSS DUEL" ? { gives: `${formatMoney(duelStake)} as a stake`, gets: "Up to double it, plus a perk", then: "Lose the skill moment and the stake is gone." }
     : focusPosition ? { gives: `Your ${focusSymbol}, bought at ${formatMoney(focusPosition.entry)}`, gets: `${formatMoney(sellValue)} back as cash`, then: `You lock in ${focusPnl >= 0 ? "a profit of" : "a loss of"} ${formatMoney(Math.abs(focusPnl))}. Cash cannot fall.` }
@@ -1404,13 +1404,13 @@ export function CryptoJourney() {
   const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
   // when a launch or a duel IS the risky move, its terms stay readable on the card
   const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
-    : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM · STAKE ${formatMoney(duelStake)}`
+    : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
       : moves.risk.label;
   const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen);
   const riskWhy = chapterPlay.mode === "HUNT" && presale
-    ? `Ticket from ${formatMoney(presale.min)} · rug risk ${Math.round(presale.rug * 100)}% · upside ${presale.upside[0]}x–${presale.upside[1]}x`
+    ? `Ticket from ${formatMoney(presale.min)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
     : chapterPlay.mode === "BOSS DUEL" && duelOpen
-      ? `Stake ${formatMoney(duelStake)} · win up to double it plus a perk · lose it all if you fail`
+      ? `Stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
       : moves.risk.why;
 
   const riskMove = () => {
@@ -1457,7 +1457,7 @@ export function CryptoJourney() {
 
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{act.name} · {chapterLabel(run.chapter)} · {monthRangeLabel(run.chapter)} · {cfg.difficulty}{cfg.modifier !== "straight" ? ` · ${modifierOf(cfg.modifier).name}` : ""}{cfg.ironman ? " · IRONMAN" : ""}{cfg.tournament ? ` · ${seasonLabel(cfg.season)}` : ""}</p>
+          <p className="journey-kicker">{act.name} | {chapterLabel(run.chapter)} | {monthRangeLabel(run.chapter)} | {cfg.difficulty}{cfg.modifier !== "straight" ? ` | ${modifierOf(cfg.modifier).name}` : ""}{cfg.ironman ? " | IRONMAN" : ""}{cfg.tournament ? ` | ${seasonLabel(cfg.season)}` : ""}</p>
           <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
           <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
             <span className="cy-level">LVL {xpBar.level}</span>
@@ -1477,7 +1477,7 @@ export function CryptoJourney() {
 
         <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
         <div>
-        <p className="cy-goal-head">{guide !== null ? `FIRST RUN · STEP ${guide + 1} OF 3` : `${chapterPlay.mode} · YOUR MOVE`}</p>
+        <p className="cy-goal-head">{guide !== null ? `FIRST RUN | STEP ${guide + 1} OF 3` : `${chapterPlay.mode} | YOUR MOVE`}</p>
         <p className="cy-goal-line">{guide === 0 ? `Buy ${formatMoney(guideBuy)} of Bitcoin below` : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
         <p className="cy-goal-why cy-extra">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
         {doom !== null && <p className="cy-goal-doom cy-extra">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
@@ -1493,15 +1493,15 @@ export function CryptoJourney() {
       <section className={`cy-standing is-${standing.tone}`} aria-label="How you stand against the Boss">
         <div className="cy-standing-head">
           <span className="cy-standing-tag">{standing.label}</span>
-          <strong>YOU {formatMoney(net)} · BOSS {formatMoney(bossNet)}</strong>
+          <strong>YOU {formatMoney(net)} | BOSS {formatMoney(bossNet)}</strong>
           <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
         <p className="cy-standing-line">{standing.line}</p>
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
-          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} · ${mission.text.slice(0, 26)} · SHOW BRIEFING`}
+          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
         </button>
-        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · MISSION · {mission.text} · +{mission.reward} XP</p>
+        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} | MISSION | {mission.text} | +{mission.reward} XP</p>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1516,7 +1516,7 @@ export function CryptoJourney() {
 
 
       <section className="cy-positions" aria-label="Open positions">
-        <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK · {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
+        <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK | {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
         {run.positions.length ? (
           <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`}>
             {run.positions.map((p) => {
@@ -1554,7 +1554,7 @@ export function CryptoJourney() {
         <section className="cy-stage" aria-live="polite">
           {phase === "brief" && (
             <article className="cy-card" key={`brief-${run.chapter}`}>
-              <p className="journey-kicker"><History /> {chapterLabel(run.chapter)} · THE SETUP</p>
+              <p className="journey-kicker"><History /> {chapterLabel(run.chapter)} | THE SETUP</p>
               <h2>{run.chapter === 0 ? "IT STARTS QUIET" : btcMove >= 0 ? "THE TAPE IS GREEN" : "THE TAPE IS BLEEDING"}</h2>
               <p className="cy-lead">{warning}</p>
               {hintFor(run.chapter) && <p className="cy-hint"><strong>WORD ON THE TIMELINE ·</strong> {hintFor(run.chapter)}</p>}
@@ -1571,14 +1571,14 @@ export function CryptoJourney() {
           {phase === "act" && (
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
               <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
-              <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
-              {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT · SAME SEED · $20 / $10 / $5 $TCFB</div>}
+              <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET | {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} | {formatMoney(focusPrice)}</strong></div>
+              {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT | SAME SEED | $20 / $10 / $5 $TCFB</div>}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className={`cy-boss-presence is-${arenaState}`}>
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
                   <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
                 </div>
-                <div className="cy-chart-instruction cy-extra"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>THE PRICE RUNS BY ITSELF · DO NOT TAP THE CHART</strong></div>
+                <div className="cy-chart-instruction cy-extra"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>THE PRICE RUNS BY ITSELF | DO NOT TAP THE CHART</strong></div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
@@ -1594,7 +1594,7 @@ export function CryptoJourney() {
                   </svg>
                   <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
-                <div className="cy-chart-legend cy-extra"><span><i className="is-now" />NOW · {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY · {formatMoney(focusPosition.entry)}</span>}</div>
+                <div className="cy-chart-legend cy-extra"><span><i className="is-now" />NOW | {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY | {formatMoney(focusPosition.entry)}</span>}</div>
                 <div className="cy-chart-foot cy-extra"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
               </div>
               <div className="cy-live cy-extra">
@@ -1624,7 +1624,7 @@ export function CryptoJourney() {
 
               </div>
               {run.stance !== "balanced" || run.convictionOn || run.heat > 0 ? (
-                <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " · CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` · HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+                <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
               ) : null}
 
               {guide !== null ? (
@@ -1659,11 +1659,11 @@ export function CryptoJourney() {
                   <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
                     disabled={!!(skill && skill.chapter === run.chapter)}
                     onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
-                    <Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : `SKILL TEST · WIN ${formatMoney(Math.max(300, Math.round(net * 0.02)))}`}
+                    <Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : `SKILL TEST | WIN ${formatMoney(Math.max(300, Math.round(net * 0.02)))}`}
                   </button>
                   {surviveUrgent && (
                     <button type="button" className="cy-quick-btn is-urgent" onClick={() => { playSfx("click"); setDialog({ k: "survive" }); }}>
-                      <HeartPulse />SURVIVE · {run.hunger >= 70 ? `HUNGER ${run.hunger}%` : `STRESS ${run.stress}%`}
+                      <HeartPulse />SURVIVE | {run.hunger >= 70 ? `HUNGER ${run.hunger}%` : `STRESS ${run.stress}%`}
                     </button>
                   )}
                 </div>
@@ -1674,13 +1674,13 @@ export function CryptoJourney() {
                 <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
 
-              {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL · {skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
+              {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL | {skill.label} | {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
                 <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
                 <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
               </div>
-              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
+              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE | {lastBook.label} | <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> | cash now {formatMoney(run.cash)}</p>}
 
 
             </article>
@@ -1688,7 +1688,7 @@ export function CryptoJourney() {
 
           {phase === "resolve" && resolution && (
             <article className={`cy-card tone-${resolution.tone}`} key={`res-${run.chapter}`}>
-              <p className="journey-kicker">{chapterLabel(run.chapter)} · THE MARKET ANSWERS</p>
+              <p className="journey-kicker">{chapterLabel(run.chapter)} | THE MARKET ANSWERS</p>
               <h2>{resolution.title}</h2>
               <p className={`cy-delta ${resolution.delta >= 0 ? "positive" : "negative"}`}>{resolution.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(resolution.delta))}</p>
               <p className="cy-lead">{resolution.detail}</p>
@@ -1760,7 +1760,7 @@ export function CryptoJourney() {
             skillDone={!!(skill && skill.chapter === run.chapter)}
             skillHead={check.head}
             skillPrize={Math.max(300, Math.round(net * 0.02))}
-            onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} · ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
+            onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
             onConviction={toggleConviction}
             onTerminal={() => setDialog({ k: "market" })}
             onSurvive={() => setDialog({ k: "survive" })}
@@ -1851,7 +1851,7 @@ function ArcadeMoment({ fx, boss }: {
         <span>PERFECT EXECUTION</span>
         <strong>{fx.multiplier.toFixed(fx.multiplier >= 10 ? 1 : 2)}×</strong>
         <h2>GOD CANDLE</h2>
-        <p>{fx.label}{fx.amount !== undefined ? ` · +${formatMoney(fx.amount)}` : " · THE BOSS FELT THAT"}</p>
+        <p>{fx.label}{fx.amount !== undefined ? ` | +${formatMoney(fx.amount)}` : " | THE BOSS FELT THAT"}</p>
       </div>
     </section>
   );
@@ -1864,7 +1864,7 @@ function ArcadeMoment({ fx, boss }: {
         <span>MARGIN ERASED</span>
         <strong>−{formatMoney(fx.amount)}</strong>
         <h2>LIQUIDATED</h2>
-        <p>{fx.symbol} · {fx.leverage}× LEVERAGE</p>
+        <p>{fx.symbol} | {fx.leverage}× LEVERAGE</p>
         <blockquote>“That was not leverage. That was a donation.”</blockquote>
       </div>
     </section>
@@ -1955,12 +1955,12 @@ function ScoreSheet({ net, chapters, diff, crises, streak, score, onClose }: { n
       <p className="journey-kicker"><Trophy /> LEADERBOARD MATH</p>
       <h2>BOSS SCORE</h2>
       <ul className="cy-lines">
-        <li>Formula · (net worth × survival × difficulty + crises) × streak</li>
-        <li>Net worth · {formatMoney(net)}</li>
-        <li>Chapters survived · {chapters}/{CHAPTERS} = x{(Math.max(0.1, Math.min(1, chapters / CHAPTERS))).toFixed(2)}</li>
-        <li>Difficulty {d.name} · x{d.cost.toFixed(2)}</li>
-        <li>Crises survived · {crises} = +{formatMoney(crises * 500)}</li>
-        <li>Streak · x{(1 + Math.min(0.5, streak * 0.05)).toFixed(2)}</li>
+        <li>Formula | (net worth × survival × difficulty + crises) × streak</li>
+        <li>Net worth | {formatMoney(net)}</li>
+        <li>Chapters survived | {chapters}/{CHAPTERS} = x{(Math.max(0.1, Math.min(1, chapters / CHAPTERS))).toFixed(2)}</li>
+        <li>Difficulty {d.name} | x{d.cost.toFixed(2)}</li>
+        <li>Crises survived | {crises} = +{formatMoney(crises * 500)}</li>
+        <li>Streak | x{(1 + Math.min(0.5, streak * 0.05)).toFixed(2)}</li>
       </ul>
       <p className="cy-delta positive">{score.toLocaleString("en-US")}</p>
       <Button className="cy-primary" onClick={onClose}>GOT IT</Button>
@@ -1992,7 +1992,7 @@ function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
 
   return (
     <>
-      <p className="journey-kicker"><Zap /> TRADING TERMINAL · {chapterLabel(run.chapter)}</p>
+      <p className="journey-kicker"><Zap /> TRADING TERMINAL | {chapterLabel(run.chapter)}</p>
       <div className="cy-term-strip" role="tablist" aria-label="Markets">
         {live.map((c) => {
           const p = priceAt(c.symbol, run.chapter, run.noise);
@@ -2010,13 +2010,13 @@ function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
 
       <div className="cy-term-head">
         <img src={COIN_LOGO[symbol]} alt="" width={40} height={40} />
-        <span><strong>{symbol}</strong><small>{fmt(price)} · this quarter {move >= 0 ? "+" : ""}{move.toFixed(1)}%</small></span>
+        <span><strong>{symbol}</strong><small>{fmt(price)} | this quarter {move >= 0 ? "+" : ""}{move.toFixed(1)}%</small></span>
         <b>CASH {fmt(run.cash)}</b>
       </div>
 
       <div className="cy-term-tabs">
-        <button className={tab === "spot" ? "is-on" : ""} onClick={() => { setTab("spot"); playSfx("click"); }}>SPOT · YOU OWN IT</button>
-        <button className={tab === "perp" ? "is-on" : ""} onClick={() => { setTab("perp"); playSfx("click"); }}>PERP · LEVERAGE</button>
+        <button className={tab === "spot" ? "is-on" : ""} onClick={() => { setTab("spot"); playSfx("click"); }}>SPOT | YOU OWN IT</button>
+        <button className={tab === "perp" ? "is-on" : ""} onClick={() => { setTab("perp"); playSfx("click"); }}>PERP | LEVERAGE</button>
       </div>
 
       {tab === "spot" ? (
@@ -2031,8 +2031,8 @@ function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
       ) : (
         <div className="cy-term-body">
           <div className="cy-toggle">
-            <button className={dir === 1 ? "is-on is-long" : ""} onClick={() => { setDir(1); playSfx("click"); }}><TrendingUp />LONG · PRICE UP</button>
-            <button className={dir === -1 ? "is-on is-short" : ""} onClick={() => { setDir(-1); playSfx("click"); }}><TrendingDown />SHORT · PRICE DOWN</button>
+            <button className={dir === 1 ? "is-on is-long" : ""} onClick={() => { setDir(1); playSfx("click"); }}><TrendingUp />LONG | PRICE UP</button>
+            <button className={dir === -1 ? "is-on is-short" : ""} onClick={() => { setDir(-1); playSfx("click"); }}><TrendingDown />SHORT | PRICE DOWN</button>
           </div>
           <div className="cy-toggle">{LEVERAGE.map((l) => <button key={l} className={lev === l ? "is-on" : ""} onClick={() => { setLev(l); playSfx("click"); }}>{l}x</button>)}</div>
           <div className="cy-term-risk">
@@ -2058,7 +2058,7 @@ function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
             return (
               <button key={p.id} className="cy-term-pos" onClick={() => onPosition(p.id)}>
                 <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
-                <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "LONG" : "SHORT"} ${p.lev}x`} · from {fmt(p.entry)}</small></span>
+                <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "LONG" : "SHORT"} ${p.lev}x`} | from {fmt(p.entry)}</small></span>
                 <b className={pnl >= 0 ? "positive" : "negative"}>{pnl >= 0 ? "+" : "−"}{fmt(Math.abs(pnl))}</b>
                 <em>CLOSE</em>
               </button>
@@ -2102,7 +2102,7 @@ function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verif
       <div className="cy-more-plan" aria-label="Your plan for this quarter">
         <div className="cy-plan-head">
           <span>YOUR PLAN FOR THIS QUARTER</span>
-          <strong className={heat > 0 ? "is-hot" : ""}>HEAT x{heat} · WIN BONUS +{Math.round((heatBonus(heat) - 1) * 100)}%</strong>
+          <strong className={heat > 0 ? "is-hot" : ""}>HEAT x{heat} | WIN BONUS +{Math.round((heatBonus(heat) - 1) * 100)}%</strong>
         </div>
         <div className="cy-plan-row">
           {STANCES.map((s) => (
@@ -2116,13 +2116,13 @@ function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verif
         <div className="cy-conviction">
           <span>CONVICTION {Math.round(conviction)}%</span>
           <div className="cy-conv-track"><i className={convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(conviction)}%` }} /></div>
-          <button type="button" className={`cy-conv-btn${convictionOn ? " is-on" : ""}`} onClick={onConviction}>{convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+          <button type="button" className={`cy-conv-btn${convictionOn ? " is-on" : ""}`} onClick={onConviction}>{convictionOn ? "ARMED | 1.5x" : "RISK IT"}</button>
         </div>
       </div>
       <div className="cy-more-grid">
         <Button variant="secondary" disabled={ap <= 0} onClick={onTerminal}><TrendingUp />TRADE TERMINAL<small>All coins, spot and leverage</small></Button>
         <Button variant="secondary" onClick={onSurvive}><HeartPulse />SURVIVE<small>Eat, calm down, pay life</small></Button>
-        <Button variant="secondary" disabled={skillDone} onClick={onSkill}><Target />{skillDone ? "SKILL DONE" : "SKILL TEST"}<small>{skillDone ? "Already played this quarter" : `${skillHead} · win ${formatMoney(skillPrize)}`}</small></Button>
+        <Button variant="secondary" disabled={skillDone} onClick={onSkill}><Target />{skillDone ? "SKILL DONE" : "SKILL TEST"}<small>{skillDone ? "Already played this quarter" : `${skillHead} | win ${formatMoney(skillPrize)}`}</small></Button>
         <Button variant="secondary" disabled={verified} onClick={onVerify}><Zap />{verified ? "SIGNALS CHECKED" : "VERIFY SIGNALS"}<small>{verified ? "One of them was a lie" : `Costs ${formatMoney(verifyCost)}`}</small></Button>
         <Button variant="secondary" disabled={ap <= 0} onClick={onStorage}><Shield />STORAGE<small>Protect exposed coins</small></Button>
         <Button variant="secondary" onClick={onHistory}><Receipt />HISTORY<small>See every cash flow</small></Button>
@@ -2141,23 +2141,23 @@ function TradeSheet({ run, symbol, onSpot, onPerp }: { run: Run; symbol: CoinSym
   return (
     <>
       <p className="journey-kicker"><Zap /> ONE TAP = ORDER FILLED</p>
-      <div className="cy-trade-head"><img src={COIN_LOGO[symbol]} alt="" width={44} height={44} /><span><strong>{symbol}</strong><small>{formatMoney(price)} · {chapterLabel(run.chapter)}</small></span></div>
+      <div className="cy-trade-head"><img src={COIN_LOGO[symbol]} alt="" width={44} height={44} /><span><strong>{symbol}</strong><small>{formatMoney(price)} | {chapterLabel(run.chapter)}</small></span></div>
       <div className="cy-trade-cols">
         <div>
-          <p className="journey-kicker">SPOT · YOU OWN IT</p>
-          <Button variant="secondary" onClick={() => onSpot(0.25)}>BUY 25% · {formatMoney(run.cash * 0.25)}</Button>
-          <Button variant="secondary" onClick={() => onSpot(0.5)}>BUY 50% · {formatMoney(run.cash * 0.5)}</Button>
-          <Button variant="secondary" onClick={() => onSpot(1)}>ALL IN · {formatMoney(run.cash)}</Button>
+          <p className="journey-kicker">SPOT | YOU OWN IT</p>
+          <Button variant="secondary" onClick={() => onSpot(0.25)}>BUY 25% | {formatMoney(run.cash * 0.25)}</Button>
+          <Button variant="secondary" onClick={() => onSpot(0.5)}>BUY 50% | {formatMoney(run.cash * 0.5)}</Button>
+          <Button variant="secondary" onClick={() => onSpot(1)}>ALL IN | {formatMoney(run.cash)}</Button>
         </div>
         <div>
-          <p className="journey-kicker">PERP · BORROWED COURAGE</p>
+          <p className="journey-kicker">PERP | BORROWED COURAGE</p>
           <div className="cy-toggle">
             <button className={dir === 1 ? "is-on" : ""} onClick={() => setDir(1)}><TrendingUp />LONG</button>
             <button className={dir === -1 ? "is-on" : ""} onClick={() => setDir(-1)}><TrendingDown />SHORT</button>
           </div>
           <div className="cy-toggle">{LEVERAGE.map((l) => <button key={l} className={lev === l ? "is-on" : ""} onClick={() => setLev(l)}>{l}x</button>)}</div>
-          <Button onClick={() => onPerp(dir, lev, 0.25)}>OPEN · {formatMoney(run.cash * 0.25)} MARGIN</Button>
-          <Button onClick={() => onPerp(dir, lev, 0.5)}>OPEN · {formatMoney(run.cash * 0.5)} MARGIN</Button>
+          <Button onClick={() => onPerp(dir, lev, 0.25)}>OPEN | {formatMoney(run.cash * 0.25)} MARGIN</Button>
+          <Button onClick={() => onPerp(dir, lev, 0.5)}>OPEN | {formatMoney(run.cash * 0.5)} MARGIN</Button>
           <small className="cy-note">Liquidation at −{(100 / lev).toFixed(0)}% price move against you.</small>
         </div>
       </div>
@@ -2174,7 +2174,7 @@ function PositionSheet({ run, id, onClose }: { run: Run; id: number; onClose: (f
   return (
     <>
       <p className="journey-kicker"><WalletCards /> {pos.kind === "spot" ? "SPOT POSITION" : `${pos.dir === 1 ? "LONG" : "SHORT"} ${pos.lev}x`}</p>
-      <div className="cy-trade-head"><img src={COIN_LOGO[pos.symbol]} alt="" width={44} height={44} /><span><strong>{pos.symbol}</strong><small>entry {formatMoney(pos.entry)} · now {formatMoney(price)}</small></span></div>
+      <div className="cy-trade-head"><img src={COIN_LOGO[pos.symbol]} alt="" width={44} height={44} /><span><strong>{pos.symbol}</strong><small>entry {formatMoney(pos.entry)} | now {formatMoney(price)}</small></span></div>
       <p className={`cy-delta ${pnl >= 0 ? "positive" : "negative"}`}>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</p>
       {pos.kind === "perp" && (
         <div className="cy-liq-bar" aria-label={`${Math.round(liq)}% margin left`}><i style={{ width: `${liq}%` }} /><span>{Math.round(liq)}% MARGIN LEFT</span></div>
@@ -2198,13 +2198,13 @@ function PresaleSheet({ card, cash, onTake, onPass }: { card: Presale; cash: num
   const labels = ["MIN TICKET", "25% OF CASH", "HALF YOUR CASH"];
   return (
     <>
-      <p className="journey-kicker"><Rocket /> {card.tag} · ONE SHOT</p>
+      <p className="journey-kicker"><Rocket /> {card.tag} | ONE SHOT</p>
       <h2>{card.name}</h2>
       <p className="cy-lead">{card.blurb}</p>
       <ul className="cy-lines">
-        <li>Rug risk · {Math.round(card.rug * 100)}%</li>
-        <li>If it works · {card.upside[0]}x to {card.upside[1]}x</li>
-        <li>Your cash · {formatMoney(cash)}</li>
+        <li>Rug risk | {Math.round(card.rug * 100)}%</li>
+        <li>If it works | {card.upside[0]}x to {card.upside[1]}x</li>
+        <li>Your cash | {formatMoney(cash)}</li>
       </ul>
       <div className={`cy-actions ${sizes.length === 3 ? "three" : ""}`}>
         {sizes.map((s, i) => (
@@ -2222,13 +2222,13 @@ function LaunchResultSheet({ res, onClose }: { res: LaunchResult; onClose: () =>
   const gain = res.back - res.size;
   return (
     <>
-      <p className="journey-kicker"><Rocket /> {res.tag} · RESULT</p>
+      <p className="journey-kicker"><Rocket /> {res.tag} | RESULT</p>
       <h2 className={res.rugged ? "negative" : "positive"}>{res.rugged ? "RUGGED." : res.multi > 6 ? "MOONSHOT" : "IT PAID"}</h2>
       <p className={`cy-delta ${gain >= 0 ? "positive" : "negative"}`}>{gain >= 0 ? "+" : "−"}{formatMoney(Math.abs(gain))}</p>
       <ul className="cy-lines">
-        <li>{res.name} · {res.multi.toFixed(2)}x</li>
-        <li>Invested · {formatMoney(res.size)}</li>
-        <li>Back in your pocket · {formatMoney(res.back)}</li>
+        <li>{res.name} | {res.multi.toFixed(2)}x</li>
+        <li>Invested | {formatMoney(res.size)}</li>
+        <li>Back in your pocket | {formatMoney(res.back)}</li>
       </ul>
       <p className="cy-lead">{res.line}</p>
       <Button className="cy-wide cy-primary" onClick={onClose}>BACK TO THE DESK <ChevronRight /></Button>
@@ -2241,7 +2241,7 @@ function CrashSheet({ chapter, onPanic, onClose }: { chapter: number; onPanic: (
   if (!crash) return <Button className="cy-wide" onClick={onClose}>CONTINUE</Button>;
   return (
     <>
-      <p className="journey-kicker"><TrendingDown /> {chapterLabel(chapter)} · {monthRangeLabel(chapter)}</p>
+      <p className="journey-kicker"><TrendingDown /> {chapterLabel(chapter)} | {monthRangeLabel(chapter)}</p>
       <h2 className="negative">{crash.title}</h2>
       <p className="cy-lead">{crash.line}</p>
       <div className="cy-actions">
@@ -2260,7 +2260,7 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
   const stakes = [0.1, 0.25, 0.5].map((f) => Math.max(200, Math.round(cash * f)));
   return (
     <>
-      <p className="journey-kicker"><Crown /> SKILL DUEL · {chapterLabel(chapter)}</p>
+      <p className="journey-kicker"><Crown /> SKILL DUEL | {chapterLabel(chapter)}</p>
       <h2>{fight.title}</h2>
       <p className="cy-lead">{fight.line}</p>
       <div className="cy-duel-stakes"><span><small>YOU RISK</small><strong>Choose below</strong></span><span><small>IF YOU WIN</small><strong>Up to 2× + {fight.perk}</strong></span><span><small>IF YOU LOSE</small><strong>Stake is gone</strong></span></div>
@@ -2268,7 +2268,7 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
       <div className="cy-grid">
         {stakes.map((s, i) => (
           <button key={i} className="cy-act" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
-            <Zap /><strong>RISK {formatMoney(s)}</strong><small>{["Low stake", "Serious stake", "Maximum stake"][i]} · win up to {formatMoney(s * 2)}</small>
+            <Zap /><strong>RISK {formatMoney(s)}</strong><small>{["Low stake", "Serious stake", "Maximum stake"][i]} | win up to {formatMoney(s * 2)}</small>
           </button>
         ))}
       </div>
@@ -2305,7 +2305,7 @@ function FailureSheet({ chapter, run, onClose }: { chapter: number; run: Run; on
   const exposed = run.positions.filter((p) => p.where === "exchange").length;
   return (
     <>
-      <p className="journey-kicker"><Shield /> {chapterLabel(chapter)} · COUNTERPARTY</p>
+      <p className="journey-kicker"><Shield /> {chapterLabel(chapter)} | COUNTERPARTY</p>
       <h2 className="negative">{fail.name}</h2>
       <p className="cy-lead">{fail.line}</p>
       <p className="cy-note">{exposed ? `You still have ${exposed} position${exposed === 1 ? "" : "s"} sitting there. ${Math.round(fail.haircut * 100)}% of it goes up in smoke at the end of this quarter.` : "Nothing of yours was on that exchange. That is what the Ledger was for."}</p>
@@ -2324,7 +2324,7 @@ function CustodySheet({ run, onPick }: { run: Run; onPick: (id: CustodyId) => vo
           <button key={c.id} className={`cy-pick-row ${run.custody === c.id ? "is-on" : ""}`} onClick={() => onPick(c.id)}>
             <strong>{c.name}</strong>
             <small>{c.blurb}</small>
-            <em>Fee {(c.fee * 100).toFixed(1)}% · {c.id === "exchange" ? "exchange risk" : c.id === "hot" ? "drainer risk" : "slow fills"}</em>
+            <em>Fee {(c.fee * 100).toFixed(1)}% | {c.id === "exchange" ? "exchange risk" : c.id === "hot" ? "drainer risk" : "slow fills"}</em>
           </button>
         ))}
       </div>
@@ -2339,19 +2339,19 @@ function LifeSheet({ run, onPick }: { run: Run; onPick: (j: JobId, h: HousingId)
   const [housing, setHousing] = useState<HousingId>(run.housing);
   return (
     <>
-      <p className="journey-kicker"><Home /> INCOME · RENT · SANITY</p>
+      <p className="journey-kicker"><Home /> INCOME | RENT | SANITY</p>
       <h2>YOUR LIFE</h2>
       <div className="cy-pick-list">
         {JOBS.map((j) => (
           <button key={j.id} className={`cy-pick-row ${job === j.id ? "is-on" : ""}`} onClick={() => setJob(j.id)}>
-            <strong>{j.name}</strong><small>{j.blurb}</small><em>{j.income ? `+${formatMoney(j.income)} / quarter` : "no income"} · stress +{j.stress}{j.ap ? ` · +${j.ap} move` : ""}</em>
+            <strong>{j.name}</strong><small>{j.blurb}</small><em>{j.income ? `+${formatMoney(j.income)} / quarter` : "no income"} | stress +{j.stress}{j.ap ? ` | +${j.ap} move` : ""}</em>
           </button>
         ))}
       </div>
       <div className="cy-pick-list">
         {HOUSING.map((h) => (
           <button key={h.id} className={`cy-pick-row ${housing === h.id ? "is-on" : ""}`} onClick={() => setHousing(h.id)}>
-            <strong>{h.name}</strong><small>{h.blurb}</small><em>−{formatMoney(h.rent)} / quarter · stress {h.calm >= 0 ? `−${h.calm}` : `+${-h.calm}`}</em>
+            <strong>{h.name}</strong><small>{h.blurb}</small><em>−{formatMoney(h.rent)} / quarter | stress {h.calm >= 0 ? `−${h.calm}` : `+${-h.calm}`}</em>
           </button>
         ))}
       </div>
@@ -2374,7 +2374,7 @@ function LedgerSheet({ run, onClose }: { run: Run; onClose: () => void }) {
       </div>
       <div className="cy-ledger">
         {run.ledger.length ? run.ledger.map((e, i) => (
-          <p key={i}><span>{chapterLabel(e.chapter)} · {e.label}</span><strong className={e.amount >= 0 ? "positive" : "negative"}>{e.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(e.amount))}</strong></p>
+          <p key={i}><span>{chapterLabel(e.chapter)} | {e.label}</span><strong className={e.amount >= 0 ? "positive" : "negative"}>{e.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(e.amount))}</strong></p>
         )) : <p className="muted"><span>Nothing booked yet.</span></p>}
       </div>
       <Button className="cy-wide cy-primary" onClick={onClose}>CLOSE THE BOOKS <ChevronRight /></Button>
@@ -2389,7 +2389,7 @@ function CashOutSheet({ run, net, score, onConfirm, onClose }: { run: Run; net: 
   const early = run.chapter < CHAPTERS - 1;
   return (
     <>
-      <p className="journey-kicker"><Skull /> {chapterLabel(run.chapter)} · WALK AWAY</p>
+      <p className="journey-kicker"><Skull /> {chapterLabel(run.chapter)} | WALK AWAY</p>
       <h2>CASH OUT NOW?</h2>
       <p className="cy-lead">
         Every position sells at today&apos;s price minus fees, tax on your profit and any debt comes off the top, and the run ends here.
@@ -2413,11 +2413,11 @@ function SurviveSheet({ run, difficulty, caps, onEat, onCalm }: { run: Run; diff
   const left = Math.max(0, caps - run.cares);
   return (
     <>
-      <p className="journey-kicker"><HeartPulse /> STAY IN THE GAME · COSTS A MOVE</p>
+      <p className="journey-kicker"><HeartPulse /> STAY IN THE GAME | COSTS A MOVE</p>
       <h2>SURVIVAL</h2>
       <div className="cy-survive">
-        <div><Activity /><span><small>HUNGER</small><strong>{run.hunger}%</strong></span><Button disabled={!left} onClick={onEat}>EAT · {formatMoney(careCost("eat", run.chapter, difficulty))}</Button></div>
-        <div><HeartPulse /><span><small>STRESS</small><strong>{run.stress}%</strong></span><Button disabled={!left} onClick={onCalm}>CALM · {formatMoney(careCost("calm", run.chapter, difficulty))}</Button></div>
+        <div><Activity /><span><small>HUNGER</small><strong>{run.hunger}%</strong></span><Button disabled={!left} onClick={onEat}>EAT | {formatMoney(careCost("eat", run.chapter, difficulty))}</Button></div>
+        <div><HeartPulse /><span><small>STRESS</small><strong>{run.stress}%</strong></span><Button disabled={!left} onClick={onCalm}>CALM | {formatMoney(careCost("calm", run.chapter, difficulty))}</Button></div>
       </div>
       <small className="cy-note">{left ? `${left} care action${left === 1 ? "" : "s"} left this quarter. Each one burns a move, and the second helps far less.` : "You are done looking after yourself this quarter. Survive on what you have."}</small>
     </>
@@ -2544,10 +2544,10 @@ function SeasonBanner({ onStart, compact }: { onStart?: (() => void) | undefined
   return (
     <div className="season-banner">
       <div className="season-head">
-        <span className="season-live"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(season)}</span>
+        <span className="season-live"><Trophy /> $TCFB TOURNAMENT | {seasonLabel(season)}</span>
         <strong>{left ? `ENDS IN ${left}` : "LIVE NOW"}</strong>
       </div>
-      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" · ")} in $TCFB, paid within 3 days after the token launch in October. Same seed for everyone: identical crashes, launches and rugs.</p>
+      <p>Top 3 of the season leaderboard win {PRIZES.map((p) => `$${p}`).join(" | ")} in $TCFB, paid within 3 days after the token launch in October. Same seed for everyone: identical crashes, launches and rugs.</p>
       <p className="season-rules">One account per player. Multiple accounts, shared wallets or duplicate entries are disqualified. Only your best run of the season counts.</p>
       {onStart && <Button className="season-cta" onClick={() => { playSfx("win"); onStart(); }}><Trophy />PLAY THE TOURNAMENT <ChevronRight /></Button>}
     </div>
@@ -2557,7 +2557,7 @@ function SeasonBanner({ onStart, compact }: { onStart?: (() => void) | undefined
 function TournamentRules({ onClose }: { onClose: () => void }) {
   return (
     <>
-      <p className="journey-kicker"><Trophy /> $TCFB TOURNAMENT · {seasonLabel(currentSeasonId())}</p>
+      <p className="journey-kicker"><Trophy /> $TCFB TOURNAMENT | {seasonLabel(currentSeasonId())}</p>
       <h2>THE RULES</h2>
       <ol className="cy-steps">
         <li><b>1</b><span>Every tournament run of the month uses the same seed. Identical crashes, launches and rugs for everyone.</span></li>
@@ -2629,7 +2629,7 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
       <SoundPrompt />
       <section className="start-stage">
         <div className="start-brand">
-          <p className="journey-kicker">REAL CRYPTO HISTORY · ONE LIFE</p>
+          <p className="journey-kicker">REAL CRYPTO HISTORY | ONE LIFE</p>
           <h1>THE CRYPTO<br /><span>FINAL BOSS</span></h1>
           <p>Trade the real 2020–2026 cycle. Beat the market. Survive the Boss.</p>
         </div>
@@ -2637,13 +2637,13 @@ function StartScreen({ resume, onTournament, onFreeRun, onResume, onBoard }: { r
           <SeasonBanner compact />
           {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
           <div className="start-actions">
-            {resume ? <Button className="start-main" onClick={onResume}><Flame />CONTINUE · YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={onTournament}><Trophy />PLAY NOW · $10,000 <ChevronRight /></Button>}
+            {resume ? <Button className="start-main" onClick={onResume}><Flame />CONTINUE | YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={onTournament}><Trophy />PLAY NOW | $10,000 <ChevronRight /></Button>}
             <div className="start-secondary">
               <Button variant="outline" onClick={() => { playSfx("click"); onFreeRun(); }}>CUSTOM RUN</Button>
               <Button variant="outline" onClick={() => { playSfx("click"); onBoard(); }}><Trophy />LEADERBOARD</Button>
             </div>
           </div>
-          <small className="start-footer">84 MONTHS · REAL PRICES · SAME SEED · <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
+          <small className="start-footer">84 MONTHS | REAL PRICES | SAME SEED | <button className="start-rules" onClick={() => { playSfx("click"); setRules(true); }}>RULES</button></small>
         </div>
       </section>
       {rules && <Sheet onClose={() => setRules(false)}><TournamentRules onClose={() => setRules(false)} /></Sheet>}
@@ -2676,7 +2676,7 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
   };
   return (
     <main className="journey-setup">
-      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT · ${seasonLabel(config.season)}` : "CUSTOM RUN"}</p><h1>{tournament ? "CHOOSE YOUR RUN" : "PICK A STYLE. PLAY."}</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
+      <header><div><p className="journey-kicker">{tournament ? `TOURNAMENT | ${seasonLabel(config.season)}` : "CUSTOM RUN"}</p><h1>{tournament ? "CHOOSE YOUR RUN" : "PICK A STYLE. PLAY."}</h1></div><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></header>
       {tournament && <SeasonBanner />}
 
       <section className="setup-block setup-id"><p className="journey-kicker">YOU</p>
@@ -2686,8 +2686,8 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
       </section>
       {tournament ? (
         <>
-          <section className="setup-block"><p className="journey-kicker">ARCHETYPE · SAME MONEY FOR EVERYONE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
-          <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS · IDENTICAL FOR EVERYONE</p>
+          <section className="setup-block"><p className="journey-kicker">ARCHETYPE | SAME MONEY FOR EVERYONE</p><div className="pick-grid">{ARCHETYPES.map((a) => <button key={a.id} className={`pick-card ${config.arch === a.id ? "is-on" : ""}`} onClick={() => set("arch", a.id)}><strong>{a.name}</strong><em>{formatMoney(startCashFor({ ...config, arch: a.id }))} START</em><small>{a.blurb}</small></button>)}</div></section>
+          <section className="setup-block season-fixed"><p className="journey-kicker">TOURNAMENT CONDITIONS | IDENTICAL FOR EVERYONE</p>
             <ul>
               <li><b>SEED</b><span>{seasonLabel(season)} — same crashes, rugs, launches and minigames for all players.</span></li>
               <li><b>MONEY</b><span>{formatMoney(startCashFor(config))} start for everyone. Your archetype is style, not an edge.</span></li>
@@ -2701,11 +2701,11 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
         </>
       ) : (
         <>
-          <section className="setup-block"><p className="journey-kicker">ONE TAP · PICK YOUR RUN</p>
+          <section className="setup-block"><p className="journey-kicker">ONE TAP | PICK YOUR RUN</p>
             <div className="preset-grid">{PRESETS.map((p) => (
               <button key={p.id} className={`preset-card ${preset === p.id ? "is-on" : ""}`} onClick={() => applyPreset(p.id)}>
                 <strong>{p.name}</strong>
-                <em>{formatMoney(startCashFor({ ...config, arch: p.arch, modifier: p.modifier }))} START · SCORE x{(modifierOf(p.modifier).mul * diffOf(p.difficulty).cost).toFixed(2)}</em>
+                <em>{formatMoney(startCashFor({ ...config, arch: p.arch, modifier: p.modifier }))} START | SCORE x{(modifierOf(p.modifier).mul * diffOf(p.difficulty).cost).toFixed(2)}</em>
                 <small>{p.line}</small>
               </button>
             ))}</div>
@@ -2724,7 +2724,7 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
               <p className="journey-kicker">TWIST</p>
               <div className="seg-row">{MODIFIERS.map((m) => <button key={m.id} className={config.modifier === m.id ? "is-on" : ""} onClick={() => set("modifier", m.id)}>{m.name}</button>)}</div>
               <button className={`iron-toggle ${config.ironman ? "is-on" : ""}`} onClick={() => set("ironman", !config.ironman)}><Flame /><span><strong>IRONMAN</strong><small>No saves, no second chances. Death is final.</small></span></button>
-              <p className="setup-fine-note">{modeOf(config.mode).blurb} · {diffOf(config.difficulty).blurb}</p>
+              <p className="setup-fine-note">{modeOf(config.mode).blurb} | {diffOf(config.difficulty).blurb}</p>
             </section>
           )}
         </>
@@ -2734,7 +2734,7 @@ function SetupScreen({ tournament, onBack, onStart }: { tournament: boolean; onB
           <img src={AVATARS.find((a) => a.id === config.avatar)?.url} alt="" />
           <span>
             <strong>{config.name.trim() || "anon"} <Flag code={config.country} size={14} /></strong>
-            <small>{archOf(config.arch).name} · {formatMoney(startCash)} · {config.difficulty}{config.modifier !== "straight" ? ` · ${modifierOf(config.modifier).name}` : ""}{config.ironman ? " · IRONMAN" : ""}</small>
+            <small>{archOf(config.arch).name} | {formatMoney(startCash)} | {config.difficulty}{config.modifier !== "straight" ? ` | ${modifierOf(config.modifier).name}` : ""}{config.ironman ? " | IRONMAN" : ""}</small>
           </span>
         </div>
         <Button onClick={() => { playSfx("win"); onStart({ ...config, name: config.name.trim() || "anon" }); }}><Rocket />START Q1 2020</Button>
@@ -2762,7 +2762,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
   return (
     <main className="journey-setup board-screen">
       <div className="board-shell">
-        <header className="board-header"><div><p className="journey-kicker">BOSS SCORE · {view === "season" ? seasonLabel(season) : "ALL TIME"}</p><h1>LEADERBOARD</h1></div><div className="board-header-actions"><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></div></header>
+        <header className="board-header"><div><p className="journey-kicker">BOSS SCORE | {view === "season" ? seasonLabel(season) : "ALL TIME"}</p><h1>LEADERBOARD</h1></div><div className="board-header-actions"><MenuSound /><Button variant="ghost" size="icon" aria-label="Back" onClick={() => { playSfx("click"); onBack(); }}><X /></Button></div></header>
         <SeasonBanner />
         <div className="cy-toggle board-tabs">
           <button className={view === "season" ? "is-on" : ""} onClick={() => { playSfx("click"); setView("season"); }}><Trophy />TOURNAMENT</button>
@@ -2777,7 +2777,7 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
                 <div className={`board-row${r.prize ? " is-prize" : ""}`} key={`${r.pos}-${r.name}`}>
                   <b className="board-position">#{r.pos}</b>
                   {avatar && <img className="board-face" src={avatar.url} alt="" loading="lazy" />}
-                  <span className="board-player"><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small><Flag code={r.country} size={15} />{r.rank ? `${r.rank.toUpperCase()} · ` : ""}{r.arch.toUpperCase()} · {r.difficulty.toUpperCase()}</small></span>
+                  <span className="board-player"><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small><Flag code={r.country} size={15} />{r.rank ? `${r.rank.toUpperCase()} | ` : ""}{r.arch.toUpperCase()} | {r.difficulty.toUpperCase()}</small></span>
                   <span className="board-run"><small>LVL {r.level}</small><strong>{r.xp.toLocaleString("en-US")} XP</strong><em>{r.months} / 84 MONTHS</em></span>
                   <span className="board-net"><small>NET WORTH</small><strong>{formatMoney(r.netWorth)}</strong></span>
                   <span className="board-score"><small>BOSS SCORE</small><i>{(r.score ?? 0).toLocaleString("en-US")}</i></span>
@@ -2855,11 +2855,11 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
   const monthsDone = monthsSurvived(run.chapter);
   const monthRow = Array.from({ length: monthCells }, (_, i) => (i < Math.round((monthsDone / TOTAL_MONTHS) * monthCells) ? "🟨" : "⬛")).join("");
   const shareText = `THE CRYPTO FINAL BOSS 🦍👑
-${won ? "" : "REKT · "}${ENDINGS[ending].title} · ${badge}
+${won ? "" : "REKT | "}${ENDINGS[ending].title} | ${badge}
 Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
 Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
 Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}
-NET ${formatMoney(net)} · SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}
+NET ${formatMoney(net)} | SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}
 Beat my run: thecryptofinalboss.app`;
   const share = async () => {
     playSfx("click");
@@ -2887,7 +2887,7 @@ Beat my run: thecryptofinalboss.app`;
     g.fillStyle = "#ffffff"; g.font = "800 84px system-ui, sans-serif";
     g.fillText(end.title, 60, 200);
     g.fillStyle = "#b9b6d6"; g.font = "500 30px system-ui, sans-serif";
-    g.fillText(`${badge} · ${monthsDone}/${TOTAL_MONTHS} MONTHS`, 60, 250);
+    g.fillText(`${badge} | ${monthsDone}/${TOTAL_MONTHS} MONTHS`, 60, 250);
     g.font = "600 42px system-ui, sans-serif"; g.fillStyle = "#ffffff";
     g.fillText(`Crashes ${crashRow}`, 60, 340);
     g.fillText(`Boss    ${duelRow}`, 60, 410);
@@ -2895,7 +2895,7 @@ Beat my run: thecryptofinalboss.app`;
     g.fillStyle = won ? "#4ade80" : "#ff4d6d"; g.font = "800 58px system-ui, sans-serif";
     g.fillText(`NET ${formatMoney(net)}`, 60, 570);
     g.fillStyle = "#b9b6d6"; g.font = "500 28px system-ui, sans-serif";
-    g.fillText(`SCORE ${score.toLocaleString("en-US")} · thecryptofinalboss.app`, 60, 620);
+    g.fillText(`SCORE ${score.toLocaleString("en-US")} | thecryptofinalboss.app`, 60, 620);
     return c;
   };
   const shareCard = async () => {
@@ -2962,17 +2962,17 @@ Beat my run: thecryptofinalboss.app`;
           <div className="end-scoreline">
             <span><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></span>
             <span><small>MONTHS</small><strong>{monthsSurvived(run.chapter)}/{TOTAL_MONTHS}</strong></span>
-            <span><small>LEVEL · XP</small><strong>{levelFor(run.xp)} · {run.xp.toLocaleString("en-US")}</strong></span>
+            <span><small>LEVEL | XP</small><strong>{levelFor(run.xp)} | {run.xp.toLocaleString("en-US")}</strong></span>
             <span><small>CRISES</small><strong>{run.crises}</strong></span>
           </div>
           {run.statuses.length > 0 && <div className="cy-status-row end-statuses">{run.statuses.map((s) => <span key={s}>{s}</span>)}</div>}
-          {newRecord && <p className="end-record">NEW PERSONAL RECORD · beat {before?.bestScore.toLocaleString("en-US")}</p>}
+          {newRecord && <p className="end-record">NEW PERSONAL RECORD | beat {before?.bestScore.toLocaleString("en-US")}</p>}
           {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
-          {profile && <small className="end-progress">RUN {profile.runs} · ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} · BEST {formatMoney(profile.bestNet)}</small>}
+          {profile && <small className="end-progress">RUN {profile.runs} | ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} | BEST {formatMoney(profile.bestNet)}</small>}
         </div>
 
         <div className="end-trophy">
-          <p className="journey-kicker">YOUR TROPHY · SPOILER-FREE</p>
+          <p className="journey-kicker">YOUR TROPHY | SPOILER-FREE</p>
           <pre className="end-grid">{`Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
 Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
 Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}`}</pre>
@@ -3002,8 +3002,8 @@ Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}`}</pre>
 
         {tournament && status !== "done" && (
           <div className="end-wallet">
-            <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} · PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
-            <input className="setup-input" placeholder="YOUR WALLET · EVM OR SOLANA" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
+            <p className="journey-kicker">TOURNAMENT {seasonLabel(run.config.season)} | PRIZES {PRIZES.map((p) => `$${p}`).join(" / ")}</p>
+            <input className="setup-input" placeholder="YOUR WALLET | EVM OR SOLANA" maxLength={64} value={wallet} onChange={(e) => { setWallet(e.target.value); setWalletError(false); }} aria-label="Prize wallet" />
             <small>{walletError ? "Enter a valid EVM or Solana wallet to join the tournament leaderboard." : "Required for a prize-valid tournament entry. Wallets stay private — prizes are paid within 3 days after the October launch."}</small>
 
           </div>
@@ -3015,7 +3015,7 @@ Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}`}</pre>
           <Button onClick={() => { playSfx("win"); void send(); }} disabled={status === "sending" || status === "done" || status === "rejected" || !name.trim() || (tournament && !isWallet(wallet))}><Trophy />{status === "done" ? "SCORE SUBMITTED" : status === "sending" ? "SENDING…" : status === "queued" ? "TRY AGAIN" : status === "rejected" ? "RUN NOT ACCEPTED" : "CLAIM YOUR RANK"}</Button>
           <Button variant="outline" disabled={status === "sending"} onClick={() => { playSfx("click"); onBoard(); }}>LEADERBOARD</Button>
           <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "SHARE RESULT"}</Button>
-          <Button className="cy-revenge" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />REVENGE RUN · 1 TAP</Button>
+          <Button className="cy-revenge" disabled={status === "sending"} onClick={() => { playSfx("click"); onRematch(); }}><Swords />REVENGE RUN | 1 TAP</Button>
           <Button variant="secondary" disabled={status === "sending"} onClick={() => { playSfx("click"); onRestart(); }}>{won ? <Crown /> : <Skull />}NEW RUN</Button>
         </div>
 
