@@ -604,7 +604,9 @@ export function CryptoJourney() {
     });
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} · held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
+    showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN · ${cust.short} · entry ${formatMoney(price)}`, "buy");
     playSfx("buy");
+
     if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
     grantXp(XP.trade, "TRADE");
     if (guide === 0) setGuide(1);
