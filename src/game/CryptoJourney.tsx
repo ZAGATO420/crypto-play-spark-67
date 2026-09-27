@@ -1516,6 +1516,9 @@ export function CryptoJourney() {
                     <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
                     {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
                   </button>
+                  {phase === "act" && p.where !== "cold" && (
+                    <button className="cy-chip-exit" title="Close this position now" aria-label={`Close ${p.symbol} now`} onClick={() => { playSfx("click"); quickClose(p.id); }}>✕</button>
+                  )}
                 </span>
               );
             })}
@@ -2827,13 +2830,76 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
     return "Beat the Boss' own book and win 3 fights to take the THRONE.";
   }, [ending, net, run.chapter, run.config.arch, run.config.modifier, won]);
 
-  const shareText = `THE CRYPTO FINAL BOSS\n${ENDINGS[ending].title} · ${badge}\nNET ${formatMoney(net)} · SCORE ${score.toLocaleString("en-US")}\n${monthsSurvived(run.chapter)}/${TOTAL_MONTHS} months · ${run.bossWins} boss fights won${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}\nplay: thecryptofinalboss.app`;
+  // Wordle-style, spoiler-free result grid: crashes met vs. survived, boss duels,
+  // and how far the 84 months got. Pure presentation of values already on the run.
+  const crashTotal = 5;
+  const crashRow = Array.from({ length: crashTotal }, (_, i) => (i < Math.min(run.crises, crashTotal) ? "🟩" : "⬛")).join("");
+  const duelTotal = 3;
+  const duelRow = Array.from({ length: duelTotal }, (_, i) => (i < Math.min(run.bossWins, duelTotal) ? "⚔️" : "⬛")).join("");
+  const monthCells = 7;
+  const monthsDone = monthsSurvived(run.chapter);
+  const monthRow = Array.from({ length: monthCells }, (_, i) => (i < Math.round((monthsDone / TOTAL_MONTHS) * monthCells) ? "🟨" : "⬛")).join("");
+  const shareText = `THE CRYPTO FINAL BOSS 🦍👑
+${won ? "" : "REKT · "}${ENDINGS[ending].title} · ${badge}
+Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
+Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
+Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}
+NET ${formatMoney(net)} · SCORE ${score.toLocaleString("en-US")}${run.config.modifier !== "straight" ? `\n${modifierOf(run.config.modifier).name}` : ""}
+Beat my run: thecryptofinalboss.app`;
   const share = async () => {
     playSfx("click");
     try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
     } catch { setCopied(false); }
+  };
+
+  // Trophy card: the same numbers drawn on a canvas so the result travels as an
+  // image on X, not just as text.
+  const [cardStatus, setCardStatus] = useState<"idle" | "copied" | "saved">("idle");
+  const drawCard = () => {
+    const c = document.createElement("canvas");
+    c.width = 1200; c.height = 675;
+    const g = c.getContext("2d");
+    if (!g) return null;
+    const bg = g.createLinearGradient(0, 0, 1200, 675);
+    bg.addColorStop(0, "#08070f"); bg.addColorStop(1, won ? "#141033" : "#2a0a12");
+    g.fillStyle = bg; g.fillRect(0, 0, 1200, 675);
+    g.strokeStyle = won ? "#f7c948" : "#ff4d6d"; g.lineWidth = 6; g.strokeRect(18, 18, 1164, 639);
+    g.fillStyle = won ? "#f7c948" : "#ff4d6d";
+    g.font = "700 34px system-ui, sans-serif";
+    g.fillText("THE CRYPTO FINAL BOSS", 60, 100);
+    g.fillStyle = "#ffffff"; g.font = "800 84px system-ui, sans-serif";
+    g.fillText(end.title, 60, 200);
+    g.fillStyle = "#b9b6d6"; g.font = "500 30px system-ui, sans-serif";
+    g.fillText(`${badge} · ${monthsDone}/${TOTAL_MONTHS} MONTHS`, 60, 250);
+    g.font = "600 42px system-ui, sans-serif"; g.fillStyle = "#ffffff";
+    g.fillText(`Crashes ${crashRow}`, 60, 340);
+    g.fillText(`Boss    ${duelRow}`, 60, 410);
+    g.fillText(`Months  ${monthRow}`, 60, 480);
+    g.fillStyle = won ? "#4ade80" : "#ff4d6d"; g.font = "800 58px system-ui, sans-serif";
+    g.fillText(`NET ${formatMoney(net)}`, 60, 570);
+    g.fillStyle = "#b9b6d6"; g.font = "500 28px system-ui, sans-serif";
+    g.fillText(`SCORE ${score.toLocaleString("en-US")} · thecryptofinalboss.app`, 60, 620);
+    return c;
+  };
+  const shareCard = async () => {
+    playSfx("click");
+    const c = drawCard();
+    if (!c) return;
+    const blob = await new Promise<Blob | null>((res) => c.toBlob((b) => res(b), "image/png"));
+    if (!blob) return;
+    try {
+      const item = new ClipboardItem({ "image/png": blob });
+      await navigator.clipboard.write([item]);
+      setCardStatus("copied");
+      return;
+    } catch { /* clipboard images are not everywhere — fall back to a download */ }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "crypto-final-boss.png"; a.click();
+    URL.revokeObjectURL(url);
+    setCardStatus("saved");
   };
 
   const send = async () => {
@@ -2889,6 +2955,19 @@ function EndScreen({ run, net, score, ending, onRestart, onRematch, onBoard }: {
           {nearMiss && <p className="end-nearmiss">{nearMiss}</p>}
           {profile && <small className="end-progress">RUN {profile.runs} · ENDINGS {Object.keys(profile.endings).length}/{Object.keys(ENDINGS).length} · BEST {formatMoney(profile.bestNet)}</small>}
         </div>
+
+        <div className="end-trophy">
+          <p className="journey-kicker">YOUR TROPHY · SPOILER-FREE</p>
+          <pre className="end-grid">{`Crashes ${crashRow} ${Math.min(run.crises, crashTotal)}/${crashTotal}
+Boss    ${duelRow} ${Math.min(run.bossWins, duelTotal)}/${duelTotal}
+Months  ${monthRow} ${monthsDone}/${TOTAL_MONTHS}`}</pre>
+          <div className="end-trophy-actions">
+            <Button variant="outline" onClick={() => void share()}><Share2 />{copied ? "COPIED" : "COPY TO SHARE"}</Button>
+            <Button variant="outline" onClick={() => void shareCard()}>{cardStatus === "copied" ? "CARD COPIED" : cardStatus === "saved" ? "CARD SAVED" : "TROPHY CARD 📸"}</Button>
+          </div>
+        </div>
+
+
 
         {run.chronicle.length > 1 && (
           <div className="end-chronicle">
