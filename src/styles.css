@@ -1681,6 +1681,13 @@
   .cy-plan-btn { min-height:30px; padding:3px 4px; }
   .cy-plan-btn b { font-size:9px; }
   .cy-plan-btn small { font-size:6px; }
-  .cy-chart-wrap { height:74px; }
-  .cy-arena { gap:4px; }
+  .cy-chart-wrap { height:66px; }
+  .cy-arena { gap:4px; padding:7px; }
+  .cy-arena-head { display:none; }
+  .cy-phase-banner strong { font-size:11px; }
+  .cy-move { min-height:60px; }
+  .cy-move > small { display:none; }
+  .cy-shell.has-intel .cy-move > small { display:block; }
+  .cy-standing-line { display:none; }
+  .cy-shell.has-intel .cy-standing-line { display:block; }
 }
