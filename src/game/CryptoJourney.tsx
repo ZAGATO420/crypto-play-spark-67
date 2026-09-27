@@ -18,7 +18,7 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODES, MODIFIERS, PERK_BLURB, PRESALES, PRESETS, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
+  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODE_MOVES, MODE_THEME, MODES, MODIFIERS, PERK_BLURB, PRESALES, PRESETS, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
   actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, lootDraw, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, skillCheckFor, standingFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type LootCard, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
@@ -358,7 +358,6 @@ export function CryptoJourney() {
     | { kind: "liq"; symbol: CoinSymbol; leverage: number; amount: number }
     | null
   >(null);
-  const [details, setDetails] = useState(false);
   // On phones the secondary explainers collapse so one quarter fits a single screen.
   const [intel, setIntel] = useState(false);
 
@@ -1383,6 +1382,31 @@ export function CryptoJourney() {
     : chapterPlay.mode === "PANIC" ? { gives: "Nothing", gets: "You stay in cash", then: "The crash cannot touch you, but you earn nothing either." }
     : { gives: `${formatMoney(buyBudget)} of your cash`, gets: `${focusSymbol} worth ${formatMoney(buyBudget)} at ${formatMoney(focusPrice)}`, then: "Price up, you gain. Price down, you lose." };
 
+  // ---- the two visible moves of this quarter: one takes risk, one protects ----
+  const theme = MODE_THEME[chapterPlay.mode];
+  const moves = MODE_MOVES[chapterPlay.mode];
+  const duelOpen = !!bossFightFor(run.chapter) && !run.fought.includes(run.chapter);
+  const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
+  const riskMove = () => {
+    playSfx("click");
+    switch (chapterPlay.mode) {
+      case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
+      case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
+      case "DEFEND": say("Funds stay where they trade. Fast to move, first to burn.", "pink"); bank(); break;
+      case "BOSS DUEL": setDialog({ k: "fight", chapter: run.chapter }); break;
+      case "MOMENTUM": if (focusPosition) setDialog({ k: "market" }); else openSpot(focusSymbol, 0.25); break;
+      default: openSpot(focusSymbol, 0.25);
+    }
+  };
+  const safeMove = () => {
+    playSfx("click");
+    switch (chapterPlay.mode) {
+      case "MOMENTUM": if (focusPosition) quickClose(focusPosition.id); else bank(); break;
+      case "PANIC": if (focusPosition) askClose(focusPosition.id, 1); else bank(); break;
+      case "DEFEND": setDialog({ k: "custody" }); break;
+      default: bank();
+    }
+  };
 
 
   return (
@@ -1445,10 +1469,11 @@ export function CryptoJourney() {
           <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
-        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · {standing.line} MISSION · {mission.text} · +{mission.reward} XP</p>
+        <p className="cy-standing-line">{standing.line}</p>
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} · ${mission.text.slice(0, 26)} · SHOW BRIEFING`}
         </button>
+        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} · MISSION · {mission.text} · +{mission.reward} XP</p>
       </section>
 
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
@@ -1459,33 +1484,7 @@ export function CryptoJourney() {
         <span className={run.hunger >= 70 ? "is-critical" : ""}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
       </section>
 
-      {details && <section className="cy-meters" aria-label="Detailed run status">
-        <Meter label="RISK" value={run.risk} tone={run.risk > 70 ? "pink" : "yellow"} detail={`${Math.round(run.risk)}%`} icon={<Zap />} />
-        <Meter label="HUNGER" value={run.hunger} tone={run.hunger > 70 ? "pink" : "cyan"} detail={`${run.hunger}%`} icon={<Activity />} />
-        <Meter label="STRESS" value={run.stress} tone={run.stress > 70 ? "pink" : "cyan"} detail={`${run.stress}%`} icon={<HeartPulse />} />
-        <Meter label="STREAK" value={Math.min(100, run.streak * 20)} tone={run.streak ? "yellow" : "cyan"} detail={`x${run.streak}`} icon={<Flame />} />
-      </section>}
 
-      <button className={`cy-details-toggle cy-extra${guide !== null ? " guide-hidden" : ""}`} onClick={() => setDetails((d) => !d)} aria-expanded={details}>
-        {details ? "HIDE THE DETAILS" : `SHOW THE DETAILS · ${formatMoney(net)} vs ${formatMoney(bossNet)}`}
-      </button>
-
-      {details && (
-        <section className="cy-versus" aria-label="You against the Boss">
-          <div className="cy-versus-head"><span className="journey-kicker"><Crown /> YOU vs {persona.name}</span><span>{run.bossWins} FIGHT{run.bossWins === 1 ? "" : "S"} WON</span></div>
-          <p className="cy-versus-help">{EXPLAIN["boss"]}</p>
-          <div className="cy-versus-bar">
-            <i className="you" style={{ width: `${Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)}%` }} />
-          </div>
-          <div className="cy-versus-num"><strong>{formatMoney(net)}</strong><strong className="boss">{formatMoney(bossNet)}</strong></div>
-          <div className="cy-conviction">
-            <span>CONVICTION</span>
-            <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
-            <button className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
-          </div>
-          <p className="cy-versus-help">{EXPLAIN["conviction"]}</p>
-        </section>
-      )}
 
 
       <section className="cy-positions" aria-label="Open positions">
@@ -1540,7 +1539,8 @@ export function CryptoJourney() {
           )}
 
           {phase === "act" && (
-            <article className={`cy-card cy-arena is-${arenaState}`} key={`act-${run.chapter}`}>
+            <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
+              <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
               {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT · SAME SEED · $20 / $10 / $5 $TCFB</div>}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
@@ -1616,18 +1616,41 @@ export function CryptoJourney() {
                   ))}
                 </div>
                 <p>{stanceOf(run.stance).line}</p>
+                <div className="cy-conviction">
+                  <span>CONVICTION {Math.round(run.conviction)}%</span>
+                  <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
+                  <button type="button" className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} disabled={guide !== null} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+                </div>
               </div>
-              <div className="cy-action-context"><span>YOUR DECISION</span><strong>{guide === 0 ? "Buy Bitcoin to enter the market." : chapterPlay.mode === "PANIC" ? "Protect cash or risk the crash." : chapterPlay.mode === "HUNT" ? "Check the launch before committing cash." : chapterPlay.mode === "DEFEND" ? "Move exposed funds before the threat hits." : chapterPlay.mode === "BOSS DUEL" ? "Risk a visible stake in a skill challenge." : focusPosition ? "Add, exit, or let the position run." : "Enter the market or preserve your cash."}</strong></div>
-              <div className="cy-main-actions">
-                {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}><TrendingUp />BUY {formatMoney(guideBuy)} BTC<ChevronRight /></Button>
-                  : guide === 1 ? <Button className="cy-main-trade is-guided" onClick={() => { setGuide(2); endChapter(); }}><ChevronRight />END QUARTER · REVEAL RESULT</Button>
-                  : chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
-                  : chapterPlay.mode === "HUNT" && presale ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />HUNT {presale.name}<ChevronRight /></Button>
-                    : chapterPlay.mode === "DEFEND" ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />MOVE FUNDS<ChevronRight /></Button>
-                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />DUEL · RISK {formatMoney(duelStake)}<ChevronRight /></Button>
-                        : <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}><TrendingUp />{chapterPlay.verb}<ChevronRight /></Button>}
-                <Button variant="secondary" disabled={guide !== null} onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
-                <Button variant="outline" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
+              {guide !== null ? (
+                <div className="cy-moves is-guided-row">
+                  {guide === 0
+                    ? <button type="button" className="cy-move is-risk is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}>
+                        <span>STEP 1</span><strong>BUY {formatMoney(guideBuy)} BTC</strong><small>Your first position</small>
+                      </button>
+                    : <button type="button" className="cy-move is-risk is-guided" onClick={() => { setGuide(2); endChapter(); }}>
+                        <span>STEP 2</span><strong>END QUARTER</strong><small>Reveal what the market did</small>
+                      </button>}
+                </div>
+              ) : (
+                <div className="cy-moves" aria-label="Your two moves this quarter">
+                  <button type="button" className="cy-move is-risk" disabled={riskLocked} onClick={riskMove}>
+                    <span><Flame />TAKE THE RISK</span>
+                    <strong>{moves.risk.label}</strong>
+                    <small>{moves.risk.sub}</small>
+                    <em>{moves.risk.why}</em>
+                  </button>
+                  <button type="button" className="cy-move is-safe" disabled={ap <= 0} onClick={safeMove}>
+                    <span><Shield />PLAY IT SAFE</span>
+                    <strong>{moves.safe.label}</strong>
+                    <small>{moves.safe.sub}</small>
+                    <em>{moves.safe.why}</em>
+                  </button>
+                </div>
+              )}
+              <div className="cy-tape-row">
+                <button type="button" className="cy-tape-btn" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE FOR IT" : "RUN THE TAPE"}</button>
+                <button type="button" className="cy-tape-btn" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />FULL TERMINAL</button>
               </div>
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
@@ -1701,7 +1724,7 @@ export function CryptoJourney() {
           {run.logs.length ? run.logs.slice(0, 6).map((l, i) => (
             <div className={`trail-entry tone-${l.tone}`} key={`${l.chapter}-${i}`}><span>{chapterLabel(l.chapter)}</span><strong>{l.title}</strong></div>
           )) : <p className="trail-empty">Every trade, rug and crisis lands here.</p>}
-          <button className="cy-rules" onClick={() => { setGuide(0); setDetails(false); }}>SHOW ME HOW TO PLAY</button>
+          <button className="cy-rules" onClick={() => setGuide(0)}>SHOW ME HOW TO PLAY</button>
           <button className="cy-rules" onClick={() => setDialog({ k: "rules" })}>HOW IT WORKS</button>
         </aside>
       </div>
@@ -1741,7 +1764,7 @@ export function CryptoJourney() {
             ap={ap}
             onStorage={() => setDialog({ k: "custody" })}
             onHistory={() => setDialog({ k: "ledger" })}
-            onGuide={() => { setGuide(0); setDetails(false); setDialog(null); }}
+            onGuide={() => { setGuide(0); setDialog(null); }}
             onEnd={() => setDialog({ k: "cashout" })}
           />}
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
@@ -1836,18 +1859,6 @@ function ArcadeMoment({ fx, boss }: {
   );
 }
 
-
-function Meter({ label, value, icon, tone, detail }: { label: string; value: number; icon: React.ReactNode; tone: string; detail: string }) {
-  return (
-    <div className={`journey-meter tone-${tone}`}>
-      <span className="meter-icon">{icon}</span>
-      <div className="min-w-0">
-        <div className="meter-label"><strong>{label}</strong><span>{detail}</span></div>
-        <div className="meter-track"><i style={{ width: `${Math.max(3, Math.min(100, value))}%` }} /></div>
-      </div>
-    </div>
-  );
-}
 
 function Sheet({ children, onClose }: { children: React.ReactNode; onClose?: (() => void) | undefined }) {
   // Escape and a tap on the dark backdrop both get you out — nobody should feel trapped.
