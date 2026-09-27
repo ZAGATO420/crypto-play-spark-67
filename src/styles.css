@@ -1884,10 +1884,11 @@
 }
 .pit-interrupt img {
   position: absolute;
-  right: -2%;
+  right: 0;
   bottom: 0;
-  width: min(62vw, 420px);
-  filter: contrast(1.2) saturate(0.5) brightness(0.9);
+  width: min(74vw, 470px);
+  opacity: 0.92;
+  filter: contrast(1.15) saturate(0.7) brightness(1.02);
   animation: pit-ram 0.22s cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
 .pit-interrupt div {
