@@ -1525,6 +1525,14 @@ export function CryptoJourney() {
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
         <p className="cy-standing-line">{standing.line}</p>
+        {mark && (
+          <div className={`cy-rank1 ${net >= mark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
+            <span className="cy-rank1-tag">VS RANK 1</span>
+            <strong>{net >= mark.net ? `+${formatMoney(net - mark.net)} AHEAD | YOU LEAD` : `−${formatMoney(mark.net - net)} TO RANK 1`}</strong>
+            <span className="cy-rank1-goal">{formatMoney(mark.net)}{mark.source === "season" ? ` | ${mark.name}` : ""}</span>
+            <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, mark.net)) * 100)))}%` }} /></i>
+          </div>
+        )}
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
         </button>
