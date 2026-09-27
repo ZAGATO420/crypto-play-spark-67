@@ -721,7 +721,7 @@ export function CryptoJourney() {
         boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
         perks: Array.from(new Set([...r.perks, fight.perk])),
         statuses: Array.from(new Set([...r.statuses, "BOSS BEATEN"])),
-      }, `${fight.title} | won`, won), `I beat him at ${fight.title.replace(/^.*· /, "")} and took ${formatMoney(won)} off his table.`));
+      }, `${fight.title} | won`, won), `I beat him at ${fight.title.replace(/^.*\| /, "")} and took ${formatMoney(won)} off his table.`));
       say(`You took ${formatMoney(won)} off the Boss. Perk unlocked: ${fight.perk}.`, "yellow");
       feel("win", won);
       grantXp(XP_EXTRA.escape * 2, "BOSS BEATEN");
@@ -1557,7 +1557,7 @@ export function CryptoJourney() {
               <p className="journey-kicker"><History /> {chapterLabel(run.chapter)} | THE SETUP</p>
               <h2>{run.chapter === 0 ? "IT STARTS QUIET" : btcMove >= 0 ? "THE TAPE IS GREEN" : "THE TAPE IS BLEEDING"}</h2>
               <p className="cy-lead">{warning}</p>
-              {hintFor(run.chapter) && <p className="cy-hint"><strong>WORD ON THE TIMELINE ·</strong> {hintFor(run.chapter)}</p>}
+              {hintFor(run.chapter) && <p className="cy-hint"><strong>WORD ON THE TIMELINE:</strong> {hintFor(run.chapter)}</p>}
               <div className="cy-facts">
                 <span><small>BTC THIS QUARTER</small><strong className={btcMove >= 0 ? "positive" : "negative"}>{btcMove >= 0 ? "+" : ""}{btcMove.toFixed(1)}%</strong></span>
                 <span><small>YOUR CASH</small><strong>{formatMoney(run.cash)}</strong></span>
@@ -1614,7 +1614,7 @@ export function CryptoJourney() {
                     );
                   })}
                 </div>
-                {attack && <p className="cy-attack"><strong>{attack.name} ·</strong> {attack.line}</p>}
+                {attack && <p className="cy-attack"><strong>{attack.name}:</strong> {attack.line}</p>}
                 <div className={`cy-pressure is-${arenaState}`}><span>{arenaState === "danger" ? "SURVIVAL ALERT" : arenaState === "winning" ? "MOMENTUM" : "MARKET PRESSURE"}</span><i><b style={{ width: `${Math.max(8, Math.min(100, arenaState === "danger" ? survivalDanger : Math.abs(btcMove) * 4 + 18))}%` }} /></i></div>
                 <div className="cy-signals">
                   {signals.map((s, i) => (
@@ -2264,7 +2264,7 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
       <h2>{fight.title}</h2>
       <p className="cy-lead">{fight.line}</p>
       <div className="cy-duel-stakes"><span><small>YOU RISK</small><strong>Choose below</strong></span><span><small>IF YOU WIN</small><strong>Up to 2× + {fight.perk}</strong></span><span><small>IF YOU LOSE</small><strong>Stake is gone</strong></span></div>
-      <p className="cy-hint"><strong>WHAT TO DO ·</strong> Choose a stake. The next screen tells you exactly when or where to tap. {PERK_BLURB[fight.perk]}</p>
+      <p className="cy-hint"><strong>WHAT TO DO:</strong> Choose a stake. The next screen tells you exactly when or where to tap. {PERK_BLURB[fight.perk]}</p>
       <div className="cy-grid">
         {stakes.map((s, i) => (
           <button key={i} className="cy-act" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
