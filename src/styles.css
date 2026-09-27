@@ -1690,4 +1690,10 @@
   .cy-shell.has-intel .cy-move > small { display:block; }
   .cy-standing-line { display:none; }
   .cy-shell.has-intel .cy-standing-line { display:block; }
+  .cy-pos-head { display:none; }
+  .cy-shell.has-intel .cy-pos-head { display:flex; }
+  .cy-phase-banner strong { display:none; }
+  .cy-shell.has-intel .cy-phase-banner strong { display:block; }
+  .cy-mobile-dock button { min-height:44px; }
+  .cy-mobile-dock button svg { width:15px; height:15px; }
 }
