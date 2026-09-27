@@ -1771,9 +1771,9 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
-              {guide === null && (!trendPilot || surviveUrgent) && (
+              {guide === null && (!skillPilot || surviveUrgent) && (
                 <div className="cy-quick-row">
-                  {!trendPilot && (
+                  {!skillPilot && (
                     <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
                       disabled={!!(skill && skill.chapter === run.chapter)}
                       onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
@@ -1877,7 +1877,7 @@ export function CryptoJourney() {
             verified={verified}
             verifyCost={Math.max(150, Math.round(net * 0.01))}
             skillDone={!!(skill && skill.chapter === run.chapter)}
-            skillHidden={trendPilot}
+            skillHidden={skillPilot}
             skillHead={check.head}
             skillPrize={Math.max(300, Math.round(net * 0.02))}
             onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
