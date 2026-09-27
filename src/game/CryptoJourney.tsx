@@ -2546,6 +2546,33 @@ function MenuSound() {
   );
 }
 
+/** Loads the season leader's net worth once, then hands the same frozen value to every screen. */
+function useTopMark(season: string): TopMark | null {
+  const [mark, setMark] = useState<TopMark | null>(null);
+  useEffect(() => {
+    let live = true;
+    void loadTopMark(season).then((m) => { if (live) setMark(m); });
+    return () => { live = false; };
+  }, [season]);
+  return mark;
+}
+
+const markTag = (mark: TopMark): string =>
+  mark.source === "season" ? "CURRENT SEASON LEADER" : mark.source === "alltime" ? "ALL-TIME BEST MARK" : "MARK TO BEAT";
+
+/** The target, stated in plain numbers, before a run starts. */
+function TargetMark({ mark }: { mark: TopMark | null }) {
+  if (!mark) return null;
+  return (
+    <div className="cy-mark" aria-label="Target to beat">
+      <span className="cy-mark-tag">[ {markTag(mark)} ]</span>
+      <strong>{formatMoney(mark.net)}</strong>
+      <em>{mark.source === "benchmark" ? "No entry yet this season — clear this mark and the board is yours." : `by ${mark.name} — beat him.`}</em>
+    </div>
+  );
+}
+
+
 function SeasonBanner({ onStart, compact }: { onStart?: (() => void) | undefined; compact?: boolean }) {
   const season = currentSeasonId();
   const ends = seasonEnd(season);
