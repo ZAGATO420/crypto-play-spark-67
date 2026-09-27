@@ -1371,8 +1371,8 @@ export function CryptoJourney() {
     setResolution(null); setDialog(null); setGuide(null); setScreen("run");
   };
 
-  if (screen === "start") return <StartScreen resume={resume} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
-  if (screen === "setup") return <SetupScreen tournament={tournament} onBack={() => setScreen("start")} onStart={begin} />;
+  if (screen === "start") return <StartScreen resume={resume} mark={mark} onTournament={() => begin(tournamentConfig())} onFreeRun={() => { setTournament(false); setScreen("setup"); }} onResume={restore} onBoard={() => setScreen("board")} />;
+  if (screen === "setup") return <SetupScreen tournament={tournament} mark={mark} onBack={() => setScreen("start")} onStart={begin} />;
   if (screen === "board") return <BoardScreen onBack={() => setScreen("start")} />;
   if (screen === "end") return (
     <EndScreen
