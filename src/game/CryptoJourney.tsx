@@ -1387,6 +1387,19 @@ export function CryptoJourney() {
   const moves = MODE_MOVES[chapterPlay.mode];
   const duelOpen = !!bossFightFor(run.chapter) && !run.fought.includes(run.chapter);
   const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
+  // survival only takes screen space when the body is actually failing
+  const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
+  // when a launch or a duel IS the risky move, its terms stay readable on the card
+  const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
+    : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM · STAKE ${formatMoney(duelStake)}`
+      : moves.risk.label;
+  const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen);
+  const riskWhy = chapterPlay.mode === "HUNT" && presale
+    ? `Ticket from ${formatMoney(presale.min)} · rug risk ${Math.round(presale.rug * 100)}% · upside ${presale.upside[0]}x–${presale.upside[1]}x`
+    : chapterPlay.mode === "BOSS DUEL" && duelOpen
+      ? `Stake ${formatMoney(duelStake)} · win up to double it plus a perk · lose it all if you fail`
+      : moves.risk.why;
+
   const riskMove = () => {
     playSfx("click");
     switch (chapterPlay.mode) {
@@ -1503,7 +1516,6 @@ export function CryptoJourney() {
                     <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
                     {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
                   </button>
-                  {phase === "act" && p.where !== "cold" && <button className="cy-chip-exit" onClick={() => quickClose(p.id)} aria-label={`Close ${p.symbol} now`}>EXIT</button>}
                 </span>
               );
             })}
@@ -1590,38 +1602,13 @@ export function CryptoJourney() {
                   {signals.map((s, i) => (
                     <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
                   ))}
+                </div>
 
-                  <button className="cy-verify" disabled={verified} onClick={() => {
-                    if (verified) return;
-                    const fee = Math.max(150, Math.round(net * 0.01));
-                    if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
-                    setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
-                    setVerified(true);
-                    playSfx("click");
-                  }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
-                </div>
               </div>
-              <div className={`cy-plan heat-${Math.min(5, run.heat)}`} aria-label="Your plan for this quarter">
-                <div className="cy-plan-head">
-                  <span>YOUR PLAN FOR THIS QUARTER</span>
-                  <strong className={run.heat > 0 ? "is-hot" : ""}>HEAT x{run.heat} · WIN BONUS +{Math.round((heatBonus(run.heat) - 1) * 100)}%</strong>
-                </div>
-                <div className="cy-plan-row">
-                  {STANCES.map((s) => (
-                    <button key={s.id} type="button" className={`cy-plan-btn is-${s.id}${run.stance === s.id ? " is-on" : ""}`} disabled={guide !== null}
-                      onClick={() => { playSfx("click"); setRun((r) => ({ ...r, stance: s.id })); say(`${s.name} · ${s.line}`, s.id === "degen" ? "pink" : "cyan"); }}>
-                      <b>{s.name}</b>
-                      <small>{s.id === "survive" ? "−50% LOSS" : s.id === "degen" ? "±60% SWING" : "AS IT COMES"}</small>
-                    </button>
-                  ))}
-                </div>
-                <p>{stanceOf(run.stance).line}</p>
-                <div className="cy-conviction">
-                  <span>CONVICTION {Math.round(run.conviction)}%</span>
-                  <div className="cy-conv-track"><i className={run.convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(run.conviction)}%` }} /></div>
-                  <button type="button" className={`cy-conv-btn${run.convictionOn ? " is-on" : ""}`} disabled={guide !== null} onClick={toggleConviction}>{run.convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
-                </div>
-              </div>
+              {run.stance !== "balanced" || run.convictionOn || run.heat > 0 ? (
+                <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " · CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` · HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+              ) : null}
+
               {guide !== null ? (
                 <div className="cy-moves is-guided-row">
                   {guide === 0
@@ -1634,11 +1621,12 @@ export function CryptoJourney() {
                 </div>
               ) : (
                 <div className="cy-moves" aria-label="Your two moves this quarter">
-                  <button type="button" className="cy-move is-risk" disabled={riskLocked} onClick={riskMove}>
+                  <button type="button" className={`cy-move is-risk${riskTerms ? " has-terms" : ""}`} disabled={riskLocked} onClick={riskMove}>
                     <span><Flame />TAKE THE RISK</span>
-                    <strong>{moves.risk.label}</strong>
+                    <strong>{riskLabel}</strong>
                     <small>{moves.risk.sub}</small>
-                    <em>{moves.risk.why}</em>
+                    <em>{riskWhy}</em>
+
                   </button>
                   <button type="button" className="cy-move is-safe" disabled={ap <= 0} onClick={safeMove}>
                     <span><Shield />PLAY IT SAFE</span>
@@ -1648,49 +1636,34 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
+              {guide === null && (
+                <div className="cy-quick-row">
+                  <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
+                    disabled={!!(skill && skill.chapter === run.chapter)}
+                    onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
+                    <Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : `SKILL TEST · WIN ${formatMoney(Math.max(300, Math.round(net * 0.02)))}`}
+                  </button>
+                  {surviveUrgent && (
+                    <button type="button" className="cy-quick-btn is-urgent" onClick={() => { playSfx("click"); setDialog({ k: "survive" }); }}>
+                      <HeartPulse />SURVIVE · {run.hunger >= 70 ? `HUNGER ${run.hunger}%` : `STRESS ${run.stress}%`}
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="cy-tape-row">
                 <button type="button" className="cy-tape-btn" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE FOR IT" : "RUN THE TAPE"}</button>
-                <button type="button" className="cy-tape-btn" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />FULL TERMINAL</button>
+                <button type="button" className="cy-tape-btn cy-tape-more" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
+                <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+
+              {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL · {skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
                 <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
                 <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
               </div>
               {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE · {lastBook.label} · <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> · cash now {formatMoney(run.cash)}</p>}
-              {guide === null && (
-                <div className={`cy-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}>
-                  <div className="cy-skill-head"><span>SKILL TEST · ONCE PER QUARTER</span><strong>{check.head}</strong></div>
-                  <p>{check.ask}</p>
-                  {skill && skill.chapter === run.chapter
-                    ? <p className={`cy-skill-result ${skill.delta >= 0 ? "positive" : "negative"}`}>{skill.label} · {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>
-                    : <Button className="cy-skill-cta" onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />PROVE YOUR SKILL · WIN {formatMoney(Math.max(300, Math.round(net * 0.02)))}</Button>}
-                </div>
-              )}
-              {guide === null && chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) && <p className="cy-action-risk">Stake {formatMoney(duelStake)} · win up to double and take a perk · lose the stake.</p>}
-              {guide === null && presale && (
-                <div className="cy-launch-stage cy-extra">
-                  <div className="cy-launch-head"><span>{presale.tag} LIVE</span><strong>{presale.name}</strong></div>
-                  <p>{presale.blurb}</p>
-                  <div className="cy-launch-facts">
-                    <span><small>TICKET FROM</small><strong>{formatMoney(presale.min)}</strong></span>
-                    <span><small>RUG RISK</small><strong>{Math.round(presale.rug * 100)}%</strong></span>
-                    <span><small>IF IT WORKS</small><strong>{presale.upside[0]}x – {presale.upside[1]}x</strong></span>
-                  </div>
-                  <Button className="cy-launch-cta" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />OPEN {presale.tag} · {presale.name}</Button>
-                </div>
-              )}
-              <div className="cy-toolbelt">
-                <button className="is-hot" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />TRADE TERMINAL</button>
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse />SURVIVE</button>
-                <button disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target />{skill && skill.chapter === run.chapter ? "SKILL DONE" : "SKILL TEST"}</button>
-                <button disabled={guide === 0} onClick={() => setDialog({ k: "market" })}><WalletCards />PORTFOLIO</button>
-                <button className="cy-tool-more" disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis />MORE</button>
-                <button className="cy-tool-extra" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />STORAGE</button>
-                <button className="cy-tool-extra" disabled={guide === 0} onClick={() => setDialog({ k: "ledger" })}><Receipt />HISTORY</button>
-                <button className="cy-tool-extra is-danger" disabled={guide === 0} onClick={() => setDialog({ k: "cashout" })}><Skull />END RUN</button>
-                <button className={`cy-tool-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
-              </div>
+
 
             </article>
           )}
@@ -1730,12 +1703,10 @@ export function CryptoJourney() {
       </div>
 
       {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
-        <button className="is-trade" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp /><span>TRADE</span></button>
-        <button disabled={guide === 0} onClick={() => setDialog({ k: "survive" })}><HeartPulse /><span>SURVIVE</span></button>
-        <button className="is-skill" disabled={guide !== null || !!(skill && skill.chapter === run.chapter)} onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}><Target /><span>{skill && skill.chapter === run.chapter ? "DONE" : "SKILL"}</span></button>
-        <button disabled={guide === 0} onClick={() => setDialog({ k: "more" })}><Ellipsis /><span>MORE</span></button>
+        <button disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis /><span>MORE</span></button>
         <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
       </nav>}
+
 
       {flash && <div className={`cy-flash tone-${flash.tone}`} role="status">{flash.text}</div>}
 
@@ -1762,11 +1733,34 @@ export function CryptoJourney() {
           {dialog.k === "loot" && <LootSheet cards={dialog.cards} onPick={(card) => takeLoot(card)} />}
           {dialog.k === "more" && <MoreSheet
             ap={ap}
+            stance={run.stance}
+            heat={run.heat}
+            conviction={run.conviction}
+            convictionOn={run.convictionOn}
+            verified={verified}
+            verifyCost={Math.max(150, Math.round(net * 0.01))}
+            skillDone={!!(skill && skill.chapter === run.chapter)}
+            skillHead={check.head}
+            skillPrize={Math.max(300, Math.round(net * 0.02))}
+            onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} · ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
+            onConviction={toggleConviction}
+            onTerminal={() => setDialog({ k: "market" })}
+            onSurvive={() => setDialog({ k: "survive" })}
+            onSkill={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}
+            onVerify={() => {
+              if (verified) return;
+              const fee = Math.max(150, Math.round(net * 0.01));
+              if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
+              setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
+              setVerified(true);
+              playSfx("click");
+            }}
             onStorage={() => setDialog({ k: "custody" })}
             onHistory={() => setDialog({ k: "ledger" })}
             onGuide={() => { setGuide(0); setDialog(null); }}
             onEnd={() => setDialog({ k: "cashout" })}
           />}
+
           {dialog.k === "trade" && <TradeSheet run={run} symbol={dialog.symbol} onSpot={(f) => openSpot(dialog.symbol, f)} onPerp={(d, l, f) => openPerp(dialog.symbol, d, l, f)} />}
           {dialog.k === "position" && <PositionSheet run={run} id={dialog.id} onClose={(f) => askClose(dialog.id, f)} />}
           {dialog.k === "presale" && <PresaleSheet card={dialog.card} cash={run.cash} onTake={(size) => setDialog({ k: "mini", kind: run.chapter % 2 === 0 ? "rugcheck" : "gas", pending: { t: "presale", card: dialog.card, size } })} onPass={() => { setDialog(null); say(`${dialog.card.name} closed without you. Discipline is a position.`, "cyan"); }} />}
@@ -2077,12 +2071,41 @@ function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard)
   );
 }
 
-function MoreSheet({ ap, onStorage, onHistory, onGuide, onEnd }: { ap: number; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void }) {
+function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verifyCost, skillDone, skillHead, skillPrize, onStance, onConviction, onTerminal, onSurvive, onSkill, onVerify, onStorage, onHistory, onGuide, onEnd }: {
+  ap: number; stance: Run["stance"]; heat: number; conviction: number; convictionOn: boolean;
+  verified: boolean; verifyCost: number; skillDone: boolean; skillHead: string; skillPrize: number;
+  onStance: (id: Run["stance"]) => void; onConviction: () => void; onTerminal: () => void; onSurvive: () => void;
+  onSkill: () => void; onVerify: () => void; onStorage: () => void; onHistory: () => void; onGuide: () => void; onEnd: () => void;
+}) {
   return (
     <>
       <p className="journey-kicker"><Ellipsis /> MORE</p>
       <h2>RUN TOOLS</h2>
+      <div className="cy-more-plan" aria-label="Your plan for this quarter">
+        <div className="cy-plan-head">
+          <span>YOUR PLAN FOR THIS QUARTER</span>
+          <strong className={heat > 0 ? "is-hot" : ""}>HEAT x{heat} · WIN BONUS +{Math.round((heatBonus(heat) - 1) * 100)}%</strong>
+        </div>
+        <div className="cy-plan-row">
+          {STANCES.map((s) => (
+            <button key={s.id} type="button" className={`cy-plan-btn is-${s.id}${stance === s.id ? " is-on" : ""}`} onClick={() => onStance(s.id)}>
+              <b>{s.name}</b>
+              <small>{s.id === "survive" ? "−50% LOSS" : s.id === "degen" ? "±60% SWING" : "AS IT COMES"}</small>
+            </button>
+          ))}
+        </div>
+        <p>{stanceOf(stance).line}</p>
+        <div className="cy-conviction">
+          <span>CONVICTION {Math.round(conviction)}%</span>
+          <div className="cy-conv-track"><i className={convictionOn ? "is-armed" : ""} style={{ width: `${Math.round(conviction)}%` }} /></div>
+          <button type="button" className={`cy-conv-btn${convictionOn ? " is-on" : ""}`} onClick={onConviction}>{convictionOn ? "ARMED · 1.5x" : "RISK IT"}</button>
+        </div>
+      </div>
       <div className="cy-more-grid">
+        <Button variant="secondary" disabled={ap <= 0} onClick={onTerminal}><TrendingUp />TRADE TERMINAL<small>All coins, spot and leverage</small></Button>
+        <Button variant="secondary" onClick={onSurvive}><HeartPulse />SURVIVE<small>Eat, calm down, pay life</small></Button>
+        <Button variant="secondary" disabled={skillDone} onClick={onSkill}><Target />{skillDone ? "SKILL DONE" : "SKILL TEST"}<small>{skillDone ? "Already played this quarter" : `${skillHead} · win ${formatMoney(skillPrize)}`}</small></Button>
+        <Button variant="secondary" disabled={verified} onClick={onVerify}><Zap />{verified ? "SIGNALS CHECKED" : "VERIFY SIGNALS"}<small>{verified ? "One of them was a lie" : `Costs ${formatMoney(verifyCost)}`}</small></Button>
         <Button variant="secondary" disabled={ap <= 0} onClick={onStorage}><Shield />STORAGE<small>Protect exposed coins</small></Button>
         <Button variant="secondary" onClick={onHistory}><Receipt />HISTORY<small>See every cash flow</small></Button>
         <Button variant="secondary" onClick={onGuide}><Target />SHOW ME HOW TO PLAY<small>Restart the 3-step guide</small></Button>
@@ -2091,6 +2114,7 @@ function MoreSheet({ ap, onStorage, onHistory, onGuide, onEnd }: { ap: number; o
     </>
   );
 }
+
 
 function TradeSheet({ run, symbol, onSpot, onPerp }: { run: Run; symbol: CoinSymbol; onSpot: (f: number) => void; onPerp: (d: 1 | -1, l: number, f: number) => void }) {
   const [dir, setDir] = useState<1 | -1>(1);
