@@ -64,3 +64,10 @@
 - SURVIVE springt bei Hunger/Stress >= 70% auf die Hauptebene (rot pulsierend)
 - Presale/Boss-Duell: Einsatz, Rug-Risiko, Upside-Range stehen im Klartext auf der Risiko-Karte
 - Alles andere (Stance, Terminal, Storage, History, Verify, Guide, End Run) hinter MORE
+
+## Visual identity: THE PIT 2021 (erledigt)
+- [x] Pit-Palette (Bunker Slate, Terminal Steel, Gorilla Amber, God Candle Mint, Margin Shock, Tape Grey) als Tokens.
+- [x] Space Grotesk (Display) + JetBrains Mono (Daten) statt system-ui; auch im Canvas-Export.
+- [x] KI-Tells weg: ALL-CAPS-Eyebrows -> [TERMINAL TAGS], Mittelpunkt-Ketten -> Mono-Pipes, weiche Glows -> 2px Hardware-Kanten + Scanlines.
+- [x] EIN Signature Moment: Boss Interruption (SYSTEM OVERRIDE, Stempel REJECTED / LIQUIDATED / THRONE THREATENED).
+- [x] Trophy-Karte als Terminal-Audit-Report.
