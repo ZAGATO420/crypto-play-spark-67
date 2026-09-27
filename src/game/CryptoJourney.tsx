@@ -1387,6 +1387,18 @@ export function CryptoJourney() {
   const moves = MODE_MOVES[chapterPlay.mode];
   const duelOpen = !!bossFightFor(run.chapter) && !run.fought.includes(run.chapter);
   const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
+  // survival only takes screen space when the body is actually failing
+  const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
+  // when a launch or a duel IS the risky move, its terms stay readable on the card
+  const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
+    : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM · STAKE ${formatMoney(duelStake)}`
+      : moves.risk.label;
+  const riskWhy = chapterPlay.mode === "HUNT" && presale
+    ? `Ticket from ${formatMoney(presale.min)} · rug risk ${Math.round(presale.rug * 100)}% · upside ${presale.upside[0]}x–${presale.upside[1]}x`
+    : chapterPlay.mode === "BOSS DUEL" && duelOpen
+      ? `Stake ${formatMoney(duelStake)} · win up to double it plus a perk · lose it all if you fail`
+      : moves.risk.why;
+
   const riskMove = () => {
     playSfx("click");
     switch (chapterPlay.mode) {
