@@ -1590,16 +1590,8 @@ export function CryptoJourney() {
                   {signals.map((s, i) => (
                     <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
                   ))}
-
-                  <button className="cy-verify" disabled={verified} onClick={() => {
-                    if (verified) return;
-                    const fee = Math.max(150, Math.round(net * 0.01));
-                    if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
-                    setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
-                    setVerified(true);
-                    playSfx("click");
-                  }}>{verified ? "ONE OF THEM WAS A LIE" : `VERIFY · ${formatMoney(Math.max(150, Math.round(net * 0.01)))}`}</button>
                 </div>
+
               </div>
               <div className={`cy-plan heat-${Math.min(5, run.heat)}`} aria-label="Your plan for this quarter">
                 <div className="cy-plan-head">
