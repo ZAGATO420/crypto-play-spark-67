@@ -1683,8 +1683,11 @@
   .cy-move > em { display:none; }
   .cy-tape-row { gap:4px; }
   .cy-tape-btn { min-height:32px; font-size:8px; }
+  .cy-tape-row { grid-template-columns:1fr; }
+  .cy-tape-more, .cy-tape-end { display:none; }
   .cy-quick-row { gap:4px; }
   .cy-quick-btn { min-height:32px; padding:5px 6px; font-size:8px; }
+
 
   .cy-conviction { gap:5px; margin-top:4px; }
   .cy-conv-btn { min-height:26px; font-size:7px; }
