@@ -20,7 +20,7 @@ import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
   ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODE_MOVES, MODE_THEME, MODES, MODIFIERS, PERK_BLURB, PRESALES, PRESETS, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
   actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, lootDraw, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, skillCheckFor, standingFor, xpProgress,
-  type Archetype, type BaseMode, type BossAttack, type BossFight, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type LootCard, type ModifierId, type Presale, type Situation,
+  type Archetype, type BaseMode, type BossAttack, type BossFight, type ChapterMode, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type LootCard, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
 
 import { readProfile, recordRun, type Profile } from "./profile";
@@ -70,8 +70,39 @@ type Pending =
   | { t: "crash"; chapter: number }
   | { t: "fight"; chapter: number; wager: number }
   | { t: "skill" }
-  | { t: "trendRisk"; stake: number }
+  | { t: "phaseRisk"; stake: number; mode: ChapterMode }
   | { t: "seed" };
+
+/**
+ * One skill moment per phase, fixed to the game that phase already owns.
+ * Pressing the risky move plays it; how well you play it decides the payout.
+ */
+const PHASE_RISK: Record<ChapterMode, { kind: MiniKind; head: string; hit: string; ok: string; miss: string }> = {
+  ACCUMULATE: { kind: "whale", head: "CATCH THE GREEN",
+    hit: "Perfect accumulation — you took every green print the whale left behind.",
+    ok: "Solid buying. Nothing wasted, nothing spectacular.",
+    miss: "You chased the red candles and paid up for your bag." },
+  MOMENTUM: { kind: "orderbook", head: "PLACE THE BID",
+    hit: "Perfect fill — you caught the breakout and pressed it clean.",
+    ok: "A solid momentum trade, nothing wasted.",
+    miss: "You bought the local top and paid the spread." },
+  PANIC: { kind: "panic", head: "BEAT THE CRASH",
+    hit: "Orders out before the bids vanished. Ice cold under pressure.",
+    ok: "Most of your orders filled. The rest went through at panic prices.",
+    miss: "You froze while the book emptied. That one hurt." },
+  HUNT: { kind: "airdrop", head: "CLAIM THE REAL ONE",
+    hit: "You hit the genuine claim instantly and the bots ate your dust.",
+    ok: "Claim landed, a little late. You are in.",
+    miss: "You clicked a drainer link and paid for the lesson." },
+  DEFEND: { kind: "hodl", head: "HOLD THE LINE",
+    hit: "You held the line perfectly. The venue shook, your margin did not.",
+    ok: "You kept the shield mostly inside the band. Bag defended.",
+    miss: "The band ran away from you and your margin took the hit." },
+  "BOSS DUEL": { kind: "gas", head: "OUTBID THE BOTS",
+    hit: "You outbid his bots to the cent. He felt that one.",
+    ok: "You landed the block, a little expensive. Respect earned.",
+    miss: "His bots front-ran you and he made sure the room noticed." },
+};
 
 type Dialog =
   | { k: "rules" }
@@ -959,35 +990,34 @@ export function CryptoJourney() {
   };
 
   /**
-   * MOMENTUM pilot: pressing the trend IS the skill moment. The minigame
-   * quality scales the payout of the risky move itself, using the same
-   * scaling the separate skill test used for its bonus.
+   * Every phase's risky move IS its skill moment. The minigame quality scales
+   * the payout directly: perfect pays 1.4x the stake, good pays the stake,
+   * a fumble costs half of it. The safe move stays a plain, fast click.
    */
-  const resolveTrendRisk = (stake: number, quality: number, label: string) => {
-    spend();
+  const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode) => {
+    const copy = PHASE_RISK[mode];
     const delta = quality >= 0.9 ? Math.round(stake * quality * 1.4)
       : quality >= 0.6 ? Math.round(stake * quality)
         : -Math.round(stake * 0.5);
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
+    const buys = mode === "ACCUMULATE";
+    // accumulating still puts real money into a real coin; the skill only scales it
+    if (buys) openSpot(focusSymbol, 0.25); else spend();
     setRun((r) => book({
       ...r,
       cash: Math.max(0, r.cash + delta),
       xp: r.xp + xp,
       heat: quality >= 0.9 ? r.heat + 1 : quality >= 0.6 ? r.heat : 0,
       stress: clamp(r.stress + (quality >= 0.6 ? 0 : 8)),
-    }, `Momentum press | ${label}`, delta));
+    }, `${copy.head} | ${label}`, delta));
     setSkill({ chapter: run.chapter, quality, label, delta });
     pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
     pop(`+${xp} XP | ${label}`, "xp");
-    say(quality >= 0.9
-      ? `${label} — you caught the breakout and pressed it clean.`
-      : quality >= 0.6
-        ? `${label} — a solid momentum trade, nothing wasted.`
-        : `${label} — you bought the local top and paid the spread.`,
-      quality >= 0.6 ? "yellow" : "pink");
+    say(quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss, quality >= 0.6 ? "yellow" : "pink");
     playSfx(delta >= 0 ? "win" : "hit");
     feel(delta >= 0 ? "win" : "loss");
-    nextInQueue();
+    if (mode === "PANIC") setFast(true);
+    if (!buys) nextInQueue();
   };
 
   const finishMini = (pending: Pending, res: MiniResult) => {
@@ -997,7 +1027,7 @@ export function CryptoJourney() {
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
     if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
     if (pending.t === "skill") return resolveSkill(res.quality, res.label);
-    if (pending.t === "trendRisk") return resolveTrendRisk(pending.stake, res.quality, res.label);
+    if (pending.t === "phaseRisk") return resolvePhaseRisk(pending.stake, res.quality, res.label, pending.mode);
     return resolveSeed(res.quality);
   };
 
@@ -1453,33 +1483,41 @@ export function CryptoJourney() {
   const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
   // survival only takes screen space when the body is actually failing
   const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
-  /** MOMENTUM pilot: the risky move is played, not clicked. Stake is visible up front. */
-  const trendStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
-  const trendPilot = chapterPlay.mode === "MOMENTUM" && guide === null && trendStake > 0;
-  // when a launch or a duel IS the risky move, its terms stay readable on the card
-  const riskLabel = chapterPlay.mode === "HUNT" && presale ? `APE INTO ${presale.name}`
-    : chapterPlay.mode === "BOSS DUEL" && duelOpen ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
-      : trendPilot ? `PRESS THE TREND | ${formatMoney(trendStake)}`
+  /** Every phase: the risky move is played, not clicked. Stake is visible up front. */
+  const phaseRisk = PHASE_RISK[chapterPlay.mode];
+  const phaseStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
+  const huntTicket = presale ? Math.min(Math.max(presale.min, Math.round(net * 0.05)), Math.max(presale.min, Math.round(run.cash * 0.25))) : 0;
+  const stakePilot = guide === null && phaseStake > 0
+    && (chapterPlay.mode === "ACCUMULATE" || chapterPlay.mode === "MOMENTUM" || chapterPlay.mode === "PANIC" || chapterPlay.mode === "DEFEND");
+  const huntPilot = chapterPlay.mode === "HUNT" && !!presale && guide === null && run.cash >= huntTicket;
+  const duelPilot = chapterPlay.mode === "BOSS DUEL" && duelOpen && guide === null;
+  const skillPilot = stakePilot || huntPilot || duelPilot;
+  // the stake, the game and what a fumble costs stay readable on the card itself
+  const riskLabel = huntPilot && presale ? `APE INTO ${presale.name} | ${formatMoney(huntTicket)}`
+    : duelPilot ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
+      : stakePilot ? `${moves.risk.label} | ${formatMoney(phaseStake)}`
         : moves.risk.label;
-  const riskTerms = (chapterPlay.mode === "HUNT" && !!presale) || (chapterPlay.mode === "BOSS DUEL" && duelOpen) || trendPilot;
-  const riskWhy = chapterPlay.mode === "HUNT" && presale
-    ? `Ticket from ${formatMoney(presale.min)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
-    : chapterPlay.mode === "BOSS DUEL" && duelOpen
-      ? `Stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
-      : trendPilot
-        ? `${check.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(trendStake * 1.4))} | fumble costs ${formatMoney(Math.round(trendStake * 0.5))}`
+  const riskTerms = skillPilot;
+  const riskWhy = huntPilot && presale
+    ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
+    : duelPilot
+      ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
+      : stakePilot
+        ? `${phaseRisk.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(phaseStake * 1.4))} | fumble costs ${formatMoney(Math.round(phaseStake * 0.5))}`
         : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
+    if (stakePilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
+    if (huntPilot && presale) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "presale", card: presale, size: huntTicket } });
+    if (duelPilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
     switch (chapterPlay.mode) {
       case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
       case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
       case "DEFEND": say("Funds stay where they trade. Fast to move, first to burn.", "pink"); bank(); break;
       case "BOSS DUEL": setDialog({ k: "fight", chapter: run.chapter }); break;
       case "MOMENTUM":
-        if (trendPilot) setDialog({ k: "mini", kind: check.kind, pending: { t: "trendRisk", stake: trendStake } });
-        else if (focusPosition) setDialog({ k: "market" });
+        if (focusPosition) setDialog({ k: "market" });
         else openSpot(focusSymbol, 0.25);
         break;
       default: openSpot(focusSymbol, 0.25);
@@ -1733,9 +1771,9 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
-              {guide === null && (!trendPilot || surviveUrgent) && (
+              {guide === null && (!skillPilot || surviveUrgent) && (
                 <div className="cy-quick-row">
-                  {!trendPilot && (
+                  {!skillPilot && (
                     <button type="button" className={`cy-quick-btn is-skill${skill && skill.chapter === run.chapter ? " is-done" : ""}`}
                       disabled={!!(skill && skill.chapter === run.chapter)}
                       onClick={() => { playSfx("click"); setDialog({ k: "mini", kind: check.kind, pending: { t: "skill" } }); }}>
@@ -1839,7 +1877,7 @@ export function CryptoJourney() {
             verified={verified}
             verifyCost={Math.max(150, Math.round(net * 0.01))}
             skillDone={!!(skill && skill.chapter === run.chapter)}
-            skillHidden={trendPilot}
+            skillHidden={skillPilot}
             skillHead={check.head}
             skillPrize={Math.max(300, Math.round(net * 0.02))}
             onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
