@@ -1515,7 +1515,8 @@ export function CryptoJourney() {
           )}
 
           {phase === "act" && (
-            <article className={`cy-card cy-arena is-${arenaState}`} key={`act-${run.chapter}`}>
+            <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
+              <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET · {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} · {formatMoney(focusPrice)}</strong></div>
               {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT · SAME SEED · $20 / $10 / $5 $TCFB</div>}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
