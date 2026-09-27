@@ -1503,7 +1503,6 @@ export function CryptoJourney() {
                     <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
                     {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
                   </button>
-                  {phase === "act" && p.where !== "cold" && <button className="cy-chip-exit" onClick={() => quickClose(p.id)} aria-label={`Close ${p.symbol} now`}>EXIT</button>}
                 </span>
               );
             })}
