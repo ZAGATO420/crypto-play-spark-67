@@ -1719,3 +1719,10 @@
   .cy-mobile-dock button { min-height:44px; }
   .cy-mobile-dock button svg { width:15px; height:15px; }
 }
+
+/* Shareable run trophy: the Wordle-style grid plus its copy actions. */
+.end-trophy { margin: 10px 0; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); text-align: left }
+.end-grid { margin: 6px 0 10px; font: 600 15px/1.5 ui-monospace, monospace; letter-spacing: .04em; white-space: pre; overflow-x: auto }
+.end-trophy-actions { display: flex; flex-wrap: wrap; gap: 8px }
+.end-trophy-actions button { flex: 1 1 140px }
+@media (max-width: 640px) { .end-grid { font-size: 13px } }
