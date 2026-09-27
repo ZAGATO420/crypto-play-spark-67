@@ -1617,17 +1617,35 @@ export function CryptoJourney() {
                 </div>
                 <p>{stanceOf(run.stance).line}</p>
               </div>
-              <div className="cy-action-context"><span>YOUR DECISION</span><strong>{guide === 0 ? "Buy Bitcoin to enter the market." : chapterPlay.mode === "PANIC" ? "Protect cash or risk the crash." : chapterPlay.mode === "HUNT" ? "Check the launch before committing cash." : chapterPlay.mode === "DEFEND" ? "Move exposed funds before the threat hits." : chapterPlay.mode === "BOSS DUEL" ? "Risk a visible stake in a skill challenge." : focusPosition ? "Add, exit, or let the position run." : "Enter the market or preserve your cash."}</strong></div>
-              <div className="cy-main-actions">
-                {guide === 0 ? <Button className="cy-main-trade is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}><TrendingUp />BUY {formatMoney(guideBuy)} BTC<ChevronRight /></Button>
-                  : guide === 1 ? <Button className="cy-main-trade is-guided" onClick={() => { setGuide(2); endChapter(); }}><ChevronRight />END QUARTER · REVEAL RESULT</Button>
-                  : chapterPlay.mode === "PANIC" ? <Button className="cy-main-trade" onClick={() => focusPosition ? askClose(focusPosition.id, 1) : bank()}><TrendingDown />{focusPosition ? `EXIT ${focusSymbol}` : "KEEP CASH"}<ChevronRight /></Button>
-                  : chapterPlay.mode === "HUNT" && presale ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "presale", card: presale })}><Rocket />HUNT {presale.name}<ChevronRight /></Button>
-                    : chapterPlay.mode === "DEFEND" ? <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => setDialog({ k: "custody" })}><Shield />MOVE FUNDS<ChevronRight /></Button>
-                      : chapterPlay.mode === "BOSS DUEL" && bossFightFor(run.chapter) && !run.fought.includes(run.chapter) ? <Button className="cy-main-trade" onClick={() => setDialog({ k: "fight", chapter: run.chapter })}><Swords />DUEL · RISK {formatMoney(duelStake)}<ChevronRight /></Button>
-                        : <Button className="cy-main-trade" disabled={ap <= 0} onClick={() => focusPosition ? setDialog({ k: "market" }) : openSpot("BTC", 0.25)}><TrendingUp />{chapterPlay.verb}<ChevronRight /></Button>}
-                <Button variant="secondary" disabled={guide !== null} onClick={() => focusPosition ? quickClose(focusPosition.id) : bank()}>{focusPosition ? <><TrendingDown />TAKE PROFIT</> : <><History />WAIT</>}</Button>
-                <Button variant="outline" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE" : "RUN TAPE"}</Button>
+              {guide !== null ? (
+                <div className="cy-moves is-guided-row">
+                  {guide === 0
+                    ? <button type="button" className="cy-move is-risk is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}>
+                        <span>STEP 1</span><strong>BUY {formatMoney(guideBuy)} BTC</strong><small>Your first position</small>
+                      </button>
+                    : <button type="button" className="cy-move is-risk is-guided" onClick={() => { setGuide(2); endChapter(); }}>
+                        <span>STEP 2</span><strong>END QUARTER</strong><small>Reveal what the market did</small>
+                      </button>}
+                </div>
+              ) : (
+                <div className="cy-moves" aria-label="Your two moves this quarter">
+                  <button type="button" className="cy-move is-risk" disabled={riskLocked} onClick={riskMove}>
+                    <span><Flame />TAKE THE RISK</span>
+                    <strong>{moves.risk.label}</strong>
+                    <small>{moves.risk.sub}</small>
+                    <em>{moves.risk.why}</em>
+                  </button>
+                  <button type="button" className="cy-move is-safe" disabled={ap <= 0} onClick={safeMove}>
+                    <span><Shield />PLAY IT SAFE</span>
+                    <strong>{moves.safe.label}</strong>
+                    <small>{moves.safe.sub}</small>
+                    <em>{moves.safe.why}</em>
+                  </button>
+                </div>
+              )}
+              <div className="cy-tape-row">
+                <button type="button" className="cy-tape-btn" disabled={guide !== null} onClick={() => { setFast(true); playSfx("click"); }}><Flame />{fast ? "MARKET RUNNING" : chapterPlay.tempo === "danger" ? "BRACE FOR IT" : "RUN THE TAPE"}</button>
+                <button type="button" className="cy-tape-btn" disabled={guide === 0 || ap <= 0} onClick={() => setDialog({ k: "market" })}><TrendingUp />FULL TERMINAL</button>
               </div>
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
                 <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
