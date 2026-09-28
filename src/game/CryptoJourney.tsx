@@ -1062,8 +1062,10 @@ export function CryptoJourney() {
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
+    // this quarter's risk moment, graded on play and paid right here
+    const play = run.riskPlay && run.riskPlay.chapter === from && !run.riskPlay.settled ? run.riskPlay : null;
     // the quarter's skill test, reported in plain words every single time
-    lines.push(skill && skill.chapter === from
+    if (!play) lines.push(skill && skill.chapter === from
       ? `Skill test | ${skillCheckFor(from).head}: ${skill.label} (${skill.delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(skill.delta))}).`
       : `Skill test | ${skillCheckFor(from).head}: not played. No bonus this quarter.`);
 
