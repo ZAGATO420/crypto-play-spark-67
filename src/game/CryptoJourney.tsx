@@ -59,6 +59,8 @@ type Run = {
   chronicle: string[];
   /** Milestone ids already lived through, so a beat never repeats. */
   seen: string[];
+  /** This quarter's risk moment: graded on play, paid at the quarter reveal. One per quarter, survives a reload. */
+  riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean } | null;
 };
 
 
