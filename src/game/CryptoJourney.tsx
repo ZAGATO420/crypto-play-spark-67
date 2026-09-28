@@ -992,32 +992,30 @@ export function CryptoJourney() {
   };
 
   /**
-   * Every phase's risky move IS its skill moment. The minigame quality scales
-   * the payout directly: perfect pays 1.4x the stake, good pays the stake,
-   * a fumble costs half of it. The safe move stays a plain, fast click.
+   * Every phase's risky move IS its skill moment. Playing it only earns a GRADE —
+   * the money is settled at the quarter reveal against the real market move, so the
+   * payout can never leak the market direction. One risk moment per quarter.
    */
   const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode) => {
     const copy = PHASE_RISK[mode];
-    const delta = quality >= 0.9 ? Math.round(stake * quality * 1.4)
-      : quality >= 0.6 ? Math.round(stake * quality)
-        : -Math.round(stake * 0.5);
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
     const buys = mode === "ACCUMULATE";
+    const symbol: CoinSymbol = mode === "ACCUMULATE" || mode === "MOMENTUM" ? focusSymbol : "BTC";
     // accumulating still puts real money into a real coin; the skill only scales it
     if (buys) openSpot(focusSymbol, 0.25); else spend();
-    setRun((r) => book({
+    setRun((r) => ({
       ...r,
-      cash: Math.max(0, r.cash + delta),
       xp: r.xp + xp,
       heat: quality >= 0.9 ? r.heat + 1 : quality >= 0.6 ? r.heat : 0,
       stress: clamp(r.stress + (quality >= 0.6 ? 0 : 8)),
-    }, `${copy.head} | ${label}`, delta));
-    setSkill({ chapter: run.chapter, quality, label, delta });
-    pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
+      riskPlay: { chapter: r.chapter, quality, label, stake, mode, symbol, delta: 0, settled: false },
+    }));
+    setSkill({ chapter: run.chapter, quality, label, delta: 0 });
     pop(`+${xp} XP | ${label}`, "xp");
-    say(quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss, quality >= 0.6 ? "yellow" : "pink");
-    playSfx(delta >= 0 ? "win" : "hit");
-    feel(delta >= 0 ? "win" : "loss");
+    pop(quality >= 0.9 ? "PERFECT | PAYS AT THE REVEAL" : quality >= 0.6 ? "CLEAN | PAYS AT THE REVEAL" : "FUMBLED | THIS WILL COST YOU", quality >= 0.6 ? "up" : "down");
+    say(`${quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss} End the quarter to see what the market did with it.`, quality >= 0.6 ? "yellow" : "pink");
+    playSfx(quality >= 0.6 ? "win" : "hit");
+    feel(quality >= 0.6 ? "win" : "loss");
     if (mode === "PANIC") setFast(true);
     if (!buys) nextInQueue();
   };
