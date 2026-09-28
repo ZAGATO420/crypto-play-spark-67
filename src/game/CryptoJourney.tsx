@@ -59,6 +59,8 @@ type Run = {
   chronicle: string[];
   /** Milestone ids already lived through, so a beat never repeats. */
   seen: string[];
+  /** This quarter's risk moment: graded on play, paid at the quarter reveal. One per quarter, survives a reload. */
+  riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean } | null;
 };
 
 
@@ -86,18 +88,18 @@ const PHASE_RISK: Record<ChapterMode, { kind: MiniKind; head: string; hit: strin
     hit: "Perfect fill — you caught the breakout and pressed it clean.",
     ok: "A solid momentum trade, nothing wasted.",
     miss: "You bought the local top and paid the spread." },
-  PANIC: { kind: "panic", head: "BEAT THE CRASH",
-    hit: "Orders out before the bids vanished. Ice cold under pressure.",
-    ok: "Most of your orders filled. The rest went through at panic prices.",
-    miss: "You froze while the book emptied. That one hurt." },
+  PANIC: { kind: "hodl", head: "HOLD THROUGH THE CRASH",
+    hit: "You held the line through the darkest wick without flinching. Diamond hands.",
+    ok: "You wobbled but you stayed in. The bag survived the wick.",
+    miss: "You cracked under pressure and dumped at the exact local bottom." },
   HUNT: { kind: "airdrop", head: "CLAIM THE REAL ONE",
     hit: "You hit the genuine claim instantly and the bots ate your dust.",
     ok: "Claim landed, a little late. You are in.",
     miss: "You clicked a drainer link and paid for the lesson." },
-  DEFEND: { kind: "hodl", head: "HOLD THE LINE",
-    hit: "You held the line perfectly. The venue shook, your margin did not.",
-    ok: "You kept the shield mostly inside the band. Bag defended.",
-    miss: "The band ran away from you and your margin took the hit." },
+  DEFEND: { kind: "panic", head: "GET IT OFF THE EXCHANGE",
+    hit: "Withdrawals out before the gate slammed. Ice cold under pressure.",
+    ok: "Most of it made it out. The rest sat there while the venue wobbled.",
+    miss: "You froze while withdrawals were paused. That one hurt." },
   "BOSS DUEL": { kind: "gas", head: "OUTBID THE BOTS",
     hit: "You outbid his bots to the cent. He felt that one.",
     ok: "You landed the block, a little expensive. Respect earned.",
@@ -258,7 +260,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [], stance: "balanced", heat: 0,
-    chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [],
+    chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [], riskPlay: null,
 
   };
 };
@@ -990,32 +992,30 @@ export function CryptoJourney() {
   };
 
   /**
-   * Every phase's risky move IS its skill moment. The minigame quality scales
-   * the payout directly: perfect pays 1.4x the stake, good pays the stake,
-   * a fumble costs half of it. The safe move stays a plain, fast click.
+   * Every phase's risky move IS its skill moment. Playing it only earns a GRADE —
+   * the money is settled at the quarter reveal against the real market move, so the
+   * payout can never leak the market direction. One risk moment per quarter.
    */
   const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode) => {
     const copy = PHASE_RISK[mode];
-    const delta = quality >= 0.9 ? Math.round(stake * quality * 1.4)
-      : quality >= 0.6 ? Math.round(stake * quality)
-        : -Math.round(stake * 0.5);
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
     const buys = mode === "ACCUMULATE";
+    const symbol: CoinSymbol = mode === "ACCUMULATE" || mode === "MOMENTUM" ? focusSymbol : "BTC";
     // accumulating still puts real money into a real coin; the skill only scales it
     if (buys) openSpot(focusSymbol, 0.25); else spend();
-    setRun((r) => book({
+    setRun((r) => ({
       ...r,
-      cash: Math.max(0, r.cash + delta),
       xp: r.xp + xp,
       heat: quality >= 0.9 ? r.heat + 1 : quality >= 0.6 ? r.heat : 0,
       stress: clamp(r.stress + (quality >= 0.6 ? 0 : 8)),
-    }, `${copy.head} | ${label}`, delta));
-    setSkill({ chapter: run.chapter, quality, label, delta });
-    pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
+      riskPlay: { chapter: r.chapter, quality, label, stake, mode, symbol, delta: 0, settled: false },
+    }));
+    setSkill({ chapter: run.chapter, quality, label, delta: 0 });
     pop(`+${xp} XP | ${label}`, "xp");
-    say(quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss, quality >= 0.6 ? "yellow" : "pink");
-    playSfx(delta >= 0 ? "win" : "hit");
-    feel(delta >= 0 ? "win" : "loss");
+    pop(quality >= 0.9 ? "PERFECT | PAYS AT THE REVEAL" : quality >= 0.6 ? "CLEAN | PAYS AT THE REVEAL" : "FUMBLED | THIS WILL COST YOU", quality >= 0.6 ? "up" : "down");
+    say(`${quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss} End the quarter to see what the market did with it.`, quality >= 0.6 ? "yellow" : "pink");
+    playSfx(quality >= 0.6 ? "win" : "hit");
+    feel(quality >= 0.6 ? "win" : "loss");
     if (mode === "PANIC") setFast(true);
     if (!buys) nextInQueue();
   };
@@ -1062,8 +1062,10 @@ export function CryptoJourney() {
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
+    // this quarter's risk moment, graded on play and paid right here
+    const play = run.riskPlay && run.riskPlay.chapter === from && !run.riskPlay.settled ? run.riskPlay : null;
     // the quarter's skill test, reported in plain words every single time
-    lines.push(skill && skill.chapter === from
+    if (!play) lines.push(skill && skill.chapter === from
       ? `Skill test | ${skillCheckFor(from).head}: ${skill.label} (${skill.delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(skill.delta))}).`
       : `Skill test | ${skillCheckFor(from).head}: not played. No bonus this quarter.`);
 
