@@ -1506,37 +1506,50 @@ export function CryptoJourney() {
   const theme = MODE_THEME[chapterPlay.mode];
   const moves = MODE_MOVES[chapterPlay.mode];
   const duelOpen = !!bossFightFor(run.chapter) && !run.fought.includes(run.chapter);
-  const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
+  /** One risk moment per quarter, in every phase. The flag lives in the run, so a reload cannot farm it. */
+  const riskPlayed = !!run.riskPlay && run.riskPlay.chapter === run.chapter;
+  const riskLocked = riskPlayed || (chapterPlay.mode === "BOSS DUEL" ? !duelOpen : ap <= 0);
   // survival only takes screen space when the body is actually failing
   const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
   /** Every phase: the risky move is played, not clicked. Stake is visible up front. */
   const phaseRisk = PHASE_RISK[chapterPlay.mode];
+  // the hunt alternates between the two scam-spotting games, and tightens with the years
+  const riskKind: MiniKind = chapterPlay.mode === "HUNT"
+    ? (run.chapter % 2 === 0 ? "airdrop" : "rugcheck")
+    : phaseRisk.kind;
+  const riskHard = cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80
+    || (chapterPlay.mode === "HUNT" && run.chapter >= 8);
   const phaseStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
   const huntTicket = presale ? Math.min(Math.max(presale.min, Math.round(net * 0.05)), Math.max(presale.min, Math.round(run.cash * 0.25))) : 0;
-  const stakePilot = guide === null && phaseStake > 0
+  const stakePilot = guide === null && phaseStake > 0 && !riskPlayed
     && (chapterPlay.mode === "ACCUMULATE" || chapterPlay.mode === "MOMENTUM" || chapterPlay.mode === "PANIC" || chapterPlay.mode === "DEFEND");
-  const huntPilot = chapterPlay.mode === "HUNT" && !!presale && guide === null && run.cash >= huntTicket;
-  const duelPilot = chapterPlay.mode === "BOSS DUEL" && duelOpen && guide === null;
+  const huntPilot = chapterPlay.mode === "HUNT" && !!presale && guide === null && !riskPlayed && run.cash >= huntTicket;
+  const duelPilot = chapterPlay.mode === "BOSS DUEL" && duelOpen && guide === null && !riskPlayed;
   const skillPilot = stakePilot || huntPilot || duelPilot;
+  const playedGrade = run.riskPlay && run.riskPlay.chapter === run.chapter ? Math.round(run.riskPlay.quality * 100) : 0;
   // the stake, the game and what a fumble costs stay readable on the card itself
-  const riskLabel = huntPilot && presale ? `APE INTO ${presale.name} | ${formatMoney(huntTicket)}`
-    : duelPilot ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
-      : stakePilot ? `${moves.risk.label} | ${formatMoney(phaseStake)}`
-        : moves.risk.label;
+  const riskLabel = riskPlayed ? `PLAYED | GRADE ${playedGrade}%`
+    : huntPilot && presale ? `APE INTO ${presale.name} | ${formatMoney(huntTicket)}`
+      : duelPilot ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
+        : stakePilot ? `${moves.risk.label} | ${formatMoney(phaseStake)}`
+          : moves.risk.label;
   const riskTerms = skillPilot;
-  const riskWhy = huntPilot && presale
-    ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
-    : duelPilot
-      ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
-      : stakePilot
-        ? `${phaseRisk.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(phaseStake * 1.4))} | fumble costs ${formatMoney(Math.round(phaseStake * 0.5))}`
-        : moves.risk.why;
+  const riskWhy = riskPlayed
+    ? "Your one risk moment this quarter is used. End the quarter to see what the market paid."
+    : huntPilot && presale
+      ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
+      : duelPilot
+        ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
+        : stakePilot
+          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}`
+          : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
-    if (stakePilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
-    if (huntPilot && presale) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "presale", card: presale, size: huntTicket } });
-    if (duelPilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
+    if (riskPlayed) return say("You already took your shot this quarter. End the quarter.", "pink");
+    if (stakePilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
+    if (huntPilot && presale) return setDialog({ k: "mini", kind: riskKind, pending: { t: "presale", card: presale, size: huntTicket } });
+    if (duelPilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
     switch (chapterPlay.mode) {
       case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
       case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
