@@ -762,6 +762,8 @@ export function CryptoJourney() {
   const resolveFight = (chapter: number, wager: number, quality: number) => {
     const fight = bossFightFor(chapter);
     setRun((r) => (r.fought.includes(chapter) ? r : { ...r, fought: [...r.fought, chapter] }));
+    // the duel is this quarter's risk moment; it pays on the spot, so it is already settled
+    setRun((r) => ({ ...r, riskPlay: { chapter, quality, label: "THE DUEL", stake: wager, mode: "BOSS DUEL", symbol: "BTC", delta: 0, settled: true } }));
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
       const won = Math.round(wager * 2);
@@ -797,6 +799,8 @@ export function CryptoJourney() {
   const takePresale = (card: Presale, size: number, quality: number) => {
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
+    // the hunt is this quarter's one risk moment too; it settles on the spot
+    setRun((r) => ({ ...r, riskPlay: { chapter: r.chapter, quality, label: card.name, stake: size, mode: "HUNT", symbol: "BTC", delta: 0, settled: true } }));
     if (quality < 0.2) {
       const gas = Math.round(size * 0.06);
       setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} | missed mint (gas)`, -gas));
@@ -1080,6 +1084,30 @@ export function CryptoJourney() {
     let crises = run.crises;
     let taxDebt = run.taxDebt;
     let realized = run.realized;
+
+    /**
+     * The risk moment pays against the real quarter move, never against the click.
+     * m = clamp(quarter return x 3, -1, +1.4) on the coin the phase was about.
+     * Hit in a green quarter: stake x m x quality. Hit in a red quarter: it still
+     * bleeds, but skill cuts the damage (stake x m x (1 - quality)). A fumble
+     * always costs half the stake, green quarter or not.
+     */
+    let riskSettled: Run["riskPlay"] = run.riskPlay;
+    if (play) {
+      const head = PHASE_RISK[play.mode].head;
+      const before = priceAt(play.symbol, from, run.noise);
+      const after = priceAt(play.symbol, next, run.noise);
+      const ret = before && after ? after / before - 1 : 0;
+      const m = Math.max(-1, Math.min(1.4, ret * 3));
+      const paid = play.quality < 0.6
+        ? -Math.round(play.stake * 0.5)
+        : m >= 0 ? Math.round(play.stake * m * play.quality) : Math.round(play.stake * m * (1 - play.quality));
+      cash = Math.max(0, cash + paid);
+      if (paid >= 0) earnFrom(`${head} | ${play.label}`, paid);
+      else spendOn(`${head} | ${play.label}`, -paid);
+      lines.push(`Risk moment | ${head}: ${play.label} on a ${ret >= 0 ? "+" : ""}${(ret * 100).toFixed(1)}% ${play.symbol} quarter — ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.`);
+      riskSettled = { ...play, delta: paid, settled: true };
+    }
     let lifeHunger = 0;
     let lifeStress = 0;
     let liquidation: Pos | null = null;
@@ -1212,7 +1240,7 @@ export function CryptoJourney() {
     if (critical) lines.push("You are running on empty. Shaking hands cost you a move next quarter.");
 
     const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
-    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
+    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals, riskPlay: riskSettled };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
     const activeMission = missionFor(run.chapter);
@@ -1482,37 +1510,50 @@ export function CryptoJourney() {
   const theme = MODE_THEME[chapterPlay.mode];
   const moves = MODE_MOVES[chapterPlay.mode];
   const duelOpen = !!bossFightFor(run.chapter) && !run.fought.includes(run.chapter);
-  const riskLocked = chapterPlay.mode === "BOSS DUEL" ? !duelOpen : chapterPlay.mode === "PANIC" ? false : ap <= 0;
+  /** One risk moment per quarter, in every phase. The flag lives in the run, so a reload cannot farm it. */
+  const riskPlayed = !!run.riskPlay && run.riskPlay.chapter === run.chapter;
+  const riskLocked = riskPlayed || (chapterPlay.mode === "BOSS DUEL" ? !duelOpen : ap <= 0);
   // survival only takes screen space when the body is actually failing
   const surviveUrgent = run.hunger >= 70 || run.stress >= 70;
   /** Every phase: the risky move is played, not clicked. Stake is visible up front. */
   const phaseRisk = PHASE_RISK[chapterPlay.mode];
+  // the hunt alternates between the two scam-spotting games, and tightens with the years
+  const riskKind: MiniKind = chapterPlay.mode === "HUNT"
+    ? (run.chapter % 2 === 0 ? "airdrop" : "rugcheck")
+    : phaseRisk.kind;
+  const riskHard = cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80
+    || (chapterPlay.mode === "HUNT" && run.chapter >= 8);
   const phaseStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
   const huntTicket = presale ? Math.min(Math.max(presale.min, Math.round(net * 0.05)), Math.max(presale.min, Math.round(run.cash * 0.25))) : 0;
-  const stakePilot = guide === null && phaseStake > 0
+  const stakePilot = guide === null && phaseStake > 0 && !riskPlayed
     && (chapterPlay.mode === "ACCUMULATE" || chapterPlay.mode === "MOMENTUM" || chapterPlay.mode === "PANIC" || chapterPlay.mode === "DEFEND");
-  const huntPilot = chapterPlay.mode === "HUNT" && !!presale && guide === null && run.cash >= huntTicket;
-  const duelPilot = chapterPlay.mode === "BOSS DUEL" && duelOpen && guide === null;
+  const huntPilot = chapterPlay.mode === "HUNT" && !!presale && guide === null && !riskPlayed && run.cash >= huntTicket;
+  const duelPilot = chapterPlay.mode === "BOSS DUEL" && duelOpen && guide === null && !riskPlayed;
   const skillPilot = stakePilot || huntPilot || duelPilot;
+  const playedGrade = run.riskPlay && run.riskPlay.chapter === run.chapter ? Math.round(run.riskPlay.quality * 100) : 0;
   // the stake, the game and what a fumble costs stay readable on the card itself
-  const riskLabel = huntPilot && presale ? `APE INTO ${presale.name} | ${formatMoney(huntTicket)}`
-    : duelPilot ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
-      : stakePilot ? `${moves.risk.label} | ${formatMoney(phaseStake)}`
-        : moves.risk.label;
+  const riskLabel = riskPlayed ? `PLAYED | GRADE ${playedGrade}%`
+    : huntPilot && presale ? `APE INTO ${presale.name} | ${formatMoney(huntTicket)}`
+      : duelPilot ? `FIGHT HIM | STAKE ${formatMoney(duelStake)}`
+        : stakePilot ? `${moves.risk.label} | ${formatMoney(phaseStake)}`
+          : moves.risk.label;
   const riskTerms = skillPilot;
-  const riskWhy = huntPilot && presale
-    ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
-    : duelPilot
-      ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
-      : stakePilot
-        ? `${phaseRisk.head}: a 4 second skill moment | perfect pays ${formatMoney(Math.round(phaseStake * 1.4))} | fumble costs ${formatMoney(Math.round(phaseStake * 0.5))}`
-        : moves.risk.why;
+  const riskWhy = riskPlayed
+    ? "Your one risk moment this quarter is used. End the quarter to see what the market paid."
+    : huntPilot && presale
+      ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
+      : duelPilot
+        ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
+        : stakePilot
+          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}`
+          : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
-    if (stakePilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
-    if (huntPilot && presale) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "presale", card: presale, size: huntTicket } });
-    if (duelPilot) return setDialog({ k: "mini", kind: phaseRisk.kind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
+    if (riskPlayed) return say("You already took your shot this quarter. End the quarter.", "pink");
+    if (stakePilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
+    if (huntPilot && presale) return setDialog({ k: "mini", kind: riskKind, pending: { t: "presale", card: presale, size: huntTicket } });
+    if (duelPilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
     switch (chapterPlay.mode) {
       case "PANIC": setFast(true); say("You are holding through the crash. Nerves of steel or a very expensive lesson.", "pink"); break;
       case "HUNT": setDialog(presale ? { k: "presale", card: presale } : { k: "market" }); break;
@@ -1912,7 +1953,7 @@ export function CryptoJourney() {
           {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
           {dialog.k === "life" && <LifeSheet run={run} onPick={setLife} />}
           {dialog.k === "ledger" && <LedgerSheet run={run} onClose={() => setDialog(null)} />}
-          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80} onResult={(res) => finishMini(dialog.pending, res)} />}
+          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={riskHard} onResult={(res) => finishMini(dialog.pending, res)} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
           {dialog.k === "fight" && <FightSheet chapter={dialog.chapter} cash={run.cash}
