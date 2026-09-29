@@ -1080,6 +1080,30 @@ export function CryptoJourney() {
     let crises = run.crises;
     let taxDebt = run.taxDebt;
     let realized = run.realized;
+
+    /**
+     * The risk moment pays against the real quarter move, never against the click.
+     * m = clamp(quarter return x 3, -1, +1.4) on the coin the phase was about.
+     * Hit in a green quarter: stake x m x quality. Hit in a red quarter: it still
+     * bleeds, but skill cuts the damage (stake x m x (1 - quality)). A fumble
+     * always costs half the stake, green quarter or not.
+     */
+    let riskSettled: Run["riskPlay"] = run.riskPlay;
+    if (play) {
+      const head = PHASE_RISK[play.mode].head;
+      const before = priceAt(play.symbol, from, run.noise);
+      const after = priceAt(play.symbol, next, run.noise);
+      const ret = before && after ? after / before - 1 : 0;
+      const m = Math.max(-1, Math.min(1.4, ret * 3));
+      const paid = play.quality < 0.6
+        ? -Math.round(play.stake * 0.5)
+        : m >= 0 ? Math.round(play.stake * m * play.quality) : Math.round(play.stake * m * (1 - play.quality));
+      cash = Math.max(0, cash + paid);
+      if (paid >= 0) earnFrom(`${head} | ${play.label}`, paid);
+      else spendOn(`${head} | ${play.label}`, -paid);
+      lines.push(`Risk moment | ${head}: ${play.label} on a ${ret >= 0 ? "+" : ""}${(ret * 100).toFixed(1)}% ${play.symbol} quarter — ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.`);
+      riskSettled = { ...play, delta: paid, settled: true };
+    }
     let lifeHunger = 0;
     let lifeStress = 0;
     let liquidation: Pos | null = null;
