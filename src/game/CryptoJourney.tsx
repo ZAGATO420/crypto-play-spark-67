@@ -797,6 +797,8 @@ export function CryptoJourney() {
   const takePresale = (card: Presale, size: number, quality: number) => {
     if (run.cash < size) { setDialog(null); return say(`${card.name} needs ${formatMoney(size)} — you hold ${formatMoney(run.cash)}.`, "pink"); }
     spend();
+    // the hunt is this quarter's one risk moment too; it settles on the spot
+    setRun((r) => ({ ...r, riskPlay: { chapter: r.chapter, quality, label: card.name, stake: size, mode: "HUNT", symbol: "BTC", delta: 0, settled: true } }));
     if (quality < 0.2) {
       const gas = Math.round(size * 0.06);
       setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} | missed mint (gas)`, -gas));
