@@ -1951,7 +1951,7 @@ export function CryptoJourney() {
           {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
           {dialog.k === "life" && <LifeSheet run={run} onPick={setLife} />}
           {dialog.k === "ledger" && <LedgerSheet run={run} onClose={() => setDialog(null)} />}
-          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80} onResult={(res) => finishMini(dialog.pending, res)} />}
+          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={riskHard} onResult={(res) => finishMini(dialog.pending, res)} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
           {dialog.k === "fight" && <FightSheet chapter={dialog.chapter} cash={run.cash}
