@@ -762,6 +762,8 @@ export function CryptoJourney() {
   const resolveFight = (chapter: number, wager: number, quality: number) => {
     const fight = bossFightFor(chapter);
     setRun((r) => (r.fought.includes(chapter) ? r : { ...r, fought: [...r.fought, chapter] }));
+    // the duel is this quarter's risk moment; it pays on the spot, so it is already settled
+    setRun((r) => ({ ...r, riskPlay: { chapter, quality, label: "THE DUEL", stake: wager, mode: "BOSS DUEL", symbol: "BTC", delta: 0, settled: true } }));
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
       const won = Math.round(wager * 2);
