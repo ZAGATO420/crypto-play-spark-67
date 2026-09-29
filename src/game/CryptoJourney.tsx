@@ -1236,7 +1236,7 @@ export function CryptoJourney() {
     if (critical) lines.push("You are running on empty. Shaking hands cost you a move next quarter.");
 
     const ledger = [...outflow, ...inflow, ...run.ledger].slice(0, 60);
-    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals };
+    const draft: Run = { ...run, chapter: next, cash, positions, risk, hunger, stress, crises, taxDebt, realized, ledger, moves: 0, cares: 0, criticals, riskPlay: riskSettled };
     const endNet = netOf(draft);
     const delta = endNet - startNet;
     const activeMission = missionFor(run.chapter);
