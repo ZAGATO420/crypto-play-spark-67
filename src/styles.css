@@ -2226,6 +2226,33 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-tape-btn, .cy-quick-btn { min-height:42px; }
 }
 
+/* ---- Frames always fill their column, on every screen size ---- */
+.cy-stage { width:100%; }
+.cy-stage > article.cy-card, .cy-card { width:100%; max-width:100%; box-sizing:border-box; }
+.cy-market-visual, .cy-actionbar, .cy-moves, .cy-quick-row, .cy-trade-row, .cy-tape-row { width:100%; box-sizing:border-box; }
+.cy-quick-row > *, .cy-trade-row > *, .cy-tape-row > * { min-width:0; }
+
+/* ---- Position chips sit above the chart, never behind it ---- */
+.cy-chips { position:relative; z-index:6; }
+.cy-chip-wrap, .cy-chip { position:relative; z-index:6; }
+.cy-chip { background:color-mix(in oklab,var(--background) 86%,var(--journey-panel)); }
+.cy-chart-title { z-index:7 !important; }
+.cy-chart-wrap { z-index:1 !important; }
+
+/* ---- Spot and perps live on the main screen ---- */
+.cy-trade-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.cy-trade-row .cy-quick-btn.is-spot { border-color:color-mix(in oklab,var(--journey-yellow) 55%,var(--border)); background:color-mix(in oklab,var(--journey-yellow) 10%,transparent); color:var(--journey-yellow); }
+.cy-trade-row .cy-quick-btn.is-spot:hover { box-shadow:0 0 18px -8px var(--journey-yellow); }
+.cy-trade-row .cy-quick-btn.is-perp { border-color:color-mix(in oklab,var(--journey-pink) 55%,var(--border)); background:color-mix(in oklab,var(--journey-pink) 10%,transparent); color:var(--journey-pink); }
+.cy-trade-row .cy-quick-btn.is-perp:hover { box-shadow:0 0 18px -8px var(--journey-pink); }
+
+@media (max-width: 640px) {
+  .cy-trade-row .cy-quick-btn { min-height:44px; font-size:10px !important; }
+}
+@media (max-width: 640px) and (max-height: 700px) {
+  .cy-trade-row .cy-quick-btn { min-height:38px; font-size:9px !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cy-count, .cy-move::after, .cy-candles rect, .cy-candles line, .cy-scrim > *, .cy-hud-side.is-boss.is-enraged img { animation:none !important; }
 }
