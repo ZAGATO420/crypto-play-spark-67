@@ -1072,8 +1072,14 @@ export function CryptoJourney() {
     if (!buys) nextInQueue();
   };
 
-  const finishMini = (pending: Pending, res: MiniResult) => {
+  const finishMini = (raw: Pending, result: MiniResult) => {
+    const pending = raw;
+    // MEV BOT and HOUSE EDGE raise the floor under every skill moment.
+    const res: MiniResult = power.skillFloor > result.quality
+      ? { ...result, quality: power.skillFloor, label: `${result.label} | MEV BOT CLEANUP` }
+      : result;
     if (res.quality >= 1) triggerGodCandle(res.label, 10);
+
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
