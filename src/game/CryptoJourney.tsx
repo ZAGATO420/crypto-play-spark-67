@@ -35,6 +35,14 @@ import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
 
+/** Compact money for tight HUD chips: $1.4M, $920K, $480. */
+function shortMoney(v: number): string {
+  const a = Math.abs(v);
+  if (a >= 1_000_000) return `$${(a / 1_000_000).toFixed(a >= 10_000_000 ? 0 : 1)}M`;
+  if (a >= 1_000) return `$${(a / 1_000).toFixed(a >= 10_000 ? 0 : 1)}K`;
+  return `$${Math.round(a)}`;
+}
+
 
 
 /* ------------------------------------------------------------------ types */
@@ -1709,123 +1717,56 @@ export function CryptoJourney() {
       {fillFx && <div className={`cy-fill tone-${fillFx.tone}`} role="status"><strong>{fillFx.head}</strong><small>{fillFx.sub}</small></div>}
 
 
-      <header className="cy-top">
-        <div className="min-w-0">
-          <p className="journey-kicker">{chapterLabel(run.chapter)} | {act.name}</p>
+      {/* ZONE 1 — the duel cockpit: you, the Boss, one line of numbers. */}
+      <header className={`cy-hud is-${arenaState}`}>
+        <figure className="cy-hud-side is-you">
+          <img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" />
+          <figcaption>
+            <strong className={netPulse ? `pulse-${netPulse}` : ""}><Count value={net} /></strong>
+            <span>{formatMoney(run.cash)} cash{openPnl !== 0 ? <> · <b className={openPnl > 0 ? "positive" : "negative"}>{openPnl > 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</b></> : null}</span>
+            <i className="cy-hud-vitals" aria-label={`Stress ${run.stress}%, hunger ${run.hunger}%`}>
+              <b className={`is-stress${run.stress >= 70 ? " is-critical" : ""}`}><u style={{ width: `${run.stress}%` }} /></b>
+              <b className={`is-hunger${run.hunger >= 70 ? " is-critical" : ""}`}><u style={{ width: `${run.hunger}%` }} /></b>
+            </i>
+          </figcaption>
+        </figure>
 
-          <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
-          <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
-            <span className="cy-level">LVL {xpBar.level}</span>
-            <div className="cy-xp-track"><i style={{ width: `${xpBar.pct}%` }} /></div>
-            <span className="cy-xp-num">{run.xp.toLocaleString("en-US")} XP</span>
-          </div>
-        </div>
-        <div className="cy-top-right">
-          <button className="cy-score" onClick={() => setDialog({ k: "score" })}><small>BOSS SCORE</small><strong>{score.toLocaleString("en-US")}</strong></button>
-          <div className="cy-ap" aria-label={`${ap} moves left`}>{Array.from({ length: AP_CAP }, (_, i) => <i key={i} className={i < ap ? "is-on" : ""} />)}</div>
-          <Button variant="ghost" size="icon" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => setDialog({ k: "sound" })}>{muted ? <VolumeX /> : <Volume2 />}</Button>
-        </div>
-      </header>
-
-      <div className="cy-rail">
-      <section className={`cy-goal${objective.urgent ? " is-urgent" : ""}${guide !== null ? " is-guided" : ""}`} aria-live="polite">
-
-        <div className="cy-goal-avatar"><img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" /></div>
-        <div>
-        <p className="cy-goal-head">{guide !== null ? `FIRST RUN | STEP ${guide + 1} OF 3` : `${chapterPlay.mode} | YOUR MOVE`}</p>
-        <p className="cy-goal-line">{guide === 0 ? `Buy ${formatMoney(guideBuy)} of Bitcoin below` : guide === 1 ? phase === "brief" ? "Open the live market to see your trade" : "See what your trade changed — then finish the quarter" : guide === 2 ? "Read the result, then enter the next chapter" : chapterPlay.task}</p>
-        <p className="cy-goal-why cy-extra">{guide === 0 ? "Your first trade is paused. The yellow dot shows the current price — you do not tap the chart." : guide === 1 ? phase === "brief" ? "Tap TAKE YOUR TURN. Then END QUARTER reveals the historical outcome." : "The market only moves after your decision. END QUARTER reveals the historical outcome." : run.chapter < 3 ? objective.goal : chapterPlay.objective}</p>
-        {doom !== null && <p className="cy-goal-doom cy-extra">Something breaks in {doom} quarter{doom === 1 ? "" : "s"}. Be ready.</p>}
-        </div>
-        {guide !== null && <div className="cy-guide-path" aria-label={`Guide step ${guide + 1} of 3`}>
-          <span className={guide === 0 ? "is-current" : "is-done"}><b>1</b>CHOOSE</span>
-          <span className={guide === 1 ? "is-current" : guide > 1 ? "is-done" : ""}><b>2</b>WATCH</span>
-          <span className={guide === 2 ? "is-current" : ""}><b>3</b>RESULT</span>
-          <button type="button" onClick={() => setGuide(null)}>SKIP GUIDE</button>
-        </div>}
-      </section>
-
-      <section className={`cy-standing is-${standing.tone}`} aria-label="How you stand against the Boss">
-        {/* Zone 1 — the duel: rank 1, the Boss bar and your relics read as one frame. */}
-        <div className="cy-duel">
-          {/* The duel faces: you on the left, the Boss on the right. */}
-          <div className={`cy-faces is-${bossPhase.toLowerCase()}`} aria-hidden>
-            <figure className="cy-face is-you">
-              <img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="" />
-              <figcaption>YOU<b>{formatMoney(Math.max(0, net))}</b></figcaption>
-            </figure>
-            <span className="cy-face-vs">VS</span>
-            <figure className="cy-face is-boss">
-              <img src={mood} alt="" />
-              <figcaption>{bossPhase}<b>{formatMoney(Math.max(0, bossNet))}</b></figcaption>
-            </figure>
+        <div className="cy-hud-mid">
+          <span className="cy-hud-q">Q{run.chapter + 1}/{CHAPTERS}</span>
+          <span className="cy-hud-vs">VS</span>
+          <div className="cy-hud-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
+            <b>L{xpBar.level}</b><i><u style={{ width: `${xpBar.pct}%` }} /></i>
           </div>
           {topMark && (
-            <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
-              <span className="cy-rank1-tag">VS RANK 1</span>
-              <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD` : `−${formatMoney(topMark.net - net)} TO GO`}</strong>
-              <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
-            </div>
-          )}
-          <BossBar you={Math.max(0, net)} him={Math.max(0, bossNet)} wins={run.bossWins} phase={bossPhase} />
-          {(run.relics ?? []).length > 0 && (
-            <p className="cy-relic-strip">
-              {(run.relics ?? []).map((id) => <b key={id} title={`${relicOf(id)?.name} — ${relicOf(id)?.effect}`}>{relicOf(id)?.glyph ?? "?"}</b>)}
-              {power.synergies.map((s) => <span key={s.name}>{s.name}</span>)}
-            </p>
+            <button type="button" className={`cy-hud-rank ${net >= topMark.net ? "is-ahead" : "is-behind"}`} onClick={() => setDialog({ k: "score" })}>
+              {`#1 ${net >= topMark.net ? "+" : "−"}${shortMoney(Math.abs(net - topMark.net))}`}
+            </button>
           )}
         </div>
 
-        <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
-          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${chapterPlay.mode} | BRIEFING`}
-        </button>
-        {intel && <p className="cy-standing-line">{standing.line} — {mission.text} (+{mission.reward} XP)</p>}
-      </section>
+        <figure className={`cy-hud-side is-boss is-${bossPhase.toLowerCase()}`}>
+          <img src={mood} alt="The Crypto Final Boss" />
+          <figcaption>
+            <strong>{formatMoney(Math.max(0, bossNet))}</strong>
+            <span>{bossPhase}{run.bossWins > 0 ? ` · ${run.bossWins}W` : ""}</span>
+            <i className="cy-hud-hp"><u style={{ width: `${Math.max(4, Math.min(100, Math.round((Math.max(0, bossNet) / Math.max(1, Math.max(0, bossNet) + Math.max(0, net))) * 100)))}%` }} /></i>
+          </figcaption>
+        </figure>
+      </header>
 
-
-      {/* Zone 2 — your money, big and animated; stress and hunger as two slim bars. */}
-      <section className={`cy-core is-${arenaState}`} aria-label="Run status">
-        <div className="cy-core-row">
-          <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong></span>
-          <span className="cy-core-cash"><small>CASH</small><strong><Count value={run.cash} /></strong></span>
-          <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}><Count value={openPnl} sign /></strong></span>
-        </div>
-        <div className="cy-core-vitals">
-          <span className={`cy-vital is-stress${run.stress >= 70 ? " is-critical" : ""}`}><small>STRESS</small><i><b style={{ width: `${run.stress}%` }} /></i><em>{run.stress}%</em></span>
-          <span className={`cy-vital is-hunger${run.hunger >= 70 ? " is-critical" : ""}`}><small>HUNGER</small><i><b style={{ width: `${run.hunger}%` }} /></i><em>{run.hunger}%</em></span>
-        </div>
-      </section>
-
-
-
-
-
-      <section className="cy-positions" aria-label="Open positions">
-        {run.positions.length ? (
-          <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`}>
-            {run.positions.map((p) => {
-              const price = mark(p.symbol);
-              const pnl = pnlOf(p, price);
-              const liq = liqPct(p, price);
-              return (
-                <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
-                  <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => { setActiveSymbol(p.symbol); setDialog({ k: "position", id: p.id }); }}>
-                    <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
-                    <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
-                    <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
-                    {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
-                  </button>
-                  {phase === "act" && p.where !== "cold" && (
-                    <button className="cy-chip-exit" title="Close this position now" aria-label={`Close ${p.symbol} now`} onClick={() => { playSfx("click"); quickClose(p.id); }}>✕</button>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-        ) : null}
-      </section>
-
+      {/* One single strip: what to do now, your relics, briefing and sound. */}
+      <div className={`cy-strip${guide !== null ? " is-guided" : ""}${objective.urgent ? " is-urgent" : ""}`}>
+        <p>{guide === 0 ? `STEP 1/3 · Buy ${formatMoney(guideBuy)} of Bitcoin below` : guide === 1 ? "STEP 2/3 · End the quarter to reveal the market" : guide === 2 ? "STEP 3/3 · Read the result, then continue" : chapterPlay.task}</p>
+        {(run.relics ?? []).length > 0 && guide === null && (
+          <span className="cy-strip-relics">{(run.relics ?? []).map((id) => <b key={id} title={`${relicOf(id)?.name} — ${relicOf(id)?.effect}`}>{relicOf(id)?.glyph ?? "?"}</b>)}</span>
+        )}
+        {guide !== null
+          ? <button type="button" className="cy-strip-btn" onClick={() => setGuide(null)}>SKIP</button>
+          : <button type="button" className="cy-strip-btn" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>{intel ? "HIDE" : "BRIEF"}</button>}
+        <button type="button" className="cy-strip-btn is-icon" aria-label={muted ? "Sound on" : "Sound settings"} onClick={() => setDialog({ k: "sound" })}>{muted ? <VolumeX /> : <Volume2 />}</button>
       </div>
+      {intel && guide === null && <p className="cy-strip-brief">{standing.line} — {mission.text} (+{mission.reward} XP){doom !== null ? ` · Something breaks in ${doom} quarter${doom === 1 ? "" : "s"}.` : ""}</p>}
+
 
       <div className="cy-body">
 
@@ -1848,15 +1789,35 @@ export function CryptoJourney() {
 
           {phase === "act" && (
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
-              <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
-              <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET | {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} | {formatMoney(focusPrice)}</strong></div>
               {cfg.tournament && <SeasonBanner compact />}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
-                <div className={`cy-boss-presence is-${arenaState}`}>
-                  <img src={mood} alt="The Crypto Final Boss reacts to your run" />
-                  <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
+                <div className="cy-chart-title">
+                  <span><img src={COIN_LOGO[focusSymbol]} alt="" width={28} height={28} /><b>{focusSymbol}</b><small>{formatMoney(focusPrice)}</small></span>
+                  <strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))}` : `${ap} MOVE${ap === 1 ? "" : "S"} LEFT`}</strong>
                 </div>
-                <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
+                {run.positions.length > 0 && (
+                  <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`} aria-label="Open positions">
+                    {run.positions.map((p) => {
+                      const price = mark(p.symbol);
+                      const pnl = pnlOf(p, price);
+                      const liq = liqPct(p, price);
+                      return (
+                        <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
+                          <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => { setActiveSymbol(p.symbol); setDialog({ k: "position", id: p.id }); }}>
+                            <img src={COIN_LOGO[p.symbol]} alt="" width={18} height={18} />
+                            <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
+                            <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
+                            {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
+                          </button>
+                          {p.where !== "cold" && (
+                            <button className="cy-chip-exit" title="Close this position now" aria-label={`Close ${p.symbol} now`} onClick={() => { playSfx("click"); quickClose(p.id); }}>✕</button>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
                     <defs>
@@ -1880,38 +1841,18 @@ export function CryptoJourney() {
                   </svg>
                   <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
-                <div className="cy-chart-foot"><span>{focusPosition ? `ENTRY ${formatMoney(focusPosition.entry)}` : "NO POSITION"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
-
-              </div>
-              <div className="cy-live cy-extra">
-                <div className="cy-live-clock"><i ref={liveClockRef} style={{ width: `${Math.round(tick * 100)}%` }} /></div>
-                <div className="cy-live-tape">
-                  {(["BTC", "ETH", "SOL"] as CoinSymbol[]).map((s) => {
-                    const open = priceAt(s, run.chapter, run.noise);
-                    const now = mark(s);
-                    if (!open) return null;
-                    const pct = (now / open - 1) * 100;
-                    return (
-                      <span key={s} className={pct >= 0 ? "up" : "down"}>
-                        <img src={COIN_LOGO[s]} alt="" width={18} height={18} />
-                        <strong>{formatMoney(now)}</strong>
-                        <small>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</small>
-                      </span>
-                    );
-                  })}
+                <div className="cy-chart-foot">
+                  <span>{focusPosition ? `ENTRY ${formatMoney(focusPosition.entry)}` : "NO POSITION"}</span>
+                  <i className="cy-live-clock" ref={liveClockRef as never} style={{ width: `${Math.round(tick * 100)}%` }} aria-hidden />
+                  <span>{waitingForFirstTrade ? "CHOOSE YOUR MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span>
                 </div>
-                {attack && <p className="cy-attack"><strong>{attack.name}:</strong> {attack.line}</p>}
-                <div className={`cy-pressure is-${arenaState}`}><span>{arenaState === "danger" ? "SURVIVAL ALERT" : arenaState === "winning" ? "MOMENTUM" : "MARKET PRESSURE"}</span><i><b style={{ width: `${Math.max(8, Math.min(100, arenaState === "danger" ? survivalDanger : Math.abs(btcMove) * 4 + 18))}%` }} /></i></div>
-                <div className="cy-signals">
-                  {signals.map((s, i) => (
-                    <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
-                  ))}
-                </div>
-
               </div>
-              {run.stance !== "balanced" || run.convictionOn || run.heat > 0 ? (
-                <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
-              ) : null}
+              {attack
+                ? <p className="cy-ticker is-attack"><strong>{attack.name}:</strong> {attack.line}</p>
+                : (run.stance !== "balanced" || run.convictionOn || run.heat > 0)
+                  ? <p className="cy-ticker">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+                  : null}
+
 
               {/* Action bar: on phones this whole group is pinned above the browser bar. */}
               <div className="cy-actionbar">

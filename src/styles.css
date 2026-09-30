@@ -2040,625 +2040,213 @@
 .cy-candles g.is-down rect { fill:color-mix(in oklab,var(--pit-shock) 74%,transparent); }
 .cy-candles g.is-down line { stroke:color-mix(in oklab,var(--pit-shock) 58%,transparent); stroke-width:.6; }
 
-/* --- mobile cockpit: one screen, no scrolling, big thumb targets --- */
-@media (max-width: 640px) {
-  body:has(.cy-shell) { overflow:hidden; }
-  .cy-shell { height:100dvh; overflow:hidden; padding-bottom:max(6px,env(safe-area-inset-bottom)); }
-  .cy-shell .cy-bossbar-foot, .cy-shell .cy-relic-strip span { display:none; }
-  .cy-move { min-height:104px; padding:12px 12px; }
-  .cy-move strong { font-size:17px; line-height:1.1; }
-  .cy-move .cy-move-why, .cy-move small { font-size:10px; line-height:1.3; }
-  .cy-tape-btn, .cy-quick-btn { min-height:52px; font-size:12px; letter-spacing:.12em; }
-  .cy-primary { min-height:54px; font-size:14px; }
-  /* every popup sits dead centre and scrolls inside itself, never the page */
-  .cy-scrim { padding:10px; place-items:center; }
-  .cy-sheet { width:min(100%,460px); max-height:82dvh; overflow:auto; padding:16px; }
-  .cy-relic-grid { grid-template-columns:1fr; gap:6px; }
-  .cy-relic-card { padding:10px; grid-template-columns:34px minmax(0,1fr); grid-template-areas:"g n" "g e" "g l"; column-gap:9px; }
-  .cy-relic-card b { grid-area:g; font-size:22px; }
-  .cy-relic-card strong { grid-area:n; }
-  .cy-relic-card small { grid-area:e; }
-  .cy-relic-card em { grid-area:l; }
-}
-
-/* ======================================================================
-   PHONE COCKPIT v2 — the whole quarter fits one screen, nothing scrolls
-   ====================================================================== */
-@media (max-width: 640px) {
-  body:has(.cy-shell) { height:100%; overflow:hidden; overscroll-behavior:none; }
-  .cy-shell {
-    height:100dvh; max-height:100dvh; overflow:hidden;
-    display:flex; flex-direction:column; gap:4px;
-    padding:max(4px,env(safe-area-inset-top)) 6px max(6px,env(safe-area-inset-bottom));
-  }
-  .cy-shell > * { flex:0 0 auto; }
-
-  /* the fixed dock duplicated the tape row and covered the real buttons */
-  .cy-mobile-dock { display:none !important; }
-
-  /* top strip: progress, mission, boss, vitals — all trimmed to lines */
-  .cy-journey { padding:3px 6px; }
-  .cy-rail { display:flex; flex-direction:column; gap:3px; flex:0 0 auto; min-height:0; }
-  .cy-goal { padding:4px 7px; }
-  .cy-goal-line { font-size:12px; }
-  .cy-goal-why, .cy-goal-doom { display:none !important; }
-  .cy-core > span { min-height:34px; padding:3px 5px; }
-  .cy-positions { padding:4px 5px; }
-  .cy-pos-head, .cy-pos-plain, .cy-empty { display:none !important; }
-  .cy-chip-wrap { flex:0 0 112px; }
-  .cy-chip { min-height:36px; padding:4px; }
-
-  /* the playing card takes whatever height is left and never overflows */
-  .cy-body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
-  .cy-stage { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
-  .cy-stage > article.cy-card {
-    flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
-    gap:4px; padding:7px; overflow:hidden;
-  }
-  .cy-card > h2 { font-size:19px; }
-  .cy-card > p.cy-lead { flex:0 1 auto; min-height:0; overflow:hidden; font-size:11px; line-height:1.3; }
-  .cy-card > ul.cy-lines { flex:1 1 auto; min-height:0; overflow-y:auto; }
-  .cy-card > .cy-flows { flex:0 1 auto; min-height:0; overflow-y:auto; margin:5px 0; }
-  .cy-card > .cy-actions { flex:0 0 auto; margin-top:auto; }
-  .cy-delta { font-size:26px; }
-
-  /* the chart stretches into the leftover space instead of pushing buttons away */
-  .cy-market-visual { flex:1 1 auto; min-height:92px; display:flex; flex-direction:column; padding:5px; }
-  .cy-chart-wrap { flex:1 1 auto; height:auto !important; min-height:64px; margin-top:2px; }
-
-  /* the two moves and the three tape buttons are always fully on screen */
-  .cy-moves, .cy-quick-row, .cy-tape-row, .cy-phase-banner { flex:0 0 auto; }
-  .cy-moves { margin:4px 0 2px; }
-  .cy-move { min-height:86px; padding:9px 10px; }
-  .cy-move strong { font-size:15px; }
-  .cy-tape-row { display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:5px; }
-  .cy-tape-more, .cy-tape-end { display:flex !important; }
-  .cy-tape-btn, .cy-quick-btn { min-height:44px; font-size:10px; }
-  .cy-preview, .cy-lastmove, .cy-live { flex:0 0 auto; }
-
-  /* opening the briefing may need room — only then the card scrolls inside itself */
-  .cy-shell.has-intel .cy-stage > article.cy-card { overflow-y:auto; }
-}
-
-/* Phones: trim the season strip and drop empty blocks so the deck always fits. */
-@media (max-width: 640px) {
-  .cy-card > .season-strip { flex:0 0 auto; padding:4px 7px; gap:5px; }
-  .cy-card > .season-strip strong { font-size:11px; }
-  .cy-card > .season-strip small { font-size:8px; }
-  .cy-positions:not(:has(.cy-chips)) { display:none; }
-}
-/* Short phones (iPhone SE class): every row gets a notch tighter. */
-@media (max-width: 640px) and (max-height: 700px) {
-  .cy-journey { display:none; }
-  .cy-goal { padding:3px 6px; }
-  .cy-goal-line { font-size:11px; }
-  .cy-core > span { min-height:28px; }
-  .cy-core strong { font-size:10px; }
-  .cy-standing-line { display:none; }
-  .cy-move { min-height:70px; padding:7px 8px; }
-  .cy-move strong { font-size:13px; }
-  .cy-tape-btn, .cy-quick-btn { min-height:40px; font-size:9px; }
-  .cy-market-visual { min-height:76px; }
-  .cy-chart-wrap { min-height:52px; }
-}
-
-/* ======================================================================
-   THREE ZONES ON THE PHONE — duel frame, money HUD, arena.
-   Bigger type, one shared frame width, and real room above Safari's bar.
-   ====================================================================== */
-.cy-count { display:inline-block; transition:color .25s ease, text-shadow .25s ease; }
-.cy-count.is-up { color:var(--journey-cyan); text-shadow:0 0 18px color-mix(in oklab,var(--journey-cyan) 60%,transparent); animation:cy-count-pop .5s ease-out; }
-.cy-count.is-down { color:var(--journey-pink); text-shadow:0 0 18px color-mix(in oklab,var(--journey-pink) 55%,transparent); animation:cy-count-pop .5s ease-out; }
-@keyframes cy-count-pop { 0% { transform:scale(1); } 32% { transform:scale(1.13); } 100% { transform:scale(1); } }
-@media (prefers-reduced-motion: reduce) { .cy-count { animation:none !important; } }
-
-/* Zone 1: rank 1 + boss bar + relics share one bordered block. */
-.cy-duel { display:grid; gap:4px; padding:5px; border:1px solid color-mix(in oklab,var(--journey-pink) 30%,var(--border)); border-radius:8px; background:color-mix(in oklab,var(--journey-pink) 5%,var(--card)); }
-.cy-duel .cy-rank1 { margin:0; border-radius:6px; }
-
-@media (max-width: 640px) {
-  /* same left and right edge for every block, including the briefing card */
-  .cy-shell { padding-left:8px; padding-right:8px; }
-  .cy-shell > *, .cy-rail > *, .cy-body, .cy-stage, .cy-stage > article.cy-card { width:100%; max-width:100%; margin-inline:0; border-radius:10px; }
-  .cy-stage > article.cy-card { padding:10px; }
-
-  /* real breathing room above the Safari address bar */
-  .cy-shell { padding-bottom:calc(max(10px,env(safe-area-inset-bottom)) + 14px); }
-
-  /* Zone 1 — the duel reads as one thing, not three stacked strips */
-  .cy-duel { gap:4px; padding:5px 6px; }
-  .cy-rank1 { gap:4px 7px; padding:5px 7px; }
-  .cy-rank1-tag { font-size:9px; }
-  .cy-rank1 strong { font-size:12px; }
-  .cy-bossbar { padding:4px 6px; }
-  .cy-bossbar-head { font-size:10px; }
-
-  /* Zone 2 — money is big; stress and hunger sit under it as two slim bars */
-  .cy-core { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; }
-  .cy-core > span { min-height:48px; padding:6px 7px; border-radius:8px; }
-  .cy-core small { font-size:8px; letter-spacing:.1em; }
-  .cy-core strong { font-size:16px; }
-  .cy-core-money strong { font-size:18px; }
-  .cy-core em { font-size:7px; }
-  .cy-core-vital { min-height:34px; }
-  .cy-core-vital strong { font-size:13px; }
-  .cy-core-vital:nth-last-of-type(2) { grid-column:1 / 3; }
-  .cy-core-vital:last-of-type { grid-column:3 / -1; }
-
-  /* the mission line gets room to breathe instead of being a hairline */
-  .cy-intel-toggle { min-height:32px; font-size:10px; }
-  .cy-goal-line { font-size:14px; line-height:1.15; }
-  .cy-goal-head { font-size:8px; }
-
-  /* Zone 3 — moves stay the biggest touch targets on screen */
-  .cy-move { min-height:92px; }
-  .cy-move strong { font-size:16px; }
-  .cy-tape-btn { min-height:48px; font-size:11px; }
-}
-
-/* Smaller phones: keep the same three zones, one notch tighter so the
-   three footer buttons always sit above the browser bar. */
-@media (max-width: 640px) and (max-height: 800px) {
-  .cy-shell { gap:3px; }
-  .cy-goal { padding:4px 7px; }
-  .cy-goal-line { font-size:13px; }
-  .cy-duel { gap:3px; padding:4px 5px; }
-  .cy-core > span { min-height:42px; padding:5px 6px; }
-  .cy-core strong { font-size:15px; }
-  .cy-core-money strong { font-size:16px; }
-  .cy-core-vital { min-height:30px; }
-  .cy-intel-toggle { min-height:28px; font-size:9px; }
-  .cy-move { min-height:82px; padding:8px 9px; }
-  .cy-move strong { font-size:15px; }
-  .cy-tape-btn { min-height:46px; font-size:10px; }
-  .cy-market-visual { min-height:70px; }
-  .cy-chart-wrap { min-height:46px; }
-  .cy-shell { padding-bottom:calc(max(8px,env(safe-area-inset-bottom)) + 10px); }
-}
-
-/* Move cards keep their terms readable but never grow past three lines,
-   and the tournament strip stays one compact line on short phones. */
-@media (max-width: 640px) {
-  .cy-move .cy-move-why, .cy-move small { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; font-size:10px; line-height:1.25; }
-  .cy-move em { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; font-size:9px; line-height:1.2; }
-}
-@media (max-width: 640px) and (max-height: 800px) {
-  .cy-card > .season-strip { padding:3px 7px; gap:4px; }
-  .cy-card > .season-strip .season-live { font-size:10px; }
-  .cy-card > .season-strip strong { font-size:9px; }
-  .cy-move .cy-move-why, .cy-move small { -webkit-line-clamp:2; font-size:9px; }
-  .cy-move em { display:none; }
-}
-
-/* Very short phones (iPhone SE / older Androids): the countdown lives on the
-   start screen, so the arena gives its row to the moves instead. */
-@media (max-width: 640px) and (max-height: 670px) {
-  .cy-card > .season-strip { display:none; }
-  .cy-core > span { min-height:38px; }
-  .cy-core-vital { min-height:26px; }
-  .cy-core strong { font-size:14px; }
-  .cy-move { min-height:76px; }
-}
-
-/* When the quarter needs an extra row (urgent SURVIVE, skill shortcut, long
-   presale terms) the chart and the move text give up the space, never the
-   buttons at the bottom. */
-@media (max-width: 640px) {
-  .cy-moves { max-height:108px; }
-  .cy-move { overflow:hidden; }
-  .cy-move strong { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
-  .cy-card:has(.cy-quick-row) .cy-market-visual { min-height:58px; }
-  .cy-card:has(.cy-quick-row) .cy-chart-wrap { min-height:40px; }
-  .cy-card:has(.cy-quick-row) .cy-moves { max-height:92px; }
-  .cy-card:has(.cy-quick-row) .cy-move { min-height:0; }
-  .cy-card:has(.cy-quick-row) > .season-strip { display:none; }
-  .cy-quick-row { gap:5px; }
-  .cy-quick-btn { min-height:40px; }
-}
-
-/* Keep the duel frame at a fixed compact height so a busy late-game quarter
-   (many open positions, relics, urgent warnings) can never push the footer off. */
-@media (max-width: 640px) {
-  .cy-standing { padding:5px 7px; gap:4px; }
-  .cy-standing-head { font-size:9px; }
-  .cy-standing-line { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; overflow:hidden; font-size:10px; line-height:1.2; }
-  .cy-relic-strip { flex-wrap:nowrap; overflow-x:auto; max-height:20px; }
-  .cy-positions { flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; max-height:32px; }
-  .cy-goal.is-urgent .cy-goal-why, .cy-goal-doom { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
-}
-
-/* Safety net: on phones the play card never exceeds its box — the chart and
-   info blocks give up pixels first, the moves and the footer buttons stay put. */
-@media (max-width: 640px) {
-  .cy-card { overflow:hidden; }
-  .cy-card > * { min-height:0; }
-  .cy-card > .cy-market-visual { flex:1 1 auto; min-height:0; }
-  .cy-card > .cy-moves { flex:0 0 auto; }
-  .cy-card > .cy-tape-row, .cy-card > .cy-quick-row { flex:0 0 auto; }
-  .cy-rail { flex:0 0 auto; }
-}
-
-@media (max-width: 640px) and (max-height: 670px) {
-  .cy-standing-line { display:none; }
-  .cy-relic-strip { max-height:18px; }
-  .cy-positions { max-height:28px; }
-  .cy-move { min-height:70px; }
-  .cy-moves { max-height:88px; }
-}
-
-/* On the smallest screens the status rail yields height to the arena, so the
-   moves and the three footer buttons always get their full space. */
-@media (max-width: 640px) and (max-height: 670px) {
-  .cy-body { min-height:280px; }
-}
-
-/* The money row is never clipped or covered: it keeps its own height, the
-   play card below it takes only the space that is actually left. */
-@media (max-width: 640px) {
-  .cy-rail { max-height:none; overflow:visible; }
-  .cy-core { position:static; z-index:auto; box-shadow:none; }
-  .cy-core > span { overflow:hidden; }
-  .cy-core strong { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .cy-body, .cy-stage, .cy-stage > article.cy-card { min-height:0; }
-}
-
-@media (max-width: 640px) {
-  /* the gap to rank 1 is the headline; the raw target value is redundant here */
-  .cy-rank1-goal { display:none; }
-  .cy-rank1 strong { white-space:normal; overflow:visible; text-overflow:clip; }
-}
-
-/* ======================================================================
-   THE ACTION BAR — the two moves and the three footer buttons.
-   Desktop keeps the old card flow (display:contents). On phones the whole
-   group is pinned above the browser bar so it can never be pushed off.
-   ====================================================================== */
-.cy-actionbar { display:contents; }
-
-@media (max-width: 640px) {
-  .cy-shell { --cy-foot:150px; }
-  .cy-shell:has(.cy-quick-row) { --cy-foot:196px; }
-
-  .cy-actionbar {
-    position:fixed; left:0; right:0; bottom:0; z-index:45;
-    display:flex; flex-direction:column; gap:5px;
-    padding:7px 8px calc(env(safe-area-inset-bottom) + 12px);
-    background:linear-gradient(180deg,color-mix(in oklab,var(--background) 40%,transparent),var(--background) 30%);
-    border-top:1px solid color-mix(in oklab,var(--journey-cyan) 22%,var(--border));
-  }
-  .cy-actionbar .cy-moves { margin:0; max-height:none; }
-  .cy-actionbar .cy-move { min-height:76px; }
-  .cy-actionbar .cy-quick-row { margin:0; }
-  .cy-actionbar .cy-tape-row { margin:0; }
-
-  /* the shell reserves exactly that much room, but only while the bar is up */
-  .cy-shell:has(.cy-actionbar) { padding-bottom:calc(var(--cy-foot) + env(safe-area-inset-bottom)); }
-
-  /* the chart and the boss portrait give up pixels first */
-  .cy-market-visual { min-height:0 !important; }
-  .cy-chart-wrap { min-height:44px; height:auto !important; flex:1 1 auto; }
-  .cy-boss-presence { max-height:56px; overflow:hidden; }
-
-  /* last-resort safety net: if a quarter is still too tall, the card itself
-     scrolls inside its own box instead of pushing the buttons away */
-  .cy-stage > article.cy-card { overflow-y:auto; -webkit-overflow-scrolling:touch; }
-}
-
-/* ======================================================================
-   MOBILE 3-ZONE GAME LAYOUT (final, authoritative)
-   Zone 1: one compact HUD strip. Zone 2: the chart arena, which always
-   keeps real height so the candles and the live animation stay visible.
-   Zone 3: the pinned action bar. Nothing scrolls, nothing is covered.
-   ====================================================================== */
-@media (max-width: 640px) {
-  .cy-shell { padding-top:6px !important; padding-left:8px !important; padding-right:8px !important; gap:6px !important; }
-  .cy-shell:has(.cy-actionbar) { padding-bottom:calc(200px + env(safe-area-inset-bottom)) !important; }
-  .cy-shell:has(.cy-quick-row) { padding-bottom:calc(248px + env(safe-area-inset-bottom)) !important; }
-
-  /* --- Zone 1: strip everything that is only prose or decoration --- */
-  .cy-journey,
-  .cy-goal-avatar,
-  .cy-goal-why,
-  .cy-goal-doom,
-  .cy-standing-head,
-  .cy-standing-bar,
-  .cy-standing-line,
-  .cy-arena-head,
-  .cy-phase-banner,
-  .cy-chart-instruction,
-  .cy-chart-legend,
-  .cy-chart-foot,
-  .cy-live,
-  .cy-stance-line,
-  .cy-pos-head,
-  .cy-rank1-goal,
-  .cy-boss-presence { display:none !important; }
-
-  .cy-rail { display:flex !important; flex-direction:column; gap:5px; flex:0 0 auto; }
-
-  .cy-goal { padding:6px 8px !important; gap:4px !important; display:block !important; }
-  .cy-goal-head { font-size:8px !important; letter-spacing:.1em; }
-  .cy-goal-line { font-size:12px !important; line-height:1.25 !important; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
-  .cy-guide-path { margin-top:4px !important; font-size:8px !important; }
-  .cy-guide-path { display:flex !important; flex-wrap:wrap; align-items:center; gap:6px; }
-  .cy-guide-path button { position:static !important; inset:auto !important; margin-left:auto; font-size:8px !important; padding:3px 7px !important; }
-  .cy-shell:not(.has-guide) .cy-goal { display:none !important; }
-
-  .cy-standing { padding:0 !important; border:0 !important; background:none !important; gap:4px !important; }
-  .cy-duel { display:grid !important; grid-template-columns:1fr 1fr; gap:5px; }
-  .cy-rank1, .cy-bossbar { padding:4px 6px !important; margin:0 !important; }
-  .cy-rank1 strong, .cy-bossbar .cy-bossbar-head { font-size:9px !important; }
-  .cy-relic-strip { grid-column:1 / -1; margin:0 !important; }
-  .cy-intel-toggle { min-height:30px !important; font-size:9px !important; padding:4px 6px !important; }
-
-  /* the five numbers: three big values, two slim vital bars */
-  .cy-core { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:4px !important; padding:6px !important; }
-  .cy-core > span { padding:0 !important; border:0 !important; background:none !important; }
-  .cy-core small { font-size:7px !important; }
-  .cy-core strong { font-size:14px !important; line-height:1.1 !important; }
-  .cy-core em { display:none !important; }
-  .cy-core .cy-core-vital { grid-column:span 1; display:flex; flex-direction:column; gap:2px; }
-  .cy-core .cy-core-vital strong { font-size:10px !important; }
-  .cy-core .cy-core-vital:last-of-type { grid-column:2 / -1; }
-
-  .cy-positions { max-height:30px !important; }
-
-  /* --- Zone 2: the arena keeps its pixels --- */
-  .cy-body, .cy-stage { flex:1 1 auto !important; min-height:0 !important; display:flex !important; flex-direction:column !important; }
-  .cy-stage > article.cy-card { flex:1 1 auto; display:flex; flex-direction:column; padding:8px !important; margin:0 !important; width:100% !important; overflow:hidden !important; }
-  .cy-market-visual { flex:1 1 auto !important; display:flex !important; flex-direction:column !important; min-height:150px !important; padding:6px !important; }
-  .cy-chart-title { flex:0 0 auto; }
-  .cy-chart-wrap { flex:1 1 auto !important; height:auto !important; min-height:130px !important; }
-}
-
-@media (max-width: 640px) and (max-height: 700px) {
-  .cy-core strong { font-size:13px !important; }
-  .cy-market-visual { min-height:120px !important; }
-  .cy-chart-wrap { min-height:104px !important; }
-}
-
-/* ======================================================================
-   THE COCKPIT (final, authoritative)
-   Zone 1 is one strip: money row + two vital bars. Replaces every earlier
-   five-column .cy-core layout, on phones and on desktop alike.
-   ====================================================================== */
-.cy-core {
-  display:flex !important;
-  flex-direction:column;
-  gap:6px !important;
-  grid-template-columns:none !important;
-  padding:8px 10px;
-  border:1px solid color-mix(in oklab,var(--pit-amber,var(--journey-cyan)) 22%,var(--border));
-  border-bottom-width:2px;
-  border-radius:8px;
-  background:linear-gradient(180deg,color-mix(in oklab,var(--card) 92%,transparent),var(--card));
-}
-.cy-core-row { display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:8px; align-items:end; }
-.cy-core-row > span { display:flex !important; min-width:0; flex-direction:column; gap:1px; padding:0 !important; border:0 !important; background:none !important; }
-.cy-core-row small { color:var(--muted-foreground); font-size:8px; font-weight:800; letter-spacing:.12em; }
-.cy-core-row strong { font:400 clamp(17px,4.6vw,30px)/1 var(--font-display); overflow-wrap:anywhere; }
-.cy-core-money strong { color:var(--pit-amber,var(--journey-yellow)); }
-.cy-core-pnl.is-up strong { color:var(--journey-cyan); text-shadow:0 0 16px color-mix(in oklab,var(--journey-cyan) 45%,transparent); }
-.cy-core-pnl.is-down strong { color:var(--journey-pink); text-shadow:0 0 16px color-mix(in oklab,var(--journey-pink) 45%,transparent); }
-
-.cy-core-vitals { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.cy-vital { display:grid !important; grid-template-columns:auto 1fr auto; gap:6px; align-items:center; padding:0 !important; border:0 !important; background:none !important; }
-.cy-vital small { color:var(--muted-foreground); font-size:7px; font-weight:800; letter-spacing:.1em; }
-.cy-vital em { font:400 10px/1 var(--font-mono,var(--font-display)); font-style:normal; color:var(--muted-foreground); }
-.cy-vital > i { display:block; height:6px; overflow:hidden; border-radius:3px; background:color-mix(in oklab,var(--muted) 80%,transparent); }
-.cy-vital > i b { display:block; height:100%; border-radius:3px; transition:width .4s cubic-bezier(.2,.8,.2,1); }
-.cy-vital.is-stress > i b { background:linear-gradient(90deg,var(--journey-cyan),var(--journey-pink)); }
-.cy-vital.is-hunger > i b { background:linear-gradient(90deg,var(--journey-yellow),var(--journey-pink)); }
-.cy-vital.is-critical em { color:var(--journey-pink); }
-.cy-vital.is-critical > i b { animation:cy-vital-alarm 1.1s ease-in-out infinite; }
-@keyframes cy-vital-alarm { 50% { filter:brightness(1.75); } }
-
-/* ======================================================================
-   ARCADE JUICE — money lands, moves punch, the boss bar breathes.
-   ====================================================================== */
-.cy-count { display:inline-block; font-variant-numeric:tabular-nums; }
-.cy-count.is-up { animation:cy-count-up .62s cubic-bezier(.2,.9,.2,1); }
-.cy-count.is-down { animation:cy-count-down .62s cubic-bezier(.2,.9,.2,1); }
-@keyframes cy-count-up {
-  0% { transform:translateY(7px) scale(1); filter:brightness(1); }
-  35% { transform:translateY(-3px) scale(1.14); filter:brightness(1.7) drop-shadow(0 0 14px color-mix(in oklab,var(--journey-cyan) 70%,transparent)); }
-  100% { transform:none; filter:none; }
-}
-@keyframes cy-count-down {
-  0% { transform:translateY(-6px); }
-  35% { transform:translateX(3px) scale(.94); filter:brightness(1.5) drop-shadow(0 0 12px color-mix(in oklab,var(--journey-pink) 70%,transparent)); }
-  60% { transform:translateX(-3px); }
-  100% { transform:none; filter:none; }
-}
-
-.cy-move { position:relative; overflow:hidden; transition:transform .12s ease, box-shadow .2s ease, filter .2s ease; }
-.cy-move::after {
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(115deg,transparent 35%,color-mix(in oklab,var(--pit-amber,var(--journey-yellow)) 30%,transparent) 50%,transparent 65%);
-  transform:translateX(-120%);
-}
-.cy-move.is-risk:not(:disabled)::after { animation:cy-move-sheen 3.4s ease-in-out infinite; }
-@keyframes cy-move-sheen { 0%,70% { transform:translateX(-120%); } 100% { transform:translateX(120%); } }
-.cy-move:not(:disabled):active { transform:translateY(2px) scale(.985); filter:brightness(1.12); }
-.cy-move.is-risk:not(:disabled) { box-shadow:0 0 0 1px color-mix(in oklab,var(--journey-pink) 35%,transparent), 0 10px 26px color-mix(in oklab,var(--journey-pink) 16%,transparent); }
-.cy-move.is-safe:not(:disabled) { box-shadow:0 0 0 1px color-mix(in oklab,var(--journey-cyan) 30%,transparent), 0 10px 26px color-mix(in oklab,var(--journey-cyan) 12%,transparent); }
-
-.cy-bossbar .cy-bossbar-track i,
-.cy-bossbar i { transition:width .5s cubic-bezier(.2,.8,.2,1); }
-.cy-bossbar.is-enraged { animation:cy-boss-breathe 1.5s ease-in-out infinite; }
-@keyframes cy-boss-breathe { 50% { box-shadow:0 0 22px color-mix(in oklab,var(--journey-pink) 40%,transparent); } }
-
-.cy-candles rect, .cy-candles line { animation:cy-candle-pop .28s ease-out both; }
-@keyframes cy-candle-pop { from { opacity:0; transform:scaleY(.4); } to { opacity:1; transform:none; } }
-
-/* every popup lands dead centre so the phone never has to scroll a sheet */
-.cy-scrim { align-items:center !important; justify-content:center !important; }
-.cy-scrim > * { animation:cy-sheet-in .22s cubic-bezier(.2,.9,.2,1) both; }
-@keyframes cy-sheet-in { from { opacity:0; transform:translateY(14px) scale(.97); } to { opacity:1; transform:none; } }
-
-@media (max-width: 640px) {
-  .cy-core { padding:6px 8px !important; gap:5px !important; }
-  .cy-core-row strong { font-size:clamp(15px,4.4vw,22px) !important; }
-  .cy-core-row small { font-size:7px !important; }
-  .cy-core em, .cy-core > span > i { display:revert !important; }
-  .cy-vital small { font-size:6px !important; }
-  .cy-actionbar .cy-move { min-height:84px !important; }
-  .cy-actionbar .cy-move strong { font-size:13px !important; }
-  .cy-actionbar .cy-tape-btn { min-height:46px !important; font-size:10px !important; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cy-count, .cy-move::after, .cy-bossbar.is-enraged, .cy-candles rect, .cy-candles line, .cy-scrim > * { animation:none !important; }
-}
-
-/* polish: vitals read as label-over-bar, rank line never wraps ugly, candles pop from their own base */
-.cy-vital { grid-template-columns:1fr auto !important; grid-template-areas:"label value" "bar bar" !important; row-gap:3px; }
-.cy-vital small { grid-area:label; }
-.cy-vital em { grid-area:value; }
-.cy-vital > i { grid-area:bar; }
-.cy-rank1 strong { font-size:11px !important; line-height:1.15; }
-.cy-candles rect, .cy-candles line { transform-box:fill-box; transform-origin:center bottom; }
 
 /* ==========================================================================
-   THE ARENA — the game screen stops looking like a form and starts looking
-   like a fight: epoch artwork behind glass, two faces duelling at the top,
-   heavy arcade cards at the bottom.
+   THE ARENA (final, authoritative layout — replaces every earlier
+   rail/core/dock patch). Three zones: HUD cockpit, chart arena, action bar.
    ========================================================================== */
 
-/* 1. Epoch artwork returns as the arena backdrop (was hidden). */
-.cy-shell { position:relative; isolation:isolate; background:transparent !important; }
-body:has(.cy-shell) { background:var(--background); }
-.cy-world {
-  display:block !important; position:fixed; inset:0; z-index:-2;
-  width:100%; height:100%; object-fit:cover; object-position:50% 28%;
-  filter:saturate(1.05) contrast(1.1) brightness(.5); opacity:.8;
-  pointer-events:none;
-}
-.cy-shell::before {
-  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
-  background:
-    radial-gradient(120% 80% at 50% 0%, color-mix(in oklab,var(--arena-tint) 26%,transparent), transparent 62%),
-    linear-gradient(180deg, color-mix(in oklab,var(--background) 30%,transparent) 0%, color-mix(in oklab,var(--background) 74%,transparent) 42%, color-mix(in oklab,var(--background) 94%,transparent) 88%);
-}
-.cy-shell { --arena-tint:var(--journey-yellow); }
+/* epoch artwork behind glass */
+.cy-shell { position:relative; isolation:isolate; background:transparent !important; --arena-tint:var(--journey-yellow); }
 .cy-shell.cy-act-2 { --arena-tint:var(--journey-pink); }
 .cy-shell.cy-act-3 { --arena-tint:var(--journey-cyan); }
+body:has(.cy-shell) { background:var(--background); }
+.cy-world { display:block !important; position:fixed; inset:0; z-index:-2; width:100%; height:100%; object-fit:cover; object-position:50% 28%; filter:saturate(1.05) contrast(1.1) brightness(.46); opacity:.8; pointer-events:none; }
+.cy-shell::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(120% 80% at 50% 0%, color-mix(in oklab,var(--arena-tint) 24%,transparent), transparent 62%),
+    linear-gradient(180deg, color-mix(in oklab,var(--background) 34%,transparent) 0%, color-mix(in oklab,var(--background) 78%,transparent) 44%, color-mix(in oklab,var(--background) 95%,transparent) 88%); }
 
-/* 2. Panels read as lit glass, not wireframe boxes. */
-.cy-goal, .cy-standing, .cy-core, .cy-card {
-  border-radius:14px !important;
-  border:1px solid color-mix(in oklab,var(--arena-tint) 26%,var(--border)) !important;
-  background:
-    linear-gradient(180deg, color-mix(in oklab,var(--arena-tint) 7%,transparent), transparent 42%),
-    color-mix(in oklab,var(--card) 94%,transparent) !important;
-  box-shadow:inset 0 1px 0 color-mix(in oklab,#fff 9%,transparent), 0 14px 34px color-mix(in oklab,#000 40%,transparent);
-}
-/* NOTE: never put backdrop-filter on .cy-card — it becomes the containing
-   block for the fixed action bar and the bar stops sitting at the screen edge. */
-.cy-goal, .cy-standing, .cy-core { backdrop-filter:blur(10px) saturate(1.1); }
+/* one column: HUD, strip, arena, actions */
+@media (min-width: 641px) { .cy-body { display:block !important; grid-template-columns:none !important; } }
+.cy-stage { display:flex; flex-direction:column; min-height:0; }
+.cy-card { border-radius:14px !important; border:1px solid color-mix(in oklab,var(--arena-tint) 26%,var(--border)) !important;
+  background:linear-gradient(180deg, color-mix(in oklab,var(--arena-tint) 7%,transparent), transparent 42%), color-mix(in oklab,var(--card) 94%,transparent) !important; }
 
-/* the faces row spans the whole duel frame */
-.cy-faces { grid-column:1 / -1; }
-
-/* 3. The duel faces — you vs the Boss, with the mood ring doing the talking. */
-.cy-faces {
-  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px;
-  margin:0 0 8px;
-}
-.cy-face { display:flex; align-items:center; gap:8px; margin:0; min-width:0; }
-.cy-face.is-boss { flex-direction:row-reverse; text-align:right; }
-.cy-face img {
-  flex:none; width:44px; height:44px; border-radius:50%; object-fit:cover;
-  border:2px solid var(--journey-cyan);
-  box-shadow:0 0 16px color-mix(in oklab,var(--journey-cyan) 34%,transparent);
-}
-.cy-face.is-boss img { border-color:var(--journey-pink); box-shadow:0 0 18px color-mix(in oklab,var(--journey-pink) 40%,transparent); }
-.cy-faces.is-broken .cy-face.is-boss img { border-color:var(--muted-foreground); filter:grayscale(.7); box-shadow:none; }
-.cy-faces.is-enraged .cy-face.is-boss img { animation:cy-face-rage 1.1s ease-in-out infinite; }
+/* ---------- ZONE 1: the duel cockpit ---------- */
+.cy-hud { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:10px;
+  padding:8px 10px; border-radius:14px;
+  border:1px solid color-mix(in oklab,var(--arena-tint) 26%,var(--border));
+  background:linear-gradient(180deg, color-mix(in oklab,var(--arena-tint) 9%,transparent), transparent 55%), color-mix(in oklab,var(--card) 90%,transparent);
+  backdrop-filter:blur(10px) saturate(1.1); }
+.cy-hud-side { display:flex; align-items:center; gap:9px; margin:0; min-width:0; }
+.cy-hud-side.is-boss { flex-direction:row-reverse; text-align:right; }
+.cy-hud-side img { flex:none; width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid var(--journey-cyan); box-shadow:0 0 16px color-mix(in oklab,var(--journey-cyan) 34%,transparent); }
+.cy-hud-side.is-boss img { border-color:var(--journey-pink); box-shadow:0 0 18px color-mix(in oklab,var(--journey-pink) 40%,transparent); }
+.cy-hud-side.is-boss.is-broken img { border-color:var(--muted-foreground); filter:grayscale(.7); box-shadow:none; }
+.cy-hud-side.is-boss.is-enraged img { animation:cy-face-rage 1.1s ease-in-out infinite; }
 @keyframes cy-face-rage { 50% { transform:scale(1.07); box-shadow:0 0 28px color-mix(in oklab,var(--journey-pink) 70%,transparent); } }
-.cy-face figcaption {
-  display:grid; min-width:0; gap:1px;
-  font:800 8px/1 var(--font-body); letter-spacing:.16em; color:var(--muted-foreground);
-}
-.cy-face figcaption b {
-  font:400 clamp(14px,4.2vw,20px)/1 var(--font-display); letter-spacing:0; color:var(--foreground);
-}
-.cy-face.is-you figcaption b { color:var(--journey-cyan); }
-.cy-face.is-boss figcaption b { color:var(--journey-pink); }
-.cy-face-vs {
-  padding:3px 7px; border-radius:999px; font:900 9px/1 var(--font-body); letter-spacing:.12em;
-  color:var(--background); background:var(--journey-yellow);
-}
+.cy-hud-side figcaption { display:grid; min-width:0; gap:2px; }
+.cy-hud-side figcaption strong { font:400 clamp(17px,5vw,26px)/1 var(--font-display); color:var(--journey-cyan); }
+.cy-hud-side.is-boss figcaption strong { color:var(--journey-pink); }
+.cy-hud-side figcaption span { font:800 8px/1.2 var(--font-body); letter-spacing:.12em; color:var(--muted-foreground); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cy-hud-side figcaption span b { font-weight:900; }
+.cy-hud-vitals { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+.cy-hud-vitals b, .cy-hud-hp { display:block; height:5px; border-radius:3px; overflow:hidden; background:color-mix(in oklab,var(--muted) 82%,transparent); }
+.cy-hud-vitals u, .cy-hud-hp u { display:block; height:100%; text-decoration:none; transition:width .45s cubic-bezier(.2,.8,.2,1); }
+.cy-hud-vitals .is-stress u { background:linear-gradient(90deg,var(--journey-cyan),var(--journey-pink)); }
+.cy-hud-vitals .is-hunger u { background:linear-gradient(90deg,var(--journey-yellow),var(--journey-pink)); }
+.cy-hud-vitals .is-critical u { animation:cy-vital-alarm 1.05s ease-in-out infinite; }
+@keyframes cy-vital-alarm { 50% { filter:brightness(1.8); } }
+.cy-hud-hp u { background:linear-gradient(90deg,var(--journey-pink),var(--journey-yellow)); }
+.cy-hud-mid { display:grid; justify-items:center; gap:4px; }
+.cy-hud-q { font:800 9px/1 var(--font-body); letter-spacing:.14em; color:var(--muted-foreground); }
+.cy-hud-vs { padding:3px 8px; border-radius:999px; font:900 10px/1 var(--font-body); letter-spacing:.12em; color:var(--background); background:var(--journey-yellow); }
+.cy-hud-xp { display:flex; align-items:center; gap:5px; width:74px; }
+.cy-hud-xp b { font:800 8px/1 var(--font-body); color:var(--journey-yellow); }
+.cy-hud-xp i { flex:1; height:4px; border-radius:2px; overflow:hidden; background:color-mix(in oklab,var(--muted) 82%,transparent); }
+.cy-hud-xp u { display:block; height:100%; background:var(--journey-yellow); text-decoration:none; }
+.cy-hud-rank { padding:3px 8px; border-radius:999px; border:1px solid color-mix(in oklab,var(--journey-cyan) 34%,var(--border)); font:800 9px/1 var(--font-mono,var(--font-body)); white-space:nowrap; }
+.cy-hud-rank.is-behind { color:var(--journey-pink); border-color:color-mix(in oklab,var(--journey-pink) 40%,var(--border)); }
+.cy-hud-rank.is-ahead { color:var(--journey-cyan); }
 
-/* 4. The two moves become heavy arcade cards with weight and light. */
-.cy-move {
-  position:relative; overflow:hidden; border-radius:16px !important; border-width:2px !important;
-  padding:12px 13px !important;
-  background:
-    linear-gradient(180deg, color-mix(in oklab,var(--move-tint) 22%,transparent), color-mix(in oklab,var(--move-tint) 6%,transparent) 55%, transparent),
-    color-mix(in oklab,var(--card) 94%,transparent) !important;
-  transition:transform .12s ease, filter .12s ease, box-shadow .2s ease;
-}
+/* ---------- one strip: what to do now ---------- */
+.cy-strip { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:11px;
+  border:1px solid color-mix(in oklab,var(--arena-tint) 22%,var(--border));
+  background:color-mix(in oklab,var(--card) 86%,transparent); backdrop-filter:blur(8px); }
+.cy-strip p { flex:1; min-width:0; margin:0; font:800 12px/1.25 var(--font-body); color:var(--foreground);
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+.cy-strip.is-guided { border-color:var(--journey-yellow); }
+.cy-strip.is-guided p { color:var(--journey-yellow); }
+.cy-strip.is-urgent { border-color:var(--journey-pink); }
+.cy-strip-relics { display:flex; gap:3px; font-size:14px; }
+.cy-strip-btn { flex:none; min-height:30px; padding:0 9px; border-radius:8px; border:1px solid var(--border);
+  background:color-mix(in oklab,var(--card) 92%,transparent); font:900 9px/1 var(--font-body); letter-spacing:.1em; color:var(--muted-foreground); }
+.cy-strip-btn.is-icon { display:grid; place-items:center; width:32px; padding:0; }
+.cy-strip-btn.is-icon svg { width:15px; height:15px; }
+.cy-strip-brief { margin:0; padding:0 4px; font:600 11px/1.35 var(--font-body); color:var(--muted-foreground); }
+.cy-ticker { margin:0; font:700 10px/1.3 var(--font-body); color:var(--muted-foreground);
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+.cy-ticker.is-attack { color:var(--journey-pink); }
+
+/* ---------- ZONE 2: the chart well ---------- */
+.cy-market-visual { border-radius:14px !important; min-height:0;
+  background:radial-gradient(90% 120% at 50% 0%, color-mix(in oklab,var(--arena-tint) 12%,transparent), transparent 60%), color-mix(in oklab,var(--background) 68%,transparent) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--arena-tint) 20%,transparent), inset 0 20px 40px color-mix(in oklab,#000 34%,transparent); }
+.cy-chart-title { position:relative; z-index:3; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.cy-chart-title span { display:flex; align-items:center; gap:6px; }
+.cy-chart-title b { font:400 18px/1 var(--font-display); }
+.cy-chart-title small { font:700 11px/1 var(--font-mono,var(--font-body)); color:var(--muted-foreground); }
+.cy-chart-title strong { font:700 13px/1 var(--font-mono,var(--font-body)); }
+.cy-chart-foot { display:flex; align-items:center; gap:8px; }
+.cy-chart-foot .cy-live-clock { flex:1; height:3px; border-radius:2px; background:var(--journey-yellow); opacity:.7; }
+.cy-now-marker { box-shadow:0 0 12px 3px color-mix(in oklab,var(--journey-yellow) 60%,transparent); }
+.cy-candles rect, .cy-candles line { transform-box:fill-box; transform-origin:center bottom; animation:cy-candle-pop .28s ease-out both; }
+@keyframes cy-candle-pop { from { opacity:0; transform:scaleY(.4); } to { opacity:1; transform:none; } }
+
+/* ---------- ZONE 3: the moves and the footer ---------- */
+.cy-actionbar { display:contents; }
+.cy-move { position:relative; overflow:hidden; border-radius:16px !important; border-width:2px !important; padding:12px 13px !important;
+  background:linear-gradient(180deg, color-mix(in oklab,var(--move-tint) 22%,transparent), color-mix(in oklab,var(--move-tint) 6%,transparent) 55%, transparent), color-mix(in oklab,var(--card) 94%,transparent) !important;
+  transition:transform .12s ease, filter .12s ease, box-shadow .2s ease; }
 .cy-move.is-risk { --move-tint:var(--journey-pink); border-color:color-mix(in oklab,var(--journey-pink) 62%,transparent) !important; }
 .cy-move.is-safe { --move-tint:var(--journey-cyan); border-color:color-mix(in oklab,var(--journey-cyan) 55%,transparent) !important; }
 .cy-move.is-guided { --move-tint:var(--journey-yellow); border-color:var(--journey-yellow) !important; }
-.cy-move span {
-  display:inline-flex; align-items:center; gap:5px;
-  font:900 9px/1 var(--font-body) !important; letter-spacing:.16em;
-  color:color-mix(in oklab,var(--move-tint) 78%,var(--foreground)) !important;
-}
-.cy-move strong {
-  display:block; margin:5px 0 3px;
-  font:400 clamp(15px,4.6vw,21px)/1.04 var(--font-display) !important; text-transform:uppercase;
-}
-.cy-move small { color:var(--muted-foreground); }
+.cy-move span { display:inline-flex; align-items:center; gap:5px; font:900 9px/1 var(--font-body) !important; letter-spacing:.16em; color:color-mix(in oklab,var(--move-tint) 78%,var(--foreground)) !important; }
+.cy-move strong { display:block; margin:5px 0 3px; font:400 clamp(15px,4.6vw,21px)/1.04 var(--font-display) !important; text-transform:uppercase; }
+.cy-move small, .cy-move em { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; color:var(--muted-foreground); font-size:10px; line-height:1.25; font-style:normal; }
+.cy-move::after { content:""; position:absolute; inset:0; pointer-events:none; transform:translateX(-120%);
+  background:linear-gradient(115deg,transparent 35%,color-mix(in oklab,var(--journey-yellow) 26%,transparent) 50%,transparent 65%); }
+.cy-move.is-risk:not(:disabled)::after { animation:cy-move-sheen 3.4s ease-in-out infinite; }
+@keyframes cy-move-sheen { 0%,70% { transform:translateX(-120%); } 100% { transform:translateX(120%); } }
 .cy-move:not(:disabled):hover { transform:translateY(-2px); filter:brightness(1.08); }
+.cy-move:not(:disabled):active { transform:translateY(2px) scale(.985); }
 .cy-move:disabled { opacity:.45; filter:grayscale(.5); }
-
-/* 5. Footer buttons get real mass so they never read as links. */
-.cy-tape-btn {
-  border-radius:12px !important; border:1px solid color-mix(in oklab,var(--arena-tint) 34%,var(--border)) !important;
+.cy-tape-btn { border-radius:12px !important; border:1px solid color-mix(in oklab,var(--arena-tint) 34%,var(--border)) !important;
   background:linear-gradient(180deg, color-mix(in oklab,#fff 7%,transparent), transparent), color-mix(in oklab,var(--card) 92%,transparent) !important;
-  font:900 11px/1 var(--font-body) !important; letter-spacing:.1em;
-}
-.cy-tape-end:not(:disabled) {
-  border-color:var(--journey-yellow) !important;
+  font:900 11px/1 var(--font-body) !important; letter-spacing:.1em; }
+.cy-tape-end:not(:disabled) { border-color:var(--journey-yellow) !important;
   background:linear-gradient(180deg, color-mix(in oklab,var(--journey-yellow) 92%,transparent), color-mix(in oklab,var(--journey-yellow) 70%,transparent)) !important;
-  color:oklch(0.18 0.02 90) !important;
-  box-shadow:0 8px 22px color-mix(in oklab,var(--journey-yellow) 26%,transparent);
-}
+  color:oklch(0.18 0.02 90) !important; box-shadow:0 8px 22px color-mix(in oklab,var(--journey-yellow) 26%,transparent); }
 .cy-tape-btn:not(:disabled):active { transform:translateY(2px); }
 
-/* 6. Chart sits in a lit well instead of a flat rectangle. */
-.cy-market-visual {
-  border-radius:14px !important;
-  background:
-    radial-gradient(90% 120% at 50% 0%, color-mix(in oklab,var(--arena-tint) 12%,transparent), transparent 60%),
-    color-mix(in oklab,var(--background) 68%,transparent) !important;
-  box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--arena-tint) 20%,transparent), inset 0 20px 40px color-mix(in oklab,#000 34%,transparent);
-}
-.cy-now-marker { box-shadow:0 0 12px 3px color-mix(in oklab,var(--journey-yellow) 60%,transparent); }
+/* animated money */
+.cy-count { display:inline-block; font-variant-numeric:tabular-nums; }
+.cy-count.is-up { animation:cy-count-up .62s cubic-bezier(.2,.9,.2,1); }
+.cy-count.is-down { animation:cy-count-down .62s cubic-bezier(.2,.9,.2,1); }
+@keyframes cy-count-up { 0% { transform:translateY(7px); } 35% { transform:translateY(-3px) scale(1.14); filter:brightness(1.7); } 100% { transform:none; filter:none; } }
+@keyframes cy-count-down { 0% { transform:translateY(-6px); } 35% { transform:translateX(3px) scale(.94); filter:brightness(1.5); } 60% { transform:translateX(-3px); } 100% { transform:none; filter:none; } }
 
-/* 7. Popups land as framed arena sheets. */
-.cy-scrim { background:color-mix(in oklab,var(--background) 72%,transparent) !important; backdrop-filter:blur(8px) saturate(.9) !important; }
-.cy-scrim > * {
-  border-radius:18px !important;
-  box-shadow:0 0 0 1px color-mix(in oklab,var(--arena-tint) 30%,transparent), 0 30px 80px color-mix(in oklab,#000 62%,transparent);
-}
+/* popups always land dead centre */
+.cy-scrim { align-items:center !important; justify-content:center !important; background:color-mix(in oklab,var(--background) 72%,transparent) !important; backdrop-filter:blur(8px) !important; }
+.cy-scrim > * { border-radius:18px !important; animation:cy-sheet-in .22s cubic-bezier(.2,.9,.2,1) both;
+  box-shadow:0 0 0 1px color-mix(in oklab,var(--arena-tint) 30%,transparent), 0 30px 80px color-mix(in oklab,#000 62%,transparent); }
+@keyframes cy-sheet-in { from { opacity:0; transform:translateY(14px) scale(.97); } to { opacity:1; transform:none; } }
 
-/* 8. Phones: the duel faces stay legible without stealing a single pixel. */
+/* ---------- PHONES: one screen, nothing scrolls, nothing covered ---------- */
 @media (max-width: 640px) {
-  .cy-faces { gap:6px; margin-bottom:6px; }
-  .cy-face img { width:34px; height:34px; }
-  .cy-face figcaption b { font-size:14px; }
-  .cy-face-vs { padding:2px 5px; font-size:8px; }
-  .cy-move { padding:9px 10px !important; border-radius:13px !important; }
-  .cy-move strong { font-size:14px !important; margin:3px 0 2px; }
-  .cy-goal, .cy-standing, .cy-core, .cy-card { border-radius:11px !important; }
+  body:has(.cy-shell) { height:100%; overflow:hidden; overscroll-behavior:none; }
+  .cy-shell { display:flex; flex-direction:column; gap:6px; height:100dvh; max-height:100dvh; overflow:hidden;
+    padding:max(6px,env(safe-area-inset-top)) 8px calc(max(8px,env(safe-area-inset-bottom)) + 10px) !important; }
+  .cy-shell > * { flex:0 0 auto; width:100%; max-width:100%; margin-inline:0; }
+
+  .cy-hud { padding:6px 8px; gap:6px; }
+  .cy-hud-side img { width:40px; height:40px; }
+  .cy-hud-side figcaption strong { font-size:19px; }
+  .cy-hud-side figcaption span { font-size:7px; letter-spacing:.08em; }
+  .cy-hud-xp { width:58px; }
+  .cy-strip p { font-size:11px; }
+
+  .cy-body { display:flex !important; grid-template-columns:none !important; flex:1 1 auto; min-height:0; flex-direction:column; }
+  .cy-stage { flex:1 1 auto; min-height:0; }
+  .cy-stage > article.cy-card { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:6px; padding:9px; overflow:hidden; border-radius:12px !important; }
+  .cy-card > h2 { font-size:20px; }
+  .cy-card > p.cy-lead { flex:0 1 auto; min-height:0; overflow-y:auto; font-size:12px; line-height:1.35; }
+  .cy-card > ul.cy-lines, .cy-card > .cy-flows { flex:0 1 auto; min-height:0; overflow-y:auto; }
+  .cy-card > .cy-actions { flex:0 0 auto; margin-top:auto; }
+  .cy-primary { min-height:54px; font-size:14px; }
+
+  /* the chart keeps the biggest share of the middle and stays visible */
+  .cy-card > .cy-market-visual { flex:1 1 auto; min-height:120px; display:flex; flex-direction:column; gap:4px; padding:7px; }
+  .cy-chart-wrap { flex:1 1 auto; height:auto !important; min-height:90px; margin-top:0; }
+  .cy-chips { display:flex; flex-wrap:nowrap; overflow-x:auto; gap:5px; max-height:40px; }
+  .cy-chip-wrap { flex:0 0 116px; }
+  .cy-chip { min-height:36px; padding:5px; }
+
+  /* the actions sit in normal flow at the bottom of the flex column */
+  .cy-actionbar { display:flex !important; flex-direction:column; gap:6px; flex:0 0 auto; margin-top:auto; }
+  .cy-moves { margin:0; grid-template-columns:1fr 1fr; gap:6px; }
+  .cy-move { min-height:78px; padding:9px 10px !important; border-radius:13px !important; }
+  .cy-move strong { font-size:14px !important; margin:3px 0 2px; -webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; }
+  .cy-move em { display:none; }
+  .cy-tape-row { grid-template-columns:1fr 1fr 1.35fr; gap:5px; }
+  .cy-tape-btn, .cy-quick-btn { min-height:46px; font-size:10px !important; }
+  .cy-sheet { width:min(100%,460px); max-height:82dvh; overflow:auto; padding:16px; }
+  .cy-scrim { padding:10px; }
 }
+
 @media (max-width: 640px) and (max-height: 700px) {
-  .cy-face img { width:28px; height:28px; }
-  .cy-face figcaption { font-size:7px; }
+  .cy-shell { gap:5px; }
+  .cy-hud-side img { width:34px; height:34px; }
+  .cy-hud-side figcaption strong { font-size:16px; }
+  .cy-strip-brief { display:none; }
+  .cy-card > .cy-market-visual { min-height:96px; }
+  .cy-chart-wrap { min-height:70px; }
+  .cy-move { min-height:70px; }
+  .cy-move small { -webkit-line-clamp:1; }
+  .cy-tape-btn, .cy-quick-btn { min-height:42px; }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .cy-faces.is-enraged .cy-face.is-boss img { animation:none; }
+  .cy-count, .cy-move::after, .cy-candles rect, .cy-candles line, .cy-scrim > *, .cy-hud-side.is-boss.is-enraged img { animation:none !important; }
 }
+
+/* phones: the tournament strip is one slim line, the run keeps the room */
+@media (max-width: 640px) {
+  .cy-card > .season-strip { flex:0 0 auto; padding:4px 8px; gap:5px; }
+  .cy-card > .season-strip strong { font-size:10px; }
+  .cy-card > .season-strip small { font-size:8px; }
+  .cy-hud-side.is-you figcaption strong { font-size:21px; }
+}
+
+/* cockpit polish: your money is the hero number, the cash line never truncates */
+.cy-hud-side figcaption strong { color:var(--journey-cyan) !important; font-family:var(--font-display) !important; letter-spacing:0 !important; }
+.cy-hud-side.is-boss figcaption strong { color:var(--journey-pink) !important; }
+.cy-hud-side.is-you figcaption strong { font-size:clamp(20px,5.6vw,28px) !important; }
+.cy-hud-side figcaption > span { white-space:nowrap; font-size:9px; overflow:visible; text-overflow:clip; }
+.cy-hud-side figcaption strong .cy-count { font-size:inherit !important; color:inherit !important; font-family:inherit !important; letter-spacing:inherit !important; }
+@media (max-width: 640px) {
+  .cy-hud { grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
+  .cy-hud-side.is-you figcaption strong { font-size:22px !important; }
+  .cy-hud-side.is-boss figcaption strong { font-size:17px !important; }
+}
+
