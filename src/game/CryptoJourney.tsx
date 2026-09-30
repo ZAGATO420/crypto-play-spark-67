@@ -1587,13 +1587,19 @@ export function CryptoJourney() {
       : duelPilot
         ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
         : stakePilot
-          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}`
+          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}${chapterPlay.mode === "MOMENTUM" ? " | your click time on the live tape adds up to ±18%" : ""}`
           : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
     if (riskPlayed) return say("You already took your shot this quarter. End the quarter.", "pink");
-    if (stakePilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
+    if (stakePilot) {
+      // MOMENTUM pilot: the moment of the click on the live tape is part of the play
+      const timing = chapterPlay.mode === "MOMENTUM" && phase === "act"
+        ? timingEdge(focusSymbol, run, tickRef.current, sweeping)
+        : null;
+      return setDialog({ k: "mini", kind: riskKind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode, timing } });
+    }
     if (huntPilot && presale) return setDialog({ k: "mini", kind: riskKind, pending: { t: "presale", card: presale, size: huntTicket } });
     if (duelPilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
     switch (chapterPlay.mode) {
