@@ -121,6 +121,8 @@ type Dialog =
   | { k: "survive" }
   | { k: "more" }
   | { k: "loot"; cards: LootCard[] }
+  | { k: "relic"; cards: Relic[] }
+
   | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
