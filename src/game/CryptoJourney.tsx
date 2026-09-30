@@ -33,6 +33,8 @@ import { loadBoard, loadTopMark, submitRun, SubmitRunError, type BoardRow, type 
 import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, unlockAudio, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
+import { RELICS, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
+
 
 
 /* ------------------------------------------------------------------ types */
