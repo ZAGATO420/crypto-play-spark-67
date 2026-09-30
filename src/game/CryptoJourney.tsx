@@ -2084,18 +2084,25 @@ function ArcadeMoment({ fx, boss }: {
   fx: { kind: "god"; label: string; multiplier: number; amount?: number } | { kind: "liq"; symbol: CoinSymbol; leverage: number; amount: number };
   boss: string;
 }) {
-  if (fx.kind === "god") return (
-    <section className="cy-arcade-fx is-god" role="status" aria-label="God candle win">
-      <div className="cy-god-lasers" aria-hidden><i /><i /><i /><i /></div>
-      <div className="cy-candle-rain" aria-hidden>{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
-      <div className="cy-arcade-copy">
-        <span>PERFECT EXECUTION</span>
-        <strong>{fx.multiplier.toFixed(fx.multiplier >= 10 ? 1 : 2)}×</strong>
-        <h2>GOD CANDLE</h2>
-        <p>{fx.label}{fx.amount !== undefined ? ` | +${formatMoney(fx.amount)}` : " | THE BOSS FELT THAT"}</p>
-      </div>
-    </section>
-  );
+  if (fx.kind === "god") {
+    // The headline scales with what was actually hit, and the number is the real multiple.
+    const m = fx.multiplier;
+    const tier = m >= 10 ? "god" : m >= 5 ? "moon" : "clean";
+    const head = tier === "god" ? "GOD CANDLE" : tier === "moon" ? "MOONSHOT" : "CLEAN HIT";
+    const kicker = tier === "god" ? "THE BOSS FELT THAT" : tier === "moon" ? "PERFECT EXECUTION" : "GREEN IS GREEN";
+    return (
+      <section className={`cy-arcade-fx is-god tier-${tier}`} role="status" aria-label={`${head} ${m.toFixed(1)} times`}>
+        <div className="cy-god-lasers" aria-hidden><i /><i /><i /><i /></div>
+        <div className="cy-candle-rain" aria-hidden>{Array.from({ length: tier === "god" ? 18 : tier === "moon" ? 12 : 7 }, (_, index) => <i key={index} />)}</div>
+        <div className="cy-arcade-copy">
+          <span>{kicker}</span>
+          <strong>{m >= 10 ? m.toFixed(1) : m.toFixed(2)}×</strong>
+          <h2>{head}</h2>
+          <p>{fx.label}{fx.amount !== undefined ? ` | +${formatMoney(fx.amount)}` : ""}</p>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="cy-arcade-fx is-liq" role="alert" aria-label="Liquidation shock">
       <div className="cy-siren" aria-hidden />
