@@ -795,7 +795,7 @@ export function CryptoJourney() {
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " | settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
-    if (quality < 1 && gain > 0 && cost > 0 && gain / cost >= 9) triggerGodCandle(`${pos.symbol} TRADE`, gain / cost + 1, gain);
+    if (gain > 0 && cost > 0 && gain / cost >= 2) triggerGodCandle(`${pos.symbol} ${pos.kind === "perp" ? `${pos.lev}x` : "SPOT"}`, gain / cost + 1, gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (Math.abs(gain) >= 25_000) setRun((r) => chron(r, gain >= 0
       ? `In ${chapterLabel(run.chapter)} I took ${formatMoney(gain)} out of ${pos.symbol} and felt untouchable.`
@@ -899,7 +899,7 @@ export function CryptoJourney() {
     pop(`${back >= size ? "+" : "−"}${formatMoney(Math.abs(back - size))}`, back >= size ? "up" : "down");
     grantXp(rugged ? XP.presaleRug : XP.presaleHit, rugged ? "RUG SURVIVED" : "LAUNCH HIT");
     if (rugged) rumble();
-    if (!rugged && multi >= 10 && quality < 1) triggerGodCandle(card.name, multi, back - size);
+    if (!rugged && multi >= 3) triggerGodCandle(card.name, multi, back - size);
     setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size, back, multi, rugged, line } });
   };
 
@@ -1103,7 +1103,9 @@ export function CryptoJourney() {
     const res: MiniResult = power.skillFloor > result.quality
       ? { ...result, quality: power.skillFloor, label: `${result.label} | MEV BOT CLEANUP` }
       : result;
-    if (res.quality >= 1) triggerGodCandle(res.label, 10);
+    // A perfect skill moment gets its own clean flash. The GOD CANDLE is reserved
+    // for real monster payouts and always shows the multiple that was actually hit.
+    if (res.quality >= 1) { playSfx("win"); pop(`PERFECT | ${res.label}`, "up"); }
 
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
