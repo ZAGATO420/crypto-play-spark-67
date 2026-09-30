@@ -2042,7 +2042,7 @@
 
 /* --- mobile cockpit: one screen, no scrolling, big thumb targets --- */
 @media (max-width: 640px) {
-  html, body { overflow:hidden; }
+  body:has(.cy-shell) { overflow:hidden; }
   .cy-shell { height:100dvh; overflow:hidden; padding-bottom:max(6px,env(safe-area-inset-bottom)); }
   .cy-shell .cy-bossbar-foot, .cy-shell .cy-relic-strip span { display:none; }
   .cy-move { min-height:104px; padding:12px 12px; }
@@ -2065,7 +2065,7 @@
    PHONE COCKPIT v2 — the whole quarter fits one screen, nothing scrolls
    ====================================================================== */
 @media (max-width: 640px) {
-  html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
+  body:has(.cy-shell) { height:100%; overflow:hidden; overscroll-behavior:none; }
   .cy-shell {
     height:100dvh; max-height:100dvh; overflow:hidden;
     display:flex; flex-direction:column; gap:4px;
@@ -2289,8 +2289,17 @@
 /* On the smallest screens the status rail yields height to the arena, so the
    moves and the three footer buttons always get their full space. */
 @media (max-width: 640px) and (max-height: 670px) {
-  .cy-rail { max-height:38dvh; overflow:hidden; }
-  .cy-body { min-height:300px; }
+  .cy-body { min-height:280px; }
+}
+
+/* The money row is never clipped or covered: it keeps its own height, the
+   play card below it takes only the space that is actually left. */
+@media (max-width: 640px) {
+  .cy-rail { max-height:none; overflow:visible; }
+  .cy-core { position:static; z-index:auto; box-shadow:none; }
+  .cy-core > span { overflow:hidden; }
+  .cy-core strong { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cy-body, .cy-stage, .cy-stage > article.cy-card { min-height:0; }
 }
 
 @media (max-width: 640px) {
