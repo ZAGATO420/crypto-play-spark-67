@@ -2292,3 +2292,9 @@
   .cy-rail { max-height:38dvh; overflow:hidden; }
   .cy-body { min-height:300px; }
 }
+
+@media (max-width: 640px) {
+  /* the gap to rank 1 is the headline; the raw target value is redundant here */
+  .cy-rank1-goal { display:none; }
+  .cy-rank1 strong { white-space:normal; overflow:visible; text-overflow:clip; }
+}
