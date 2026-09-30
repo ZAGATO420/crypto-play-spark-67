@@ -1918,7 +1918,10 @@ export function CryptoJourney() {
                 <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
               ) : null}
 
+              {/* Action bar: on phones this whole group is pinned above the browser bar. */}
+              <div className="cy-actionbar">
               {guide !== null ? (
+
                 <div className="cy-moves is-guided-row">
                   {guide === 0
                     ? <button type="button" className="cy-move is-risk is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}>
