@@ -2509,3 +2509,11 @@
 @media (prefers-reduced-motion: reduce) {
   .cy-count, .cy-move::after, .cy-bossbar.is-enraged, .cy-candles rect, .cy-candles line, .cy-scrim > * { animation:none !important; }
 }
+
+/* polish: vitals read as label-over-bar, rank line never wraps ugly, candles pop from their own base */
+.cy-vital { grid-template-columns:1fr auto !important; grid-template-areas:"label value" "bar bar" !important; row-gap:3px; }
+.cy-vital small { grid-area:label; }
+.cy-vital em { grid-area:value; }
+.cy-vital > i { grid-area:bar; }
+.cy-rank1 strong { font-size:11px !important; line-height:1.15; }
+.cy-candles rect, .cy-candles line { transform-box:fill-box; transform-origin:center bottom; }
