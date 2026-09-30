@@ -1068,7 +1068,7 @@ export function CryptoJourney() {
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
     if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
     if (pending.t === "skill") return resolveSkill(res.quality, res.label);
-    if (pending.t === "phaseRisk") return resolvePhaseRisk(pending.stake, res.quality, res.label, pending.mode);
+    if (pending.t === "phaseRisk") return resolvePhaseRisk(pending.stake, res.quality, res.label, pending.mode, pending.timing);
     return resolveSeed(res.quality);
   };
 
