@@ -1989,7 +1989,7 @@ export function CryptoJourney() {
       {levelUp !== null && <div className="cy-levelup" role="status">LEVEL {levelUp}<small>The Boss raised an eyebrow.</small></div>}
 
       {dialog && (
-        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" || dialog.k === "loot" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
+        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" || dialog.k === "loot" || dialog.k === "relic" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); playOpening(0); }} />}
           {dialog.k === "how" && <HowToPlay onClose={() => setDialog(null)} />}
           {dialog.k === "sound" && <SoundSheet
