@@ -795,7 +795,7 @@ export function CryptoJourney() {
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " | settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
-    if (quality < 1 && gain > 0 && cost > 0 && gain / cost >= 9) triggerGodCandle(`${pos.symbol} TRADE`, gain / cost + 1, gain);
+    if (gain > 0 && cost > 0 && gain / cost >= 2) triggerGodCandle(`${pos.symbol} ${pos.kind === "perp" ? `${pos.lev}x` : "SPOT"}`, gain / cost + 1, gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (Math.abs(gain) >= 25_000) setRun((r) => chron(r, gain >= 0
       ? `In ${chapterLabel(run.chapter)} I took ${formatMoney(gain)} out of ${pos.symbol} and felt untouchable.`
@@ -899,7 +899,7 @@ export function CryptoJourney() {
     pop(`${back >= size ? "+" : "−"}${formatMoney(Math.abs(back - size))}`, back >= size ? "up" : "down");
     grantXp(rugged ? XP.presaleRug : XP.presaleHit, rugged ? "RUG SURVIVED" : "LAUNCH HIT");
     if (rugged) rumble();
-    if (!rugged && multi >= 10 && quality < 1) triggerGodCandle(card.name, multi, back - size);
+    if (!rugged && multi >= 3) triggerGodCandle(card.name, multi, back - size);
     setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size, back, multi, rugged, line } });
   };
 
@@ -1103,7 +1103,9 @@ export function CryptoJourney() {
     const res: MiniResult = power.skillFloor > result.quality
       ? { ...result, quality: power.skillFloor, label: `${result.label} | MEV BOT CLEANUP` }
       : result;
-    if (res.quality >= 1) triggerGodCandle(res.label, 10);
+    // A perfect skill moment gets its own clean flash. The GOD CANDLE is reserved
+    // for real monster payouts and always shows the multiple that was actually hit.
+    if (res.quality >= 1) { playSfx("win"); pop(`PERFECT | ${res.label}`, "up"); }
 
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
@@ -1884,6 +1886,18 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
+              {/* Spot and perps are the heart of the game, so they sit on the main
+                  screen instead of hiding behind MORE. */}
+              {guide === null && (
+                <div className="cy-trade-row" aria-label="Open the trading desk">
+                  <button type="button" className="cy-quick-btn is-spot" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market" }); }}>
+                    <WalletCards />BUY SPOT
+                  </button>
+                  <button type="button" className="cy-quick-btn is-perp" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market" }); }}>
+                    <Zap />PERPS | UP TO 50x
+                  </button>
+                </div>
+              )}
               {guide === null && (!skillPilot || surviveUrgent) && (
                 <div className="cy-quick-row">
                   {!skillPilot && (
@@ -2082,18 +2096,25 @@ function ArcadeMoment({ fx, boss }: {
   fx: { kind: "god"; label: string; multiplier: number; amount?: number } | { kind: "liq"; symbol: CoinSymbol; leverage: number; amount: number };
   boss: string;
 }) {
-  if (fx.kind === "god") return (
-    <section className="cy-arcade-fx is-god" role="status" aria-label="God candle win">
-      <div className="cy-god-lasers" aria-hidden><i /><i /><i /><i /></div>
-      <div className="cy-candle-rain" aria-hidden>{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
-      <div className="cy-arcade-copy">
-        <span>PERFECT EXECUTION</span>
-        <strong>{fx.multiplier.toFixed(fx.multiplier >= 10 ? 1 : 2)}×</strong>
-        <h2>GOD CANDLE</h2>
-        <p>{fx.label}{fx.amount !== undefined ? ` | +${formatMoney(fx.amount)}` : " | THE BOSS FELT THAT"}</p>
-      </div>
-    </section>
-  );
+  if (fx.kind === "god") {
+    // The headline scales with what was actually hit, and the number is the real multiple.
+    const m = fx.multiplier;
+    const tier = m >= 10 ? "god" : m >= 5 ? "moon" : "clean";
+    const head = tier === "god" ? "GOD CANDLE" : tier === "moon" ? "MOONSHOT" : "CLEAN HIT";
+    const kicker = tier === "god" ? "THE BOSS FELT THAT" : tier === "moon" ? "PERFECT EXECUTION" : "GREEN IS GREEN";
+    return (
+      <section className={`cy-arcade-fx is-god tier-${tier}`} role="status" aria-label={`${head} ${m.toFixed(1)} times`}>
+        <div className="cy-god-lasers" aria-hidden><i /><i /><i /><i /></div>
+        <div className="cy-candle-rain" aria-hidden>{Array.from({ length: tier === "god" ? 18 : tier === "moon" ? 12 : 7 }, (_, index) => <i key={index} />)}</div>
+        <div className="cy-arcade-copy">
+          <span>{kicker}</span>
+          <strong>{m >= 10 ? m.toFixed(1) : m.toFixed(2)}×</strong>
+          <h2>{head}</h2>
+          <p>{fx.label}{fx.amount !== undefined ? ` | +${formatMoney(fx.amount)}` : ""}</p>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="cy-arcade-fx is-liq" role="alert" aria-label="Liquidation shock">
       <div className="cy-siren" aria-hidden />
