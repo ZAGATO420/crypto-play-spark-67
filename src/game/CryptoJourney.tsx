@@ -1731,7 +1731,7 @@ export function CryptoJourney() {
           </div>
           {topMark && (
             <button type="button" className={`cy-hud-rank ${net >= topMark.net ? "is-ahead" : "is-behind"}`} onClick={() => setDialog({ k: "score" })}>
-              {net >= topMark.net ? `+${formatMoney(net - topMark.net)} vs #1` : `−${formatMoney(topMark.net - net)} vs #1`}
+              {`#1 ${net >= topMark.net ? "+" : "−"}${shortMoney(Math.abs(net - topMark.net))}`}
             </button>
           )}
         </div>
