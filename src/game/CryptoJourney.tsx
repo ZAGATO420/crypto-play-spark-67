@@ -1969,6 +1969,9 @@ export function CryptoJourney() {
                 <button type="button" className="cy-tape-btn cy-tape-more" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
                 <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+              </div>
+
+
 
               {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL | {skill.label} | {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
