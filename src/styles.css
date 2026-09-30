@@ -2060,3 +2060,84 @@
   .cy-relic-card small { grid-area:e; }
   .cy-relic-card em { grid-area:l; }
 }
+
+/* ======================================================================
+   PHONE COCKPIT v2 — the whole quarter fits one screen, nothing scrolls
+   ====================================================================== */
+@media (max-width: 640px) {
+  html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
+  .cy-shell {
+    height:100dvh; max-height:100dvh; overflow:hidden;
+    display:flex; flex-direction:column; gap:4px;
+    padding:max(4px,env(safe-area-inset-top)) 6px max(6px,env(safe-area-inset-bottom));
+  }
+  .cy-shell > * { flex:0 0 auto; }
+
+  /* the fixed dock duplicated the tape row and covered the real buttons */
+  .cy-mobile-dock { display:none !important; }
+
+  /* top strip: progress, mission, boss, vitals — all trimmed to lines */
+  .cy-journey { padding:3px 6px; }
+  .cy-rail { display:flex; flex-direction:column; gap:3px; flex:0 0 auto; min-height:0; }
+  .cy-goal { padding:4px 7px; }
+  .cy-goal-line { font-size:12px; }
+  .cy-goal-why, .cy-goal-doom { display:none !important; }
+  .cy-core > span { min-height:34px; padding:3px 5px; }
+  .cy-positions { padding:4px 5px; }
+  .cy-pos-head, .cy-pos-plain, .cy-empty { display:none !important; }
+  .cy-chip-wrap { flex:0 0 112px; }
+  .cy-chip { min-height:36px; padding:4px; }
+
+  /* the playing card takes whatever height is left and never overflows */
+  .cy-body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+  .cy-stage { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+  .cy-stage > article.cy-card {
+    flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
+    gap:4px; padding:7px; overflow:hidden;
+  }
+  .cy-card > h2 { font-size:19px; }
+  .cy-card > p.cy-lead { flex:0 1 auto; min-height:0; overflow:hidden; font-size:11px; line-height:1.3; }
+  .cy-card > ul.cy-lines { flex:1 1 auto; min-height:0; overflow-y:auto; }
+  .cy-card > .cy-flows { flex:0 1 auto; min-height:0; overflow-y:auto; margin:5px 0; }
+  .cy-card > .cy-actions { flex:0 0 auto; margin-top:auto; }
+  .cy-delta { font-size:26px; }
+
+  /* the chart stretches into the leftover space instead of pushing buttons away */
+  .cy-market-visual { flex:1 1 auto; min-height:92px; display:flex; flex-direction:column; padding:5px; }
+  .cy-chart-wrap { flex:1 1 auto; height:auto !important; min-height:64px; margin-top:2px; }
+
+  /* the two moves and the three tape buttons are always fully on screen */
+  .cy-moves, .cy-quick-row, .cy-tape-row, .cy-phase-banner { flex:0 0 auto; }
+  .cy-moves { margin:4px 0 2px; }
+  .cy-move { min-height:86px; padding:9px 10px; }
+  .cy-move strong { font-size:15px; }
+  .cy-tape-row { display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:5px; }
+  .cy-tape-more, .cy-tape-end { display:flex !important; }
+  .cy-tape-btn, .cy-quick-btn { min-height:44px; font-size:10px; }
+  .cy-preview, .cy-lastmove, .cy-live { flex:0 0 auto; }
+
+  /* opening the briefing may need room — only then the card scrolls inside itself */
+  .cy-shell.has-intel .cy-stage > article.cy-card { overflow-y:auto; }
+}
+
+/* Phones: trim the season strip and drop empty blocks so the deck always fits. */
+@media (max-width: 640px) {
+  .cy-card > .season-strip { flex:0 0 auto; padding:4px 7px; gap:5px; }
+  .cy-card > .season-strip strong { font-size:11px; }
+  .cy-card > .season-strip small { font-size:8px; }
+  .cy-positions:not(:has(.cy-chips)) { display:none; }
+}
+/* Short phones (iPhone SE class): every row gets a notch tighter. */
+@media (max-width: 640px) and (max-height: 700px) {
+  .cy-journey { display:none; }
+  .cy-goal { padding:3px 6px; }
+  .cy-goal-line { font-size:11px; }
+  .cy-core > span { min-height:28px; }
+  .cy-core strong { font-size:10px; }
+  .cy-standing-line { display:none; }
+  .cy-move { min-height:70px; padding:7px 8px; }
+  .cy-move strong { font-size:13px; }
+  .cy-tape-btn, .cy-quick-btn { min-height:40px; font-size:9px; }
+  .cy-market-visual { min-height:76px; }
+  .cy-chart-wrap { min-height:52px; }
+}
