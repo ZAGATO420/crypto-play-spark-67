@@ -82,3 +82,6 @@
 - [x] 5. Arcade juice: candle chart, neon boss bar, relic strip (flex card + trophy already live)
 
 - [x] MOMENTUM timing pilot verified in-game (entry verdict shown after skill moment)
+- [x] Mobile three zones: duel frame (rank 1 + boss bar + relics), money HUD (animated net worth/cash/PnL, stress + hunger bars), arena; every block one shared full width
+- [x] No-scroll verified over 12 quarters at 375x677, 390x844 and 360x640, footer clear of the Safari bar
+- [x] Rolling money counters with green/red flash on every material change

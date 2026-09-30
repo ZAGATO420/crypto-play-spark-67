@@ -1760,21 +1760,24 @@ export function CryptoJourney() {
         </div>
         <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
         <p className="cy-standing-line">{standing.line}</p>
-        {topMark && (
-          <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
-            <span className="cy-rank1-tag">VS RANK 1</span>
-            <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD | YOU LEAD` : `−${formatMoney(topMark.net - net)} TO RANK 1`}</strong>
-            <span className="cy-rank1-goal">{formatMoney(topMark.net)}{topMark.source === "season" ? ` | ${topMark.name}` : ""}</span>
-            <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
-          </div>
-        )}
-        <BossBar you={Math.max(0, net)} him={Math.max(0, bossNet)} wins={run.bossWins} phase={bossPhase} />
-        {(run.relics ?? []).length > 0 && (
-          <p className="cy-relic-strip">
-            {(run.relics ?? []).map((id) => <b key={id} title={`${relicOf(id)?.name} — ${relicOf(id)?.effect}`}>{relicOf(id)?.glyph ?? "?"}</b>)}
-            {power.synergies.map((s) => <span key={s.name}>{s.name}</span>)}
-          </p>
-        )}
+        {/* Zone 1 — the duel: rank 1, the Boss bar and your relics read as one frame. */}
+        <div className="cy-duel">
+          {topMark && (
+            <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
+              <span className="cy-rank1-tag">VS RANK 1</span>
+              <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD | YOU LEAD` : `−${formatMoney(topMark.net - net)} TO RANK 1`}</strong>
+              <span className="cy-rank1-goal">{formatMoney(topMark.net)}{topMark.source === "season" ? ` | ${topMark.name}` : ""}</span>
+              <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
+            </div>
+          )}
+          <BossBar you={Math.max(0, net)} him={Math.max(0, bossNet)} wins={run.bossWins} phase={bossPhase} />
+          {(run.relics ?? []).length > 0 && (
+            <p className="cy-relic-strip">
+              {(run.relics ?? []).map((id) => <b key={id} title={`${relicOf(id)?.name} — ${relicOf(id)?.effect}`}>{relicOf(id)?.glyph ?? "?"}</b>)}
+              {power.synergies.map((s) => <span key={s.name}>{s.name}</span>)}
+            </p>
+          )}
+        </div>
 
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
@@ -1782,12 +1785,13 @@ export function CryptoJourney() {
         <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} | MISSION | {mission.text} | +{mission.reward} XP</p>
       </section>
 
+      {/* Zone 2 — your money, big and animated; stress and hunger as two slim bars. */}
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
         <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong><em>{net >= bossNet ? "BOSS UNDER PRESSURE" : `${formatMoney(bossNet - net)} TO CATCH`}</em></span>
-        <span><small>CASH</small><strong>{formatMoney(run.cash)}</strong><em>READY</em></span>
-        <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}>{openPnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</strong><em>{run.positions.length ? `${run.positions.length} OPEN` : "NO TRADE"}</em></span>
-        <span className={run.stress >= 70 ? "is-critical" : ""}><small>STRESS</small><strong>{run.stress}%</strong><i><b style={{ width: `${run.stress}%` }} /></i></span>
-        <span className={run.hunger >= 70 ? "is-critical" : ""}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
+        <span className="cy-core-cash"><small>CASH</small><strong><Count value={run.cash} /></strong><em>READY</em></span>
+        <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}><Count value={openPnl} sign /></strong><em>{run.positions.length ? `${run.positions.length} OPEN` : "NO TRADE"}</em></span>
+        <span className={`cy-core-vital${run.stress >= 70 ? " is-critical" : ""}`}><small>STRESS</small><strong>{run.stress}%</strong><i><b style={{ width: `${run.stress}%` }} /></i></span>
+        <span className={`cy-core-vital${run.hunger >= 70 ? " is-critical" : ""}`}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
       </section>
 
 
@@ -2108,8 +2112,11 @@ const pctMove = (symbol: CoinSymbol, r: Run) => {
 
 /* -------------------------------------------------------------- fragments */
 
-function Count({ value }: { value: number }) {
+function Count({ value, sign }: { value: number; sign?: boolean }) {
   const [shown, setShown] = useState(value);
+  // Every material jump rolls the digits AND flashes the number green or red,
+  // so money moving is something you see, not something you have to notice.
+  const [flash, setFlash] = useState<"" | "up" | "down">("");
   const shownRef = useRef(value);
   useEffect(() => { shownRef.current = shown; }, [shown]);
   useEffect(() => {
@@ -2117,18 +2124,25 @@ function Count({ value }: { value: number }) {
     // Small live wobbles snap instead of animating, otherwise the number
     // restarts its count-up every few frames and the card looks like it flickers.
     if (Math.abs(value - from) < Math.max(2, Math.abs(value) * 0.01)) { setShown(value); return; }
+    setFlash(value > from ? "up" : "down");
+    const clear = window.setTimeout(() => setFlash(""), 760);
     const start = performance.now();
     let frame = 0;
     const tick = (t: number) => {
-      const k = Math.min(1, (t - start) / 420);
+      const k = Math.min(1, (t - start) / 520);
       setShown(from + (value - from) * (1 - Math.pow(1 - k, 3)));
       if (k < 1) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(clear); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
-  return <>{formatMoney(Math.round(shown))}</>;
+  const rounded = Math.round(shown);
+  return (
+    <span className={`cy-count${flash ? ` is-${flash}` : ""}`}>
+      {sign ? `${rounded >= 0 ? "+" : "−"}${formatMoney(Math.abs(rounded))}` : formatMoney(rounded)}
+    </span>
+  );
 }
 
 function ArcadeMoment({ fx, boss }: {
