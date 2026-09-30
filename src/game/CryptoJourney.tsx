@@ -1781,15 +1781,35 @@ export function CryptoJourney() {
 
           {phase === "act" && (
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
-              <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
-              <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET | {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} | {formatMoney(focusPrice)}</strong></div>
               {cfg.tournament && <SeasonBanner compact />}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
-                <div className={`cy-boss-presence is-${arenaState}`}>
-                  <img src={mood} alt="The Crypto Final Boss reacts to your run" />
-                  <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
+                <div className="cy-chart-title">
+                  <span><img src={COIN_LOGO[focusSymbol]} alt="" width={28} height={28} /><b>{focusSymbol}</b><small>{formatMoney(focusPrice)}</small></span>
+                  <strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))}` : `${ap} MOVE${ap === 1 ? "" : "S"} LEFT`}</strong>
                 </div>
-                <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
+                {run.positions.length > 0 && (
+                  <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`} aria-label="Open positions">
+                    {run.positions.map((p) => {
+                      const price = mark(p.symbol);
+                      const pnl = pnlOf(p, price);
+                      const liq = liqPct(p, price);
+                      return (
+                        <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
+                          <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => { setActiveSymbol(p.symbol); setDialog({ k: "position", id: p.id }); }}>
+                            <img src={COIN_LOGO[p.symbol]} alt="" width={18} height={18} />
+                            <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
+                            <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
+                            {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
+                          </button>
+                          {p.where !== "cold" && (
+                            <button className="cy-chip-exit" title="Close this position now" aria-label={`Close ${p.symbol} now`} onClick={() => { playSfx("click"); quickClose(p.id); }}>✕</button>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
                     <defs>
