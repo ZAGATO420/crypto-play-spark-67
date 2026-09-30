@@ -2119,3 +2119,25 @@
   /* opening the briefing may need room — only then the card scrolls inside itself */
   .cy-shell.has-intel .cy-stage > article.cy-card { overflow-y:auto; }
 }
+
+/* Phones: trim the season strip and drop empty blocks so the deck always fits. */
+@media (max-width: 640px) {
+  .cy-card > .season-strip { flex:0 0 auto; padding:4px 7px; gap:5px; }
+  .cy-card > .season-strip strong { font-size:11px; }
+  .cy-card > .season-strip small { font-size:8px; }
+  .cy-positions:not(:has(.cy-chips)) { display:none; }
+}
+/* Short phones (iPhone SE class): every row gets a notch tighter. */
+@media (max-width: 640px) and (max-height: 700px) {
+  .cy-journey { display:none; }
+  .cy-goal { padding:3px 6px; }
+  .cy-goal-line { font-size:11px; }
+  .cy-core > span { min-height:28px; }
+  .cy-core strong { font-size:10px; }
+  .cy-standing-line { display:none; }
+  .cy-move { min-height:70px; padding:7px 8px; }
+  .cy-move strong { font-size:13px; }
+  .cy-tape-btn, .cy-quick-btn { min-height:40px; font-size:9px; }
+  .cy-market-visual { min-height:76px; }
+  .cy-chart-wrap { min-height:52px; }
+}
