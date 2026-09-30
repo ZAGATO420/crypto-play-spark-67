@@ -2004,6 +2004,8 @@ export function CryptoJourney() {
             onPerp={(s, d, l, f) => openPerp(s, d, l, f)}
             onPosition={(id) => setDialog({ k: "position", id })} />}
           {dialog.k === "loot" && <LootSheet cards={dialog.cards} onPick={(card) => takeLoot(card)} />}
+          {dialog.k === "relic" && <RelicSheet cards={dialog.cards} owned={run.relics ?? []} onPick={takeRelic} />}
+
           {dialog.k === "more" && <MoreSheet
             ap={ap}
             stance={run.stance}
