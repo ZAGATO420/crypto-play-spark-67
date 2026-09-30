@@ -2065,7 +2065,7 @@
    PHONE COCKPIT v2 — the whole quarter fits one screen, nothing scrolls
    ====================================================================== */
 @media (max-width: 640px) {
-  html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
+  body:has(.cy-shell) { height:100%; overflow:hidden; overscroll-behavior:none; }
   .cy-shell {
     height:100dvh; max-height:100dvh; overflow:hidden;
     display:flex; flex-direction:column; gap:4px;
