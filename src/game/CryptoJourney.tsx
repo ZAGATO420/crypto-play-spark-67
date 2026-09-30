@@ -1709,17 +1709,10 @@ export function CryptoJourney() {
       {fillFx && <div className={`cy-fill tone-${fillFx.tone}`} role="status"><strong>{fillFx.head}</strong><small>{fillFx.sub}</small></div>}
 
 
-      <section className="cy-journey" aria-label={`Month ${Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} of ${TOTAL_MONTHS}`}>
-        <div className="cy-journey-labels"><span>MANIA</span><span>COLLAPSE</span><span>ENDGAME</span></div>
-        <div className="cy-journey-track">
-          {Array.from({ length: TOTAL_MONTHS }, (_, i) => <i key={i} className={`${i < run.chapter * 3 ? "is-lived" : ""}${i === run.chapter * 3 ? " is-now" : ""}${i % 12 === 0 ? " is-year" : ""}`} />)}
-        </div>
-        <strong>MONTH {Math.min(TOTAL_MONTHS, run.chapter * 3 + 1)} / {TOTAL_MONTHS}</strong>
-      </section>
-
       <header className="cy-top">
         <div className="min-w-0">
-          <p className="journey-kicker">{act.name} | {chapterLabel(run.chapter)} | {monthRangeLabel(run.chapter)} | {cfg.difficulty}{cfg.modifier !== "straight" ? ` | ${modifierOf(cfg.modifier).name}` : ""}{cfg.ironman ? " | IRONMAN" : ""}{cfg.tournament ? ` | ${seasonLabel(cfg.season)}` : ""}</p>
+          <p className="journey-kicker">{chapterLabel(run.chapter)} | {act.name}</p>
+
           <h1 className={`cy-net${netPulse ? ` pulse-${netPulse}` : ""}`}><Count value={net} /></h1>
           <div className="cy-xp" aria-label={`Level ${xpBar.level}, ${run.xp} XP`}>
             <span className="cy-level">LVL {xpBar.level}</span>
@@ -1753,20 +1746,12 @@ export function CryptoJourney() {
       </section>
 
       <section className={`cy-standing is-${standing.tone}`} aria-label="How you stand against the Boss">
-        <div className="cy-standing-head">
-          <span className="cy-standing-tag">{standing.label}</span>
-          <strong>YOU {formatMoney(net)} | BOSS {formatMoney(bossNet)}</strong>
-          <button type="button" onClick={() => { playSfx("click"); setDialog({ k: "how" }); }}>HOW TO PLAY</button>
-        </div>
-        <div className="cy-standing-bar"><i style={{ width: `${Math.max(3, Math.min(97, Math.round((Math.max(0, net) / Math.max(1, Math.max(0, net) + Math.max(0, bossNet))) * 100)))}%` }} /></div>
-        <p className="cy-standing-line">{standing.line}</p>
         {/* Zone 1 — the duel: rank 1, the Boss bar and your relics read as one frame. */}
         <div className="cy-duel">
           {topMark && (
             <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
               <span className="cy-rank1-tag">VS RANK 1</span>
-              <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD | YOU LEAD` : `−${formatMoney(topMark.net - net)} TO RANK 1`}</strong>
-              <span className="cy-rank1-goal">{formatMoney(topMark.net)}{topMark.source === "season" ? ` | ${topMark.name}` : ""}</span>
+              <strong>{net >= topMark.net ? `+${formatMoney(net - topMark.net)} AHEAD` : `−${formatMoney(topMark.net - net)} TO GO`}</strong>
               <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
             </div>
           )}
@@ -1780,25 +1765,30 @@ export function CryptoJourney() {
         </div>
 
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
-          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
+          {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${chapterPlay.mode} | BRIEFING`}
         </button>
-        <p className="cy-extra">QUARTER {run.chapter + 1} OF {CHAPTERS} | MISSION | {mission.text} | +{mission.reward} XP</p>
+        {intel && <p className="cy-standing-line">{standing.line} — {mission.text} (+{mission.reward} XP)</p>}
       </section>
+
 
       {/* Zone 2 — your money, big and animated; stress and hunger as two slim bars. */}
       <section className={`cy-core is-${arenaState}`} aria-label="Run status">
-        <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong><em>{net >= bossNet ? "BOSS UNDER PRESSURE" : `${formatMoney(bossNet - net)} TO CATCH`}</em></span>
-        <span className="cy-core-cash"><small>CASH</small><strong><Count value={run.cash} /></strong><em>READY</em></span>
-        <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}><Count value={openPnl} sign /></strong><em>{run.positions.length ? `${run.positions.length} OPEN` : "NO TRADE"}</em></span>
-        <span className={`cy-core-vital${run.stress >= 70 ? " is-critical" : ""}`}><small>STRESS</small><strong>{run.stress}%</strong><i><b style={{ width: `${run.stress}%` }} /></i></span>
-        <span className={`cy-core-vital${run.hunger >= 70 ? " is-critical" : ""}`}><small>HUNGER</small><strong>{run.hunger}%</strong><i><b style={{ width: `${run.hunger}%` }} /></i></span>
+        <div className="cy-core-row">
+          <span className="cy-core-money"><small>NET WORTH</small><strong><Count value={net} /></strong></span>
+          <span className="cy-core-cash"><small>CASH</small><strong><Count value={run.cash} /></strong></span>
+          <span className={`cy-core-pnl ${openPnl >= 0 ? "is-up" : "is-down"}`}><small>OPEN P&amp;L</small><strong className={openPnl >= 0 ? "positive" : "negative"}><Count value={openPnl} sign /></strong></span>
+        </div>
+        <div className="cy-core-vitals">
+          <span className={`cy-vital is-stress${run.stress >= 70 ? " is-critical" : ""}`}><small>STRESS</small><i><b style={{ width: `${run.stress}%` }} /></i><em>{run.stress}%</em></span>
+          <span className={`cy-vital is-hunger${run.hunger >= 70 ? " is-critical" : ""}`}><small>HUNGER</small><i><b style={{ width: `${run.hunger}%` }} /></i><em>{run.hunger}%</em></span>
+        </div>
       </section>
+
 
 
 
 
       <section className="cy-positions" aria-label="Open positions">
-        <div className="cy-pos-head"><span className="journey-kicker"><WalletCards /> BOOK | {run.positions.length} OPEN</span><span>{formatMoney(run.cash)} CASH</span></div>
         {run.positions.length ? (
           <div className={`cy-chips ${run.positions.length > 4 ? "is-dense" : ""}`}>
             {run.positions.map((p) => {
@@ -1820,15 +1810,9 @@ export function CryptoJourney() {
               );
             })}
           </div>
-        ) : <p className="cy-empty cy-extra">No positions. Cash does not win chapters.</p>}
-        {run.positions.length > 0 && (() => {
-          const p = focusPosition ?? [...run.positions].sort((a, b) => b.margin - a.margin)[0]!;
-          const price = mark(p.symbol);
-          const pnl = pnlOf(p, price);
-          return <p className="cy-pos-plain cy-extra">Chart focus: {p.symbol}, bought at {formatMoney(p.entry)}, now {formatMoney(price)} — you are {formatMoney(Math.abs(pnl))} {pnl >= 0 ? "up" : "down"}. Tap a position to inspect it.</p>;
-        })()}
-
+        ) : null}
       </section>
+
       </div>
 
       <div className="cy-body">
@@ -1860,7 +1844,6 @@ export function CryptoJourney() {
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
                   <div><p><Crown /> {net >= bossNet ? "BOSS UNDER PRESSURE" : "THE BOSS IS WATCHING"}</p><span>{bossLine}</span></div>
                 </div>
-                <div className="cy-chart-instruction cy-extra"><span>{waitingForFirstTrade ? "PRICE PAUSED" : "LIVE PRICE"}</span><strong>THE PRICE RUNS BY ITSELF | DO NOT TAP THE CHART</strong></div>
                 <div className="cy-chart-title"><span><img src={COIN_LOGO[focusSymbol]} alt="" width={32} height={32} /><b>{focusSymbol}</b></span><strong className={focusPnl >= 0 ? "positive" : "negative"}>{focusPosition ? `${focusPnl >= 0 ? "+" : "−"}${formatMoney(Math.abs(focusPnl))} PROFIT / LOSS` : `${formatMoney(focusPrice)} NOW`}</strong></div>
                 <div className="cy-chart-wrap">
                   <svg className="cy-chart" viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={`${focusSymbol} live quarter chart`}>
@@ -1885,8 +1868,8 @@ export function CryptoJourney() {
                   </svg>
                   <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
-                <div className="cy-chart-legend cy-extra"><span><i className="is-now" />NOW | {formatMoney(focusPrice)}</span>{focusPosition && <span><i className="is-entry" />YOUR BUY | {formatMoney(focusPosition.entry)}</span>}</div>
-                <div className="cy-chart-foot cy-extra"><span>{focusPosition ? `${focusSymbol} POSITION OPEN` : "NO POSITION YET"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR FIRST MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
+                <div className="cy-chart-foot"><span>{focusPosition ? `ENTRY ${formatMoney(focusPosition.entry)}` : "NO POSITION"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
+
               </div>
               <div className="cy-live cy-extra">
                 <div className="cy-live-clock"><i ref={liveClockRef} style={{ width: `${Math.round(tick * 100)}%` }} /></div>
@@ -1974,12 +1957,7 @@ export function CryptoJourney() {
 
 
               {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL | {skill.label} | {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
-              <div className="cy-preview cy-extra" aria-label="What the yellow button does">
-                <span><small>YOU GIVE</small><strong>{preview.gives}</strong></span>
-                <span><small>YOU GET</small><strong>{preview.gets}</strong></span>
-                <span><small>AFTER THAT</small><strong>{preview.then}</strong></span>
-              </div>
-              {lastBook && lastBook.chapter === run.chapter && <p className="cy-lastmove cy-extra">LAST MOVE | {lastBook.label} | <b className={lastBook.amount >= 0 ? "positive" : "negative"}>{lastBook.amount >= 0 ? "+" : "−"}{formatMoney(Math.abs(lastBook.amount))}</b> | cash now {formatMoney(run.cash)}</p>}
+
 
 
             </article>
@@ -2019,10 +1997,6 @@ export function CryptoJourney() {
         </aside>
       </div>
 
-      {phase === "act" && <nav className="cy-mobile-dock" aria-label="Game controls">
-        <button disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis /><span>MORE</span></button>
-        <button className={guide === 1 ? "is-next" : ""} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight /><span>END QUARTER</span></button>
-      </nav>}
 
 
       {flash && <div className={`cy-flash tone-${flash.tone}`} role="status">{flash.text}</div>}

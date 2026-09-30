@@ -85,3 +85,10 @@
 - [x] Mobile three zones: duel frame (rank 1 + boss bar + relics), money HUD (animated net worth/cash/PnL, stress + hunger bars), arena; every block one shared full width
 - [x] No-scroll verified over 12 quarters at 375x677, 390x844 and 360x640, footer clear of the Safari bar
 - [x] Rolling money counters with green/red flash on every material change
+
+## Final polish pass (Sep 30 2026)
+- [x] Removed legacy stacked layers: month track, mobile dock, duplicate money rows, prose strips, preview/last-move lines, chart legend/instruction, position head.
+- [x] Cockpit: one strip with Net Worth / Cash / Open P&L + two vital bars (stress, hunger).
+- [x] Arcade juice: rolling counters with green/red punch, risk-card sheen, press feedback, boss-bar breathing, candle pop-in, centred sheet animations.
+- [x] Mobile no-scroll verified at 375x677, 390x844, 360x640; chart keeps 190-351px, all buttons on screen.
+- [x] Minigames stay the heart of TAKE THE RISK across all 6 phases (2020-2026).
