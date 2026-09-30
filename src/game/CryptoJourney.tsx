@@ -1918,7 +1918,10 @@ export function CryptoJourney() {
                 <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
               ) : null}
 
+              {/* Action bar: on phones this whole group is pinned above the browser bar. */}
+              <div className="cy-actionbar">
               {guide !== null ? (
+
                 <div className="cy-moves is-guided-row">
                   {guide === 0
                     ? <button type="button" className="cy-move is-risk is-guided" onClick={() => openSpot("BTC", run.cash > 0 ? guideBuy / run.cash : 0.25)}>
@@ -1966,6 +1969,9 @@ export function CryptoJourney() {
                 <button type="button" className="cy-tape-btn cy-tape-more" disabled={guide === 0} onClick={() => { playSfx("click"); setDialog({ k: "more" }); }}><Ellipsis />MORE</button>
                 <button type="button" className={`cy-tape-btn cy-tape-end${guide === 1 ? " is-next" : ""}`} disabled={guide === 0} onClick={() => { if (guide === 1) setGuide(2); endChapter(); }}><ChevronRight />END QUARTER</button>
               </div>
+              </div>
+
+
 
               {skill && skill.chapter === run.chapter && <p className={`cy-lastmove ${skill.delta >= 0 ? "positive" : "negative"}`}>SKILL | {skill.label} | {skill.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(skill.delta))}</p>}
               <div className="cy-preview cy-extra" aria-label="What the yellow button does">
