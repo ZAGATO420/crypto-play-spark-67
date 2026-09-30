@@ -72,7 +72,7 @@ type Pending =
   | { t: "crash"; chapter: number }
   | { t: "fight"; chapter: number; wager: number }
   | { t: "skill" }
-  | { t: "phaseRisk"; stake: number; mode: ChapterMode }
+  | { t: "phaseRisk"; stake: number; mode: ChapterMode; timing?: Timing | null }
   | { t: "seed" };
 
 /**
