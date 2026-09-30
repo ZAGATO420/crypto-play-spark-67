@@ -60,7 +60,7 @@ type Run = {
   /** Milestone ids already lived through, so a beat never repeats. */
   seen: string[];
   /** This quarter's risk moment: graded on play, paid at the quarter reveal. One per quarter, survives a reload. */
-  riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean } | null;
+  riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean; timing?: Timing | null } | null;
 };
 
 
@@ -72,7 +72,7 @@ type Pending =
   | { t: "crash"; chapter: number }
   | { t: "fight"; chapter: number; wager: number }
   | { t: "skill" }
-  | { t: "phaseRisk"; stake: number; mode: ChapterMode }
+  | { t: "phaseRisk"; stake: number; mode: ChapterMode; timing?: Timing | null }
   | { t: "seed" };
 
 /**
@@ -301,6 +301,42 @@ const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) => {
   const wick = Math.sin(t * Math.PI * 3 + phase) * amp * (1 - t * 0.55);
   const hunt = sweep ? -Math.max(0, Math.sin(t * Math.PI * 2)) * (0.05 + span * 0.5) : 0;
   return Math.max(a * 0.02, (a + (b - a) * t) * (1 + wick + hunt));
+};
+
+/**
+ * MOMENTUM pilot: watching the tape is a skill. When the risky move is pressed we
+ * grade WHERE in the last ~3 seconds of ALREADY VISIBLE tape the click landed.
+ * Buying a visible local low pays a bonus, chasing a visible high (worse during a
+ * SWEEP fakeout) costs. The middle of the range is neutral, exactly as before.
+ */
+type Timing = { r: number; z: number; verdict: string };
+const TIMING_WINDOW = 3_000 / LIVE_MS; // three seconds of revealed tape
+
+const timingEdge = (symbol: CoinSymbol, r: Run, t: number, sweep: boolean): Timing => {
+  const from = Math.max(0, t - TIMING_WINDOW);
+  if (t - from < 0.01) return { r: 0, z: 0.5, verdict: "too early to read the tape | no edge" };
+  const steps = 24;
+  let low = Infinity;
+  let high = -Infinity;
+  for (let i = 0; i <= steps; i++) {
+    const price = livePrice(symbol, r, from + ((t - from) * i) / steps, sweep);
+    if (price < low) low = price;
+    if (price > high) high = price;
+  }
+  const price = livePrice(symbol, r, t, sweep);
+  const z = clamp((price - low) / Math.max(high - low, 1e-9), 0, 1);
+  const dipStrength = clamp((0.28 - z) / 0.28, 0, 1);
+  const topStrength = clamp((z - 0.72) / 0.28, 0, 1);
+  const edge = dipStrength > 0
+    ? dipStrength * 0.12
+    : topStrength > 0 ? -topStrength * (sweep ? 0.18 : 0.12) : 0;
+  const pct = `${edge >= 0 ? "+" : "−"}${Math.abs(Math.round(edge * 100))}%`;
+  const verdict = dipStrength > 0
+    ? `bought the local low | ${pct}`
+    : topStrength > 0
+      ? sweep ? `chased the sweep fakeout high | ${pct}` : `chased the local high | ${pct}`
+      : "entered mid range | no edge";
+  return { r: Number(edge.toFixed(4)), z: Number(z.toFixed(3)), verdict };
 };
 
 const pnlOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price - p.margin : p.margin * p.lev * p.dir * (price / p.entry - 1));
@@ -1000,7 +1036,7 @@ export function CryptoJourney() {
    * the money is settled at the quarter reveal against the real market move, so the
    * payout can never leak the market direction. One risk moment per quarter.
    */
-  const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode) => {
+  const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode, timing?: Timing | null) => {
     const copy = PHASE_RISK[mode];
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
     const buys = mode === "ACCUMULATE";
@@ -1012,12 +1048,13 @@ export function CryptoJourney() {
       xp: r.xp + xp,
       heat: quality >= 0.9 ? r.heat + 1 : quality >= 0.6 ? r.heat : 0,
       stress: clamp(r.stress + (quality >= 0.6 ? 0 : 8)),
-      riskPlay: { chapter: r.chapter, quality, label, stake, mode, symbol, delta: 0, settled: false },
+      riskPlay: { chapter: r.chapter, quality, label, stake, mode, symbol, delta: 0, settled: false, timing: timing ?? null },
     }));
     setSkill({ chapter: run.chapter, quality, label, delta: 0 });
     pop(`+${xp} XP | ${label}`, "xp");
     pop(quality >= 0.9 ? "PERFECT | PAYS AT THE REVEAL" : quality >= 0.6 ? "CLEAN | PAYS AT THE REVEAL" : "FUMBLED | THIS WILL COST YOU", quality >= 0.6 ? "up" : "down");
-    say(`${quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss} End the quarter to see what the market did with it.`, quality >= 0.6 ? "yellow" : "pink");
+    if (timing) pop(`TIMED | ${timing.verdict}`, timing.r > 0 ? "up" : timing.r < 0 ? "down" : "xp");
+    say(`${quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss}${timing ? ` Your entry: ${timing.verdict}.` : ""} End the quarter to see what the market did with it.`, quality >= 0.6 ? "yellow" : "pink");
     playSfx(quality >= 0.6 ? "win" : "hit");
     feel(quality >= 0.6 ? "win" : "loss");
     if (mode === "PANIC") setFast(true);
@@ -1031,7 +1068,7 @@ export function CryptoJourney() {
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
     if (pending.t === "fight") return resolveFight(pending.chapter, pending.wager, res.quality);
     if (pending.t === "skill") return resolveSkill(res.quality, res.label);
-    if (pending.t === "phaseRisk") return resolvePhaseRisk(pending.stake, res.quality, res.label, pending.mode);
+    if (pending.t === "phaseRisk") return resolvePhaseRisk(pending.stake, res.quality, res.label, pending.mode, pending.timing);
     return resolveSeed(res.quality);
   };
 
@@ -1099,13 +1136,18 @@ export function CryptoJourney() {
       const after = priceAt(play.symbol, next, run.noise);
       const ret = before && after ? after / before - 1 : 0;
       const m = Math.max(-1, Math.min(1.4, ret * 3));
-      const paid = play.quality < 0.6
+      const base = play.quality < 0.6
         ? -Math.round(play.stake * 0.5)
         : m >= 0 ? Math.round(play.stake * m * play.quality) : Math.round(play.stake * m * (1 - play.quality));
+      // MOMENTUM pilot: when you clicked on the live tape scales the result the same
+      // way in both directions. A fumbled minigame is never rescued by good timing.
+      const edge = play.quality >= 0.6 ? (play.timing?.r ?? 0) : 0;
+      const paid = edge === 0 ? base : Math.round(base * (base >= 0 ? 1 + edge : 1 - edge));
       cash = Math.max(0, cash + paid);
       if (paid >= 0) earnFrom(`${head} | ${play.label}`, paid);
       else spendOn(`${head} | ${play.label}`, -paid);
       lines.push(`Risk moment | ${head}: ${play.label} on a ${ret >= 0 ? "+" : ""}${(ret * 100).toFixed(1)}% ${play.symbol} quarter — ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.`);
+      if (play.timing) lines.push(`Timed entry | ${play.timing.verdict}${edge !== 0 ? ` — skill result ${base >= 0 ? "+" : "−"}${formatMoney(Math.abs(base))} became ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.` : " — no change to the payout."}`);
       riskSettled = { ...play, delta: paid, settled: true };
     }
     let lifeHunger = 0;
@@ -1545,13 +1587,19 @@ export function CryptoJourney() {
       : duelPilot
         ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
         : stakePilot
-          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}`
+          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}${chapterPlay.mode === "MOMENTUM" ? " | your click time on the live tape adds up to ±18%" : ""}`
           : moves.risk.why;
 
   const riskMove = () => {
     playSfx("click");
     if (riskPlayed) return say("You already took your shot this quarter. End the quarter.", "pink");
-    if (stakePilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode } });
+    if (stakePilot) {
+      // MOMENTUM pilot: the moment of the click on the live tape is part of the play
+      const timing = chapterPlay.mode === "MOMENTUM" && phase === "act"
+        ? timingEdge(focusSymbol, run, tickRef.current, sweeping)
+        : null;
+      return setDialog({ k: "mini", kind: riskKind, pending: { t: "phaseRisk", stake: phaseStake, mode: chapterPlay.mode, timing } });
+    }
     if (huntPilot && presale) return setDialog({ k: "mini", kind: riskKind, pending: { t: "presale", card: presale, size: huntTicket } });
     if (duelPilot) return setDialog({ k: "mini", kind: riskKind, pending: { t: "fight", chapter: run.chapter, wager: duelStake } });
     switch (chapterPlay.mode) {
