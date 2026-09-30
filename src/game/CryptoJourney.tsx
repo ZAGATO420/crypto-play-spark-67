@@ -1850,7 +1850,7 @@ export function CryptoJourney() {
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
               <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET | {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} | {formatMoney(focusPrice)}</strong></div>
-              {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT | SAME SEED | $20 / $10 / $5 $TCFB</div>}
+              {cfg.tournament && <SeasonBanner compact />}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className={`cy-boss-presence is-${arenaState}`}>
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
