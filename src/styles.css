@@ -2343,3 +2343,76 @@
      scrolls inside its own box instead of pushing the buttons away */
   .cy-stage > article.cy-card { overflow-y:auto; -webkit-overflow-scrolling:touch; }
 }
+
+/* ======================================================================
+   MOBILE 3-ZONE GAME LAYOUT (final, authoritative)
+   Zone 1: one compact HUD strip. Zone 2: the chart arena, which always
+   keeps real height so the candles and the live animation stay visible.
+   Zone 3: the pinned action bar. Nothing scrolls, nothing is covered.
+   ====================================================================== */
+@media (max-width: 640px) {
+  .cy-shell { padding-top:6px !important; padding-left:8px !important; padding-right:8px !important; gap:6px !important; }
+  .cy-shell:has(.cy-actionbar) { padding-bottom:calc(200px + env(safe-area-inset-bottom)) !important; }
+  .cy-shell:has(.cy-quick-row) { padding-bottom:calc(248px + env(safe-area-inset-bottom)) !important; }
+
+  /* --- Zone 1: strip everything that is only prose or decoration --- */
+  .cy-journey,
+  .cy-goal-avatar,
+  .cy-goal-why,
+  .cy-goal-doom,
+  .cy-standing-head,
+  .cy-standing-bar,
+  .cy-standing-line,
+  .cy-arena-head,
+  .cy-phase-banner,
+  .cy-chart-instruction,
+  .cy-chart-legend,
+  .cy-chart-foot,
+  .cy-live,
+  .cy-stance-line,
+  .cy-pos-head,
+  .cy-rank1-goal,
+  .cy-boss-presence { display:none !important; }
+
+  .cy-rail { display:flex !important; flex-direction:column; gap:5px; flex:0 0 auto; }
+
+  .cy-goal { padding:6px 8px !important; gap:4px !important; display:block !important; }
+  .cy-goal-head { font-size:8px !important; letter-spacing:.1em; }
+  .cy-goal-line { font-size:12px !important; line-height:1.25 !important; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+  .cy-guide-path { margin-top:4px !important; font-size:8px !important; }
+  .cy-guide-path { display:flex !important; flex-wrap:wrap; align-items:center; gap:6px; }
+  .cy-guide-path button { position:static !important; inset:auto !important; margin-left:auto; font-size:8px !important; padding:3px 7px !important; }
+  .cy-shell:not(.has-guide) .cy-goal { display:none !important; }
+
+  .cy-standing { padding:0 !important; border:0 !important; background:none !important; gap:4px !important; }
+  .cy-duel { display:grid !important; grid-template-columns:1fr 1fr; gap:5px; }
+  .cy-rank1, .cy-bossbar { padding:4px 6px !important; margin:0 !important; }
+  .cy-rank1 strong, .cy-bossbar .cy-bossbar-head { font-size:9px !important; }
+  .cy-relic-strip { grid-column:1 / -1; margin:0 !important; }
+  .cy-intel-toggle { min-height:30px !important; font-size:9px !important; padding:4px 6px !important; }
+
+  /* the five numbers: three big values, two slim vital bars */
+  .cy-core { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:4px !important; padding:6px !important; }
+  .cy-core > span { padding:0 !important; border:0 !important; background:none !important; }
+  .cy-core small { font-size:7px !important; }
+  .cy-core strong { font-size:14px !important; line-height:1.1 !important; }
+  .cy-core em { display:none !important; }
+  .cy-core .cy-core-vital { grid-column:span 1; display:flex; flex-direction:column; gap:2px; }
+  .cy-core .cy-core-vital strong { font-size:10px !important; }
+  .cy-core .cy-core-vital:last-of-type { grid-column:2 / -1; }
+
+  .cy-positions { max-height:30px !important; }
+
+  /* --- Zone 2: the arena keeps its pixels --- */
+  .cy-body, .cy-stage { flex:1 1 auto !important; min-height:0 !important; display:flex !important; flex-direction:column !important; }
+  .cy-stage > article.cy-card { flex:1 1 auto; display:flex; flex-direction:column; padding:8px !important; margin:0 !important; width:100% !important; overflow:hidden !important; }
+  .cy-market-visual { flex:1 1 auto !important; display:flex !important; flex-direction:column !important; min-height:150px !important; padding:6px !important; }
+  .cy-chart-title { flex:0 0 auto; }
+  .cy-chart-wrap { flex:1 1 auto !important; height:auto !important; min-height:130px !important; }
+}
+
+@media (max-width: 640px) and (max-height: 700px) {
+  .cy-core strong { font-size:13px !important; }
+  .cy-market-visual { min-height:120px !important; }
+  .cy-chart-wrap { min-height:104px !important; }
+}
