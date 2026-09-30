@@ -1449,16 +1449,40 @@ export function CryptoJourney() {
     openChapterCards(run.chapter);
   };
 
+  /**
+   * One artefact, kept for the rest of the run. Two matching artefacts unlock a
+   * named synergy, which is where the collection starts to feel like a build.
+   */
+  const takeRelic = (card: Relic) => {
+    const owned = [...(run.relics ?? []), card.id];
+    const before = power.synergies.map((s) => s.name);
+    const after = relicPower(owned).synergies.filter((s) => !before.includes(s.name));
+    setRun((r) => ({ ...r, relics: owned, seen: Array.from(new Set([...r.seen, `relic-${r.chapter}`])) }));
+    playSfx("level");
+    grantXp(300, card.name);
+    if (after[0]) {
+      triggerGodCandle(`SYNERGY | ${after[0].name}`, 8);
+      say(`SYNERGY UNLOCKED | ${after[0].name} — ${after[0].line}`, "yellow");
+    } else say(`${card.name} | ${card.effect}`, "yellow");
+    setDialog(null);
+    openChapterCards(run.chapter);
+  };
+
   const continueChapter = () => {
     setResolution(null);
     setSkill(null);
     if (guide === 2) setGuide(null);
+    if (relicChapter(run.chapter) && !run.seen.includes(`relic-${run.chapter}`)) {
+      const cards = relicOffer(run.relics ?? [], (salt) => det(run.seed, salt), run.chapter);
+      if (cards.length) { setDialog({ k: "relic", cards }); return; }
+    }
     if (run.chapter >= 1 && !run.seen.includes(`loot-${run.chapter}`)) {
       setDialog({ k: "loot", cards: lootDraw((salt) => det(run.seed, salt), run.chapter) });
       return;
     }
     openChapterCards(run.chapter);
   };
+
 
   const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
 
