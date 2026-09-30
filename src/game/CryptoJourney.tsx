@@ -1751,6 +1751,14 @@ export function CryptoJourney() {
             <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
           </div>
         )}
+        <BossBar you={Math.max(0, net)} him={Math.max(0, bossNet)} wins={run.bossWins} phase={bossPhase} />
+        {(run.relics ?? []).length > 0 && (
+          <p className="cy-relic-strip">
+            {(run.relics ?? []).map((id) => <b key={id} title={`${relicOf(id)?.name} — ${relicOf(id)?.effect}`}>{relicOf(id)?.glyph ?? "?"}</b>)}
+            {power.synergies.map((s) => <span key={s.name}>{s.name}</span>)}
+          </p>
+        )}
+
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
         </button>
