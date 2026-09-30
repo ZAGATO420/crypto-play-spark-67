@@ -1240,8 +1240,9 @@ export function CryptoJourney() {
       spendOn("Tax debt payment", paid);
       lines.push(`Tax debt payment: ${formatMoney(paid)}.`);
     }
-    const rent = Math.round(house.rent * diff.cost);
-    const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
+    const rent = Math.round(house.rent * diff.cost * power.lifeCut);
+    const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)) * power.lifeCut);
+
     cash -= rent + food;
     spendOn(`Rent | ${house.name}`, rent);
     spendOn("Food & living", food);
