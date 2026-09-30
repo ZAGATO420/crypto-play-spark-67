@@ -2245,7 +2245,7 @@ body:has(.cy-shell) { background:var(--background); }
 .cy-hud-side figcaption > span { white-space:nowrap; font-size:9px; overflow:visible; text-overflow:clip; }
 .cy-hud-side figcaption strong .cy-count { font-size:inherit !important; color:inherit !important; font-family:inherit !important; letter-spacing:inherit !important; }
 @media (max-width: 640px) {
-  .cy-hud { grid-template-columns:minmax(0,1.3fr) auto minmax(0,.78fr); }
+  .cy-hud { grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
   .cy-hud-side.is-you figcaption strong { font-size:22px !important; }
   .cy-hud-side.is-boss figcaption strong { font-size:17px !important; }
 }
