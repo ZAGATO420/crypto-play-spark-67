@@ -552,6 +552,10 @@ export function CryptoJourney() {
 
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
+  /** His state of mind, read off his own book and the duels he has lost. */
+  const bossPhase: "SMUG" | "PRESSED" | "ENRAGED" | "BROKEN" =
+    run.bossWins >= 3 && net > bossNet ? "BROKEN" : net > bossNet * 1.2 ? "ENRAGED" : net > bossNet * 0.6 ? "PRESSED" : "SMUG";
+
   const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
   const waitingForFirstTrade = run.chapter < 2 && run.trades === 0;
   const duelStake = Math.max(200, Math.round(run.cash * 0.1));
