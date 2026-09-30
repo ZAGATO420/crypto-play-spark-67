@@ -2229,3 +2229,11 @@ body:has(.cy-shell) { background:var(--background); }
 @media (prefers-reduced-motion: reduce) {
   .cy-count, .cy-move::after, .cy-candles rect, .cy-candles line, .cy-scrim > *, .cy-hud-side.is-boss.is-enraged img { animation:none !important; }
 }
+
+/* phones: the tournament strip is one slim line, the run keeps the room */
+@media (max-width: 640px) {
+  .cy-card > .season-strip { flex:0 0 auto; padding:4px 8px; gap:5px; }
+  .cy-card > .season-strip strong { font-size:10px; }
+  .cy-card > .season-strip small { font-size:8px; }
+  .cy-hud-side.is-you figcaption strong { font-size:21px; }
+}
