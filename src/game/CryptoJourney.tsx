@@ -1865,6 +1865,15 @@ export function CryptoJourney() {
                       <clipPath id="cy-chart-reveal"><rect ref={chartRevealRef} x="0" y="0" width={currentChartX} height="100" /></clipPath>
                     </defs>
                     <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
+                    <g className="cy-candles" clipPath="url(#cy-chart-reveal)">
+                      {candles.map((c, i) => (
+                        <g key={i} className={c.up ? "is-up" : "is-down"}>
+                          <line x1={c.x} x2={c.x} y1={c.wickTop} y2={c.wickBottom} vectorEffect="non-scaling-stroke" />
+                          <rect x={c.x - 1.3} y={c.top} width="2.6" height={c.height} />
+                        </g>
+                      ))}
+                    </g>
+
                     <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
                     <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" clipPath="url(#cy-chart-reveal)" />
                     {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
