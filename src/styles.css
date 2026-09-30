@@ -2089,8 +2089,8 @@
   .cy-chip { min-height:36px; padding:4px; }
 
   /* the playing card takes whatever height is left and never overflows */
-  .cy-body { flex:1 1 auto; min-height:0; display:flex; }
-  .cy-stage { flex:1 1 auto; min-height:0; display:flex; }
+  .cy-body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+  .cy-stage { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
   .cy-stage > article.cy-card {
     flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
     gap:4px; padding:7px; overflow:hidden;
@@ -2103,7 +2103,7 @@
   .cy-delta { font-size:26px; }
 
   /* the chart stretches into the leftover space instead of pushing buttons away */
-  .cy-market-visual { flex:1 1 auto; min-height:104px; display:flex; flex-direction:column; padding:5px; }
+  .cy-market-visual { flex:1 1 auto; min-height:92px; display:flex; flex-direction:column; padding:5px; }
   .cy-chart-wrap { flex:1 1 auto; height:auto !important; min-height:64px; margin-top:2px; }
 
   /* the two moves and the three tape buttons are always fully on screen */
