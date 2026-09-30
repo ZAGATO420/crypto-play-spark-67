@@ -1136,13 +1136,18 @@ export function CryptoJourney() {
       const after = priceAt(play.symbol, next, run.noise);
       const ret = before && after ? after / before - 1 : 0;
       const m = Math.max(-1, Math.min(1.4, ret * 3));
-      const paid = play.quality < 0.6
+      const base = play.quality < 0.6
         ? -Math.round(play.stake * 0.5)
         : m >= 0 ? Math.round(play.stake * m * play.quality) : Math.round(play.stake * m * (1 - play.quality));
+      // MOMENTUM pilot: when you clicked on the live tape scales the result the same
+      // way in both directions. A fumbled minigame is never rescued by good timing.
+      const edge = play.quality >= 0.6 ? (play.timing?.r ?? 0) : 0;
+      const paid = edge === 0 ? base : Math.round(base * (base >= 0 ? 1 + edge : 1 - edge));
       cash = Math.max(0, cash + paid);
       if (paid >= 0) earnFrom(`${head} | ${play.label}`, paid);
       else spendOn(`${head} | ${play.label}`, -paid);
       lines.push(`Risk moment | ${head}: ${play.label} on a ${ret >= 0 ? "+" : ""}${(ret * 100).toFixed(1)}% ${play.symbol} quarter — ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.`);
+      if (play.timing) lines.push(`Timed entry | ${play.timing.verdict}${edge !== 0 ? ` — skill result ${base >= 0 ? "+" : "−"}${formatMoney(Math.abs(base))} became ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.` : " — no change to the payout."}`);
       riskSettled = { ...play, delta: paid, settled: true };
     }
     let lifeHunger = 0;
