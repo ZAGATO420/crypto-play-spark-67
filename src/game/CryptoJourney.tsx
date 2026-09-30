@@ -2345,6 +2345,63 @@ function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard)
   );
 }
 
+/**
+ * The relic draft. Three artefacts, one kept forever, and the synergy list right
+ * under them so the player can see the build they are aiming at.
+ */
+function RelicSheet({ cards, owned, onPick }: { cards: Relic[]; owned: string[]; onPick: (c: Relic) => void }) {
+  const power = relicPower(owned);
+  const next = SYNERGY_HINTS(owned);
+  return (
+    <>
+      <h2>CHOOSE YOUR ARTEFACT</h2>
+      <p className="cy-note">Kept for the rest of the run. It changes your numbers, never the market.</p>
+      <div className="cy-relic-grid">
+        {cards.map((c) => (
+          <button key={c.id} className="cy-relic-card" onClick={() => { playSfx("click"); onPick(c); }}>
+            <b>{c.glyph}</b>
+            <strong>{c.name}</strong>
+            <small>{c.effect}</small>
+            <em>{c.line}</em>
+          </button>
+        ))}
+      </div>
+      {owned.length > 0 && (
+        <p className="cy-relic-own">HELD {owned.map((id) => relicOf(id)?.glyph ?? "?").join(" ")}{power.synergies.length ? ` | SYNERGY ${power.synergies.map((s) => s.name).join(" + ")}` : ""}</p>
+      )}
+      {next && <small className="cy-note">{next}</small>}
+    </>
+  );
+}
+
+/** One gentle nudge toward the closest synergy the player could still complete. */
+const SYNERGY_HINTS = (owned: string[]): string | null => {
+  for (const s of SYNERGIES) {
+    const missing = s.needs.filter((n) => !owned.includes(n));
+    if (owned.some((o) => s.needs.includes(o as never)) && missing.length === 1) {
+      return `One away from ${s.name}: add ${relicOf(missing[0]!)?.name}. ${s.line}`;
+    }
+  }
+  return null;
+};
+
+/**
+ * The Boss as an opponent you can actually hurt: his liquidity bar drains when
+ * you out-trade him or win a duel, and his face changes state with it.
+ */
+function BossBar({ you, him, wins, phase }: { you: number; him: number; wins: number; phase: "SMUG" | "PRESSED" | "ENRAGED" | "BROKEN" }) {
+  const total = Math.max(1, you + him);
+  const hp = Math.max(4, Math.min(100, Math.round((him / total) * 100)));
+  return (
+    <div className={`cy-bossbar is-${phase.toLowerCase()}`}>
+      <span className="cy-bossbar-head">THE FINAL BOSS <b>{phase}</b></span>
+      <div className="cy-bossbar-track"><i style={{ width: `${hp}%` }} /><u style={{ left: `${hp}%` }} /></div>
+      <span className="cy-bossbar-foot">HIS LIQUIDITY {formatMoney(him)} | DUELS WON {wins}/6</span>
+    </div>
+  );
+}
+
+
 function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verifyCost, skillDone, skillHidden, skillHead, skillPrize, onStance, onConviction, onTerminal, onSurvive, onSkill, onVerify, onStorage, onHistory, onGuide, onEnd }: {
   ap: number; stance: Run["stance"]; heat: number; conviction: number; convictionOn: boolean;
   verified: boolean; verifyCost: number; skillDone: boolean; skillHidden?: boolean; skillHead: string; skillPrize: number;
