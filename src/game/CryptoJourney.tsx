@@ -427,6 +427,10 @@ export function CryptoJourney() {
   // The real target of a run: what the current season leader holds. Fetched once
   // per page and then frozen, so nobody chases a number that moves mid-run.
   const topMark = useTopMark(currentSeasonId());
+  // Relics turn into one bag of multipliers here, so every payout path reads
+  // the same numbers instead of each checking artefacts by hand.
+  const power = useMemo(() => relicPower(run.relics ?? []), [run.relics]);
+
 
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
