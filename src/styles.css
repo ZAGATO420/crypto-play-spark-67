@@ -2042,7 +2042,7 @@
 
 /* --- mobile cockpit: one screen, no scrolling, big thumb targets --- */
 @media (max-width: 640px) {
-  html, body { overflow:hidden; }
+  body:has(.cy-shell) { overflow:hidden; }
   .cy-shell { height:100dvh; overflow:hidden; padding-bottom:max(6px,env(safe-area-inset-bottom)); }
   .cy-shell .cy-bossbar-foot, .cy-shell .cy-relic-strip span { display:none; }
   .cy-move { min-height:104px; padding:12px 12px; }
