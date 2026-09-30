@@ -1036,7 +1036,7 @@ export function CryptoJourney() {
    * the money is settled at the quarter reveal against the real market move, so the
    * payout can never leak the market direction. One risk moment per quarter.
    */
-  const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode) => {
+  const resolvePhaseRisk = (stake: number, quality: number, label: string, mode: ChapterMode, timing?: Timing | null) => {
     const copy = PHASE_RISK[mode];
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
     const buys = mode === "ACCUMULATE";
@@ -1048,12 +1048,13 @@ export function CryptoJourney() {
       xp: r.xp + xp,
       heat: quality >= 0.9 ? r.heat + 1 : quality >= 0.6 ? r.heat : 0,
       stress: clamp(r.stress + (quality >= 0.6 ? 0 : 8)),
-      riskPlay: { chapter: r.chapter, quality, label, stake, mode, symbol, delta: 0, settled: false },
+      riskPlay: { chapter: r.chapter, quality, label, stake, mode, symbol, delta: 0, settled: false, timing: timing ?? null },
     }));
     setSkill({ chapter: run.chapter, quality, label, delta: 0 });
     pop(`+${xp} XP | ${label}`, "xp");
     pop(quality >= 0.9 ? "PERFECT | PAYS AT THE REVEAL" : quality >= 0.6 ? "CLEAN | PAYS AT THE REVEAL" : "FUMBLED | THIS WILL COST YOU", quality >= 0.6 ? "up" : "down");
-    say(`${quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss} End the quarter to see what the market did with it.`, quality >= 0.6 ? "yellow" : "pink");
+    if (timing) pop(`TIMED | ${timing.verdict}`, timing.r > 0 ? "up" : timing.r < 0 ? "down" : "xp");
+    say(`${quality >= 0.9 ? copy.hit : quality >= 0.6 ? copy.ok : copy.miss}${timing ? ` Your entry: ${timing.verdict}.` : ""} End the quarter to see what the market did with it.`, quality >= 0.6 ? "yellow" : "pink");
     playSfx(quality >= 0.6 ? "win" : "hit");
     feel(quality >= 0.6 ? "win" : "loss");
     if (mode === "PANIC") setFast(true);
