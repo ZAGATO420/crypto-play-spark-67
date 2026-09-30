@@ -610,7 +610,7 @@ export function CryptoJourney() {
   };
 
   const grantXp = (amount: number, label?: string) => {
-    const gain = Math.max(1, Math.round(amount * arch.xp * XP_MODE[cfg.mode]));
+    const gain = Math.max(1, Math.round(amount * arch.xp * XP_MODE[cfg.mode] * power.xpMul));
     setRun((r) => {
       const next = r.xp + gain;
       if (levelFor(next) > levelFor(r.xp)) {
