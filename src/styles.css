@@ -2307,3 +2307,39 @@
   .cy-rank1-goal { display:none; }
   .cy-rank1 strong { white-space:normal; overflow:visible; text-overflow:clip; }
 }
+
+/* ======================================================================
+   THE ACTION BAR — the two moves and the three footer buttons.
+   Desktop keeps the old card flow (display:contents). On phones the whole
+   group is pinned above the browser bar so it can never be pushed off.
+   ====================================================================== */
+.cy-actionbar { display:contents; }
+
+@media (max-width: 640px) {
+  .cy-shell { --cy-foot:150px; }
+  .cy-shell:has(.cy-quick-row) { --cy-foot:196px; }
+
+  .cy-actionbar {
+    position:fixed; left:0; right:0; bottom:0; z-index:45;
+    display:flex; flex-direction:column; gap:5px;
+    padding:7px 8px calc(env(safe-area-inset-bottom) + 12px);
+    background:linear-gradient(180deg,color-mix(in oklab,var(--background) 40%,transparent),var(--background) 30%);
+    border-top:1px solid color-mix(in oklab,var(--journey-cyan) 22%,var(--border));
+  }
+  .cy-actionbar .cy-moves { margin:0; max-height:none; }
+  .cy-actionbar .cy-move { min-height:76px; }
+  .cy-actionbar .cy-quick-row { margin:0; }
+  .cy-actionbar .cy-tape-row { margin:0; }
+
+  /* the shell reserves exactly that much room, so nothing hides behind it */
+  .cy-shell { padding-bottom:calc(var(--cy-foot) + env(safe-area-inset-bottom)); }
+
+  /* the chart and the boss portrait give up pixels first */
+  .cy-market-visual { min-height:0 !important; }
+  .cy-chart-wrap { min-height:44px; height:auto !important; flex:1 1 auto; }
+  .cy-boss-presence { max-height:56px; overflow:hidden; }
+
+  /* last-resort safety net: if a quarter is still too tall, the card itself
+     scrolls inside its own box instead of pushing the buttons away */
+  .cy-stage > article.cy-card { overflow-y:auto; -webkit-overflow-scrolling:touch; }
+}
