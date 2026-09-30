@@ -2277,3 +2277,8 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-hud-side.is-boss figcaption strong { font-size:17px !important; }
 }
 
+
+/* ---- Every action stays reachable on phones ----
+   The old mobile dock is gone, so MORE and END QUARTER must not be hidden. */
+.cy-tape-more, .cy-tape-end { display:flex !important; }
+.cy-tape-row { grid-template-columns:1fr 1fr 1.35fr !important; }
