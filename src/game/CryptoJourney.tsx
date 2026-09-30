@@ -1886,6 +1886,18 @@ export function CryptoJourney() {
                   </button>
                 </div>
               )}
+              {/* Spot and perps are the heart of the game, so they sit on the main
+                  screen instead of hiding behind MORE. */}
+              {guide === null && (
+                <div className="cy-trade-row" aria-label="Open the trading desk">
+                  <button type="button" className="cy-quick-btn is-spot" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market" }); }}>
+                    <WalletCards />BUY SPOT
+                  </button>
+                  <button type="button" className="cy-quick-btn is-perp" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market" }); }}>
+                    <Zap />PERPS | UP TO 50x
+                  </button>
+                </div>
+              )}
               {guide === null && (!skillPilot || surviveUrgent) && (
                 <div className="cy-quick-row">
                   {!skillPilot && (
