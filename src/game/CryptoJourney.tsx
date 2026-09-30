@@ -813,7 +813,7 @@ export function CryptoJourney() {
     setRun((r) => ({ ...r, riskPlay: { chapter, quality, label: "THE DUEL", stake: wager, mode: "BOSS DUEL", symbol: "BTC", delta: 0, settled: true } }));
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
-      const won = Math.round(wager * 2);
+      const won = Math.round(wager * 2 * power.duelMul);
       setRun((r) => chron(book({
         ...r, cash: r.cash + won, bossWins: r.bossWins + 1, conviction: clamp(r.conviction + 35),
         boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
