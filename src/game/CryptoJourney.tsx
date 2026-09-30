@@ -1748,6 +1748,18 @@ export function CryptoJourney() {
       <section className={`cy-standing is-${standing.tone}`} aria-label="How you stand against the Boss">
         {/* Zone 1 — the duel: rank 1, the Boss bar and your relics read as one frame. */}
         <div className="cy-duel">
+          {/* The duel faces: you on the left, the Boss on the right. */}
+          <div className={`cy-faces is-${bossPhase.toLowerCase()}`} aria-hidden>
+            <figure className="cy-face is-you">
+              <img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="" />
+              <figcaption>YOU<b>{formatMoney(Math.max(0, net))}</b></figcaption>
+            </figure>
+            <span className="cy-face-vs">VS</span>
+            <figure className="cy-face is-boss">
+              <img src={mood} alt="" />
+              <figcaption>{bossPhase}<b>{formatMoney(Math.max(0, bossNet))}</b></figcaption>
+            </figure>
+          </div>
           {topMark && (
             <div className={`cy-rank1 ${net >= topMark.net ? "is-ahead" : "is-behind"}`} aria-label="How you stand against rank 1">
               <span className="cy-rank1-tag">VS RANK 1</span>
