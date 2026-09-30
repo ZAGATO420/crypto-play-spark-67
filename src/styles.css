@@ -2331,8 +2331,8 @@
   .cy-actionbar .cy-quick-row { margin:0; }
   .cy-actionbar .cy-tape-row { margin:0; }
 
-  /* the shell reserves exactly that much room, so nothing hides behind it */
-  .cy-shell { padding-bottom:calc(var(--cy-foot) + env(safe-area-inset-bottom)); }
+  /* the shell reserves exactly that much room, but only while the bar is up */
+  .cy-shell:has(.cy-actionbar) { padding-bottom:calc(var(--cy-foot) + env(safe-area-inset-bottom)); }
 
   /* the chart and the boss portrait give up pixels first */
   .cy-market-visual { min-height:0 !important; }
