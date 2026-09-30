@@ -1833,38 +1833,18 @@ export function CryptoJourney() {
                   </svg>
                   <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
-                <div className="cy-chart-foot"><span>{focusPosition ? `ENTRY ${formatMoney(focusPosition.entry)}` : "NO POSITION"}</span><span>{waitingForFirstTrade ? "CHOOSE YOUR MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span></div>
-
-              </div>
-              <div className="cy-live cy-extra">
-                <div className="cy-live-clock"><i ref={liveClockRef} style={{ width: `${Math.round(tick * 100)}%` }} /></div>
-                <div className="cy-live-tape">
-                  {(["BTC", "ETH", "SOL"] as CoinSymbol[]).map((s) => {
-                    const open = priceAt(s, run.chapter, run.noise);
-                    const now = mark(s);
-                    if (!open) return null;
-                    const pct = (now / open - 1) * 100;
-                    return (
-                      <span key={s} className={pct >= 0 ? "up" : "down"}>
-                        <img src={COIN_LOGO[s]} alt="" width={18} height={18} />
-                        <strong>{formatMoney(now)}</strong>
-                        <small>{pct >= 0 ? "+" : ""}{pct.toFixed(1)}%</small>
-                      </span>
-                    );
-                  })}
+                <div className="cy-chart-foot">
+                  <span>{focusPosition ? `ENTRY ${formatMoney(focusPosition.entry)}` : "NO POSITION"}</span>
+                  <i className="cy-live-clock" ref={liveClockRef as never} style={{ width: `${Math.round(tick * 100)}%` }} aria-hidden />
+                  <span>{waitingForFirstTrade ? "CHOOSE YOUR MOVE" : `${Math.round(tick * 100)}% OF QUARTER`}</span>
                 </div>
-                {attack && <p className="cy-attack"><strong>{attack.name}:</strong> {attack.line}</p>}
-                <div className={`cy-pressure is-${arenaState}`}><span>{arenaState === "danger" ? "SURVIVAL ALERT" : arenaState === "winning" ? "MOMENTUM" : "MARKET PRESSURE"}</span><i><b style={{ width: `${Math.max(8, Math.min(100, arenaState === "danger" ? survivalDanger : Math.abs(btcMove) * 4 + 18))}%` }} /></i></div>
-                <div className="cy-signals">
-                  {signals.map((s, i) => (
-                    <span key={i} className={`cy-signal${verified ? (s.lie ? " is-fake" : " is-true") : ""}`}><small>{s.label}</small>{s.value}</span>
-                  ))}
-                </div>
-
               </div>
-              {run.stance !== "balanced" || run.convictionOn || run.heat > 0 ? (
-                <p className="cy-stance-line">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION ARMED 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
-              ) : null}
+              {attack
+                ? <p className="cy-ticker is-attack"><strong>{attack.name}:</strong> {attack.line}</p>
+                : (run.stance !== "balanced" || run.convictionOn || run.heat > 0)
+                  ? <p className="cy-ticker">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+                  : null}
+
 
               {/* Action bar: on phones this whole group is pinned above the browser bar. */}
               <div className="cy-actionbar">
