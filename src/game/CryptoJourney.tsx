@@ -33,6 +33,8 @@ import { loadBoard, loadTopMark, submitRun, SubmitRunError, type BoardRow, type 
 import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, unlockAudio, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
+import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
+
 
 
 /* ------------------------------------------------------------------ types */
@@ -61,7 +63,10 @@ type Run = {
   seen: string[];
   /** This quarter's risk moment: graded on play, paid at the quarter reveal. One per quarter, survives a reload. */
   riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean; timing?: Timing | null } | null;
+  /** Roguelike relics collected this run. They bend your own numbers, never history. */
+  relics: string[];
 };
+
 
 
 type Phase = "brief" | "act" | "resolve";
@@ -116,6 +121,8 @@ type Dialog =
   | { k: "survive" }
   | { k: "more" }
   | { k: "loot"; cards: LootCard[] }
+  | { k: "relic"; cards: Relic[] }
+
   | { k: "cashout" }
   | { k: "decision"; card: Decision }
   | { k: "situation"; card: Situation }
@@ -159,7 +166,7 @@ const STANCES: { id: Stance; name: string; short: string; line: string; win: num
 ];
 const stanceOf = (id: Stance) => STANCES.find((s) => s.id === id) ?? STANCES[1]!;
 /** Calling the quarter right stacks HEAT, and HEAT multiplies your next win. */
-const heatBonus = (heat: number) => 1 + Math.min(5, heat) * 0.12;
+const heatBonus = (heat: number, step = 0.12) => 1 + Math.min(5, heat) * step;
 
 
 export const AVATARS = [
@@ -260,7 +267,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     logs: [], noise: makeNoise(config.mode, seed), muted: false, seed, config,
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [], stance: "balanced", heat: 0,
-    chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [], riskPlay: null,
+    chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [], riskPlay: null, relics: [],
 
   };
 };
@@ -420,6 +427,10 @@ export function CryptoJourney() {
   // The real target of a run: what the current season leader holds. Fetched once
   // per page and then frozen, so nobody chases a number that moves mid-run.
   const topMark = useTopMark(currentSeasonId());
+  // Relics turn into one bag of multipliers here, so every payout path reads
+  // the same numbers instead of each checking artefacts by hand.
+  const power = useMemo(() => relicPower(run.relics ?? []), [run.relics]);
+
 
   const [pops, setPops] = useState<Pop[]>([]);
   const [shake, setShake] = useState(false);
@@ -519,6 +530,19 @@ export function CryptoJourney() {
   const chartMax = Math.max(...chartPoints);
   const chartSpan = Math.max(Number.EPSILON, chartMax - chartMin);
   const chartPath = chartPoints.map((price, i) => `${(i / 27) * 100},${92 - ((price - chartMin) / chartSpan) * 76}`).join(" ");
+  /**
+   * The same live walk drawn as candles, so the quarter reads like a real chart:
+   * each step becomes an open/close body with a wick, green up, red down.
+   */
+  const candles = useMemo(() => chartPoints.slice(1).map((close, i) => {
+    const open = chartPoints[i]!;
+    const y = (p: number) => 92 - ((p - chartMin) / chartSpan) * 76;
+    const top = Math.min(y(open), y(close));
+    const bottom = Math.max(y(open), y(close));
+    const wick = Math.max(1.2, (bottom - top) * 0.55);
+    return { x: ((i + 0.5) / 27) * 100, top, height: Math.max(0.9, bottom - top), wickTop: top - wick, wickBottom: bottom + wick, up: close >= open };
+  }), [chartPoints, chartMin, chartSpan]);
+
   const currentChartX = Math.max(2, Math.min(98, tick * 100));
   const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
   const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
@@ -541,6 +565,10 @@ export function CryptoJourney() {
 
   const survivalDanger = Math.max(run.stress, run.hunger, run.risk);
   const arenaState = crashFor(run.chapter) || survivalDanger >= 80 ? "danger" : focusPnl > 0 || run.streak >= 2 ? "winning" : "neutral";
+  /** His state of mind, read off his own book and the duels he has lost. */
+  const bossPhase: "SMUG" | "PRESSED" | "ENRAGED" | "BROKEN" =
+    run.bossWins >= 3 && net > bossNet ? "BROKEN" : net > bossNet * 1.2 ? "ENRAGED" : net > bossNet * 0.6 ? "PRESSED" : "SMUG";
+
   const marketPulse = focusPosition ? (focusPnl >= 0 ? "up" : "down") : btcMove >= 0 ? "up" : "down";
   const waitingForFirstTrade = run.chapter < 2 && run.trades === 0;
   const duelStake = Math.max(200, Math.round(run.cash * 0.1));
@@ -603,7 +631,7 @@ export function CryptoJourney() {
   };
 
   const grantXp = (amount: number, label?: string) => {
-    const gain = Math.max(1, Math.round(amount * arch.xp * XP_MODE[cfg.mode]));
+    const gain = Math.max(1, Math.round(amount * arch.xp * XP_MODE[cfg.mode] * power.xpMul));
     setRun((r) => {
       const next = r.xp + gain;
       if (levelFor(next) > levelFor(r.xp)) {
@@ -802,7 +830,7 @@ export function CryptoJourney() {
     setRun((r) => ({ ...r, riskPlay: { chapter, quality, label: "THE DUEL", stake: wager, mode: "BOSS DUEL", symbol: "BTC", delta: 0, settled: true } }));
     if (!fight) return nextInQueue();
     if (quality >= 0.9) {
-      const won = Math.round(wager * 2);
+      const won = Math.round(wager * 2 * power.duelMul);
       setRun((r) => chron(book({
         ...r, cash: r.cash + won, bossWins: r.bossWins + 1, conviction: clamp(r.conviction + 35),
         boss: { ...r.boss, cash: Math.max(0, r.boss.cash - won), line: "He is not smiling any more." },
@@ -1061,8 +1089,14 @@ export function CryptoJourney() {
     if (!buys) nextInQueue();
   };
 
-  const finishMini = (pending: Pending, res: MiniResult) => {
+  const finishMini = (raw: Pending, result: MiniResult) => {
+    const pending = raw;
+    // MEV BOT and HOUSE EDGE raise the floor under every skill moment.
+    const res: MiniResult = power.skillFloor > result.quality
+      ? { ...result, quality: power.skillFloor, label: `${result.label} | MEV BOT CLEANUP` }
+      : result;
     if (res.quality >= 1) triggerGodCandle(res.label, 10);
+
     if (pending.t === "close") return closePosition(pending.id, pending.fraction, res.quality);
     if (pending.t === "presale") return takePresale(pending.card, pending.size, res.quality);
     if (pending.t === "crash") return resolveCrash(pending.chapter, res.quality);
@@ -1136,13 +1170,15 @@ export function CryptoJourney() {
       const after = priceAt(play.symbol, next, run.noise);
       const ret = before && after ? after / before - 1 : 0;
       const m = Math.max(-1, Math.min(1.4, ret * 3));
-      const base = play.quality < 0.6
-        ? -Math.round(play.stake * 0.5)
-        : m >= 0 ? Math.round(play.stake * m * play.quality) : Math.round(play.stake * m * (1 - play.quality));
+      const raw = play.quality < 0.6
+        ? -Math.round(play.stake * 0.5 * power.fumbleCut)
+        : m >= 0 ? Math.round(play.stake * m * play.quality * power.payoutMul) : Math.round(play.stake * m * (1 - play.quality) * power.redCut);
+      const base = raw;
       // MOMENTUM pilot: when you clicked on the live tape scales the result the same
       // way in both directions. A fumbled minigame is never rescued by good timing.
-      const edge = play.quality >= 0.6 ? (play.timing?.r ?? 0) : 0;
+      const edge = play.quality >= 0.6 ? (play.timing?.r ?? 0) * power.timingMul : 0;
       const paid = edge === 0 ? base : Math.round(base * (base >= 0 ? 1 + edge : 1 - edge));
+
       cash = Math.max(0, cash + paid);
       if (paid >= 0) earnFrom(`${head} | ${play.label}`, paid);
       else spendOn(`${head} | ${play.label}`, -paid);
@@ -1227,8 +1263,9 @@ export function CryptoJourney() {
       spendOn("Tax debt payment", paid);
       lines.push(`Tax debt payment: ${formatMoney(paid)}.`);
     }
-    const rent = Math.round(house.rent * diff.cost);
-    const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)));
+    const rent = Math.round(house.rent * diff.cost * power.lifeCut);
+    const food = Math.round((520 + Math.floor(next / 4) * 190) * diff.cost * levelPerk(levelFor(run.xp)) * power.lifeCut);
+
     cash -= rent + food;
     spendOn(`Rent | ${house.name}`, rent);
     spendOn("Food & living", food);
@@ -1266,13 +1303,14 @@ export function CryptoJourney() {
     // leverage does not only cost money, it costs sleep
     const notional = positions.filter((p) => p.kind === "perp").reduce((s, p) => s + p.margin * p.lev, 0);
     const levered = Math.min(18, Math.round((notional / Math.max(1, startNet)) * 12));
-    const hunger = clamp(run.hunger + Math.round((8 + Math.floor(next / 6)) * arch.risk * diff.hunger) + (idle ? 7 : 0) + lifeHunger);
+    const hunger = clamp(run.hunger + Math.round(((8 + Math.floor(next / 6)) * arch.risk * diff.hunger + (idle ? 7 : 0) + lifeHunger) * power.hungerCut));
     const redQuarter = netOf({ ...run, chapter: next, cash, positions, taxDebt }) < startNet;
-    const nerves = run.perks.includes("STEEL NERVES") ? 0.7 : 1;
+    const nerves = (run.perks.includes("STEEL NERVES") ? 0.7 : 1) * power.stressCut;
     const stress = clamp(
       run.stress + Math.round(((6 + Math.floor(next / 7)) * arch.risk * diff.stress + (idle ? 10 : 0)
       + Math.round(job.stress * 0.5) - house.calm + levered + (redQuarter ? 8 : -3) + lifeStress) * nerves),
     );
+
 
     if (idle) lines.push("You made no moves this quarter. Boredom and doubt did the work instead.");
     if (levered >= 8) lines.push("Your leverage kept you awake. Stress climbed with the notional.");
@@ -1428,16 +1466,40 @@ export function CryptoJourney() {
     openChapterCards(run.chapter);
   };
 
+  /**
+   * One artefact, kept for the rest of the run. Two matching artefacts unlock a
+   * named synergy, which is where the collection starts to feel like a build.
+   */
+  const takeRelic = (card: Relic) => {
+    const owned = [...(run.relics ?? []), card.id];
+    const before = power.synergies.map((s) => s.name);
+    const after = relicPower(owned).synergies.filter((s) => !before.includes(s.name));
+    setRun((r) => ({ ...r, relics: owned, seen: Array.from(new Set([...r.seen, `relic-${r.chapter}`])) }));
+    playSfx("level");
+    grantXp(300, card.name);
+    if (after[0]) {
+      triggerGodCandle(`SYNERGY | ${after[0].name}`, 8);
+      say(`SYNERGY UNLOCKED | ${after[0].name} — ${after[0].line}`, "yellow");
+    } else say(`${card.name} | ${card.effect}`, "yellow");
+    setDialog(null);
+    openChapterCards(run.chapter);
+  };
+
   const continueChapter = () => {
     setResolution(null);
     setSkill(null);
     if (guide === 2) setGuide(null);
+    if (relicChapter(run.chapter) && !run.seen.includes(`relic-${run.chapter}`)) {
+      const cards = relicOffer(run.relics ?? [], (salt) => det(run.seed, salt), run.chapter);
+      if (cards.length) { setDialog({ k: "relic", cards }); return; }
+    }
     if (run.chapter >= 1 && !run.seen.includes(`loot-${run.chapter}`)) {
       setDialog({ k: "loot", cards: lootDraw((salt) => det(run.seed, salt), run.chapter) });
       return;
     }
     openChapterCards(run.chapter);
   };
+
 
   const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
 
@@ -1706,6 +1768,14 @@ export function CryptoJourney() {
             <i><b style={{ width: `${Math.max(2, Math.min(100, Math.round((Math.max(0, net) / Math.max(1, topMark.net)) * 100)))}%` }} /></i>
           </div>
         )}
+        <BossBar you={Math.max(0, net)} him={Math.max(0, bossNet)} wins={run.bossWins} phase={bossPhase} />
+        {(run.relics ?? []).length > 0 && (
+          <p className="cy-relic-strip">
+            {(run.relics ?? []).map((id) => <b key={id} title={`${relicOf(id)?.name} — ${relicOf(id)?.effect}`}>{relicOf(id)?.glyph ?? "?"}</b>)}
+            {power.synergies.map((s) => <span key={s.name}>{s.name}</span>)}
+          </p>
+        )}
+
         <button type="button" className="cy-intel-toggle" onClick={() => { playSfx("click"); setIntel((v) => !v); }} aria-expanded={intel}>
           {intel ? "HIDE BRIEFING" : `Q${run.chapter + 1}/${CHAPTERS} | ${mission.text.slice(0, 26)} | SHOW BRIEFING`}
         </button>
@@ -1780,7 +1850,7 @@ export function CryptoJourney() {
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
               <div className="cy-phase-banner"><span>{theme.badge}</span><strong>{chapterPlay.task}</strong><small>{theme.tag}</small></div>
               <div className="cy-arena-head"><p className="journey-kicker"><Zap /> LIVE MARKET | {ap} MOVE{ap === 1 ? "" : "S"} LEFT</p><strong>{focusSymbol} | {formatMoney(focusPrice)}</strong></div>
-              {cfg.tournament && <div className="cy-tournament-live"><Trophy /> LIVE MONTHLY TOURNAMENT | SAME SEED | $20 / $10 / $5 $TCFB</div>}
+              {cfg.tournament && <SeasonBanner compact />}
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className={`cy-boss-presence is-${arenaState}`}>
                   <img src={mood} alt="The Crypto Final Boss reacts to your run" />
@@ -1795,6 +1865,15 @@ export function CryptoJourney() {
                       <clipPath id="cy-chart-reveal"><rect ref={chartRevealRef} x="0" y="0" width={currentChartX} height="100" /></clipPath>
                     </defs>
                     <polygon points={`0,100 ${chartPath} 100,100`} fill="url(#cy-chart-fill)" />
+                    <g className="cy-candles" clipPath="url(#cy-chart-reveal)">
+                      {candles.map((c, i) => (
+                        <g key={i} className={c.up ? "is-up" : "is-down"}>
+                          <line x1={c.x} x2={c.x} y1={c.wickTop} y2={c.wickBottom} vectorEffect="non-scaling-stroke" />
+                          <rect x={c.x - 1.3} y={c.top} width="2.6" height={c.height} />
+                        </g>
+                      ))}
+                    </g>
+
                     <polyline className="cy-chart-ghost" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="1.1" vectorEffect="non-scaling-stroke" />
                     <polyline className="cy-chart-live-line" points={chartPath} fill="none" stroke="var(--journey-cyan)" strokeWidth="2" vectorEffect="non-scaling-stroke" clipPath="url(#cy-chart-reveal)" />
                     {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
@@ -1944,7 +2023,7 @@ export function CryptoJourney() {
       {levelUp !== null && <div className="cy-levelup" role="status">LEVEL {levelUp}<small>The Boss raised an eyebrow.</small></div>}
 
       {dialog && (
-        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" || dialog.k === "loot" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
+        <Sheet onClose={dialog.k === "decision" || dialog.k === "situation" || dialog.k === "mini" || dialog.k === "fight" || dialog.k === "offer" || dialog.k === "loot" || dialog.k === "relic" ? undefined : () => (dialog.k === "crash" || dialog.k === "failure" || dialog.k === "launchResult" ? nextInQueue() : setDialog(null))}>
           {dialog.k === "rules" && <Rules onClose={() => { setDialog(null); playOpening(0); }} />}
           {dialog.k === "how" && <HowToPlay onClose={() => setDialog(null)} />}
           {dialog.k === "sound" && <SoundSheet
@@ -1959,6 +2038,8 @@ export function CryptoJourney() {
             onPerp={(s, d, l, f) => openPerp(s, d, l, f)}
             onPosition={(id) => setDialog({ k: "position", id })} />}
           {dialog.k === "loot" && <LootSheet cards={dialog.cards} onPick={(card) => takeLoot(card)} />}
+          {dialog.k === "relic" && <RelicSheet cards={dialog.cards} owned={run.relics ?? []} onPick={takeRelic} />}
+
           {dialog.k === "more" && <MoreSheet
             ap={ap}
             stance={run.stance}
@@ -2299,6 +2380,63 @@ function LootSheet({ cards, onPick }: { cards: LootCard[]; onPick: (c: LootCard)
     </>
   );
 }
+
+/**
+ * The relic draft. Three artefacts, one kept forever, and the synergy list right
+ * under them so the player can see the build they are aiming at.
+ */
+function RelicSheet({ cards, owned, onPick }: { cards: Relic[]; owned: string[]; onPick: (c: Relic) => void }) {
+  const power = relicPower(owned);
+  const next = SYNERGY_HINTS(owned);
+  return (
+    <>
+      <h2>CHOOSE YOUR ARTEFACT</h2>
+      <p className="cy-note">Kept for the rest of the run. It changes your numbers, never the market.</p>
+      <div className="cy-relic-grid">
+        {cards.map((c) => (
+          <button key={c.id} className="cy-relic-card" onClick={() => { playSfx("click"); onPick(c); }}>
+            <b>{c.glyph}</b>
+            <strong>{c.name}</strong>
+            <small>{c.effect}</small>
+            <em>{c.line}</em>
+          </button>
+        ))}
+      </div>
+      {owned.length > 0 && (
+        <p className="cy-relic-own">HELD {owned.map((id) => relicOf(id)?.glyph ?? "?").join(" ")}{power.synergies.length ? ` | SYNERGY ${power.synergies.map((s) => s.name).join(" + ")}` : ""}</p>
+      )}
+      {next && <small className="cy-note">{next}</small>}
+    </>
+  );
+}
+
+/** One gentle nudge toward the closest synergy the player could still complete. */
+const SYNERGY_HINTS = (owned: string[]): string | null => {
+  for (const s of SYNERGIES) {
+    const missing = s.needs.filter((n) => !owned.includes(n));
+    if (owned.some((o) => s.needs.includes(o as never)) && missing.length === 1) {
+      return `One away from ${s.name}: add ${relicOf(missing[0]!)?.name}. ${s.line}`;
+    }
+  }
+  return null;
+};
+
+/**
+ * The Boss as an opponent you can actually hurt: his liquidity bar drains when
+ * you out-trade him or win a duel, and his face changes state with it.
+ */
+function BossBar({ you, him, wins, phase }: { you: number; him: number; wins: number; phase: "SMUG" | "PRESSED" | "ENRAGED" | "BROKEN" }) {
+  const total = Math.max(1, you + him);
+  const hp = Math.max(4, Math.min(100, Math.round((him / total) * 100)));
+  return (
+    <div className={`cy-bossbar is-${phase.toLowerCase()}`}>
+      <span className="cy-bossbar-head">THE FINAL BOSS <b>{phase}</b></span>
+      <div className="cy-bossbar-track"><i style={{ width: `${hp}%` }} /><u style={{ left: `${hp}%` }} /></div>
+      <span className="cy-bossbar-foot">HIS LIQUIDITY {formatMoney(him)} | DUELS WON {wins}/6</span>
+    </div>
+  );
+}
+
 
 function MoreSheet({ ap, stance, heat, conviction, convictionOn, verified, verifyCost, skillDone, skillHidden, skillHead, skillPrize, onStance, onConviction, onTerminal, onSurvive, onSkill, onVerify, onStorage, onHistory, onGuide, onEnd }: {
   ap: number; stance: Run["stance"]; heat: number; conviction: number; convictionOn: boolean;

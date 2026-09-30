@@ -73,3 +73,12 @@
 - [x] Trophy-Karte als Terminal-Audit-Report.
 
 - [x] Sichtbare Zielmarke: Platz-1-Netto wird einmal pro Seite geladen und eingefroren; Startscreen-Banner, HUD-Zeile "VS RANK 1" unter der Boss-Anzeige (auch mobil), Endscreen-Urteil und Share-Zeile.
+
+## Big upgrade pass (requested 2026-09-30)
+- [x] 1. Real boss duel: liquidity bar with SMUG / PRESSED / ENRAGED / BROKEN phases in the live HUD
+- [x] 2. Roguelike relics & synergies (12 relics, 5 synergies, draft every 4th quarter); relics cut rent/food/hunger/stress noise
+- [x] 3. Mobile no-scroll layout: 100dvh cockpit, 104px move cards, centered self-scrolling modals (verified 390x844)
+- [x] 4. October tournament: season rolls over on the clock, live countdown strip inside the run
+- [x] 5. Arcade juice: candle chart, neon boss bar, relic strip (flex card + trophy already live)
+
+- [x] MOMENTUM timing pilot verified in-game (entry verdict shown after skill moment)

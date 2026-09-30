@@ -1998,3 +1998,65 @@
 .cy-move.is-risk { border-color: var(--pit-shock); }
 .cy-move.is-safe { border-color: color-mix(in oklab, var(--pit-mint) 60%, var(--pit-edge)); }
 .cy-tape-btn { font-family: var(--font-mono); letter-spacing: 0.1em; }
+
+/* ==================================================================
+   ARCADE PASS — relics, the boss liquidity bar, candles, and a mobile
+   cockpit that fits one screen with thumb-sized buttons.
+   ================================================================== */
+
+/* --- the boss as an opponent with a health bar --- */
+.cy-bossbar { display:grid; gap:4px; margin-top:6px; padding:6px 8px; border:1px solid color-mix(in oklab,var(--pit-shock) 34%,var(--pit-edge)); background:color-mix(in oklab,var(--pit-bg) 70%,transparent); }
+.cy-bossbar-head { display:flex; justify-content:space-between; align-items:center; gap:8px; font-family:var(--font-mono); font-size:8px; font-weight:800; letter-spacing:.14em; color:var(--muted-foreground); }
+.cy-bossbar-head b { padding:1px 6px; border:1px solid currentColor; color:var(--pit-shock); font-size:8px; }
+.cy-bossbar-track { position:relative; height:9px; overflow:hidden; border:1px solid color-mix(in oklab,var(--pit-shock) 40%,transparent); background:color-mix(in oklab,var(--pit-bg) 90%,transparent); }
+.cy-bossbar-track i { display:block; height:100%; background:linear-gradient(90deg,color-mix(in oklab,var(--pit-shock) 85%,transparent),color-mix(in oklab,var(--pit-shock) 45%,transparent)); transition:width .6s cubic-bezier(.22,.9,.24,1); }
+.cy-bossbar-track u { position:absolute; top:-2px; width:2px; height:13px; background:var(--pit-amber); transition:left .6s cubic-bezier(.22,.9,.24,1); }
+.cy-bossbar-foot { font-family:var(--font-mono); font-size:8px; color:var(--muted-foreground); }
+.cy-bossbar.is-enraged { border-color:var(--pit-shock); animation:cy-bossbeat 1.1s ease-in-out infinite; }
+.cy-bossbar.is-enraged .cy-bossbar-head b { color:var(--pit-shock); background:color-mix(in oklab,var(--pit-shock) 18%,transparent); }
+.cy-bossbar.is-broken { border-color:var(--pit-mint); }
+.cy-bossbar.is-broken .cy-bossbar-head b { color:var(--pit-mint); }
+.cy-bossbar.is-broken .cy-bossbar-track i { background:linear-gradient(90deg,color-mix(in oklab,var(--pit-mint) 70%,transparent),transparent); }
+.cy-bossbar.is-smug .cy-bossbar-head b { color:var(--pit-amber); }
+@keyframes cy-bossbeat { 0%,100% { box-shadow:0 0 0 0 color-mix(in oklab,var(--pit-shock) 34%,transparent); } 50% { box-shadow:0 0 16px 0 color-mix(in oklab,var(--pit-shock) 30%,transparent); } }
+@media (prefers-reduced-motion: reduce) { .cy-bossbar.is-enraged { animation:none; } }
+
+/* --- relics: the draft and the held strip --- */
+.cy-relic-grid { display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+.cy-relic-card { display:grid; gap:4px; padding:14px 12px; border:2px solid var(--pit-edge); background:linear-gradient(180deg,color-mix(in oklab,var(--pit-steel) 92%,transparent),color-mix(in oklab,var(--pit-bg) 80%,transparent)); text-align:left; cursor:pointer; transition:transform .16s, border-color .16s, box-shadow .16s; }
+.cy-relic-card b { font-size:26px; line-height:1; }
+.cy-relic-card strong { font-family:var(--font-display); font-size:14px; letter-spacing:.06em; color:var(--pit-amber); }
+.cy-relic-card small { font-family:var(--font-mono); font-size:10px; color:var(--pit-mint); }
+.cy-relic-card em { font-size:10px; font-style:normal; color:var(--muted-foreground); }
+.cy-relic-card:hover, .cy-relic-card:focus-visible { transform:translateY(-3px); border-color:var(--pit-amber); box-shadow:0 10px 26px -14px color-mix(in oklab,var(--pit-amber) 60%,transparent); outline:none; }
+.cy-relic-own { font-family:var(--font-mono); font-size:10px; color:var(--pit-amber); }
+.cy-relic-strip { display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-top:5px; }
+.cy-relic-strip b { display:grid; place-items:center; width:24px; height:24px; border:1px solid color-mix(in oklab,var(--pit-amber) 45%,transparent); background:color-mix(in oklab,var(--pit-amber) 10%,transparent); font-size:13px; }
+.cy-relic-strip span { padding:2px 6px; border:1px solid var(--pit-mint); color:var(--pit-mint); font-family:var(--font-mono); font-size:8px; letter-spacing:.1em; }
+
+/* --- candles instead of a flat line --- */
+.cy-candles g.is-up rect { fill:color-mix(in oklab,var(--pit-mint) 78%,transparent); }
+.cy-candles g.is-up line { stroke:color-mix(in oklab,var(--pit-mint) 60%,transparent); stroke-width:.6; }
+.cy-candles g.is-down rect { fill:color-mix(in oklab,var(--pit-shock) 74%,transparent); }
+.cy-candles g.is-down line { stroke:color-mix(in oklab,var(--pit-shock) 58%,transparent); stroke-width:.6; }
+
+/* --- mobile cockpit: one screen, no scrolling, big thumb targets --- */
+@media (max-width: 640px) {
+  html, body { overflow:hidden; }
+  .cy-shell { height:100dvh; overflow:hidden; padding-bottom:max(6px,env(safe-area-inset-bottom)); }
+  .cy-shell .cy-bossbar-foot, .cy-shell .cy-relic-strip span { display:none; }
+  .cy-move { min-height:104px; padding:12px 12px; }
+  .cy-move strong { font-size:17px; line-height:1.1; }
+  .cy-move .cy-move-why, .cy-move small { font-size:10px; line-height:1.3; }
+  .cy-tape-btn, .cy-quick-btn { min-height:52px; font-size:12px; letter-spacing:.12em; }
+  .cy-primary { min-height:54px; font-size:14px; }
+  /* every popup sits dead centre and scrolls inside itself, never the page */
+  .cy-scrim { padding:10px; place-items:center; }
+  .cy-sheet { width:min(100%,460px); max-height:82dvh; overflow:auto; padding:16px; }
+  .cy-relic-grid { grid-template-columns:1fr; gap:6px; }
+  .cy-relic-card { padding:10px; grid-template-columns:34px minmax(0,1fr); grid-template-areas:"g n" "g e" "g l"; column-gap:9px; }
+  .cy-relic-card b { grid-area:g; font-size:22px; }
+  .cy-relic-card strong { grid-area:n; }
+  .cy-relic-card small { grid-area:e; }
+  .cy-relic-card em { grid-area:l; }
+}
