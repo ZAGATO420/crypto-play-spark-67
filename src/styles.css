@@ -2057,7 +2057,7 @@ body:has(.cy-shell) { background:var(--background); }
     linear-gradient(180deg, color-mix(in oklab,var(--background) 34%,transparent) 0%, color-mix(in oklab,var(--background) 78%,transparent) 44%, color-mix(in oklab,var(--background) 95%,transparent) 88%); }
 
 /* one column: HUD, strip, arena, actions */
-.cy-body { display:block !important; }
+@media (min-width: 641px) { .cy-body { display:block !important; grid-template-columns:none !important; } }
 .cy-stage { display:flex; flex-direction:column; min-height:0; }
 .cy-card { border-radius:14px !important; border:1px solid color-mix(in oklab,var(--arena-tint) 26%,var(--border)) !important;
   background:linear-gradient(180deg, color-mix(in oklab,var(--arena-tint) 7%,transparent), transparent 42%), color-mix(in oklab,var(--card) 94%,transparent) !important; }
@@ -2186,7 +2186,7 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-hud-xp { width:58px; }
   .cy-strip p { font-size:11px; }
 
-  .cy-body { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+  .cy-body { display:flex !important; grid-template-columns:none !important; flex:1 1 auto; min-height:0; flex-direction:column; }
   .cy-stage { flex:1 1 auto; min-height:0; }
   .cy-stage > article.cy-card { flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:6px; padding:9px; overflow:hidden; border-radius:12px !important; }
   .cy-card > h2 { font-size:20px; }
