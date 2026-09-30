@@ -303,6 +303,42 @@ const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) => {
   return Math.max(a * 0.02, (a + (b - a) * t) * (1 + wick + hunt));
 };
 
+/**
+ * MOMENTUM pilot: watching the tape is a skill. When the risky move is pressed we
+ * grade WHERE in the last ~3 seconds of ALREADY VISIBLE tape the click landed.
+ * Buying a visible local low pays a bonus, chasing a visible high (worse during a
+ * SWEEP fakeout) costs. The middle of the range is neutral, exactly as before.
+ */
+type Timing = { r: number; z: number; verdict: string };
+const TIMING_WINDOW = 3_000 / LIVE_MS; // three seconds of revealed tape
+
+const timingEdge = (symbol: CoinSymbol, r: Run, t: number, sweep: boolean): Timing => {
+  const from = Math.max(0, t - TIMING_WINDOW);
+  if (t - from < 0.01) return { r: 0, z: 0.5, verdict: "too early to read the tape | no edge" };
+  const steps = 24;
+  let low = Infinity;
+  let high = -Infinity;
+  for (let i = 0; i <= steps; i++) {
+    const price = livePrice(symbol, r, from + ((t - from) * i) / steps, sweep);
+    if (price < low) low = price;
+    if (price > high) high = price;
+  }
+  const price = livePrice(symbol, r, t, sweep);
+  const z = clamp((price - low) / Math.max(high - low, 1e-9), 0, 1);
+  const dipStrength = clamp((0.28 - z) / 0.28, 0, 1);
+  const topStrength = clamp((z - 0.72) / 0.28, 0, 1);
+  const edge = dipStrength > 0
+    ? dipStrength * 0.12
+    : topStrength > 0 ? -topStrength * (sweep ? 0.18 : 0.12) : 0;
+  const pct = `${edge >= 0 ? "+" : "−"}${Math.abs(Math.round(edge * 100))}%`;
+  const verdict = dipStrength > 0
+    ? `bought the local low | ${pct}`
+    : topStrength > 0
+      ? sweep ? `chased the sweep fakeout high | ${pct}` : `chased the local high | ${pct}`
+      : "entered mid range | no edge";
+  return { r: Number(edge.toFixed(4)), z: Number(z.toFixed(3)), verdict };
+};
+
 const pnlOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price - p.margin : p.margin * p.lev * p.dir * (price / p.entry - 1));
 const valueOf = (p: Pos, price: number) => (p.kind === "spot" ? p.qty * price : Math.max(0, p.margin + pnlOf(p, price)));
 const liqPct = (p: Pos, price: number) => (p.kind === "spot" ? 100 : clamp(100 + (pnlOf(p, price) / p.margin) * 100, 0, 100));
