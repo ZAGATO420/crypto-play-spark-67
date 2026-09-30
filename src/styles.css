@@ -2248,3 +2248,5 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-hud-side.is-you figcaption strong { font-size:22px !important; }
   .cy-hud-side.is-boss figcaption strong { font-size:17px !important; }
 }
+
+.cy-hud-side.is-you figcaption strong { outline:2px solid red !important; }
