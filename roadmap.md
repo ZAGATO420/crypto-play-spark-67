@@ -73,3 +73,11 @@
 - [x] Trophy-Karte als Terminal-Audit-Report.
 
 - [x] Sichtbare Zielmarke: Platz-1-Netto wird einmal pro Seite geladen und eingefroren; Startscreen-Banner, HUD-Zeile "VS RANK 1" unter der Boss-Anzeige (auch mobil), Endscreen-Urteil und Share-Zeile.
+
+## Big upgrade pass (requested 2026-09-30)
+- [ ] 1. Real boss duel: animated boss health/liquidity bar, counterattacks, phase visuals (Enraged / Smug / Broken)
+- [ ] 2. Roguelike relics & synergies (Balatro-style); cut dry micromanagement (job/rent/hunger noise)
+- [ ] 3. Mobile no-scroll layout: big buttons, centered modals for every interaction
+- [ ] 4. October tournament / season rollover live
+- [ ] 5. Arcade juice: neon, dynamic candles, viral X flex card at run end
+- [x] MOMENTUM timing pilot verified in-game (entry verdict shown after skill moment)
