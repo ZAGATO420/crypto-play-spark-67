@@ -35,6 +35,14 @@ import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
 
+/** Compact money for tight HUD chips: $1.4M, $920K, $480. */
+function shortMoney(v: number): string {
+  const a = Math.abs(v);
+  if (a >= 1_000_000) return `$${(a / 1_000_000).toFixed(a >= 10_000_000 ? 0 : 1)}M`;
+  if (a >= 1_000) return `$${(a / 1_000).toFixed(a >= 10_000 ? 0 : 1)}K`;
+  return `$${Math.round(a)}`;
+}
+
 
 
 /* ------------------------------------------------------------------ types */
