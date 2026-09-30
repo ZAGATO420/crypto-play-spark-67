@@ -2285,3 +2285,10 @@
   .cy-move { min-height:70px; }
   .cy-moves { max-height:88px; }
 }
+
+/* On the smallest screens the status rail yields height to the arena, so the
+   moves and the three footer buttons always get their full space. */
+@media (max-width: 640px) and (max-height: 670px) {
+  .cy-rail { max-height:38dvh; overflow:hidden; }
+  .cy-body { min-height:300px; }
+}
