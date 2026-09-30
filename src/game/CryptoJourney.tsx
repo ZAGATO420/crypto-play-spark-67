@@ -530,6 +530,19 @@ export function CryptoJourney() {
   const chartMax = Math.max(...chartPoints);
   const chartSpan = Math.max(Number.EPSILON, chartMax - chartMin);
   const chartPath = chartPoints.map((price, i) => `${(i / 27) * 100},${92 - ((price - chartMin) / chartSpan) * 76}`).join(" ");
+  /**
+   * The same live walk drawn as candles, so the quarter reads like a real chart:
+   * each step becomes an open/close body with a wick, green up, red down.
+   */
+  const candles = useMemo(() => chartPoints.slice(1).map((close, i) => {
+    const open = chartPoints[i]!;
+    const y = (p: number) => 92 - ((p - chartMin) / chartSpan) * 76;
+    const top = Math.min(y(open), y(close));
+    const bottom = Math.max(y(open), y(close));
+    const wick = Math.max(1.2, (bottom - top) * 0.55);
+    return { x: ((i + 0.5) / 27) * 100, top, height: Math.max(0.9, bottom - top), wickTop: top - wick, wickBottom: bottom + wick, up: close >= open };
+  }), [chartPoints, chartMin, chartSpan]);
+
   const currentChartX = Math.max(2, Math.min(98, tick * 100));
   const currentChartY = 92 - ((focusPrice - chartMin) / chartSpan) * 76;
   const entryChartY = focusPosition ? Math.max(10, Math.min(94, 92 - ((focusPosition.entry - chartMin) / chartSpan) * 76)) : null;
