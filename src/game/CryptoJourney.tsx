@@ -166,7 +166,7 @@ const STANCES: { id: Stance; name: string; short: string; line: string; win: num
 ];
 const stanceOf = (id: Stance) => STANCES.find((s) => s.id === id) ?? STANCES[1]!;
 /** Calling the quarter right stacks HEAT, and HEAT multiplies your next win. */
-const heatBonus = (heat: number) => 1 + Math.min(5, heat) * 0.12;
+const heatBonus = (heat: number, step = 0.12) => 1 + Math.min(5, heat) * step;
 
 
 export const AVATARS = [
