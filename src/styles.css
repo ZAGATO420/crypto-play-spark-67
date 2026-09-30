@@ -2237,3 +2237,14 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-card > .season-strip small { font-size:8px; }
   .cy-hud-side.is-you figcaption strong { font-size:21px; }
 }
+
+/* cockpit polish: your money is the hero number, the cash line never truncates */
+.cy-hud-side figcaption strong { color:var(--journey-cyan) !important; font-family:var(--font-display) !important; letter-spacing:0 !important; }
+.cy-hud-side.is-boss figcaption strong { color:var(--journey-pink) !important; }
+.cy-hud-side.is-you figcaption strong { font-size:clamp(20px,5.6vw,28px) !important; }
+.cy-hud-side figcaption span { white-space:nowrap; font-size:8px; }
+@media (max-width: 640px) {
+  .cy-hud { grid-template-columns:minmax(0,1.1fr) auto minmax(0,.92fr); }
+  .cy-hud-side.is-you figcaption strong { font-size:22px !important; }
+  .cy-hud-side.is-boss figcaption strong { font-size:17px !important; }
+}
