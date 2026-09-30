@@ -1715,7 +1715,7 @@ export function CryptoJourney() {
           <img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" />
           <figcaption>
             <strong className={netPulse ? `pulse-${netPulse}` : ""}><Count value={net} /></strong>
-            <span>{formatMoney(run.cash)} cash · <b className={openPnl >= 0 ? "positive" : "negative"}>{openPnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</b></span>
+            <span>{formatMoney(run.cash)} cash{openPnl !== 0 ? <> · <b className={openPnl > 0 ? "positive" : "negative"}>{openPnl > 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</b></> : null}</span>
             <i className="cy-hud-vitals" aria-label={`Stress ${run.stress}%, hunger ${run.hunger}%`}>
               <b className={`is-stress${run.stress >= 70 ? " is-critical" : ""}`}><u style={{ width: `${run.stress}%` }} /></b>
               <b className={`is-hunger${run.hunger >= 70 ? " is-critical" : ""}`}><u style={{ width: `${run.hunger}%` }} /></b>
