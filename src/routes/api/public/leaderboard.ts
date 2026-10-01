@@ -108,8 +108,11 @@ function maxLevelForXp(xp: number): number {
 function implausibleReason(run: z.infer<typeof runSchema>): string | null {
   // Airdrops/presales/50x perps can multiply an early run hard, so keep a very
   // generous floor for short runs and let the ceiling grow with months played.
-  const monthCeiling = Math.max(50_000_000, 25_000 * Math.pow(2.1, Math.max(run.months, 1)));
-  if (run.net > Math.min(monthCeiling, 1e10)) return "net";
+  // Calibrated on real runs (best so far ~$4M at 24 months): ~6x headroom early,
+  // growing per quarter, hard-capped at $200M for a full run.
+  const quarters = Math.max(run.months, 1) / 3;
+  const monthCeiling = Math.max(25_000_000, 500_000 * Math.pow(1.45, quarters));
+  if (run.net > Math.min(monthCeiling, 200_000_000)) return "net";
   // XP is earned per action; it cannot outrun the number of months by orders of magnitude.
   if (run.xp > 60_000 + run.months * 40_000) return "xp";
   if (run.trades > 120 + run.months * 120) return "trades";
@@ -301,6 +304,18 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           run.isTournament && run.difficulty.toUpperCase() === "NORMAL" && run.mode.toLowerCase() === "classic";
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        // Rate limit: at most 6 submissions per player key in 10 minutes.
+        if (run.playerKey) {
+          const since = new Date(Date.now() - 10 * 60_000).toISOString();
+          const { count } = await supabaseAdmin
+            .from("leaderboard_runs")
+            .select("id", { count: "exact", head: true })
+            .eq("player_key", run.playerKey)
+            .gte("created_at", since);
+          if ((count ?? 0) >= 6) {
+            return Response.json({ error: "too many submissions" }, { status: 429, headers: CORS });
+          }
+        }
         // Badges arrive uppercased from the client ("FINAL BOSS"); match case-insensitively.
         const rankMatch = RANKS.find((r) => r.toLowerCase() === run.rank.trim().toLowerCase());
         const finalScore = Math.round(Math.min(Math.max(0, run.score), scoreCeiling(run)));

@@ -27,7 +27,7 @@ export const RELICS: Relic[] = [
   { id: "laser_eyes", name: "LASER EYES", glyph: "👁", tag: "PAYOUT", line: "You see the move before the room does.", effect: "Winning risk moments pay +15%." },
   { id: "diamond_gloves", name: "DIAMOND GLOVES", glyph: "💎", tag: "SKILL", line: "Your hands stop shaking when it matters.", effect: "A fumbled skill moment costs 25% less." },
   { id: "cold_vault", name: "COLD VAULT", glyph: "🧊", tag: "LIFE", line: "Keys offline, nerves offline.", effect: "Rent and living costs drop 25%." },
-  { id: "mev_bot", name: "MEV BOT", glyph: "🤖", tag: "SKILL", line: "A little machine cleans up behind you.", effect: "Skill quality can never land below 0.35." },
+  { id: "mev_bot", name: "MEV BOT", glyph: "🤖", tag: "SKILL", line: "A little machine cleans up behind you.", effect: "A fumble never grades below 0.35, so misses cost less." },
   { id: "heat_core", name: "HEAT CORE", glyph: "🔥", tag: "HEAT", line: "Every correct read burns hotter.", effect: "Each HEAT step is worth +6% more." },
   { id: "whale_radar", name: "WHALE RADAR", glyph: "🐋", tag: "PAYOUT", line: "You feel the wick before it prints.", effect: "Your entry timing counts double." },
   { id: "gas_burner", name: "GAS BURNER", glyph: "⛽", tag: "PAYOUT", line: "You size up when the block is yours.", effect: "Risk moments stake 25% more, win or lose." },
@@ -47,7 +47,7 @@ export const SYNERGIES: Synergy[] = [
   { name: "ZEN DEGEN", needs: ["diamond_gloves", "copium_tank"], line: "Nothing rattles you: fumbles cost another 20% less." },
   { name: "SNIPER RIG", needs: ["whale_radar", "gas_burner"], line: "Big size, perfect entries: timing counts triple." },
   { name: "OFF THE GRID", needs: ["ramen_reserve", "cold_vault"], line: "Life gets cheap: another 20% off rent and food." },
-  { name: "HOUSE EDGE", needs: ["boss_tax", "mev_bot"], line: "The machine fights him for you: the skill floor rises to 0.5." },
+  { name: "HOUSE EDGE", needs: ["boss_tax", "mev_bot"], line: "The machine fights him for you: a fumble never grades below 0.5, so it hurts far less." },
 ];
 
 export type RelicPower = {
