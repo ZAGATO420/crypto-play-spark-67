@@ -127,6 +127,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     const next = from + 1;
     const startNet = netOf(from);
     const realizedBefore = st.realized;
+    const preRisk = st.risk; // force-close checks the risk you ENDED the quarter with
     st.risk = clamp(st.risk - 10);
 
     // Quarterly risk play
@@ -155,8 +156,8 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     }
     st.positions = still;
 
-    // Margin call at extreme stress
-    if (st.risk >= 95 && st.positions.some((p) => p.kind === "perp")) {
+    // Margin call at extreme stress (checked against pre-decay risk, like the client)
+    if (preRisk >= 95 && st.positions.some((p) => p.kind === "perp")) {
       for (const p of st.positions.filter((x) => x.kind === "perp")) {
         st.cash += Math.round(valueOf(p, priceAt(p.symbol, next)));
       }
@@ -166,10 +167,10 @@ export function verifyRun(input: VerifyInput): VerifyResult {
 
     // Funding
     const attack = attackFor(from, det(seed, `attack-${from}`), "calm");
-    const squeeze = attack?.id === "SQUEEZE" ? 2 : 1;
+    const squeeze = attack?.id === "SQUEEZE" ? 2.2 : 1;
     const funding = Math.round(
       st.positions.filter((p) => p.kind === "perp")
-        .reduce((a, p) => a + p.margin * p.lev * 0.012 * squeeze, 0));
+        .reduce((a, p) => a + p.margin * p.lev * 0.018 * squeeze, 0));
     if (funding > 0) st.cash -= funding;
 
     // Boss debt
@@ -177,12 +178,12 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       st.cash -= Math.round(Math.max(600, startNet * 0.02));
     }
 
-    // Exchange failure
+    // Exchange failure: everything on the exchange takes the haircut, perps included
     const failure = failureFor(next);
     if (failure) {
       let hit = 0;
       st.positions = st.positions.map((p) => {
-        if (p.kind === "spot" && p.where === failure.where) {
+        if (p.where === failure.where) {
           hit += 1;
           return { ...p, qty: p.qty * (1 - failure.haircut), margin: p.margin * (1 - failure.haircut) };
         }
@@ -191,10 +192,10 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       if (hit > 0) st.crises += 1;
     }
 
-    // Hot wallet drainer
-    if (det(seed, `drain-${next}`) < 0.07) {
+    // Hot wallet drainer (only when something is actually in the hot wallet)
+    if (st.positions.some((p) => p.where === "hot") && det(seed, `drain-${next}`) < custodyOf("hot").drain) {
       st.positions = st.positions.map((p) =>
-        p.kind === "spot" && p.where === "hot"
+        p.where === "hot"
           ? { ...p, qty: p.qty * 0.88, margin: p.margin * 0.88 } : p);
     }
 
