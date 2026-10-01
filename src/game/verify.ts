@@ -463,7 +463,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         break;
       }
       case "care": {
-        const cost = careCost(e.kind, c, diff);
+        const cost = careCost(e.kind, c, diff.id);
         if (e.cost !== cost) return fail(`care-cost@${i}`);
         if (st.cares >= diff.caps || st.cash < cost) return fail(`care-cap@${i}`);
         st.cash -= cost;
