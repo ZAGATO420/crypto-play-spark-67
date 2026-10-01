@@ -42,7 +42,7 @@ export type RunSubmission = {
   isTournament?: boolean;
   playerKey?: string;
   /** Tournament audit trail; the server replays it before the entry counts for prizes. */
-  log?: LogEvent[];
+  log?: LogEvent[] | undefined;
 };
 
 export type SubmitFailure = "offline" | "rejected" | "unavailable";

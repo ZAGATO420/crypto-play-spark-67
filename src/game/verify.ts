@@ -8,9 +8,9 @@ import {
   ARCHETYPES, CHAPTERS, COINS, DIFFICULTIES, TAX_RATE, TOURNAMENT_RULES, XP, XP_EXTRA,
   attackFor, bossFightFor, careCost, chapterMonth, chapterPlayFor, crashFor, custodyOf,
   decisionForChapter, failureFor, housingOf, isTaxChapter, jobOf, levelFor,
-  levelPerk, lootDraw, missionFor, pickLifeEvent, presaleFor,
-  situationFor, skillCheckFor, stanceOf,
-  type CoinSymbol, type CustodyId, type HousingId, type JobId, type Stance,
+  levelPerk, lootDraw, missionFor, monthsSurvived, personaFor, pickLifeEvent,
+  presaleFor, situationFor, skillCheckFor,
+  type CoinSymbol, type CustodyId, type HousingId, type JobId,
 } from "./journey-data";
 import { relicChapter, relicOffer, relicPower, type RelicId } from "./relics";
 import { det, hashString } from "./rng";
@@ -37,6 +37,16 @@ const MODIFIERS = [
   { id: "lowcap", name: "LOW-CAP SEASON" },
 ] as const;
 
+// Mirrors the client's STANCES table (CryptoJourney.tsx) — kept local so this
+// module stays importable from the server without pulling in the game screen.
+type VStance = "survive" | "balanced" | "degen";
+const STANCES: { id: VStance; win: number; loss: number; xp: number }[] = [
+  { id: "survive", win: 0.6, loss: 0.5, xp: 60 },
+  { id: "balanced", win: 1, loss: 1, xp: 40 },
+  { id: "degen", win: 1.6, loss: 1.6, xp: 120 },
+];
+const stanceOf = (id: VStance) => STANCES.find((s) => s.id === id) ?? STANCES[1]!;
+
 const clamp = (v: number, min = 0, max = 100) => Math.min(max, Math.max(min, v));
 const heatBonus = (streak: number, step = 0.12) => 1 + Math.min(9, Math.max(0, streak)) * step;
 
@@ -50,33 +60,33 @@ type VState = {
   risk: number; realized: number; taxDebt: number; xp: number; trades: number;
   crises: number; bossWins: number; custody: CustodyId; job: JobId; housing: HousingId;
   relics: RelicId[]; perks: string[]; statuses: string[]; fought: number[];
-  stance: Stance; heat: number; streak: number; conviction: number; convictionOn: boolean;
+  stance: VStance; heat: number; streak: number; conviction: number; convictionOn: boolean;
   moves: number; cares: number; chapter: number; ended: boolean;
   riskPlay: null | { chapter: number; quality: number; stake: number; mode: string; symbol: CoinSymbol; settled: boolean; timingR: number | null };
 };
 
-const XP_MODE_CLASSIC = 1;
-
 export function verifyRun(input: VerifyInput): VerifyResult {
-  const arch = ARCHETYPES[input.archetype as keyof typeof ARCHETYPES];
+  const arch = ARCHETYPES.find((a) => a.id === input.archetype);
   if (!arch) return { ok: false, reason: "archetype" };
-  const diff = DIFFICULTIES.NORMAL; // tournaments always run NORMAL rules
+  const diff = DIFFICULTIES.find((d) => d.id === "NORMAL")!; // tournaments always run NORMAL rules
   const seed = hashString(`tcfb-season-${input.season}`);
-  const modifier = MODIFIERS[Math.floor(det(seed, "modifier") * MODIFIERS.length) % MODIFIERS.length].id;
+  const modifier = MODIFIERS[Math.floor(det(seed, "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
+  const bias = personaFor(det(seed, "persona")).bias;
   const noise = Array.from({ length: 84 }, (_, i) => (det(seed, `noise-${i}`) - 0.5) * 0.036);
 
+  const coin = (symbol: string) => COINS.find((c) => c.symbol === symbol);
   const monthOf = (chapter: number) => chapterMonth(Math.min(Math.max(chapter, 0), CHAPTERS - 1));
   const rawAt = (symbol: CoinSymbol, chapter: number) => {
-    const price = COINS[symbol].prices[monthOf(chapter)];
+    const price = coin(symbol)?.prices[monthOf(chapter)] ?? 0;
     return Number.isFinite(price) && price > 0 ? price : 0;
   };
   const priceAt = (symbol: CoinSymbol, chapter: number) =>
-    clamp(rawAt(symbol, chapter) * (1 + noise[monthOf(chapter)]), 0.00000001);
+    clamp(rawAt(symbol, chapter) * (1 + (noise[monthOf(chapter)] ?? 0)), 0.00000001);
 
   // Live price range for a chapter: entries use the live tape, so accept any
   // price the tape could have shown (with and without a sweep wick).
   const liveRange = (symbol: CoinSymbol, chapter: number): [number, number] => {
-    const attack = attackFor(chapter, det(seed, `attack-${chapter}`), "calm");
+    const attack = attackFor(chapter, det(seed, `attack-${chapter}`), bias);
     const sweeping = attack?.id === "SWEEP";
     let lo = Infinity, hi = 0;
     for (let i = 0; i <= 40; i++) {
@@ -109,8 +119,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
 
   const power = () => relicPower(st.relics);
   const perkFee = () => (st.perks.includes("CHEAP FEES") ? 0.5 : 1);
-  const grantXp = (amount: number) =>
-    Math.max(1, Math.round(amount * arch.xp * XP_MODE_CLASSIC * power().xpMul));
+  const grantXp = (amount: number) => Math.max(1, Math.round(amount * arch.xp * power().xpMul));
   const pnlOf = (p: VPos, price: number) =>
     p.kind === "perp" ? (price / p.entry - 1) * p.dir * p.lev * p.margin : 0;
   const valueOf = (p: VPos, price: number) =>
@@ -130,7 +139,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     const preRisk = st.risk; // force-close checks the risk you ENDED the quarter with
     st.risk = clamp(st.risk - 10);
 
-    // Quarterly risk play
+    // Quarterly risk play, paid against the real market move
     if (st.riskPlay && st.riskPlay.chapter === from && !st.riskPlay.settled) {
       const rp = st.riskPlay;
       const before = priceAt(rp.symbol, from), after = priceAt(rp.symbol, next);
@@ -147,7 +156,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       st.riskPlay = { ...rp, settled: true };
     }
 
-    // Liquidations
+    // Liquidations on the new prices
     const still: VPos[] = [];
     for (const p of st.positions) {
       if (p.kind === "perp" && pnlOf(p, priceAt(p.symbol, next)) <= -p.margin * 0.97) {
@@ -166,7 +175,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     }
 
     // Funding
-    const attack = attackFor(from, det(seed, `attack-${from}`), "calm");
+    const attack = attackFor(from, det(seed, `attack-${from}`), bias);
     const squeeze = attack?.id === "SQUEEZE" ? 2.2 : 1;
     const funding = Math.round(
       st.positions.filter((p) => p.kind === "perp")
@@ -183,7 +192,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     if (failure) {
       let hit = 0;
       st.positions = st.positions.map((p) => {
-        if (p.where === failure.where) {
+        if (p.where === "exchange") {
           hit += 1;
           return { ...p, qty: p.qty * (1 - failure.haircut), margin: p.margin * (1 - failure.haircut) };
         }
@@ -195,8 +204,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     // Hot wallet drainer (only when something is actually in the hot wallet)
     if (st.positions.some((p) => p.where === "hot") && det(seed, `drain-${next}`) < custodyOf("hot").drain) {
       st.positions = st.positions.map((p) =>
-        p.where === "hot"
-          ? { ...p, qty: p.qty * 0.88, margin: p.margin * 0.88 } : p);
+        p.where === "hot" ? { ...p, qty: p.qty * 0.88, margin: p.margin * 0.88 } : p);
     }
 
     // Income, debt service, living costs
@@ -282,7 +290,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   };
 
   for (let i = 0; i < input.log.length; i++) {
-    const e = input.log[i];
+    const e = input.log[i]!;
     if (st.ended) return fail(`event-after-end@${i}`);
     if (typeof e.c !== "number" || e.c < 0) return fail(`chapter-order@${i}`);
     const c = e.c;
@@ -297,7 +305,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     switch (e.t) {
       case "spot": {
         const sym = e.s as CoinSymbol;
-        if (!COINS[sym]) return fail(`spot-symbol@${i}`);
+        if (!coin(sym)) return fail(`spot-symbol@${i}`);
         if (e.size < 50 || e.size + e.fee > st.cash + 1) return fail(`spot-size@${i}`);
         if (!inRange(sym, c, e.price)) return fail(`spot-price@${i}`);
         const fee = Math.round(e.size * custodyOf(st.custody).fee * perkFee());
@@ -309,7 +317,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       }
       case "perp": {
         const sym = e.s as CoinSymbol;
-        if (!COINS[sym]) return fail(`perp-symbol@${i}`);
+        if (!coin(sym)) return fail(`perp-symbol@${i}`);
         if (e.margin < 50 || e.margin > st.cash + 1) return fail(`perp-margin@${i}`);
         if (e.lev < 2 || e.lev > 50 || (e.dir !== 1 && e.dir !== -1)) return fail(`perp-shape@${i}`);
         if (!inRange(sym, c, e.price)) return fail(`perp-price@${i}`);
@@ -340,7 +348,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         if (e.frac >= 0.999) st.positions = st.positions.filter((p) => p.id !== pos.id);
         else { pos.margin -= cost; pos.qty *= 1 - e.frac; }
         if (pos.where === "cold") st.moves += 1;
-        st.xp += grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (e.q >= 1 ? 260 : e.q > 0.5 ? 120 : 0));
+        st.xp += grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (e.q >= 1 ? XP_EXTRA.minigamePerfect : e.q > 0.5 ? XP_EXTRA.minigameOk : 0));
         break;
       }
       case "risk": {
@@ -348,7 +356,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         if (play.mode !== e.mode) return fail(`risk-mode@${i}`);
         if (play.mode === "HUNT" || play.mode === "BOSS DUEL") return fail(`risk-kind@${i}`);
         const sym = e.sym as CoinSymbol;
-        if (!COINS[sym]) return fail(`risk-symbol@${i}`);
+        if (!coin(sym)) return fail(`risk-symbol@${i}`);
         if (play.mode !== "ACCUMULATE" && play.mode !== "MOMENTUM" && sym !== "BTC") return fail(`risk-btc@${i}`);
         const expected = Math.min(Math.max(400, Math.round(netOf(c) * 0.03)), Math.max(0, Math.round(st.cash * 0.25)));
         if (!near(e.stake, expected, Math.max(10, expected * 0.12))) return fail(`risk-stake@${i}`);
@@ -373,7 +381,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         } else {
           const rugged = det(seed, `rug-${c}-${card.name}`) < card.rug / (arch.risk || 1);
           const multi = rugged ? 0.08
-            : (card.up[0] + det(seed, `multi-${c}-${card.name}`) * (card.up[1] - card.up[0])) * (0.85 + e.q * 0.3);
+            : (card.upside[0] + det(seed, `multi-${c}-${card.name}`) * (card.upside[1] - card.upside[0])) * (0.85 + e.q * 0.3);
           const back = Math.round(e.size * multi);
           if (!near(e.back, back, Math.max(2, Math.abs(back) * 0.02))) return fail(`presale-back@${i}`);
           st.cash += back - e.size;
@@ -437,10 +445,10 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       case "crash": {
         if (!crashFor(c)) return fail(`crash-card@${i}`);
         if (e.q < 0 || e.q > 1) return fail(`crash-q@${i}`);
-        if (e.q >= 0.9) st.xp += grantXp(520);
+        if (e.q >= 0.9) st.xp += grantXp(XP_EXTRA.escape);
         else if (e.q >= 0.5) {
           st.positions = st.positions.map((p) => ({ ...p, qty: p.qty * 0.94, margin: p.margin * 0.94 }));
-          st.xp += grantXp(120);
+          st.xp += grantXp(XP_EXTRA.minigameOk);
         } else {
           st.positions = st.positions.map((p) => ({ ...p, qty: p.qty * 0.84, margin: p.margin * 0.84 }));
         }
@@ -448,7 +456,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       }
       case "seedphrase": {
         if (e.q < 0 || e.q > 1) return fail(`seed-q@${i}`);
-        if (e.q >= 0.9) st.xp += grantXp(520);
+        if (e.q >= 0.9) st.xp += grantXp(XP_EXTRA.escape);
         else if (e.q >= 0.5) st.cash = Math.max(0, st.cash - 400);
         else st.positions = st.positions.map((p) =>
           p.where === "cold" ? { ...p, qty: p.qty * 0.5, margin: p.margin * 0.5 } : p);
@@ -484,7 +492,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         break;
       }
       case "offer": {
-        const attack = attackFor(c, det(seed, `attack-${c}`), "calm");
+        const attack = attackFor(c, det(seed, `attack-${c}`), bias);
         if (attack?.id !== "OFFER") return fail(`offer-attack@${i}`);
         const expected = Math.max(2000, Math.round(netOf(c) * 0.25));
         if (!near(e.amount, expected, Math.max(50, expected * 0.15))) return fail(`offer-amount@${i}`);
@@ -508,7 +516,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       case "relic": {
         if (!relicChapter(c)) return fail(`relic-chapter@${i}`);
         const offer = relicOffer(st.relics, (salt: string) => det(seed, salt), c);
-        if (!offer.includes(e.id as RelicId)) return fail(`relic-offer@${i}`);
+        if (!offer.some((r) => r.id === e.id)) return fail(`relic-offer@${i}`);
         st.relics.push(e.id as RelicId);
         st.xp += grantXp(300);
         break;
@@ -519,7 +527,8 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         break;
       }
       case "stance": {
-        st.stance = e.stance as Stance;
+        if (!["survive", "balanced", "degen"].includes(e.stance)) return fail(`stance@${i}`);
+        st.stance = e.stance as VStance;
         break;
       }
       case "bank": {
@@ -564,7 +573,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   if (Math.abs(st.xp - input.xp) > 300) return fail(`xp-mismatch:${st.xp}vs${input.xp}`);
   if (st.trades !== input.trades) return fail(`trades-mismatch:${st.trades}vs${input.trades}`);
   if (input.achievements > st.crises + 1) return fail(`crises-mismatch`);
-  const expectedMonths = Math.min(monthsSurvived(st.chapter), 84);
+  const expectedMonths = monthsSurvived(st.chapter);
   if (Math.abs(expectedMonths - input.months) > 3) return fail(`months-mismatch:${expectedMonths}vs${input.months}`);
   if (input.survived && finalNet <= 0) return fail(`survived-broke`);
 
