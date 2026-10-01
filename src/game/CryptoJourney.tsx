@@ -121,7 +121,7 @@ const PHASE_RISK: Record<ChapterMode, { kind: MiniKind; head: string; hit: strin
 
 type Dialog =
   | { k: "rules" }
-  | { k: "market" }
+  | { k: "market"; tab?: Kind }
   | { k: "trade"; symbol: CoinSymbol }
   | { k: "position"; id: number }
   | { k: "presale"; card: Presale }
@@ -753,6 +753,9 @@ export function CryptoJourney() {
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
     showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin | entry ${formatMoney(price)}`, "perp");
     playSfx("buy");
+    // opening leverage is the loudest moment in the game: the candle shows the
+    // exact leverage you picked, never a hardcoded number
+    triggerGodCandle(`${symbol} ${dir === 1 ? "LONG" : "SHORT"}`, lev, margin);
 
     grantXp(XP.trade + lev * 8, `${lev}x`);
     playOpening();
@@ -1195,6 +1198,8 @@ export function CryptoJourney() {
       lines.push(`Risk moment | ${head}: ${play.label} on a ${ret >= 0 ? "+" : ""}${(ret * 100).toFixed(1)}% ${play.symbol} quarter — ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.`);
       if (play.timing) lines.push(`Timed entry | ${play.timing.verdict}${edge !== 0 ? ` — skill result ${base >= 0 ? "+" : "−"}${formatMoney(Math.abs(base))} became ${paid >= 0 ? "+" : "−"}${formatMoney(Math.abs(paid))}.` : " — no change to the payout."}`);
       riskSettled = { ...play, delta: paid, settled: true };
+      // a big reveal gets the candle with the multiple actually earned on the stake
+      if (paid > 0 && play.stake > 0 && paid / play.stake >= 0.5) triggerGodCandle(`${play.label}`, 1 + paid / play.stake, paid);
     }
     let lifeHunger = 0;
     let lifeStress = 0;
@@ -1807,7 +1812,7 @@ export function CryptoJourney() {
                         <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
                           <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => { setActiveSymbol(p.symbol); setDialog({ k: "position", id: p.id }); }}>
                             <img src={COIN_LOGO[p.symbol]} alt="" width={18} height={18} />
-                            <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
+                            <span><strong>{p.symbol}</strong><small className={`cy-chip-lev ${p.kind === "spot" ? "is-spot" : p.dir === 1 ? "is-long" : "is-short"}`}>{p.kind === "spot" ? "SPOT" : `${p.lev}x ${p.dir === 1 ? "LONG" : "SHORT"}`}</small></span>
                             <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
                             {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
                           </button>
@@ -1890,10 +1895,10 @@ export function CryptoJourney() {
                   screen instead of hiding behind MORE. */}
               {guide === null && (
                 <div className="cy-trade-row" aria-label="Open the trading desk">
-                  <button type="button" className="cy-quick-btn is-spot" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market" }); }}>
+                  <button type="button" className="cy-quick-btn is-spot" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market", tab: "spot" }); }}>
                     <WalletCards />BUY SPOT
                   </button>
-                  <button type="button" className="cy-quick-btn is-perp" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market" }); }}>
+                  <button type="button" className="cy-quick-btn is-perp" onClick={() => { playSfx("click"); setActiveSymbol(focusSymbol); setDialog({ k: "market", tab: "perp" }); }}>
                     <Zap />PERPS | UP TO 50x
                   </button>
                 </div>
@@ -1984,7 +1989,7 @@ export function CryptoJourney() {
             onSfx={(v) => { setSfxVol(v); setVols(getVolumes()); playSfx("click"); }}
             onClose={() => setDialog(null)} />}
           {dialog.k === "score" && <ScoreSheet net={net} chapters={run.chapter} diff={cfg.difficulty} crises={run.crises} streak={run.streak} score={score} onClose={() => setDialog(null)} />}
-          {dialog.k === "market" && <TerminalSheet run={run} start={activeSymbol}
+          {dialog.k === "market" && <TerminalSheet run={run} start={activeSymbol} startTab={dialog.tab ?? "spot"}
             onSpot={(s, f) => openSpot(s, f)}
             onPerp={(s, d, l, f) => openPerp(s, d, l, f)}
             onPosition={(id) => setDialog({ k: "position", id })} />}
@@ -2233,15 +2238,15 @@ function ScoreSheet({ net, chapters, diff, crises, streak, score, onClose }: { n
  * the market strip, spot versus perp, leverage, the liquidation price in
  * plain numbers, and every open position with a one-tap exit.
  */
-function TerminalSheet({ run, start, onSpot, onPerp, onPosition }: {
-  run: Run; start: CoinSymbol;
+function TerminalSheet({ run, start, startTab = "spot", onSpot, onPerp, onPosition }: {
+  run: Run; start: CoinSymbol; startTab?: Kind;
   onSpot: (s: CoinSymbol, f: number) => void;
   onPerp: (s: CoinSymbol, d: 1 | -1, l: number, f: number) => void;
   onPosition: (id: number) => void;
 }) {
   const live = COINS.filter((c) => priceAt(c.symbol, run.chapter, run.noise) > 0);
   const [symbol, setSymbol] = useState<CoinSymbol>(live.some((c) => c.symbol === start) ? start : (live[0]?.symbol ?? "BTC"));
-  const [tab, setTab] = useState<Kind>("spot");
+  const [tab, setTab] = useState<Kind>(startTab);
   const [dir, setDir] = useState<1 | -1>(1);
   const [lev, setLev] = useState<number>(5);
   const price = priceAt(symbol, run.chapter, run.noise);
