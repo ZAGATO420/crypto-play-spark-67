@@ -62,10 +62,12 @@ export type Database = {
           player_key: string | null
           player_name: string
           rank_title: string
+          run_log: Json | null
           score: number
           season: string | null
           survived: boolean
           trades: number
+          verified: boolean
           wallet: string | null
           xp: number
         }
@@ -86,10 +88,12 @@ export type Database = {
           player_key?: string | null
           player_name: string
           rank_title?: string
+          run_log?: Json | null
           score?: number
           season?: string | null
           survived?: boolean
           trades?: number
+          verified?: boolean
           wallet?: string | null
           xp?: number
         }
@@ -110,10 +114,12 @@ export type Database = {
           player_key?: string | null
           player_name?: string
           rank_title?: string
+          run_log?: Json | null
           score?: number
           season?: string | null
           survived?: boolean
           trades?: number
+          verified?: boolean
           wallet?: string | null
           xp?: number
         }
