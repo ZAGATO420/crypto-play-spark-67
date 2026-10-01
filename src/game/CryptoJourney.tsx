@@ -1578,6 +1578,11 @@ export function CryptoJourney() {
       const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? "{}");
       if (saved.run) {
         const restored = { ...freshRun(saved.run.config ?? defaultConfig), ...saved.run } as Run;
+        // Old or damaged saves: drop positions missing numbers so nothing shows $NaN.
+        const ok = (p: Partial<Pos>) => [p.margin, p.entry, p.qty, p.lev].every((v) => typeof v === "number" && Number.isFinite(v)) && (p.dir === 1 || p.dir === -1);
+        restored.positions = (Array.isArray(restored.positions) ? restored.positions : []).filter(ok).map((p) => ({ ...p, where: p.where ?? "exchange" } as Pos));
+        if (!Array.isArray(restored.relics)) restored.relics = [];
+        if (!Array.isArray(restored.seen)) restored.seen = [];
         setRun(restored);
         setActiveSymbol([...restored.positions].sort((a, b) => b.margin - a.margin)[0]?.symbol ?? "BTC");
         setPhase(saved.phase ?? "brief");
