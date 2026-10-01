@@ -240,9 +240,9 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     // Stance plan + heat
     const plan = stanceOf(st.stance);
     const calledRight =
-      (plan.call === "green" && delta > 0) ||
-      (plan.call === "red" && delta < 0) ||
-      (plan.call === "flat" && Math.abs(delta) < Math.max(600, startNet * 0.03));
+      (st.stance === "degen" && delta > 0) ||
+      (st.stance === "survive" && delta < 0) ||
+      (st.stance === "balanced" && Math.abs(delta) < Math.max(1, startNet * 0.03));
     let planCash = 0;
     if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(st.heat) : 1));
     else if (delta < 0) planCash = Math.round(Math.abs(delta) * (1 - plan.loss));
@@ -355,7 +355,9 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         if (e.q < 0 || e.q > 1) return fail(`risk-q@${i}`);
         st.riskPlay = { chapter: c, quality: e.q, stake: e.stake, mode: play.mode, symbol: sym, settled: false, timingR: e.timingR };
         if (play.mode !== "ACCUMULATE") st.moves += 1;
-        st.xp += grantXp(e.q >= 0.9 ? 700 : e.q >= 0.6 ? 450 : 120);
+        // client adds this XP raw (no multipliers) and bumps HEAT on a perfect
+        st.xp += e.q >= 0.9 ? 700 : e.q >= 0.6 ? 450 : 120;
+        st.heat = e.q >= 0.9 ? st.heat + 1 : e.q >= 0.6 ? st.heat : 0;
         break;
       }
       case "presale": {
@@ -367,7 +369,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         if (e.q < 0.2) {
           const gas = Math.round(e.size * 0.06);
           if (!near(e.gas ?? -1, gas, 2) || e.back !== 0) return fail(`presale-gas@${i}`);
-          st.cash -= gas;
+          st.cash = Math.max(0, st.cash - gas);
         } else {
           const rugged = det(seed, `rug-${c}-${card.name}`) < card.rug / (arch.risk || 1);
           const multi = rugged ? 0.08
@@ -396,10 +398,12 @@ export function verifyRun(input: VerifyInput): VerifyResult {
           st.cash += won;
           st.perks.push(fight.perk);
           st.bossWins += 1;
+          st.conviction = clamp(st.conviction + 35);
           st.xp += grantXp(XP_EXTRA.escape * 2);
         } else if (e.q >= 0.5) {
           if (e.delta !== 0) return fail(`fight-delta@${i}`);
-          st.xp += grantXp(120);
+          st.conviction = clamp(st.conviction + 10);
+          st.xp += grantXp(XP_EXTRA.minigameOk);
         } else {
           if (e.delta !== -e.wager) return fail(`fight-delta@${i}`);
           st.cash = Math.max(0, st.cash - e.wager);
