@@ -305,8 +305,36 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         // Tournament conditions are fixed: NORMAL difficulty and the CLASSIC market.
         // A run played on anything else is still kept, but only as a free run, so
         // the prize ranking stays comparable.
-        const asTournament =
+        let asTournament =
           run.isTournament && run.difficulty.toUpperCase() === "NORMAL" && run.mode.toLowerCase() === "classic";
+
+        // Prize entries must prove themselves: the server replays the run's
+        // action log against the same deterministic history and recomputes the
+        // final numbers. A run that does not replay cleanly is still stored,
+        // but as a free run — never as a prize candidate.
+        let verified = false;
+        if (asTournament) {
+          if (!run.log || run.log.length === 0 || !run.season) {
+            asTournament = false;
+          } else {
+            const verdict = verifyRun({
+              archetype: run.arch,
+              season: run.season,
+              log: run.log as unknown as LogEvent[],
+              netWorth: run.net,
+              xp: run.xp,
+              trades: run.trades,
+              achievements: run.achievements,
+              months: run.months,
+              survived: run.survived,
+            });
+            if (verdict.ok) verified = true;
+            else {
+              console.warn("tournament run failed replay", { reason: verdict.reason, name: run.name, season: run.season });
+              asTournament = false;
+            }
+          }
+        }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         // Rate limit: at most 6 submissions per player key in 10 minutes.
@@ -345,6 +373,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
           is_tournament: asTournament,
           player_key: asTournament ? run.playerKey ?? null : null,
           avatar: run.avatar ?? null,
+          verified,
+          run_log: verified ? (run.log as unknown as LogEvent[]) : null,
         };
 
         // Every run is kept as its own row. Ranking dedupes a player's runs when
@@ -365,7 +395,7 @@ export const Route = createFileRoute("/api/public/leaderboard")({
         }
 
 
-        return Response.json({ ok: true, success: true }, { status: 201, headers: CORS });
+        return Response.json({ ok: true, success: true, verified }, { status: 201, headers: CORS });
       },
     },
   },
