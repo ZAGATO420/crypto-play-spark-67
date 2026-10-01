@@ -6,9 +6,9 @@
  */
 import {
   ARCHETYPES, CHAPTERS, COINS, DIFFICULTIES, TAX_RATE, TOURNAMENT_RULES, XP, XP_EXTRA,
-  attackFor, bossFightFor, careCost, chapterMonth, chapterPlayFor, custodyOf,
+  attackFor, bossFightFor, careCost, chapterMonth, chapterPlayFor, crashFor, custodyOf,
   decisionForChapter, failureFor, housingOf, isTaxChapter, jobOf, levelFor,
-  levelPerk, lootDraw, missionFor, monthsSurvived, pickLifeEvent, presaleFor,
+  levelPerk, lootDraw, missionFor, pickLifeEvent, presaleFor,
   situationFor, skillCheckFor, stanceOf,
   type CoinSymbol, type CustodyId, type HousingId, type JobId, type Stance,
 } from "./journey-data";
@@ -50,12 +50,12 @@ type VState = {
   risk: number; realized: number; taxDebt: number; xp: number; trades: number;
   crises: number; bossWins: number; custody: CustodyId; job: JobId; housing: HousingId;
   relics: RelicId[]; perks: string[]; statuses: string[]; fought: number[];
-  stance: Stance; heat: number; conviction: number; convictionOn: boolean;
+  stance: Stance; heat: number; streak: number; conviction: number; convictionOn: boolean;
   moves: number; cares: number; chapter: number; ended: boolean;
   riskPlay: null | { chapter: number; quality: number; stake: number; mode: string; symbol: CoinSymbol; settled: boolean; timingR: number | null };
 };
 
-const XP_MODE: Record<string, number> = { classic: 1, daily: 1.2, blitz: 0.8, custom: 1.25 };
+const XP_MODE_CLASSIC = 1;
 
 export function verifyRun(input: VerifyInput): VerifyResult {
   const arch = ARCHETYPES[input.archetype as keyof typeof ARCHETYPES];
@@ -63,7 +63,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   const diff = DIFFICULTIES.NORMAL; // tournaments always run NORMAL rules
   const seed = hashString(`tcfb-season-${input.season}`);
   const modifier = MODIFIERS[Math.floor(det(seed, "modifier") * MODIFIERS.length) % MODIFIERS.length].id;
-  const noise = makeNoise(seed);
+  const noise = Array.from({ length: 84 }, (_, i) => (det(seed, `noise-${i}`) - 0.5) * 0.036);
 
   const monthOf = (chapter: number) => chapterMonth(Math.min(Math.max(chapter, 0), CHAPTERS - 1));
   const rawAt = (symbol: CoinSymbol, chapter: number) => {
@@ -103,14 +103,14 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     trades: 0, crises: 0, bossWins: 0, custody: "exchange", job: "dayjob",
     housing: "shared", relics: [], perks: [],
     statuses: modifier !== "straight" ? [MODIFIERS.find((m) => m.id === modifier)!.name] : [],
-    fought: [], stance: "balanced", heat: 0, conviction: 0, convictionOn: false,
+    fought: [], stance: "balanced", heat: 0, streak: 0, conviction: 0, convictionOn: false,
     moves: 0, cares: 0, chapter: 0, ended: false, riskPlay: null,
   };
 
   const power = () => relicPower(st.relics);
   const perkFee = () => (st.perks.includes("CHEAP FEES") ? 0.5 : 1);
   const grantXp = (amount: number) =>
-    Math.max(1, Math.round(amount * arch.xp * XP_MODE.classic * power().xpMul));
+    Math.max(1, Math.round(amount * arch.xp * XP_MODE_CLASSIC * power().xpMul));
   const pnlOf = (p: VPos, price: number) =>
     p.kind === "perp" ? (price / p.entry - 1) * p.dir * p.lev * p.margin : 0;
   const valueOf = (p: VPos, price: number) =>
@@ -167,17 +167,14 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     // Funding
     const attack = attackFor(from, det(seed, `attack-${from}`), "calm");
     const squeeze = attack?.id === "SQUEEZE" ? 2 : 1;
-    if (squeeze > 1 || st.positions.some((p) => p.kind === "perp")) {
-      const funding = Math.round(
-        st.positions.filter((p) => p.kind === "perp")
-          .reduce((a, p) => a + p.margin * p.lev * 0.012 * squeeze, 0));
-      st.cash -= funding;
-    }
+    const funding = Math.round(
+      st.positions.filter((p) => p.kind === "perp")
+        .reduce((a, p) => a + p.margin * p.lev * 0.012 * squeeze, 0));
+    if (funding > 0) st.cash -= funding;
 
     // Boss debt
     if (st.statuses.includes("BOSS DEBT")) {
-      const cut = Math.round(Math.max(600, startNet * 0.02));
-      st.cash -= cut;
+      st.cash -= Math.round(Math.max(600, startNet * 0.02));
     }
 
     // Exchange failure
@@ -236,8 +233,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
 
     // Conviction payout
     if (st.convictionOn) {
-      const convCash = Math.round(delta * 0.5);
-      st.cash = Math.max(0, st.cash + convCash);
+      st.cash = Math.max(0, st.cash + Math.round(delta * 0.5));
     }
 
     // Stance plan + heat
@@ -253,11 +249,9 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     const newHeat = calledRight ? Math.min(9, st.heat + 1) : 0;
     st.heat = newHeat;
     st.stance = "balanced";
-    st.streak = 0; // placeholder replaced below
 
     // Streak
-    st.streak = delta > 0 && !idle ? (st.streakPrev ?? 0) + 1 : 0;
-    st.streakPrev = st.streak;
+    st.streak = delta > 0 && !idle ? st.streak + 1 : 0;
 
     // Mission
     const activeMission = missionFor(from);
@@ -289,9 +283,15 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   for (let i = 0; i < input.log.length; i++) {
     const e = input.log[i];
     if (st.ended) return fail(`event-after-end@${i}`);
-    if (typeof e.c !== "number" || e.c < 0 || e.c > st.chapter) return fail(`chapter-order@${i}`);
+    if (typeof e.c !== "number" || e.c < 0) return fail(`chapter-order@${i}`);
     const c = e.c;
-    if (c !== st.chapter && e.t !== "quarter") return fail(`stale-chapter@${i}`);
+    if (e.t === "quarter") {
+      if (c !== st.chapter) return fail(`quarter-order@${i}`);
+      settleQuarter(c);
+      if (netOf(st.chapter) <= 0) st.ended = true;
+      continue;
+    }
+    if (c !== st.chapter) return fail(`stale-chapter@${i}`);
 
     switch (e.t) {
       case "spot": {
@@ -410,37 +410,158 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       case "decision": {
         const card = decisionForChapter(c);
         const sit = situationFor(c);
-        const option = card?.options.find((o) => o.label === e.label) ?? sit?.options.find((o) => o.label === e.label);
+        const inCard = card?.options.find((o) => o.label === e.label);
+        const option = inCard ?? sit?.options.find((o) => o.label === e.label);
         if (!option) return fail(`decision-option@${i}`);
-        const isCrisis = !!card?.options.find((o) => o.label === e.label);
         if (option.bagMul) st.positions = st.positions.map((p) => ({ ...p, margin: p.margin * option.bagMul!, qty: p.qty * option.bagMul! }));
         st.cash = Math.max(0, Math.round(st.cash * (option.cashMul ?? 1) + (option.cash ?? 0)));
-        if (isCrisis) st.crises += 1;
-        st.xp += grantXp(option.xp ?? (isCrisis ? XP.crisis : 200));
+        if (inCard) st.crises += 1;
+        st.xp += grantXp(option.xp ?? (inCard ? XP.crisis : 200));
         break;
       }
       case "skill": {
         const check = skillCheckFor(c);
         const stake = Math.max(300, Math.round(netOf(c) * 0.02));
         const expected = e.q >= 0.6 ? Math.round(stake * e.q) : -Math.round(stake * 0.5);
-        if (!near(e.delta, expected, Math.max(4, Math.abs(expected) * 0.12))) return fail(`skill-delta@${i}`);
         if (e.q < 0 || e.q > 1) return fail(`skill-q@${i}`);
+        if (!near(e.delta, expected, Math.max(4, Math.abs(expected) * 0.12))) return fail(`skill-delta@${i}`);
         st.cash = Math.max(0, st.cash + e.delta);
         st.xp += Math.round(check.reward * e.q); // client adds raw, no multipliers
         break;
       }
       case "crash": {
-        if (!CHAPTERS || c < 0) return fail(`crash@${i}`);
-        const crash = (await0 => await0)(null); // placeholder removed below
+        if (!crashFor(c)) return fail(`crash-card@${i}`);
+        if (e.q < 0 || e.q > 1) return fail(`crash-q@${i}`);
+        if (e.q >= 0.9) st.xp += grantXp(520);
+        else if (e.q >= 0.5) {
+          st.positions = st.positions.map((p) => ({ ...p, qty: p.qty * 0.94, margin: p.margin * 0.94 }));
+          st.xp += grantXp(120);
+        } else {
+          st.positions = st.positions.map((p) => ({ ...p, qty: p.qty * 0.84, margin: p.margin * 0.84 }));
+        }
+        break;
+      }
+      case "seedphrase": {
+        if (e.q < 0 || e.q > 1) return fail(`seed-q@${i}`);
+        if (e.q >= 0.9) st.xp += grantXp(520);
+        else if (e.q >= 0.5) st.cash = Math.max(0, st.cash - 400);
+        else st.positions = st.positions.map((p) =>
+          p.where === "cold" ? { ...p, qty: p.qty * 0.5, margin: p.margin * 0.5 } : p);
+        break;
+      }
+      case "care": {
+        const cost = careCost(e.kind, c, diff);
+        if (e.cost !== cost) return fail(`care-cost@${i}`);
+        if (st.cares >= diff.caps || st.cash < cost) return fail(`care-cap@${i}`);
+        st.cash -= cost;
+        st.moves += 1; st.cares += 1;
+        st.xp += grantXp(XP.survive);
+        break;
+      }
+      case "custody": {
+        const to = e.to as CustodyId;
+        if (!["exchange", "hot", "cold"].includes(to)) return fail(`custody-to@${i}`);
+        const fee = Math.round(spotValue(c) * 0.004);
+        if (!near(e.fee, fee, Math.max(2, fee * 0.02))) return fail(`custody-fee@${i}`);
+        if (st.cash < fee) return fail(`custody-cash@${i}`);
+        st.cash -= fee;
+        st.positions = st.positions.map((p) => p.kind === "spot" ? { ...p, where: to } : p);
+        st.custody = to;
+        st.moves += 1;
+        st.xp += grantXp(XP_EXTRA.custody);
+        break;
+      }
+      case "life": {
+        st.job = e.job as JobId;
+        st.housing = e.housing as HousingId;
+        st.moves += 1;
+        st.xp += grantXp(XP_EXTRA.life);
+        break;
+      }
+      case "offer": {
+        const attack = attackFor(c, det(seed, `attack-${c}`), "calm");
+        if (attack?.id !== "OFFER") return fail(`offer-attack@${i}`);
+        const expected = Math.max(2000, Math.round(netOf(c) * 0.25));
+        if (!near(e.amount, expected, Math.max(50, expected * 0.15))) return fail(`offer-amount@${i}`);
+        st.cash += e.amount;
+        if (!st.statuses.includes("BOSS DEBT")) st.statuses.push("BOSS DEBT");
+        break;
+      }
+      case "loot": {
+        if (c < 1) return fail(`loot-chapter@${i}`);
+        const cards = lootDraw((salt: string) => det(seed, salt), c);
+        if (!cards.some((card) => card.kind === e.kind)) return fail(`loot-kind@${i}`);
+        if (e.kind === "cash" || e.kind === "tcfb") {
+          const expected = Math.max(500, Math.round(netOf(c) * 0.02));
+          if (!near(e.bonus, expected, Math.max(20, expected * 0.15))) return fail(`loot-bonus@${i}`);
+          st.cash += e.bonus;
+          if (e.kind === "tcfb") st.xp += grantXp(250);
+        } else if (e.kind === "xp") st.xp += grantXp(400);
+        else if (e.kind === "move") st.perks.push("+1 MOVE");
+        break;
+      }
+      case "relic": {
+        if (!relicChapter(c)) return fail(`relic-chapter@${i}`);
+        const offer = relicOffer(st.relics, (salt: string) => det(seed, salt), c);
+        if (!offer.includes(e.id as RelicId)) return fail(`relic-offer@${i}`);
+        st.relics.push(e.id as RelicId);
+        st.xp += grantXp(300);
+        break;
+      }
+      case "conviction": {
+        if (e.on && st.conviction < 100) return fail(`conviction-gate@${i}`);
+        st.convictionOn = e.on;
+        break;
+      }
+      case "stance": {
+        st.stance = e.stance as Stance;
+        break;
+      }
+      case "bank": {
+        st.moves += 1;
+        break;
+      }
+      case "signal": {
+        const expected = Math.max(150, Math.round(netOf(c) * 0.01));
+        if (!near(e.fee, expected, Math.max(10, expected * 0.15))) return fail(`signal-fee@${i}`);
+        if (st.cash < e.fee) return fail(`signal-cash@${i}`);
+        st.cash -= e.fee;
+        break;
+      }
+      case "sellout": {
+        for (const p of st.positions) {
+          const gross = Math.round(valueOf(p, priceAt(p.symbol, c)) * 0.96);
+          const fee = Math.round(gross * custodyOf(p.where).fee);
+          st.cash += gross - fee;
+          st.realized += gross - fee - p.margin;
+        }
+        st.positions = [];
+        if (st.realized > 0) st.cash -= Math.round(st.realized * TAX_RATE);
+        if (st.taxDebt > 0) {
+          const paid = Math.min(Math.max(0, st.cash), st.taxDebt);
+          st.cash -= paid;
+          st.taxDebt -= paid;
+        }
+        st.cash = Math.max(0, Math.round(st.cash));
+        st.ended = true;
         break;
       }
       default:
         return fail(`unknown@${i}`);
     }
   }
-  return { ok: true };
-}
 
-function makeNoise(seed: number) {
-  return Array.from({ length: 84 }, (_, i) => (det(seed, `noise-${i}`) - 0.5) * 0.036);
+  // Final cross-checks against the reported result
+  const finalNet = netOf(st.chapter);
+  if (!near(finalNet, input.netWorth, Math.max(250, Math.abs(input.netWorth) * 0.005))) {
+    return fail(`net-mismatch:${Math.round(finalNet)}vs${Math.round(input.netWorth)}`);
+  }
+  if (Math.abs(st.xp - input.xp) > 300) return fail(`xp-mismatch:${st.xp}vs${input.xp}`);
+  if (st.trades !== input.trades) return fail(`trades-mismatch:${st.trades}vs${input.trades}`);
+  if (input.achievements > st.crises + 1) return fail(`crises-mismatch`);
+  const expectedMonths = Math.min(monthsSurvived(st.chapter), 84);
+  if (Math.abs(expectedMonths - input.months) > 3) return fail(`months-mismatch:${expectedMonths}vs${input.months}`);
+  if (input.survived && finalNet <= 0) return fail(`survived-broke`);
+
+  return { ok: true };
 }
