@@ -893,6 +893,7 @@ export function CryptoJourney() {
     setRun((r) => ({ ...r, riskPlay: { chapter: r.chapter, quality, label: card.name, stake: size, mode: "HUNT", symbol: "BTC", delta: 0, settled: true } }));
     if (quality < 0.2) {
       const gas = Math.round(size * 0.06);
+      rec({ t: "presale", c: run.chapter, name: card.name, size, q: quality, back: 0, gas });
       setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} | missed mint (gas)`, -gas));
       log({ chapter: run.chapter, title: `MISSED | ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
       return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
@@ -901,6 +902,7 @@ export function CryptoJourney() {
     const multi = rugged ? 0.08 : (card.upside[0] + det(run.seed, `multi-${run.chapter}-${card.name}`) * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
 
     const back = Math.round(size * multi);
+    rec({ t: "presale", c: run.chapter, name: card.name, size, q: quality, back });
     setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
       realized: r.realized + back - size,
@@ -936,6 +938,7 @@ export function CryptoJourney() {
       hunger: kind === "eat" ? clamp(r.hunger - relief) : r.hunger,
       stress: kind === "calm" ? clamp(r.stress - relief) : r.stress,
     }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
+    rec({ t: "care", c: run.chapter, kind, cost });
     say(kind === "eat" ? `Fed. Hunger down ${relief}. That was a move you did not trade.` : `Head cleared. Stress down ${relief}.`, "cyan");
     grantXp(XP.survive, "STILL ALIVE");
   };
@@ -967,6 +970,7 @@ export function CryptoJourney() {
       ledger.push({ chapter: run.chapter, label: "Outstanding tax debt", amount: -paid });
     }
     setRun((r) => ({ ...r, cash: Math.max(0, Math.round(cash)), positions: [], taxDebt: 0, realized: 0, ledger: [...ledger, ...r.ledger].slice(0, 60) }));
+    rec({ t: "sellout", c: run.chapter });
     finish("SELLOUT");
   };
 
@@ -987,6 +991,7 @@ export function CryptoJourney() {
       positions: r.positions.map((p) => (p.kind === "spot" ? { ...p, where: id } : p)),
       statuses: id === "cold" ? Array.from(new Set([...r.statuses, "SELF CUSTODY"])) : r.statuses,
     }, `Moved bags to ${custodyOf(id).short}`, -fee));
+    rec({ t: "custody", c: run.chapter, to: id, fee });
     log({ chapter: run.chapter, title: `CUSTODY | ${custodyOf(id).short}`, detail: `${formatMoney(value)} moved for ${formatMoney(fee)} in fees.`, tone: "cyan" });
     say(`Bags now in ${custodyOf(id).name}. ${custodyOf(id).blurb}`, "cyan");
     grantXp(XP_EXTRA.custody, "CUSTODY MOVE");
@@ -998,6 +1003,7 @@ export function CryptoJourney() {
     if (ap <= 0) return say("Changing your life costs a move. None left.", "pink");
     spend();
     setRun((r) => ({ ...r, job, housing, stress: clamp(r.stress + (job === "fulltime" ? 8 : 0)) }));
+    rec({ t: "life", c: run.chapter, job, housing });
     log({ chapter: run.chapter, title: "LIFE CHANGED", detail: `${jobOf(job).name} | ${housingOf(housing).name}.`, tone: "cyan" });
     say(`${jobOf(job).name} | ${housingOf(housing).name}. Costs and income updated.`, "cyan");
     grantXp(XP_EXTRA.life, "LIFE CHOICE");
@@ -1007,11 +1013,13 @@ export function CryptoJourney() {
     if (ap <= 0) return say("No moves left. End the quarter.", "pink");
     spend();
     setRun((r) => ({ ...r, stress: clamp(r.stress - 6) }));
+    rec({ t: "bank", c: run.chapter });
     say("You sat on your hands. Stress down 6. Patience is a position.", "cyan");
   };
 
   const resolveDecision = (option: DecisionOption, crisis = true) => {
     playSfx("click");
+    rec({ t: "decision", c: run.chapter, label: option.label, crisis });
     const status = STATUS_BY_CHOICE[option.label];
     setRun((r) => {
       const positions = r.positions.map((p) => (option.bagMul !== undefined ? { ...p, margin: p.margin * option.bagMul, qty: p.qty * option.bagMul } : p));
