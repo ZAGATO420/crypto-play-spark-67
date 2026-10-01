@@ -2044,7 +2044,7 @@ export function CryptoJourney() {
             skillHidden={skillPilot}
             skillHead={check.head}
             skillPrize={Math.max(300, Math.round(net * 0.02))}
-            onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
+            onStance={(id) => { playSfx("click"); rec({ t: "stance", c: run.chapter, stance: id }); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
             onConviction={toggleConviction}
             onTerminal={() => setDialog({ k: "market" })}
             onSurvive={() => setDialog({ k: "survive" })}
@@ -2054,6 +2054,7 @@ export function CryptoJourney() {
               const fee = Math.max(150, Math.round(net * 0.01));
               if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
               setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
+              rec({ t: "signal", c: run.chapter, fee });
               setVerified(true);
               playSfx("click");
             }}
@@ -3202,6 +3203,7 @@ function EndScreen({ run, net, score, ending, mark, onRestart, onRematch, onBoar
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
     season: run.config.season, isTournament: tournament, playerKey: playerKey(),
+    log: tournament ? run.audit : undefined,
   }), [badge, name, net, run, score, tournament, won]);
   const punchline = useMemo(() => {
     if (won) return null;
