@@ -34,6 +34,7 @@ import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, p
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
+import type { LogEvent } from "./runlog";
 
 /** Compact money for tight HUD chips: $1.4M, $920K, $480. */
 function shortMoney(v: number): string {
@@ -73,6 +74,8 @@ type Run = {
   riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean; timing?: Timing | null } | null;
   /** Roguelike relics collected this run. They bend your own numbers, never history. */
   relics: string[];
+  /** Tournament audit trail: every money-moving action, replayed server-side before a prize entry counts. */
+  audit: LogEvent[];
 };
 
 
@@ -276,7 +279,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [], stance: "balanced", heat: 0,
     chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [], riskPlay: null, relics: [],
-
+    audit: [],
   };
 };
 
@@ -700,6 +703,12 @@ export function CryptoJourney() {
   /** One line of the story, told in the first person, kept for the end screen. */
   const chron = (r: Run, line: string): Run => ({ ...r, chronicle: [...r.chronicle, line].slice(-14) });
 
+  /** Tournament runs record every money-moving action; the server replays this log before a prize entry counts. */
+  const rec = (e: LogEvent) => {
+    if (!cfg.tournament) return;
+    setRun((r) => ({ ...r, audit: [...(r.audit ?? []), e] }));
+  };
+
 
   /* ---------------------------------------------------------- run actions */
 
@@ -723,6 +732,7 @@ export function CryptoJourney() {
         nextId: r.nextId + 1,
       }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee);
     });
+    rec({ t: "spot", c: run.chapter, s: symbol, size, fee, price });
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} | held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
     showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN | ${cust.short} | entry ${formatMoney(price)}`, "buy");
@@ -749,6 +759,7 @@ export function CryptoJourney() {
       positions: [...r.positions, { id: r.nextId, symbol, kind: "perp", dir, lev, margin, entry: price, qty: 0, where: "exchange" }],
       nextId: r.nextId + 1,
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
+    rec({ t: "perp", c: run.chapter, s: symbol, dir, lev, margin, price });
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
     showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin | entry ${formatMoney(price)}`, "perp");
@@ -795,6 +806,7 @@ export function CryptoJourney() {
         ? r.positions.filter((p) => p.id !== id)
         : r.positions.map((p) => (p.id === id ? { ...p, margin: p.margin * (1 - fraction), qty: p.qty * (1 - fraction) } : p)),
     }, `Closed ${pos.symbol}`, back), `${cust.short} fee`, -fee));
+    rec({ t: "close", c: run.chapter, id, frac: fraction, q: quality, price, back, fee });
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " | settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
@@ -822,6 +834,7 @@ export function CryptoJourney() {
     if (run.conviction < 100 && !run.convictionOn) return say("Conviction is not full yet. Win quarters, fill the bar.", "pink");
     playSfx("hit");
     setRun((r) => ({ ...r, convictionOn: !r.convictionOn }));
+    rec({ t: "conviction", c: run.chapter, on: !run.convictionOn });
     say(run.convictionOn ? "Conviction back in the holster." : "CONVICTION ARMED | this quarter counts 1.5x, win or lose.", "yellow");
   };
 
@@ -829,6 +842,7 @@ export function CryptoJourney() {
     nextInQueue();
     playSfx("vault");
     setRun((r) => book({ ...r, cash: r.cash + amount, statuses: Array.from(new Set([...r.statuses, "BOSS DEBT"])), stress: clamp(r.stress + 6) }, "The Boss bought you out", amount));
+    rec({ t: "offer", c: run.chapter, amount });
     log({ chapter: run.chapter, title: "TOOK THE OFFER", detail: `${formatMoney(amount)} now, a cut of every quarter forever.`, tone: "pink" });
     say(`${formatMoney(amount)} in your account. He owns a piece of you now.`, "pink");
   };
@@ -836,6 +850,7 @@ export function CryptoJourney() {
   /** A boss fight: stake real money, land the skill moment, live with it. */
   const resolveFight = (chapter: number, wager: number, quality: number) => {
     const fight = bossFightFor(chapter);
+    rec({ t: "fight", c: chapter, wager, q: quality, delta: quality >= 0.9 ? Math.round(wager * 2 * power.duelMul) : quality >= 0.5 ? 0 : -wager });
     setRun((r) => (r.fought.includes(chapter) ? r : { ...r, fought: [...r.fought, chapter] }));
     // the duel is this quarter's risk moment; it pays on the spot, so it is already settled
     setRun((r) => ({ ...r, riskPlay: { chapter, quality, label: "THE DUEL", stake: wager, mode: "BOSS DUEL", symbol: "BTC", delta: 0, settled: true } }));
@@ -878,6 +893,7 @@ export function CryptoJourney() {
     setRun((r) => ({ ...r, riskPlay: { chapter: r.chapter, quality, label: card.name, stake: size, mode: "HUNT", symbol: "BTC", delta: 0, settled: true } }));
     if (quality < 0.2) {
       const gas = Math.round(size * 0.06);
+      rec({ t: "presale", c: run.chapter, name: card.name, size, q: quality, back: 0, gas });
       setRun((r) => book({ ...r, cash: Math.max(0, r.cash - gas), stress: clamp(r.stress + 10) }, `${card.name} | missed mint (gas)`, -gas));
       log({ chapter: run.chapter, title: `MISSED | ${card.name}`, detail: "Gas too low. The bots filled the whole allocation.", tone: "pink" });
       return setDialog({ k: "launchResult", res: { name: card.name, tag: card.tag, size: Math.round(size * 0.06), back: 0, multi: 0, rugged: true, line: "Your transaction never made it into the block. Gas is a skill." } });
@@ -886,6 +902,7 @@ export function CryptoJourney() {
     const multi = rugged ? 0.08 : (card.upside[0] + det(run.seed, `multi-${run.chapter}-${card.name}`) * (card.upside[1] - card.upside[0])) * (0.85 + quality * 0.3);
 
     const back = Math.round(size * multi);
+    rec({ t: "presale", c: run.chapter, name: card.name, size, q: quality, back });
     setRun((r) => book(book({
       ...r, cash: r.cash - size + back, trades: r.trades + 1,
       realized: r.realized + back - size,
@@ -921,6 +938,7 @@ export function CryptoJourney() {
       hunger: kind === "eat" ? clamp(r.hunger - relief) : r.hunger,
       stress: kind === "calm" ? clamp(r.stress - relief) : r.stress,
     }, kind === "eat" ? "Groceries" : "Time off / therapy", -cost));
+    rec({ t: "care", c: run.chapter, kind, cost });
     say(kind === "eat" ? `Fed. Hunger down ${relief}. That was a move you did not trade.` : `Head cleared. Stress down ${relief}.`, "cyan");
     grantXp(XP.survive, "STILL ALIVE");
   };
@@ -952,6 +970,7 @@ export function CryptoJourney() {
       ledger.push({ chapter: run.chapter, label: "Outstanding tax debt", amount: -paid });
     }
     setRun((r) => ({ ...r, cash: Math.max(0, Math.round(cash)), positions: [], taxDebt: 0, realized: 0, ledger: [...ledger, ...r.ledger].slice(0, 60) }));
+    rec({ t: "sellout", c: run.chapter });
     finish("SELLOUT");
   };
 
@@ -972,6 +991,7 @@ export function CryptoJourney() {
       positions: r.positions.map((p) => (p.kind === "spot" ? { ...p, where: id } : p)),
       statuses: id === "cold" ? Array.from(new Set([...r.statuses, "SELF CUSTODY"])) : r.statuses,
     }, `Moved bags to ${custodyOf(id).short}`, -fee));
+    rec({ t: "custody", c: run.chapter, to: id, fee });
     log({ chapter: run.chapter, title: `CUSTODY | ${custodyOf(id).short}`, detail: `${formatMoney(value)} moved for ${formatMoney(fee)} in fees.`, tone: "cyan" });
     say(`Bags now in ${custodyOf(id).name}. ${custodyOf(id).blurb}`, "cyan");
     grantXp(XP_EXTRA.custody, "CUSTODY MOVE");
@@ -983,6 +1003,7 @@ export function CryptoJourney() {
     if (ap <= 0) return say("Changing your life costs a move. None left.", "pink");
     spend();
     setRun((r) => ({ ...r, job, housing, stress: clamp(r.stress + (job === "fulltime" ? 8 : 0)) }));
+    rec({ t: "life", c: run.chapter, job, housing });
     log({ chapter: run.chapter, title: "LIFE CHANGED", detail: `${jobOf(job).name} | ${housingOf(housing).name}.`, tone: "cyan" });
     say(`${jobOf(job).name} | ${housingOf(housing).name}. Costs and income updated.`, "cyan");
     grantXp(XP_EXTRA.life, "LIFE CHOICE");
@@ -992,11 +1013,13 @@ export function CryptoJourney() {
     if (ap <= 0) return say("No moves left. End the quarter.", "pink");
     spend();
     setRun((r) => ({ ...r, stress: clamp(r.stress - 6) }));
+    rec({ t: "bank", c: run.chapter });
     say("You sat on your hands. Stress down 6. Patience is a position.", "cyan");
   };
 
   const resolveDecision = (option: DecisionOption, crisis = true) => {
     playSfx("click");
+    rec({ t: "decision", c: run.chapter, label: option.label, crisis });
     const status = STATUS_BY_CHOICE[option.label];
     setRun((r) => {
       const positions = r.positions.map((p) => (option.bagMul !== undefined ? { ...p, margin: p.margin * option.bagMul, qty: p.qty * option.bagMul } : p));
@@ -1021,6 +1044,7 @@ export function CryptoJourney() {
 
   /** Crash cards hand you a panic exit: tap fast and you save part of the bag. */
   const resolveCrash = (chapter: number, quality: number) => {
+    rec({ t: "crash", c: chapter, q: quality });
     const title = crashFor(chapter)?.title ?? "the crash";
     if (quality >= 0.9) {
       setRun((r) => chron({ ...r, stress: clamp(r.stress - 10), statuses: Array.from(new Set([...r.statuses, "COLD BLOODED"])) }, `I saw ${title} coming and got out with my hands steady.`));
@@ -1042,6 +1066,7 @@ export function CryptoJourney() {
 
 
   const resolveSeed = (quality: number) => {
+    rec({ t: "seedphrase", c: run.chapter, q: quality });
     if (quality >= 0.9) {
       say("Seed recovered word for word. Cold storage intact.", "yellow");
       grantXp(XP_EXTRA.escape, "KEYS SECURED");
@@ -1062,6 +1087,7 @@ export function CryptoJourney() {
     const stake = Math.max(300, Math.round(net * 0.02));
     const delta = quality >= 0.6 ? Math.round(stake * quality) : -Math.round(stake * 0.5);
     const xp = Math.round(check.reward * quality);
+    rec({ t: "skill", c: run.chapter, q: quality, delta });
     setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} | ${label}`, delta));
     setSkill({ chapter: run.chapter, quality, label, delta });
     pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
@@ -1080,6 +1106,7 @@ export function CryptoJourney() {
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
     const buys = mode === "ACCUMULATE";
     const symbol: CoinSymbol = mode === "ACCUMULATE" || mode === "MOMENTUM" ? focusSymbol : "BTC";
+    rec({ t: "risk", c: run.chapter, stake, q: quality, mode, sym: symbol, timingR: timing?.r ?? null });
     // accumulating still puts real money into a real coin; the skill only scales it
     if (buys) openSpot(focusSymbol, 0.25); else spend();
     setRun((r) => ({
@@ -1147,6 +1174,7 @@ export function CryptoJourney() {
     if (playOpening(120)) return;
     playSfx("quarter");
     const from = run.chapter;
+    rec({ t: "quarter", c: from });
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
@@ -1463,6 +1491,7 @@ export function CryptoJourney() {
   const takeLoot = (card: LootCard) => {
     const id = `loot-${run.chapter}`;
     const bonus = Math.max(500, Math.round(net * 0.02));
+    rec({ t: "loot", c: run.chapter, kind: card.kind, bonus: card.kind === "cash" || card.kind === "tcfb" ? bonus : 0 });
     setRun((r) => {
       const seen = Array.from(new Set([...r.seen, id]));
       if (card.kind === "cash") return book({ ...r, seen, cash: r.cash + bonus }, `Loot | ${card.name}`, bonus);
@@ -1487,6 +1516,7 @@ export function CryptoJourney() {
    */
   const takeRelic = (card: Relic) => {
     const owned = [...(run.relics ?? []), card.id];
+    rec({ t: "relic", c: run.chapter, id: card.id });
     const before = power.synergies.map((s) => s.name);
     const after = relicPower(owned).synergies.filter((s) => !before.includes(s.name));
     setRun((r) => ({ ...r, relics: owned, seen: Array.from(new Set([...r.seen, `relic-${r.chapter}`])) }));
@@ -1583,6 +1613,7 @@ export function CryptoJourney() {
         restored.positions = (Array.isArray(restored.positions) ? restored.positions : []).filter(ok).map((p) => ({ ...p, where: p.where ?? "exchange" } as Pos));
         if (!Array.isArray(restored.relics)) restored.relics = [];
         if (!Array.isArray(restored.seen)) restored.seen = [];
+        if (!Array.isArray(restored.audit)) restored.audit = [];
         setRun(restored);
         setActiveSymbol([...restored.positions].sort((a, b) => b.margin - a.margin)[0]?.symbol ?? "BTC");
         setPhase(saved.phase ?? "brief");
@@ -2013,7 +2044,7 @@ export function CryptoJourney() {
             skillHidden={skillPilot}
             skillHead={check.head}
             skillPrize={Math.max(300, Math.round(net * 0.02))}
-            onStance={(id) => { playSfx("click"); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
+            onStance={(id) => { playSfx("click"); rec({ t: "stance", c: run.chapter, stance: id }); setRun((r) => ({ ...r, stance: id })); say(`${stanceOf(id).name} | ${stanceOf(id).line}`, id === "degen" ? "pink" : "cyan"); }}
             onConviction={toggleConviction}
             onTerminal={() => setDialog({ k: "market" })}
             onSurvive={() => setDialog({ k: "survive" })}
@@ -2023,6 +2054,7 @@ export function CryptoJourney() {
               const fee = Math.max(150, Math.round(net * 0.01));
               if (run.cash < fee) return say("No cash for research. Trade on vibes then.", "pink");
               setRun((r) => book({ ...r, cash: r.cash - fee }, "Signal research", -fee));
+              rec({ t: "signal", c: run.chapter, fee });
               setVerified(true);
               playSfx("click");
             }}
@@ -3171,6 +3203,7 @@ function EndScreen({ run, net, score, ending, mark, onRestart, onRematch, onBoar
     score, xp: run.xp, level: levelFor(run.xp), rank: badge, months: monthsSurvived(run.chapter), achievements: run.crises,
     trades: run.trades, survived: won, avatar: run.config.avatar,
     season: run.config.season, isTournament: tournament, playerKey: playerKey(),
+    log: tournament ? run.audit : undefined,
   }), [badge, name, net, run, score, tournament, won]);
   const punchline = useMemo(() => {
     if (won) return null;
