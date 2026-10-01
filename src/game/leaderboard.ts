@@ -1,3 +1,5 @@
+import type { LogEvent } from "./runlog";
+
 export type BoardRow = {
   pos: number;
   name: string;
@@ -39,6 +41,8 @@ export type RunSubmission = {
   wallet?: string;
   isTournament?: boolean;
   playerKey?: string;
+  /** Tournament audit trail; the server replays it before the entry counts for prizes. */
+  log?: LogEvent[];
 };
 
 export type SubmitFailure = "offline" | "rejected" | "unavailable";
