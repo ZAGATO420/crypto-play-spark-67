@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { bestPerPlayer, rankScore } from "@/game/ranking";
+import { verifyRun } from "@/game/verify";
+import type { LogEvent } from "@/game/runlog";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -79,6 +81,8 @@ const runSchema = z.object({
   wallet: z.string().trim().regex(WALLET).optional(),
   isTournament: z.boolean().default(false),
   playerKey: z.string().trim().min(6).max(64).optional(),
+  // Tournament audit trail: loosely shaped here, strictly checked by verifyRun.
+  log: z.array(z.record(z.string(), z.unknown())).max(400).optional(),
 // Prize-bearing tournament rows require both identities. The wallet links
 // repeat browser identities and is never returned by the public GET endpoint.
 }).refine((r) => !r.isTournament || (r.season && r.playerKey && r.wallet), {
@@ -139,7 +143,7 @@ function sanitizeName(name: string): string {
 // that ended slightly negative. Net worth still dominates, but survival time,
 // XP and achievements count — and unfinished mini-runs get a soft penalty.
 const SELECT_COLS =
-  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament, wallet, player_key";
+  "player_name, archetype, country, difficulty, mode, net_worth, xp, level, rank_title, months_survived, achievements, survived, avatar, score, created_at, season, is_tournament, wallet, player_key, verified";
 
 // One prize slot per player: inside a season only the player's best run may
 // occupy a rank. A player is identified by BOTH the browser player key and any
@@ -199,7 +203,8 @@ export const Route = createFileRoute("/api/public/leaderboard")({
             .limit(500);
 
           if (mode && mode !== "all") query = query.eq("mode", mode);
-          if (seasonView) query = query.eq("season", season).eq("is_tournament", true);
+          // The prize board only lists runs the server could replay and confirm.
+          if (seasonView) query = query.eq("season", season).eq("is_tournament", true).eq("verified", true);
           return (await query) as { data: any[] | null; error: any };
         };
 
