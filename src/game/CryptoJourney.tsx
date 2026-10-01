@@ -34,6 +34,7 @@ import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, p
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
+import type { LogEvent } from "./runlog";
 
 /** Compact money for tight HUD chips: $1.4M, $920K, $480. */
 function shortMoney(v: number): string {
@@ -73,6 +74,8 @@ type Run = {
   riskPlay: { chapter: number; quality: number; label: string; stake: number; mode: ChapterMode; symbol: CoinSymbol; delta: number; settled: boolean; timing?: Timing | null } | null;
   /** Roguelike relics collected this run. They bend your own numbers, never history. */
   relics: string[];
+  /** Tournament audit trail: every money-moving action, replayed server-side before a prize entry counts. */
+  audit: LogEvent[];
 };
 
 
@@ -276,7 +279,7 @@ const freshRun = (config: Config, reuse?: number): Run => {
     boss: { cash: start * 3, btc: 0, line: personaFor(det(seed, "persona")).line },
     conviction: 0, convictionOn: false, perks: [], bossWins: 0, fought: [], stance: "balanced", heat: 0,
     chronicle: [`I started in ${chapterLabel(0)} with ${formatMoney(start)} and no idea what was coming.`], seen: [], riskPlay: null, relics: [],
-
+    audit: [],
   };
 };
 
@@ -699,6 +702,12 @@ export function CryptoJourney() {
 
   /** One line of the story, told in the first person, kept for the end screen. */
   const chron = (r: Run, line: string): Run => ({ ...r, chronicle: [...r.chronicle, line].slice(-14) });
+
+  /** Tournament runs record every money-moving action; the server replays this log before a prize entry counts. */
+  const rec = (e: LogEvent) => {
+    if (!cfg.tournament) return;
+    setRun((r) => ({ ...r, audit: [...(r.audit ?? []), e] }));
+  };
 
 
   /* ---------------------------------------------------------- run actions */
