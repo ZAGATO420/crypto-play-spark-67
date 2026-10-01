@@ -1812,7 +1812,7 @@ export function CryptoJourney() {
                         <span key={p.id} className={`cy-chip-wrap ${pnl >= 0 ? "up" : "down"}`}>
                           <button className={`cy-chip ${pnl >= 0 ? "up" : "down"}`} onClick={() => { setActiveSymbol(p.symbol); setDialog({ k: "position", id: p.id }); }}>
                             <img src={COIN_LOGO[p.symbol]} alt="" width={18} height={18} />
-                            <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "L" : "S"} ${p.lev}x`}</small></span>
+                            <span><strong>{p.symbol}</strong><small className={`cy-chip-lev ${p.kind === "spot" ? "is-spot" : p.dir === 1 ? "is-long" : "is-short"}`}>{p.kind === "spot" ? "SPOT" : `${p.lev}x ${p.dir === 1 ? "LONG" : "SHORT"}`}</small></span>
                             <b>{pnl >= 0 ? "+" : "−"}{formatMoney(Math.abs(pnl))}</b>
                             {p.kind === "perp" && <i className="cy-liq" style={{ width: `${liq}%` }} />}
                           </button>

@@ -2282,3 +2282,17 @@ body:has(.cy-shell) { background:var(--background); }
    The old mobile dock is gone, so MORE and END QUARTER must not be hidden. */
 .cy-tape-more, .cy-tape-end { display:flex !important; }
 .cy-tape-row { grid-template-columns:1fr 1fr 1.35fr !important; }
+
+/* ---- position chip: the leverage badge is a pill that is never clipped ---- */
+.cy-chip span { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; }
+.cy-chip-lev { flex: 0 0 auto; padding: 2px 5px; border-radius: 999px; border: 1px solid var(--border); font: 700 8px/1 var(--font-body); letter-spacing: .06em; white-space: nowrap; }
+.cy-chip-lev.is-spot { color: var(--journey-yellow); border-color: color-mix(in oklab, var(--journey-yellow) 55%, var(--border)); background: color-mix(in oklab, var(--journey-yellow) 12%, transparent); }
+.cy-chip-lev.is-long { color: var(--journey-cyan); border-color: color-mix(in oklab, var(--journey-cyan) 55%, var(--border)); background: color-mix(in oklab, var(--journey-cyan) 12%, transparent); }
+.cy-chip-lev.is-short { color: var(--journey-pink); border-color: color-mix(in oklab, var(--journey-pink) 55%, var(--border)); background: color-mix(in oklab, var(--journey-pink) 12%, transparent); }
+
+@media (max-width: 640px) {
+  .cy-chips, .cy-chips.is-dense { max-height: none !important; align-items: stretch; }
+  .cy-chip-wrap { flex: 0 0 182px !important; }
+  .cy-chip { grid-template-columns: 18px minmax(0,1fr) auto !important; grid-template-areas: "logo name pnl" !important; min-height: 40px !important; padding: 6px 7px !important; }
+  .cy-chip b { font-size: 12px !important; text-align: right; }
+}
