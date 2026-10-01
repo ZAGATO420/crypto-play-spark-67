@@ -732,6 +732,7 @@ export function CryptoJourney() {
         nextId: r.nextId + 1,
       }, `Bought ${symbol} spot`, -size), `${cust.short} fee`, -fee);
     });
+    rec({ t: "spot", c: run.chapter, s: symbol, size, fee, price });
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} | held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
     showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN | ${cust.short} | entry ${formatMoney(price)}`, "buy");
@@ -758,6 +759,7 @@ export function CryptoJourney() {
       positions: [...r.positions, { id: r.nextId, symbol, kind: "perp", dir, lev, margin, entry: price, qty: 0, where: "exchange" }],
       nextId: r.nextId + 1,
     }, `${lev}x ${dir === 1 ? "long" : "short"} ${symbol} margin`, -margin));
+    rec({ t: "perp", c: run.chapter, s: symbol, dir, lev, margin, price });
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
     showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin | entry ${formatMoney(price)}`, "perp");
@@ -804,6 +806,7 @@ export function CryptoJourney() {
         ? r.positions.filter((p) => p.id !== id)
         : r.positions.map((p) => (p.id === id ? { ...p, margin: p.margin * (1 - fraction), qty: p.qty * (1 - fraction) } : p)),
     }, `Closed ${pos.symbol}`, back), `${cust.short} fee`, -fee));
+    rec({ t: "close", c: run.chapter, id, frac: fraction, q: quality, price, back, fee });
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " | settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
@@ -831,6 +834,7 @@ export function CryptoJourney() {
     if (run.conviction < 100 && !run.convictionOn) return say("Conviction is not full yet. Win quarters, fill the bar.", "pink");
     playSfx("hit");
     setRun((r) => ({ ...r, convictionOn: !r.convictionOn }));
+    rec({ t: "conviction", c: run.chapter, on: !run.convictionOn });
     say(run.convictionOn ? "Conviction back in the holster." : "CONVICTION ARMED | this quarter counts 1.5x, win or lose.", "yellow");
   };
 
@@ -838,6 +842,7 @@ export function CryptoJourney() {
     nextInQueue();
     playSfx("vault");
     setRun((r) => book({ ...r, cash: r.cash + amount, statuses: Array.from(new Set([...r.statuses, "BOSS DEBT"])), stress: clamp(r.stress + 6) }, "The Boss bought you out", amount));
+    rec({ t: "offer", c: run.chapter, amount });
     log({ chapter: run.chapter, title: "TOOK THE OFFER", detail: `${formatMoney(amount)} now, a cut of every quarter forever.`, tone: "pink" });
     say(`${formatMoney(amount)} in your account. He owns a piece of you now.`, "pink");
   };
@@ -845,6 +850,7 @@ export function CryptoJourney() {
   /** A boss fight: stake real money, land the skill moment, live with it. */
   const resolveFight = (chapter: number, wager: number, quality: number) => {
     const fight = bossFightFor(chapter);
+    rec({ t: "fight", c: chapter, wager, q: quality, delta: quality >= 0.9 ? Math.round(wager * 2 * power.duelMul) : quality >= 0.5 ? 0 : -wager });
     setRun((r) => (r.fought.includes(chapter) ? r : { ...r, fought: [...r.fought, chapter] }));
     // the duel is this quarter's risk moment; it pays on the spot, so it is already settled
     setRun((r) => ({ ...r, riskPlay: { chapter, quality, label: "THE DUEL", stake: wager, mode: "BOSS DUEL", symbol: "BTC", delta: 0, settled: true } }));
