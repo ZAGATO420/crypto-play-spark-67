@@ -1044,6 +1044,7 @@ export function CryptoJourney() {
 
   /** Crash cards hand you a panic exit: tap fast and you save part of the bag. */
   const resolveCrash = (chapter: number, quality: number) => {
+    rec({ t: "crash", c: chapter, q: quality });
     const title = crashFor(chapter)?.title ?? "the crash";
     if (quality >= 0.9) {
       setRun((r) => chron({ ...r, stress: clamp(r.stress - 10), statuses: Array.from(new Set([...r.statuses, "COLD BLOODED"])) }, `I saw ${title} coming and got out with my hands steady.`));
@@ -1065,6 +1066,7 @@ export function CryptoJourney() {
 
 
   const resolveSeed = (quality: number) => {
+    rec({ t: "seedphrase", c: run.chapter, q: quality });
     if (quality >= 0.9) {
       say("Seed recovered word for word. Cold storage intact.", "yellow");
       grantXp(XP_EXTRA.escape, "KEYS SECURED");
@@ -1085,6 +1087,7 @@ export function CryptoJourney() {
     const stake = Math.max(300, Math.round(net * 0.02));
     const delta = quality >= 0.6 ? Math.round(stake * quality) : -Math.round(stake * 0.5);
     const xp = Math.round(check.reward * quality);
+    rec({ t: "skill", c: run.chapter, q: quality, delta });
     setRun((r) => book({ ...r, cash: Math.max(0, r.cash + delta), xp: r.xp + xp }, `${check.head} | ${label}`, delta));
     setSkill({ chapter: run.chapter, quality, label, delta });
     pop(`${delta >= 0 ? "+" : "−"}${formatMoney(Math.abs(delta))}`, delta >= 0 ? "up" : "down");
@@ -1103,6 +1106,7 @@ export function CryptoJourney() {
     const xp = quality >= 0.9 ? 700 : quality >= 0.6 ? 450 : 120;
     const buys = mode === "ACCUMULATE";
     const symbol: CoinSymbol = mode === "ACCUMULATE" || mode === "MOMENTUM" ? focusSymbol : "BTC";
+    rec({ t: "risk", c: run.chapter, stake, q: quality, mode, sym: symbol, timingR: timing?.r ?? null });
     // accumulating still puts real money into a real coin; the skill only scales it
     if (buys) openSpot(focusSymbol, 0.25); else spend();
     setRun((r) => ({
@@ -1170,6 +1174,7 @@ export function CryptoJourney() {
     if (playOpening(120)) return;
     playSfx("quarter");
     const from = run.chapter;
+    rec({ t: "quarter", c: from });
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
@@ -1486,6 +1491,7 @@ export function CryptoJourney() {
   const takeLoot = (card: LootCard) => {
     const id = `loot-${run.chapter}`;
     const bonus = Math.max(500, Math.round(net * 0.02));
+    rec({ t: "loot", c: run.chapter, kind: card.kind, bonus: card.kind === "cash" || card.kind === "tcfb" ? bonus : 0 });
     setRun((r) => {
       const seen = Array.from(new Set([...r.seen, id]));
       if (card.kind === "cash") return book({ ...r, seen, cash: r.cash + bonus }, `Loot | ${card.name}`, bonus);
@@ -1510,6 +1516,7 @@ export function CryptoJourney() {
    */
   const takeRelic = (card: Relic) => {
     const owned = [...(run.relics ?? []), card.id];
+    rec({ t: "relic", c: run.chapter, id: card.id });
     const before = power.synergies.map((s) => s.name);
     const after = relicPower(owned).synergies.filter((s) => !before.includes(s.name));
     setRun((r) => ({ ...r, relics: owned, seen: Array.from(new Set([...r.seen, `relic-${r.chapter}`])) }));
@@ -1606,6 +1613,7 @@ export function CryptoJourney() {
         restored.positions = (Array.isArray(restored.positions) ? restored.positions : []).filter(ok).map((p) => ({ ...p, where: p.where ?? "exchange" } as Pos));
         if (!Array.isArray(restored.relics)) restored.relics = [];
         if (!Array.isArray(restored.seen)) restored.seen = [];
+        if (!Array.isArray(restored.audit)) restored.audit = [];
         setRun(restored);
         setActiveSymbol([...restored.positions].sort((a, b) => b.margin - a.margin)[0]?.symbol ?? "BTC");
         setPhase(saved.phase ?? "brief");
