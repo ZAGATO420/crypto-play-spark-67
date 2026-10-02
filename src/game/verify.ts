@@ -15,6 +15,7 @@ import {
 import { relicChapter, relicOffer, relicPower, type RelicId } from "./relics";
 import { det, hashString } from "./rng";
 import type { LogEvent } from "./runlog";
+import { liveRange, makeNoise, priceAt as sharedPriceAt } from "./market";
 
 export interface VerifyInput {
   archetype: string;
@@ -72,7 +73,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   const seed = hashString(`tcfb-season-${input.season}`);
   const modifier = MODIFIERS[Math.floor(det(seed, "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
   const bias = personaFor(det(seed, "persona")).bias;
-  const noise = Array.from({ length: 84 }, (_, i) => (det(seed, `noise-${i}`) - 0.5) * 0.036);
+  const noise = makeNoise(TOURNAMENT_RULES.mode, seed);
 
   const coin = (symbol: string) => COINS.find((c) => c.symbol === symbol);
   const monthOf = (chapter: number) => chapterMonth(Math.min(Math.max(chapter, 0), CHAPTERS - 1));
@@ -80,30 +81,9 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     const price = coin(symbol)?.prices[monthOf(chapter)] ?? 0;
     return Number.isFinite(price) && price > 0 ? price : 0;
   };
-  const priceAt = (symbol: CoinSymbol, chapter: number) =>
-    clamp(rawAt(symbol, chapter) * (1 + (noise[monthOf(chapter)] ?? 0)), 0.00000001);
-
-  // Live price range for a chapter: entries use the live tape, so accept any
-  // price the tape could have shown (with and without a sweep wick).
-  const liveRange = (symbol: CoinSymbol, chapter: number): [number, number] => {
-    const attack = attackFor(chapter, det(seed, `attack-${chapter}`), bias);
-    const sweeping = attack?.id === "SWEEP";
-    let lo = Infinity, hi = 0;
-    for (let i = 0; i <= 40; i++) {
-      const t = i / 40;
-      const a = priceAt(symbol, chapter), b = priceAt(symbol, chapter + 1);
-      let p = a + (b - a) * t;
-      const amp = Math.max(a * 0.02, 0.00000001);
-      p += Math.sin(t * Math.PI * 6 + chapter * 1.7) * amp * 0.9;
-      p += Math.sin(t * Math.PI * 14 + monthOf(chapter)) * amp * 0.35;
-      if (sweeping) p += a * 0.05 * Math.sin(t * Math.PI);
-      if (p < lo) lo = p;
-      if (p > hi) hi = p;
-    }
-    return [lo * 0.97, hi * 1.03];
-  };
+  const priceAt = (symbol: CoinSymbol, chapter: number) => sharedPriceAt(symbol, chapter, noise);
   const inRange = (symbol: CoinSymbol, chapter: number, price: number) => {
-    const [lo, hi] = liveRange(symbol, chapter);
+    const [lo, hi] = liveRange(symbol, { chapter, noise, seed, mode: TOURNAMENT_RULES.mode });
     return price >= lo && price <= hi;
   };
 
