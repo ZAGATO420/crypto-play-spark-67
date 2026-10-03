@@ -92,4 +92,4 @@
 - [x] Arcade juice: rolling counters with green/red punch, risk-card sheen, press feedback, boss-bar breathing, candle pop-in, centred sheet animations.
 - [x] Mobile no-scroll verified at 375x677, 390x844, 360x640; chart keeps 190-351px, all buttons on screen.
 - [x] Minigames stay the heart of TAKE THE RISK across all 6 phases (2020-2026).
-- [ ] Bühne Phase 1: Reload-Test während Ereignistext und Karten-Einfahrt; echter Run verified; Testeintrag löschen; dann auf OK für Phase 2 warten
+- [x] Bühne Phase 1: Reload-Test während Ereignistext und Karten-Einfahrt; echter Run verified; Testeintrag löschen; dann auf OK für Phase 2 warten
