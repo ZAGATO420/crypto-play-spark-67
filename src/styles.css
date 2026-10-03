@@ -2455,3 +2455,4 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-arena.is-staged .cy-stage-card > strong { font-size: 22px !important; }
 }
 @media (prefers-reduced-motion: reduce) { .cy-arena.is-staged .cy-stage-card { transition: none; } }
+.cy-arena.is-staged .cy-chart polygon { opacity: .35; }
