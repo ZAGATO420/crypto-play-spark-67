@@ -1849,7 +1849,7 @@ export function CryptoJourney() {
           )}
 
           {phase === "act" && (
-            <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
+            <article className={`cy-card cy-arena is-staged is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
               {cfg.tournament && <SeasonBanner compact />}
               <StageBoss src={stageBossImg} mood={stageMood} />
               <StageHeadline key={`head-${run.chapter}`} title={theme.badge} sub={theme.tag} show={guide === null && !riskPlayed} />

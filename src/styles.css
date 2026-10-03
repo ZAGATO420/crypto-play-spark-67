@@ -2397,3 +2397,62 @@ body:has(.cy-shell) { background:var(--background); }
 @media (prefers-reduced-motion: reduce) {
   .cy-sheet-stage img { animation: none !important; }
 }
+
+/* ================= STAGE v2: boss-led arena (presentation only) ================= */
+.cy-shell .cy-arena.is-staged { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(120% 70% at 50% 0%, color-mix(in oklab, var(--phase, var(--journey-yellow)) 16%, var(--background)) 0%, var(--background) 70%); border-color: color-mix(in oklab, var(--phase, var(--journey-yellow)) 45%, var(--border)); }
+.cy-arena.is-staged .cy-stage-boss { z-index: 0; height: 64%; inset: 0 0 auto 0; }
+.cy-arena.is-staged .cy-stage-boss img { opacity: 1; object-position: 50% 14%; filter: contrast(1.08) saturate(1.1); -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%); }
+.cy-arena.is-staged .cy-stage-boss::after { background: radial-gradient(90% 70% at 50% 35%, transparent 40%, color-mix(in oklab, var(--background) 75%, transparent) 100%), linear-gradient(180deg, transparent 50%, var(--background) 100%); }
+.cy-arena.is-staged > *:not(.cy-stage-boss) { position: relative; z-index: 1; }
+.cy-arena.is-staged > .cy-stage-head { position: absolute; z-index: 6; top: 14%; }
+
+/* Chart becomes a neon tape over the lower half of the boss */
+.cy-shell .cy-arena.is-staged .cy-market-visual { flex: 1 1 auto; min-height: 210px; display: flex; flex-direction: column; justify-content: flex-end; border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 6px 4px 2px; }
+.cy-arena.is-staged .cy-market-visual::before { display: none; }
+.cy-arena.is-staged .cy-market-visual::after { height: 60%; background: linear-gradient(0deg, color-mix(in oklab, var(--background) 92%, transparent) 10%, transparent); }
+.cy-arena.is-staged .cy-chart-title { position: absolute; top: 6px; left: 6px; right: 6px; z-index: 3; }
+.cy-arena.is-staged .cy-chart-title > span, .cy-arena.is-staged .cy-chart-title > strong { padding: 4px 9px; border-radius: 999px; background: color-mix(in oklab, var(--background) 72%, transparent); backdrop-filter: blur(6px); }
+.cy-arena.is-staged .cy-chips { position: relative; z-index: 3; margin-top: 34px; }
+.cy-arena.is-staged .cy-chart-wrap { position: relative; z-index: 2; flex: 0 0 auto; height: 46%; min-height: 110px; margin-top: auto; }
+.cy-arena.is-staged .cy-chart { width: 100%; height: 100%; overflow: visible; }
+.cy-arena.is-staged .cy-chart-live-line { stroke: var(--journey-yellow); stroke-width: 3; filter: drop-shadow(0 0 4px var(--journey-yellow)) drop-shadow(0 0 12px color-mix(in oklab, var(--journey-yellow) 60%, transparent)); }
+.cy-arena.is-staged.pulse-down .cy-chart-live-line, .cy-arena.is-staged .pulse-down .cy-chart-live-line { stroke: var(--journey-pink); }
+.cy-arena.is-staged .cy-chart-ghost { opacity: .25; }
+.cy-arena.is-staged .cy-candles { opacity: .35; }
+.cy-arena.is-staged .cy-now-marker { width: 14px; height: 14px; box-shadow: 0 0 0 4px color-mix(in oklab, var(--journey-yellow) 30%, transparent), 0 0 18px var(--journey-yellow); }
+.cy-arena.is-staged .cy-chart-foot { position: relative; z-index: 3; font-size: 10px; opacity: .85; }
+
+/* Real playing cards */
+.cy-arena.is-staged .cy-moves:not(.is-guided-row) { gap: 10px; margin: 6px 0 4px; perspective: 900px; }
+.cy-shell .cy-arena.is-staged .cy-stage-card { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; gap: 3px; min-height: 168px; padding: 12px 10px 10px; border-radius: 16px; border: 2px solid var(--c); background: radial-gradient(120% 60% at 50% 0%, color-mix(in oklab, var(--c) 34%, var(--card)) 0%, var(--card) 70%); box-shadow: 0 14px 30px color-mix(in oklab, var(--background) 70%, transparent), inset 0 0 0 4px var(--card), inset 0 0 0 5px color-mix(in oklab, var(--c) 45%, transparent), 0 0 24px color-mix(in oklab, var(--c) 25%, transparent); transform-origin: 50% 100%; transition: transform .15s ease, box-shadow .15s ease; }
+.cy-arena.is-staged .cy-stage-card.is-risk { --c: var(--journey-pink); transform: rotate(-2deg); }
+.cy-arena.is-staged .cy-stage-card.is-safe { --c: var(--journey-cyan); transform: rotate(2deg); }
+.cy-arena.is-staged .cy-stage-card:hover:not(:disabled) { transform: translateY(-6px) rotate(0); }
+.cy-arena.is-staged .cy-stage-card:active:not(:disabled) { transform: scale(.94) rotate(0); transition-duration: .06s; }
+.cy-arena.is-staged .cy-stage-art { position: static; width: 54px; height: 54px; opacity: 1; padding: 10px; border-radius: 50%; color: var(--c); background: radial-gradient(circle, color-mix(in oklab, var(--c) 35%, transparent), transparent 70%); filter: drop-shadow(0 0 10px var(--c)); flex: 0 0 auto; }
+.cy-arena.is-staged .cy-stage-card.is-risk .cy-stage-art { color: var(--journey-yellow); }
+.cy-arena.is-staged .cy-stage-card > span { justify-content: center; font-size: 11px !important; letter-spacing: .14em; color: var(--c); }
+.cy-arena.is-staged .cy-stage-card > span svg { display: none; }
+.cy-arena.is-staged .cy-stage-card > strong { font-size: 17px !important; line-height: 1.05; }
+.cy-arena.is-staged .cy-stage-card > small { display: block !important; font-size: 10px !important; opacity: .85; }
+.cy-arena.is-staged .cy-stage-card > em { display: block !important; font-size: 9px !important; opacity: .65; }
+.cy-arena.is-staged .cy-stage-card.is-played { transform: rotate(0) scale(.96); }
+.cy-arena.is-staged .cy-stage-card.is-played::after { content: "PLAYED"; position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%) rotate(-14deg); padding: 3px 10px; border: 2px solid currentColor; border-radius: 6px; font: 900 14px "JetBrains Mono", monospace; letter-spacing: .2em; color: var(--foreground); opacity: .85; }
+
+@media (max-height: 720px) and (max-width: 640px) {
+  .cy-shell .cy-arena.is-staged .cy-market-visual { min-height: 150px; }
+  .cy-shell .cy-arena.is-staged .cy-stage-card { min-height: 132px; padding: 8px 8px; }
+  .cy-arena.is-staged .cy-stage-art { width: 40px; height: 40px; padding: 7px; }
+  .cy-arena.is-staged .cy-stage-card > strong { font-size: 14px !important; }
+  .cy-arena.is-staged .cy-stage-card > em { display: none !important; }
+}
+@media (min-width: 1024px) {
+  .cy-arena.is-staged .cy-stage-boss { height: 72%; }
+  .cy-arena.is-staged .cy-stage-boss img { object-position: 50% 16%; }
+  .cy-shell .cy-arena.is-staged .cy-market-visual { min-height: 360px; }
+  .cy-shell .cy-arena.is-staged .cy-stage-card { min-height: 220px; }
+  .cy-arena.is-staged .cy-stage-art { width: 84px; height: 84px; }
+  .cy-arena.is-staged .cy-stage-card > strong { font-size: 22px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .cy-arena.is-staged .cy-stage-card { transition: none; } }
+.cy-arena.is-staged .cy-chart polygon { opacity: .35; }
