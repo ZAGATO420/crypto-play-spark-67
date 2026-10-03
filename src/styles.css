@@ -2540,3 +2540,31 @@ body:has(.cy-shell) { background:var(--background); }
 .cy-stage-context .cy-ctx-hint{flex-basis:100%;margin:2px 0 0;text-align:center;font-size:12px;line-height:1.35;color:color-mix(in oklab,var(--foreground) 85%,transparent)}
 @keyframes cy-ctx-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.cy-arena.is-staged .cy-stage-context{animation:none}}
+
+/* ---------- Quarter briefing: boss-lit dossier instead of an empty box ---------- */
+.cy-shell .cy-card.cy-brief { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; gap: 12px; justify-content: flex-end;
+  background: radial-gradient(120% 60% at 50% 0%, color-mix(in oklab, var(--brief-tint) 18%, var(--background)) 0%, var(--background) 75%) !important;
+  border-color: color-mix(in oklab, var(--brief-tint) 45%, var(--border)) !important; }
+.cy-brief.is-up { --brief-tint: var(--pit-mint); }
+.cy-brief.is-down { --brief-tint: var(--pit-shock); }
+.cy-brief > *:not(.cy-stage-boss) { position: relative; z-index: 1; }
+.cy-brief .cy-stage-boss { position: absolute; inset: 0 0 auto 0; height: 70%; z-index: 0; pointer-events: none; }
+.cy-brief .cy-stage-boss img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; opacity: .9;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%); }
+.cy-brief .journey-kicker { align-self: flex-start; margin-bottom: auto; background: color-mix(in oklab, var(--background) 75%, transparent); backdrop-filter: blur(6px); }
+.cy-brief h2 { font-size: clamp(32px, 9vw, 56px) !important; line-height: .95; text-transform: uppercase; color: var(--brief-tint); text-shadow: 0 4px 24px color-mix(in oklab, var(--background) 90%, transparent); margin: 0; }
+.cy-brief .cy-lead { font-size: 15px; color: var(--foreground); text-shadow: 0 2px 10px var(--background); margin: 0; }
+.cy-brief .cy-hint { padding: 10px 12px; border-left: 3px solid var(--pit-amber); background: color-mix(in oklab, var(--background) 78%, transparent); backdrop-filter: blur(6px); font-size: 12px; line-height: 1.4; }
+.cy-brief .cy-hint strong { display: block; color: var(--pit-amber); font-size: 10px; letter-spacing: .14em; margin-bottom: 3px; }
+.cy-brief .cy-facts { display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px; border: 0 !important; padding: 0 !important; }
+.cy-brief .cy-facts > span { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid color-mix(in oklab, var(--brief-tint) 30%, var(--border)); border-radius: 12px !important;
+  background: color-mix(in oklab, var(--card) 82%, transparent); backdrop-filter: blur(6px); }
+.cy-brief .cy-facts small { font: 700 9px/1.2 var(--font-mono); letter-spacing: .14em; color: var(--muted-foreground); }
+.cy-brief .cy-facts strong { font: 700 22px/1 var(--font-display); background: none !important; }
+.cy-brief .cy-actions { margin-top: 2px; }
+.cy-brief .cy-primary { min-height: 54px; border-radius: 14px !important; font: 800 15px/1 var(--font-display) !important; letter-spacing: .08em;
+  background: linear-gradient(180deg, var(--pit-amber), color-mix(in oklab, var(--pit-amber) 70%, var(--background))) !important; color: var(--pit-bg) !important;
+  box-shadow: 0 10px 30px color-mix(in oklab, var(--pit-amber) 35%, transparent); animation: cy-brief-go 2.2s ease-in-out infinite; }
+@keyframes cy-brief-go { 50% { box-shadow: 0 10px 40px color-mix(in oklab, var(--pit-amber) 60%, transparent); } }
+@media (min-width: 1024px) { .cy-brief .cy-facts { grid-template-columns: repeat(4, minmax(0,1fr)) !important; } .cy-shell .cy-card.cy-brief { min-height: 560px; } }
+@media (prefers-reduced-motion: reduce) { .cy-brief .cy-primary { animation: none; } }
