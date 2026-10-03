@@ -1833,7 +1833,8 @@ export function CryptoJourney() {
 
         <section className="cy-stage" aria-live="polite">
           {phase === "brief" && (
-            <article className="cy-card" key={`brief-${run.chapter}`}>
+            <article className={`cy-card cy-brief ${btcMove >= 0 ? "is-up" : "is-down"}`} key={`brief-${run.chapter}`}>
+              <StageBoss src={stageBossImg} mood={stageMood} />
               <p className="journey-kicker"><History /> {chapterLabel(run.chapter)} | THE SETUP</p>
               <h2>{run.chapter === 0 ? "IT STARTS QUIET" : btcMove >= 0 ? "THE TAPE IS GREEN" : "THE TAPE IS BLEEDING"}</h2>
               <p className="cy-lead">{warning}</p>
