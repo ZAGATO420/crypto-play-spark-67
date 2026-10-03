@@ -2489,3 +2489,21 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act,
   .cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option { animation: none !important; transition: none; }
 }
+
+/* ---------- Stake pickers: all choices on one line, no scrolling ---------- */
+.cy-sheet:has(.cy-sheet-stage) .cy-actions .cy-primary,
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act:first-child { color: var(--foreground); }
+.cy-sheet .cy-actions button { color: var(--foreground); }
+.cy-sheet .cy-actions .cy-primary:not(:has(+ *)), .cy-sheet .cy-wide.cy-primary { color: var(--background); }
+.cy-sheet .cy-grid:has(> .cy-act:nth-child(3)) { grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 6px; }
+.cy-sheet .cy-grid:has(> .cy-act:nth-child(3)) .cy-act { min-height: 0; padding: 10px 6px; text-align: center; justify-items: center; gap: 3px; }
+.cy-sheet .cy-grid:has(> .cy-act:nth-child(3)) .cy-act strong { font-size: clamp(12px, 3.6vw, 16px); }
+.cy-sheet .cy-grid:has(> .cy-act:nth-child(3)) .cy-act small { font-size: 9px; }
+.cy-sheet .cy-actions.three { grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 6px; }
+.cy-sheet .cy-actions.three button { min-height: 58px; padding: 6px 4px; flex-direction: column; gap: 2px; font-size: clamp(11px, 3.4vw, 14px); white-space: normal; height: auto; }
+.cy-sheet .cy-actions.three button small { display: block; font-size: 8px; letter-spacing: .08em; opacity: .8; }
+@media (max-width: 640px) {
+  .cy-sheet:has(.cy-sheet-stage) { gap: 8px; }
+  .cy-sheet:has(.cy-sheet-stage) .cy-lead { font-size: 12px; }
+  .cy-sheet:has(.cy-sheet-stage) .cy-hint { font-size: 11px; padding: 7px 9px; margin: 0; }
+}
