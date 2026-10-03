@@ -1834,7 +1834,12 @@ export function CryptoJourney() {
         <section className="cy-stage" aria-live="polite">
           {phase === "brief" && (
             <article className={`cy-card cy-brief ${btcMove >= 0 ? "is-up" : "is-down"}`} key={`brief-${run.chapter}`}>
-              <StageBoss src={stageBossImg} mood={stageMood} />
+              {(() => {
+                // Setup screen mirrors the MARKET, not the player's stress.
+                const m = run.chapter === 0 ? "calm" : btcMove >= 25 ? "smug" : btcMove >= 0 ? "calm" : btcMove <= -20 ? "enraged" : "stressed";
+                const img = m === "smug" ? smugBoss.url : m === "calm" ? crownedBoss.url : m === "enraged" ? enragedBoss.url : stressedBoss.url;
+                return <StageBoss src={img} mood={m} />;
+              })()}
               <p className="journey-kicker"><History /> {chapterLabel(run.chapter)} | THE SETUP</p>
               <h2>{run.chapter === 0 ? "IT STARTS QUIET" : btcMove >= 0 ? "THE TAPE IS GREEN" : "THE TAPE IS BLEEDING"}</h2>
               <p className="cy-lead">{warning}</p>
