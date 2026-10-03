@@ -2602,7 +2602,7 @@ function PresaleSheet({ card, cash, onTake, onPass }: { card: Presale; cash: num
           </Button>
         ))}
       </div>
-      <Button variant="outline" className="cy-wide" onClick={onPass}>PASS</Button>
+      <div className="cy-actions cy-exit"><Button variant="outline" className="cy-wide" onClick={onPass}>PASS</Button></div>
     </>
   );
 }
@@ -2664,8 +2664,8 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
           </button>
         ))}
       </div>
-      <div className="cy-actions"><Button onClick={onDuck}>WALK AWAY</Button></div>
       <small className="cy-note">Walking away costs no money, just stress and your conviction.</small>
+      <div className="cy-actions cy-exit"><Button onClick={onDuck}>WALK AWAY</Button></div>
     </>
   );
 }
