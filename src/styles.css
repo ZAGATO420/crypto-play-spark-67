@@ -2296,3 +2296,46 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-chip { grid-template-columns: 18px minmax(0,1fr) auto !important; grid-template-areas: "logo name pnl" !important; min-height: 40px !important; padding: 6px 7px !important; }
   .cy-chip b { font-size: 12px !important; text-align: right; }
 }
+
+/* ================= DESKTOP COMMAND CENTER (≥1024px, additive only) =================
+   Mobile DOM and rules stay untouched. Left column = the show, right = quiet rail. */
+@media (min-width: 1024px) {
+  .cy-shell { display:flex !important; flex-direction:column; gap:10px; padding:12px 24px 16px !important; }
+  .cy-shell > * { width:min(100%, 1320px) !important; margin-inline:auto !important; }
+  .cy-shell::before {
+    background:
+      radial-gradient(60% 50% at 30% 30%, color-mix(in oklab, var(--journey-cyan) 10%, transparent), transparent 70%),
+      radial-gradient(45% 40% at 85% 75%, color-mix(in oklab, var(--journey-pink) 8%, transparent), transparent 70%),
+      repeating-linear-gradient(90deg, transparent 0 22px, color-mix(in oklab, var(--journey-cyan) 6%, transparent) 22px 24px),
+      linear-gradient(0deg, color-mix(in oklab, var(--foreground) 3%, transparent) 1px, transparent 1px) 0 0 / 100% 48px,
+      var(--background) !important;
+    opacity:.9;
+  }
+  .cy-body { display:grid !important; grid-template-columns:minmax(0, 62fr) minmax(260px, 38fr) !important; gap:18px; align-items:start; }
+  .cy-stage { min-width:0; }
+  .cy-chart-wrap { height:clamp(260px, 34vh, 380px) !important; }
+
+  /* right rail: quieter, smaller, no frame fight with the arena */
+  .cy-trail { display:block !important; order:initial; position:sticky; top:12px; max-height:calc(100dvh - 140px); overflow:auto;
+    padding:12px 14px; border:0 !important; border-left:1px solid color-mix(in oklab, var(--border) 60%, transparent) !important;
+    border-radius:0 !important; background:transparent !important; box-shadow:none !important; backdrop-filter:none !important;
+    color:var(--muted-foreground); font-size:11px; opacity:.85; }
+  .cy-trail .trail-entry { background:transparent !important; border-color:color-mix(in oklab, var(--border) 50%, transparent) !important; box-shadow:none !important; }
+  .cy-trail .trail-entry strong { font-size:11px; font-weight:500; color:color-mix(in oklab, var(--foreground) 75%, transparent); }
+  .cy-trail .cy-rules { font-size:10px; opacity:.8; }
+
+  /* fluid numbers that grow on big screens */
+  .cy-hud-side.is-you figcaption strong { font-size:clamp(24px, 2.2vw, 40px) !important; }
+  .cy-hud-side.is-boss figcaption strong { font-size:clamp(16px, 1.4vw, 24px) !important; }
+  .cy-hud-side figcaption > span { font-size:clamp(11px, 1vw, 16px); }
+  .cy-hud-side img { width:clamp(48px, 4vw, 64px); height:clamp(48px, 4vw, 64px); }
+  .cy-chart-title span, .cy-chart-title strong { font-size:clamp(16px, 1.8vw, 26px) !important; }
+  .cy-chip b { font-size:clamp(12px, 1vw, 16px) !important; }
+  .cy-move strong { font-size:clamp(16px, 1.4vw, 22px) !important; }
+  .cy-net { font-size:clamp(28px, 2.6vw, 44px); }
+
+  /* secondary areas: large, centered, focused */
+  .cy-scrim { backdrop-filter:blur(12px) !important; background:color-mix(in oklab, var(--background) 78%, transparent) !important; }
+  .cy-sheet { width:min(880px, 90vw) !important; max-height:85vh !important; padding:28px 32px; border-color:var(--journey-cyan);
+    box-shadow:0 0 0 1px color-mix(in oklab, var(--journey-cyan) 35%, transparent), 0 40px 120px color-mix(in oklab, #000 65%, transparent) !important; }
+}
