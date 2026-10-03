@@ -2339,3 +2339,43 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-sheet { width:min(880px, 90vw) !important; max-height:85vh !important; padding:28px 32px; border-color:var(--journey-cyan);
     box-shadow:0 0 0 1px color-mix(in oklab, var(--journey-cyan) 35%, transparent), 0 40px 120px color-mix(in oklab, #000 65%, transparent) !important; }
 }
+
+/* ---------- Stage (phase 1): quarter decision as a boss stage ---------- */
+.cy-arena { position: relative; isolation: isolate; overflow: hidden; }
+.cy-stage-boss { position: absolute; inset: 0 0 auto 0; height: 78%; z-index: -1; pointer-events: none; }
+.cy-stage-boss img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; opacity: .5; animation: cy-stage-in .7s ease-out both, cy-stage-breathe 9s ease-in-out infinite alternate; }
+.cy-stage-boss::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in oklab, var(--background) 25%, transparent) 0%, transparent 35%, var(--background) 100%); }
+.cy-stage-boss.is-enraged img, .cy-stage-boss.is-broken img { filter: saturate(1.25) hue-rotate(-12deg); }
+.cy-arena .cy-market-visual { background: color-mix(in oklab, var(--background) 55%, transparent); }
+.cy-stage-head { position: absolute; inset: 0 0 auto 0; top: 18%; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px; background: none; border: 0; color: var(--foreground); text-align: center; cursor: pointer; animation: cy-stage-head 2.6s ease both; }
+.cy-stage-head strong { font-family: "Space Grotesk", sans-serif; font-size: clamp(30px, 7vw, 56px); line-height: .95; letter-spacing: -.02em; text-shadow: 0 6px 30px rgba(0,0,0,.8); }
+.cy-stage-head span { font-family: "JetBrains Mono", monospace; font-size: clamp(11px, 2.6vw, 14px); letter-spacing: .14em; color: var(--journey-yellow); text-shadow: 0 2px 12px rgba(0,0,0,.9); }
+.cy-stage-card { position: relative; overflow: hidden; animation: cy-stage-card .5s cubic-bezier(.2,.9,.3,1.2) both; }
+.cy-stage-card.is-safe { animation-delay: .08s; }
+.cy-stage-art { position: absolute; right: -10px; top: -10px; width: 86px; height: 86px; display: grid; place-items: center; opacity: .18; pointer-events: none; }
+.cy-stage-art svg { width: 100%; height: 100%; }
+.cy-stage-card.is-risk .cy-stage-art { color: var(--journey-yellow); }
+.cy-stage-card.is-played { filter: grayscale(.8); opacity: .7; }
+.cy-stage-pulse { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 3px solid var(--journey-yellow); z-index: 4; pointer-events: none; animation: cy-stage-pulse .9s ease-out forwards; }
+.cy-stage-pulse b { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); white-space: nowrap; font: 800 11px "JetBrains Mono", monospace; color: var(--journey-yellow); background: color-mix(in oklab, var(--background) 80%, transparent); padding: 2px 6px; border-radius: 4px; }
+.cy-stage-delta { margin-left: 6px; font-style: normal; font-weight: 800; animation: cy-stage-delta 1.3s ease-out forwards; }
+.cy-shell.is-trading .cy-arena { visibility: hidden; }
+.cy-scrim .cy-sheet { animation: cy-sheet-open .32s cubic-bezier(.2,.9,.3,1.15) both; }
+@keyframes cy-stage-in { from { opacity: 0; transform: scale(1.08); } }
+@keyframes cy-stage-breathe { to { transform: scale(1.04); } }
+@keyframes cy-stage-head { 0% { opacity: 0; transform: translateY(14px) scale(.96); } 12%, 78% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-8px); } }
+@keyframes cy-stage-card { from { opacity: 0; transform: translateY(30px) scale(.96); } }
+@keyframes cy-stage-pulse { 0% { transform: scale(.6); opacity: 1; box-shadow: 0 0 0 0 var(--journey-yellow); } 100% { transform: scale(2.4); opacity: 0; box-shadow: 0 0 0 10px transparent; } }
+@keyframes cy-stage-delta { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }
+@keyframes cy-sheet-open { from { opacity: 0; transform: translateY(18px) scale(.95); } }
+@media (min-width: 1024px) {
+  .cy-stage-boss { height: 85%; }
+  .cy-stage-boss img { object-position: 70% 20%; opacity: .6; }
+  .cy-stage-art { width: 120px; height: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cy-stage-boss img, .cy-stage-head, .cy-stage-card, .cy-stage-pulse, .cy-stage-delta, .cy-scrim .cy-sheet { animation: none !important; }
+  .cy-stage-pulse { opacity: .9; }
+}
+.cy-stage-pulse.is-left b { left: -4px; transform: none; }
+.cy-stage-pulse.is-right b { left: auto; right: -4px; transform: none; }
