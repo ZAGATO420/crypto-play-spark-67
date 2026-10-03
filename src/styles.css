@@ -2530,3 +2530,13 @@ body:has(.cy-shell) { background:var(--background); }
 /* primary actions: always light text on its own fill, dark text on bright fills */
 .cy-primary { color: var(--background) !important; }
 .cy-sheet:has(.cy-sheet-stage) .cy-actions .cy-primary { color: var(--foreground) !important; }
+
+/* Stage context band — keeps the arena alive after the headline fades */
+.cy-arena.is-staged .cy-stage-context{position:relative;z-index:4;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;margin:6px 10px 4px;padding:8px 10px;border-radius:12px;background:color-mix(in oklab,var(--background) 62%,transparent);border:1px solid color-mix(in oklab,var(--journey-yellow) 30%,transparent);backdrop-filter:blur(6px);animation:cy-ctx-in .6s 2.4s ease both}
+.cy-stage-context>span{font:700 10px/1 "JetBrains Mono",monospace;letter-spacing:.08em;padding:5px 8px;border-radius:999px;background:color-mix(in oklab,var(--foreground) 8%,transparent);color:var(--foreground)}
+.cy-stage-context .cy-ctx-badge{background:var(--journey-yellow);color:var(--background)}
+.cy-stage-context .cy-ctx-btc.positive{color:var(--journey-green,#3ddc84)}
+.cy-stage-context .cy-ctx-btc.negative{color:var(--journey-red,#ff5470)}
+.cy-stage-context .cy-ctx-hint{flex-basis:100%;margin:2px 0 0;text-align:center;font-size:12px;line-height:1.35;color:color-mix(in oklab,var(--foreground) 85%,transparent)}
+@keyframes cy-ctx-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cy-arena.is-staged .cy-stage-context{animation:none}}
