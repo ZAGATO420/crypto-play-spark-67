@@ -2456,3 +2456,36 @@ body:has(.cy-shell) { background:var(--background); }
 }
 @media (prefers-reduced-motion: reduce) { .cy-arena.is-staged .cy-stage-card { transition: none; } }
 .cy-arena.is-staged .cy-chart polygon { opacity: .35; }
+
+/* ---------- Stage (phase 3): moment sheets get the same card look ---------- */
+.cy-sheet:has(.cy-sheet-stage) .cy-actions button,
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act,
+.cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option {
+  position: relative; overflow: hidden; border-radius: 16px; border-width: 2px;
+  box-shadow: 0 14px 30px color-mix(in oklab, var(--background) 70%, transparent), 0 0 24px color-mix(in oklab, var(--journey-yellow) 12%, transparent);
+  animation: cy-stage-card .5s cubic-bezier(.2,.9,.3,1.2) both;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.cy-sheet:has(.cy-sheet-stage) .cy-actions button:nth-child(2),
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act:nth-child(2),
+.cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option:nth-child(2) { animation-delay: .08s; }
+.cy-sheet:has(.cy-sheet-stage) .cy-actions button:nth-child(3),
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act:nth-child(3),
+.cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option:nth-child(3) { animation-delay: .16s; }
+.cy-sheet:has(.cy-sheet-stage) .cy-actions button:hover:not(:disabled),
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act:hover:not(:disabled),
+.cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option:hover:not(:disabled) { transform: translateY(-4px); }
+.cy-sheet:has(.cy-sheet-stage) .cy-actions button:active:not(:disabled),
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act:active:not(:disabled),
+.cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option:active:not(:disabled) { transform: scale(.95); transition-duration: .06s; }
+.cy-sheet:has(.cy-sheet-stage) .cy-actions .cy-primary,
+.cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act:first-child {
+  border-color: var(--journey-yellow);
+  background: radial-gradient(120% 60% at 50% 0%, color-mix(in oklab, var(--journey-yellow) 22%, var(--card)) 0%, var(--card) 70%);
+  box-shadow: 0 14px 30px color-mix(in oklab, var(--background) 70%, transparent), inset 0 0 0 4px var(--card), inset 0 0 0 5px color-mix(in oklab, var(--journey-yellow) 40%, transparent), 0 0 24px color-mix(in oklab, var(--journey-yellow) 22%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cy-sheet:has(.cy-sheet-stage) .cy-actions button,
+  .cy-sheet:has(.cy-sheet-stage) .cy-grid .cy-act,
+  .cy-sheet:has(.cy-sheet-stage) .cy-decide .cy-option { animation: none !important; transition: none; }
+}
