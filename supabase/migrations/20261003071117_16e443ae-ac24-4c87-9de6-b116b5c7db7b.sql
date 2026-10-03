@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public can read leaderboard runs" ON public.leaderboard_runs;
