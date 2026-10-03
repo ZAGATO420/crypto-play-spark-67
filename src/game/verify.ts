@@ -302,13 +302,13 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     if (e.t === "quarter") {
       if (c !== st.chapter) return fail(`quarter-order@${i}`);
       if (typeof e.n === "number" && !near(netOf(c), e.n, Math.max(250, Math.abs(e.n) * 0.005))) {
-        return fail(`quarter-net@${c}:${Math.round(netOf(c))}vs${e.n} cash${Math.round(st.cash)}vs${e.cash} ${JSON.stringify(input.log.slice(Math.max(0, i - 8), i))}`);
+        return fail(`quarter-net@${c}:${Math.round(netOf(c))}vs${e.n}`);
       }
       settleQuarter(c);
       if (netOf(st.chapter) <= 0) st.ended = true;
       continue;
     }
-    if (c !== st.chapter) return fail(`stale-chapter@${i} st${st.chapter} ${JSON.stringify(input.log.slice(0, i + 2))}`);
+    if (c !== st.chapter) return fail(`stale-chapter@${i}`);
 
     switch (e.t) {
       case "spot": {
