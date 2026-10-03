@@ -8,7 +8,7 @@ import enragedBoss from "@/assets/boss/enraged.webp.asset.json";
 import smugBoss from "@/assets/boss/smug.webp.asset.json";
 import stressedBoss from "@/assets/boss/stressed.webp.asset.json";
 import brokenBoss from "@/assets/boss/broken.webp.asset.json";
-import { Delta, StageBoss, StageHeadline, TapPulse, type Pulse } from "./Stage";
+import { Delta, SheetStage, StageBoss, StageHeadline, TapPulse, type Pulse } from "./Stage";
 import actMania from "@/assets/game/act-mania.jpg";
 import actCollapse from "@/assets/game/act-collapse.jpg";
 import actEndgame from "@/assets/game/act-endgame.jpg";
@@ -2579,6 +2579,7 @@ function PresaleSheet({ card, cash, onTake, onPass }: { card: Presale; cash: num
   const labels = ["MIN TICKET", "25% OF CASH", "HALF YOUR CASH"];
   return (
     <>
+      <SheetStage src={smugBoss.url} mood="smug" title={card.name} sub={card.tag} />
       <p className="journey-kicker"><Rocket /> {card.tag} | ONE SHOT</p>
       <h2>{card.name}</h2>
       <p className="cy-lead">{card.blurb}</p>
@@ -2622,6 +2623,7 @@ function CrashSheet({ chapter, onPanic, onClose }: { chapter: number; onPanic: (
   if (!crash) return <Button className="cy-wide" onClick={onClose}>CONTINUE</Button>;
   return (
     <>
+      <SheetStage src={enragedBoss.url} mood="enraged" title={crash.title} sub={chapterLabel(chapter)} />
       <p className="journey-kicker"><TrendingDown /> {chapterLabel(chapter)} | {monthRangeLabel(chapter)}</p>
       <h2 className="negative">{crash.title}</h2>
       <p className="cy-lead">{crash.line}</p>
@@ -2641,6 +2643,7 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
   const stakes = [0.1, 0.25, 0.5].map((f) => Math.max(200, Math.round(cash * f)));
   return (
     <>
+      <SheetStage src={enragedBoss.url} mood="enraged" title={fight.title} sub="SKILL DUEL" />
       <p className="journey-kicker"><Crown /> SKILL DUEL | {chapterLabel(chapter)}</p>
       <h2>{fight.title}</h2>
       <p className="cy-lead">{fight.line}</p>
@@ -2663,6 +2666,7 @@ function OfferSheet({ attack, net, onTake, onRefuse }: { attack: BossAttack; net
   const amount = Math.max(2000, Math.round(net * 0.25));
   return (
     <>
+      <SheetStage src={crownedBoss.url} mood="calm" title="HE WANTS TO BUY YOU OUT" sub={attack.name} />
       <p className="journey-kicker"><Crown /> {attack.name}</p>
       <h2>HE WANTS TO BUY YOU OUT</h2>
       <p className="cy-lead">{attack.line}</p>
@@ -2686,6 +2690,7 @@ function FailureSheet({ chapter, run, onClose }: { chapter: number; run: Run; on
   const exposed = run.positions.filter((p) => p.where === "exchange").length;
   return (
     <>
+      <SheetStage src={brokenBoss.url} mood="broken" title={fail.name} sub="COUNTERPARTY" />
       <p className="journey-kicker"><Shield /> {chapterLabel(chapter)} | COUNTERPARTY</p>
       <h2 className="negative">{fail.name}</h2>
       <p className="cy-lead">{fail.line}</p>
@@ -2809,6 +2814,7 @@ function SurviveSheet({ run, difficulty, caps, onEat, onCalm }: { run: Run; diff
 function DecisionSheet({ card, onPick }: { card: Decision | Situation; onPick: (o: DecisionOption) => void }) {
   return (
     <>
+      <SheetStage src={stressedBoss.url} mood="stressed" title={card.title} sub={card.kicker} />
       <p className="journey-kicker"><History /> {card.kicker}</p>
       <h2>{card.title}</h2>
       <p className="cy-lead">{card.body}</p>

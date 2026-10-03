@@ -2379,3 +2379,21 @@ body:has(.cy-shell) { background:var(--background); }
 }
 .cy-stage-pulse.is-left b { left: -4px; transform: none; }
 .cy-stage-pulse.is-right b { left: auto; right: -4px; transform: none; }
+
+/* ---------- Stage (phase 2): boss backdrop inside the big moment sheets ---------- */
+.cy-sheet { position: relative; isolation: isolate; overflow: hidden; }
+.cy-sheet-stage { position: absolute; inset: 0 0 auto 0; height: 62%; z-index: -1; pointer-events: none; }
+.cy-sheet-stage img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; opacity: .38; animation: cy-stage-in .7s ease-out both, cy-stage-breathe 9s ease-in-out infinite alternate; }
+.cy-sheet-stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, color-mix(in oklab, var(--background) 30%, transparent) 0%, transparent 30%, var(--background) 92%); }
+.cy-sheet-stage.is-enraged img, .cy-sheet-stage.is-broken img { filter: saturate(1.25) hue-rotate(-12deg); }
+.cy-sheet .cy-stage-head { top: 2%; z-index: 6; pointer-events: none; }
+.cy-sheet .cy-stage-head strong { font-size: clamp(20px, 4.6vw, 32px); opacity: .92; }
+.cy-sheet .cy-stage-head { animation: cy-sheet-head 1.6s ease both; }
+@keyframes cy-sheet-head { 0% { opacity: 0; transform: translateY(10px) scale(.97); } 18%, 55% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-6px); } }
+@media (min-width: 1024px) {
+  .cy-sheet-stage { height: 70%; }
+  .cy-sheet-stage img { object-position: 65% 15%; opacity: .45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cy-sheet-stage img { animation: none !important; }
+}
