@@ -1,0 +1,1 @@
+DELETE FROM public.leaderboard_runs WHERE player_name IN ('VerifierTest', 'FakeTest');

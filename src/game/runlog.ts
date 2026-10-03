@@ -26,5 +26,5 @@ export type LogEvent =
   | { t: "stance"; c: number; stance: string }
   | { t: "bank"; c: number }
   | { t: "signal"; c: number; fee: number }
-  | { t: "quarter"; c: number }
+  | { t: "quarter"; c: number; n?: number; cash?: number }
   | { t: "sellout"; c: number };
