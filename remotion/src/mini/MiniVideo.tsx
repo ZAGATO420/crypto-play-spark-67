@@ -159,7 +159,7 @@ const Panic: React.FC = () => {
         ))}
       </div>
       <Flash at={end} color={C.acid} />
-      <Stamp at={end} text="FUNDS SAVED" color={C.acid} sub="12/12 · NOT YOUR KEYS, NOT YOUR COINS" />
+      <Stamp at={end} text="FUNDS SAVED" color={C.acid} sub="12/12 PULLED IN TIME" />
     </Shake>
   );
 };
