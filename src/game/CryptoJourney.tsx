@@ -1852,7 +1852,7 @@ export function CryptoJourney() {
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
               {cfg.tournament && <SeasonBanner compact />}
               <StageBoss src={stageBossImg} mood={stageMood} />
-              <StageHeadline title={theme.badge} sub={theme.tag} show={guide === null && !riskPlayed && waitingForFirstTrade} />
+              <StageHeadline key={`head-${run.chapter}`} title={theme.badge} sub={theme.tag} show={guide === null && !riskPlayed} />
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className="cy-chart-title">
                   <span><img src={COIN_LOGO[focusSymbol]} alt="" width={28} height={28} /><b>{focusSymbol}</b><small>{formatMoney(focusPrice)}</small></span>
