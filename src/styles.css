@@ -2311,7 +2311,7 @@ body:has(.cy-shell) { background:var(--background); }
       var(--background) !important;
     opacity:.9;
   }
-  .cy-body { display:grid !important; grid-template-columns:minmax(0, 62fr) minmax(260px, 38fr) !important; gap:18px; align-items:start; }
+  .cy-body, .cy-shell.has-guide .cy-body { max-width:none !important; display:grid !important; grid-template-columns:minmax(0, 62fr) minmax(260px, 38fr) !important; gap:18px; align-items:start; }
   .cy-stage { min-width:0; }
   .cy-chart-wrap { height:clamp(260px, 34vh, 380px) !important; }
 
@@ -2329,7 +2329,7 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-hud-side.is-boss figcaption strong { font-size:clamp(16px, 1.4vw, 24px) !important; }
   .cy-hud-side figcaption > span { font-size:clamp(11px, 1vw, 16px); }
   .cy-hud-side img { width:clamp(48px, 4vw, 64px); height:clamp(48px, 4vw, 64px); }
-  .cy-chart-title span, .cy-chart-title strong { font-size:clamp(16px, 1.8vw, 26px) !important; }
+  .cy-chart-title > span { font-size:clamp(16px, 1.8vw, 26px) !important; }
   .cy-chip b { font-size:clamp(12px, 1vw, 16px) !important; }
   .cy-move strong { font-size:clamp(16px, 1.4vw, 22px) !important; }
   .cy-net { font-size:clamp(28px, 2.6vw, 44px); }
