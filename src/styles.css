@@ -2596,3 +2596,22 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-arena.is-staged .cy-ctx-hint { display: none; }
   .cy-arena.is-staged .cy-stage-art { display: none; }
 }
+
+/* ---------- Stage phase 4: big moments (duel, presale, crash, decision) become a full stage ---------- */
+.cy-sheet { overflow-y: auto; overscroll-behavior: contain; }
+.cy-sheet .cy-exit { position: sticky; bottom: -22px; z-index: 5; margin: 0 -22px -22px; padding: 10px 22px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(0deg, var(--card) 70%, transparent); }
+.cy-sheet .cy-exit > button { width: 100%; min-height: 48px; }
+@media (max-width: 640px) {
+  .cy-scrim:has(.cy-sheet-stage) { padding: 0 !important; }
+  .cy-scrim:has(.cy-sheet-stage) > .cy-sheet { width: 100% !important; height: 100dvh; max-height: 100dvh !important; border-radius: 0 !important; border: 0; padding: 16px 16px 0; align-content: end; gap: 10px; background: var(--background); }
+  .cy-sheet:has(.cy-sheet-stage) { padding-top: 34dvh !important; }
+  .cy-sheet .cy-sheet-stage { height: 52dvh; }
+  .cy-sheet .cy-sheet-stage img { opacity: .75; object-position: 50% 10%; }
+  .cy-sheet:has(.cy-sheet-stage) h2 { text-shadow: 0 2px 14px var(--background); }
+  .cy-sheet:has(.cy-sheet-stage) .cy-exit { bottom: 0; margin: 0 -16px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); }
+  .cy-sheet:has(.cy-sheet-stage) .cy-lead { font-size: 13px; line-height: 1.35; }
+}
+@media (max-width: 640px) and (max-height: 720px) {
+  .cy-sheet:has(.cy-sheet-stage) { padding-top: 22dvh !important; }
+  .cy-sheet:has(.cy-sheet-stage) .cy-hint { display: none; }
+}
