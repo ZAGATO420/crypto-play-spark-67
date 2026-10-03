@@ -35,6 +35,7 @@ import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
 import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
 import type { LogEvent } from "./runlog";
+import { livePrice as sharedLivePrice, makeNoise, priceAt } from "./market";
 
 /** Compact money for tight HUD chips: $1.4M, $920K, $480. */
 function shortMoney(v: number): string {
@@ -211,16 +212,6 @@ const DEATH_PUNCHLINES: Record<Exclude<EndingKey, "LEGEND" | "SURVIVOR" | "SELLO
   BROKE: ["Your portfolio has successfully become a tax deduction.", "Seven years of alpha, distilled into zero.", "The Boss thanks you for providing exit liquidity."],
 };
 
-const makeNoise = (mode: BaseMode, seed: number) => {
-  const step = mode === "historical" ? 0 : mode === "chaos" ? 0.05 : 0.018;
-  const cap = mode === "chaos" ? 0.4 : 0.12;
-  let drift = 0;
-  return Array.from({ length: 84 }, (_, i) => {
-    drift = Math.max(-cap, Math.min(cap, drift + (det(seed, `noise-${i}`) * 2 - 1) * step));
-    return 1 + drift;
-  });
-};
-
 // Tournament runs all share the season seed, so every player meets the same
 // market noise, the same rugs and the same drainers. Free runs stay random,
 // unless a player asks for a rematch on the exact same seed.
@@ -285,41 +276,13 @@ const freshRun = (config: Config, reuse?: number): Run => {
 
 
 
-const priceAt = (symbol: CoinSymbol, chapter: number, noise: number[]) => {
-  const month = chapterMonth(chapter);
-  const base = COINS.find((c) => c.symbol === symbol)?.prices[month] ?? 0;
-  return base ? base * (noise[month] ?? 1) : 0;
-};
-
 /**
  * The quarter is not a jump any more: t walks from 0 to 1 in front of the
  * player, with real intra-quarter wicks on top of the historical path.
  * Deterministic, so a tournament seed shows everyone the same tape.
  */
-const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) => {
-  const a = priceAt(symbol, r.chapter, r.noise);
-  if (!a) return 0;
-  if (r.config.mode === "historical") {
-    const coin = COINS.find((candidate) => candidate.symbol === symbol);
-    if (!coin) return 0;
-    const startMonth = chapterMonth(r.chapter);
-    const endMonth = chapterMonth(Math.min(CHAPTERS - 1, r.chapter + 1));
-    const monthProgress = Math.max(0, endMonth - startMonth) * clamp(t, 0, 1);
-    const leftMonth = Math.min(endMonth, startMonth + Math.floor(monthProgress));
-    const rightMonth = Math.min(endMonth, leftMonth + 1);
-    const left = coin.prices[leftMonth] ?? a;
-    const right = coin.prices[rightMonth] || left;
-    const fraction = monthProgress - Math.floor(monthProgress);
-    return left + (right - left) * fraction;
-  }
-  const b = priceAt(symbol, r.chapter + 1, r.noise) || a;
-  const span = Math.abs(b / a - 1);
-  const phase = det(r.seed, `wick-${r.chapter}-${symbol}`) * Math.PI * 2;
-  const amp = (0.35 + det(r.seed, `amp-${r.chapter}-${symbol}`) * 0.7) * Math.max(0.05, span);
-  const wick = Math.sin(t * Math.PI * 3 + phase) * amp * (1 - t * 0.55);
-  const hunt = sweep ? -Math.max(0, Math.sin(t * Math.PI * 2)) * (0.05 + span * 0.5) : 0;
-  return Math.max(a * 0.02, (a + (b - a) * t) * (1 + wick + hunt));
-};
+const livePrice = (symbol: CoinSymbol, r: Run, t: number, sweep = false) =>
+  sharedLivePrice(symbol, { chapter: r.chapter, noise: r.noise, seed: r.seed, mode: r.config.mode }, t, sweep);
 
 /**
  * MOMENTUM pilot: watching the tape is a skill. When the risky move is pressed we
