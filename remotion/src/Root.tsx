@@ -11,6 +11,7 @@ import { OnboardVideo, ONB_TOTAL } from "./onb/OnboardVideo";
 import { TokVideo, TOK_TOTAL } from "./tok/TokVideo";
 import { AdVideo, AD_TOTAL } from "./ad/AdVideo";
 import { Teaser16, T16_TOTAL } from "./teaser/Teaser16";
+import { MiniVideo, MINI_TOTAL } from "./mini/MiniVideo";
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -25,5 +26,6 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="tiktok" component={TokVideo} durationInFrames={TOK_TOTAL} fps={30} width={1080} height={1920} />
     <Composition id="ad" component={AdVideo} durationInFrames={AD_TOTAL} fps={30} width={1080} height={1920} />
     <Composition id="teaser16" component={Teaser16} durationInFrames={T16_TOTAL} fps={30} width={1920} height={1080} />
+    <Composition id="mini" component={MiniVideo} durationInFrames={MINI_TOTAL} fps={30} width={1080} height={1920} />
   </>
 );
