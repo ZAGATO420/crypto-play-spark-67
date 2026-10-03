@@ -1853,6 +1853,12 @@ export function CryptoJourney() {
               {cfg.tournament && <SeasonBanner compact />}
               <StageBoss src={stageBossImg} mood={stageMood} />
               <StageHeadline key={`head-${run.chapter}`} title={theme.badge} sub={theme.tag} show={!riskPlayed} />
+              <div className="cy-stage-context" aria-label="Quarter context">
+                <span className="cy-ctx-badge">{theme.badge}</span>
+                <span className="cy-ctx-mood">BOSS · {({ calm: "WATCHING", smug: "SMUG", stressed: "UNDER PRESSURE", enraged: "ENRAGED", broken: "BROKEN" } as Record<string, string>)[stageMood] ?? "WATCHING"}</span>
+                <span className={`cy-ctx-btc ${btcMove >= 0 ? "positive" : "negative"}`}>BTC {btcMove >= 0 ? "+" : ""}{btcMove.toFixed(1)}%</span>
+                {hintFor(run.chapter) && <p className="cy-ctx-hint">{hintFor(run.chapter)}</p>}
+              </div>
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className="cy-chart-title">
                   <span><img src={COIN_LOGO[focusSymbol]} alt="" width={28} height={28} /><b>{focusSymbol}</b><small>{formatMoney(focusPrice)}</small></span>
