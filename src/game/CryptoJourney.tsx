@@ -2651,8 +2651,9 @@ function FightSheet({ chapter, cash, onFight, onDuck }: { chapter: number; cash:
       <p className="cy-hint"><strong>WHAT TO DO:</strong> Choose a stake. The next screen tells you exactly when or where to tap. {PERK_BLURB[fight.perk]}</p>
       <div className="cy-grid">
         {stakes.map((s, i) => (
-          <button key={i} className="cy-act" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
-            <Zap /><strong>RISK {formatMoney(s)}</strong><small>{["Low stake", "Serious stake", "Maximum stake"][i]} | win up to {formatMoney(s * 2)}</small>
+          <button key={i} className="cy-act cy-stake" disabled={cash < s} onClick={() => onFight(s, fight.mini)}>
+            <em className="cy-stake-tag">{["LOW", "MID", "MAX"][i]}</em>
+            <Zap /><strong>{formatMoney(s)}</strong><small>{cash < s ? "NOT ENOUGH CASH" : `win up to ${formatMoney(s * 2)}`}</small>
           </button>
         ))}
       </div>

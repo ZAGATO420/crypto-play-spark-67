@@ -2506,3 +2506,27 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-sheet:has(.cy-sheet-stage) .cy-lead { font-size: 12px; }
   .cy-sheet:has(.cy-sheet-stage) .cy-hint { font-size: 11px; padding: 7px 9px; margin: 0; }
 }
+
+/* ---------- Global contrast pass: sheets, choice cards, secondary buttons ---------- */
+.cy-sheet .cy-act { background: color-mix(in oklab, var(--card) 88%, var(--journey-yellow) 4%); border-color: color-mix(in oklab, var(--journey-yellow) 35%, var(--border)); color: var(--foreground); }
+.cy-sheet .cy-act strong { color: var(--foreground); }
+.cy-sheet .cy-act small { color: color-mix(in oklab, var(--foreground) 72%, transparent); }
+.cy-sheet .cy-act svg { color: var(--journey-yellow); }
+.cy-sheet .cy-act:disabled { opacity: 1; filter: none; background: color-mix(in oklab, var(--card) 70%, transparent); border-color: var(--border); border-style: dashed; box-shadow: none !important; }
+.cy-sheet .cy-act:disabled strong { color: color-mix(in oklab, var(--foreground) 45%, transparent); }
+.cy-sheet .cy-act:disabled small { color: var(--journey-pink); font-weight: 700; letter-spacing: .06em; }
+.cy-sheet .cy-act:disabled svg { color: color-mix(in oklab, var(--foreground) 35%, transparent); }
+.cy-stake { position: relative; }
+.cy-stake-tag { justify-self: center; padding: 2px 7px; border-radius: 999px; border: 1px solid currentColor; color: var(--journey-yellow); font: 800 9px/1.2 var(--font-body); font-style: normal; letter-spacing: .12em; }
+.cy-stake:disabled .cy-stake-tag { color: color-mix(in oklab, var(--foreground) 40%, transparent); }
+/* secondary actions in sheets: calm outline, never neon fill */
+.cy-sheet .cy-actions > button:not(.cy-primary) {
+  background: color-mix(in oklab, var(--card) 85%, transparent) !important;
+  color: var(--foreground) !important;
+  border: 1px solid color-mix(in oklab, var(--foreground) 28%, transparent) !important;
+  box-shadow: none !important;
+}
+.cy-sheet .cy-actions > button:not(.cy-primary):hover { border-color: var(--foreground) !important; }
+/* primary actions: always light text on its own fill, dark text on bright fills */
+.cy-primary { color: var(--background) !important; }
+.cy-sheet:has(.cy-sheet-stage) .cy-actions .cy-primary { color: var(--foreground) !important; }
