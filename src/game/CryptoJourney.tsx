@@ -6,6 +6,9 @@ import bossStageWide from "@/assets/boss/stage-wide.jpg.asset.json";
 import bossStagePortrait from "@/assets/boss/stage-portrait.jpg.asset.json";
 import enragedBoss from "@/assets/boss/enraged.webp.asset.json";
 import smugBoss from "@/assets/boss/smug.webp.asset.json";
+import stressedBoss from "@/assets/boss/stressed.webp.asset.json";
+import brokenBoss from "@/assets/boss/broken.webp.asset.json";
+import { Delta, StageBoss, StageHeadline, TapPulse, type Pulse } from "./Stage";
 import actMania from "@/assets/game/act-mania.jpg";
 import actCollapse from "@/assets/game/act-collapse.jpg";
 import actEndgame from "@/assets/game/act-endgame.jpg";
@@ -518,6 +521,7 @@ export function CryptoJourney() {
   const persona = personaFor(det(run.seed, "persona"));
   const act = actFor(run.chapter);
   const chapterPlay = chapterPlayFor(run.chapter);
+  const [stagePulse, setStagePulse] = useState<Pulse | null>(null);
   const mission = missionFor(run.chapter);
   const attack = attackFor(run.chapter, det(run.seed, `attack-${run.chapter}`), persona.bias);
   const sweeping = attack?.id === "SWEEP";
@@ -1727,6 +1731,20 @@ export function CryptoJourney() {
       default: openSpot(focusSymbol, 0.25);
     }
   };
+  // Stage (presentation only): show where on the live curve the tap landed.
+  const stageMood = run.stress > 85 || run.hunger > 85 ? "broken" : run.stress > 70 || run.hunger > 70 ? "enraged" : run.stress > 50 ? "stressed" : run.streak >= 2 ? "smug" : "calm";
+  const stageBossImg = stageMood === "broken" ? brokenBoss.url : stageMood === "enraged" ? enragedBoss.url : stageMood === "stressed" ? stressedBoss.url : stageMood === "smug" ? smugBoss.url : crownedBoss.url;
+  const stageTap = () => {
+    if (phase !== "act") return;
+    let label = "STOP";
+    if (chapterPlay.mode === "MOMENTUM") {
+      const z = timingEdge(focusSymbol, run, tickRef.current, sweeping).z;
+      label = z <= 0.35 ? "GOOD ENTRY" : z >= 0.65 ? "LATE ENTRY" : "MID";
+    }
+    setStagePulse({ x: currentChartX, y: Math.max(6, Math.min(94, currentChartY)), label, id: Date.now() });
+    window.setTimeout(() => setStagePulse(null), 900);
+  };
+
   const safeMove = () => {
     playSfx("click");
     switch (chapterPlay.mode) {
@@ -1739,7 +1757,7 @@ export function CryptoJourney() {
 
 
   return (
-    <main className={`cy-shell cy-act-${act.n}${shake ? " is-shaking" : ""}${guide !== null ? " has-guide" : ""}${intel ? " has-intel" : ""}${liqAlert ? " is-liqalert" : ""}`}>
+    <main className={`cy-shell${dialog?.k === "market" ? " is-trading" : ""} cy-act-${act.n}${shake ? " is-shaking" : ""}${guide !== null ? " has-guide" : ""}${intel ? " has-intel" : ""}${liqAlert ? " is-liqalert" : ""}`}>
       <img className="cy-world" src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" loading="lazy" width={1600} height={900} aria-hidden />
       {actSplash && <section className={`cy-act-splash cy-act-splash-${act.n}`} onClick={() => setActSplash(false)} aria-label={`${act.name} begins`}>
         <img src={act.n === 1 ? actMania : act.n === 2 ? actCollapse : actEndgame} alt="" />
@@ -1766,7 +1784,7 @@ export function CryptoJourney() {
           <img src={AVATARS.find((a) => a.id === cfg.avatar)?.url ?? avApe.url} alt="Your trader" />
           <figcaption>
             <strong className={netPulse ? `pulse-${netPulse}` : ""}><Count value={net} /></strong>
-            <span>{formatMoney(run.cash)} cash{openPnl !== 0 ? <> · <b className={openPnl > 0 ? "positive" : "negative"}>{openPnl > 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</b></> : null}</span>
+            <span><Count value={run.cash} /> cash<Delta value={run.cash} />{openPnl !== 0 ? <> · <b className={openPnl > 0 ? "positive" : "negative"}>{openPnl > 0 ? "+" : "−"}{formatMoney(Math.abs(openPnl))}</b></> : null}</span>
             <i className="cy-hud-vitals" aria-label={`Stress ${run.stress}%, hunger ${run.hunger}%`}>
               <b className={`is-stress${run.stress >= 70 ? " is-critical" : ""}`}><u style={{ width: `${run.stress}%` }} /></b>
               <b className={`is-hunger${run.hunger >= 70 ? " is-critical" : ""}`}><u style={{ width: `${run.hunger}%` }} /></b>
@@ -1833,6 +1851,8 @@ export function CryptoJourney() {
           {phase === "act" && (
             <article className={`cy-card cy-arena is-${arenaState} mode-${theme.slug}`} key={`act-${run.chapter}`}>
               {cfg.tournament && <SeasonBanner compact />}
+              <StageBoss src={stageBossImg} mood={stageMood} />
+              <StageHeadline title={theme.badge} sub={theme.tag} show={guide === null && !riskPlayed && waitingForFirstTrade} />
               <div className={`cy-market-visual pulse-${marketPulse}${waitingForFirstTrade ? " is-paused" : ""}`}>
                 <div className="cy-chart-title">
                   <span><img src={COIN_LOGO[focusSymbol]} alt="" width={28} height={28} /><b>{focusSymbol}</b><small>{formatMoney(focusPrice)}</small></span>
@@ -1882,6 +1902,7 @@ export function CryptoJourney() {
                     {entryChartY !== null && <line className="cy-entry-line" x1="0" x2="100" y1={entryChartY} y2={entryChartY} vectorEffect="non-scaling-stroke" />}
                     <line x1={currentChartX} x2={currentChartX} y1="8" y2="94" stroke="var(--journey-yellow)" strokeWidth=".7" vectorEffect="non-scaling-stroke" />
                   </svg>
+                  <TapPulse pulse={stagePulse} />
                   <i ref={chartMarkerRef} className="cy-now-marker" style={{ left: `${currentChartX}%`, top: `${currentChartY}%` }} aria-hidden />
                 </div>
                 <div className="cy-chart-foot">
@@ -1912,14 +1933,16 @@ export function CryptoJourney() {
                 </div>
               ) : (
                 <div className="cy-moves" aria-label="Your two moves this quarter">
-                  <button type="button" className={`cy-move is-risk${riskTerms ? " has-terms" : ""}`} disabled={riskLocked} onClick={riskMove}>
+                  <button type="button" className={`cy-move cy-stage-card is-risk${riskTerms ? " has-terms" : ""}${riskPlayed ? " is-played" : ""}`} disabled={riskLocked} onClick={() => { stageTap(); riskMove(); }}>
+                    <i className="cy-stage-art" aria-hidden><Flame /></i>
                     <span><Flame />TAKE THE RISK</span>
                     <strong>{riskLabel}</strong>
                     <small>{moves.risk.sub}</small>
                     <em>{riskWhy}</em>
 
                   </button>
-                  <button type="button" className="cy-move is-safe" disabled={ap <= 0} onClick={safeMove}>
+                  <button type="button" className="cy-move cy-stage-card is-safe" disabled={ap <= 0} onClick={() => { stageTap(); safeMove(); }}>
+                    <i className="cy-stage-art" aria-hidden><Shield /></i>
                     <span><Shield />PLAY IT SAFE</span>
                     <strong>{moves.safe.label}</strong>
                     <small>{moves.safe.sub}</small>
