@@ -1981,6 +1981,16 @@ export function CryptoJourney() {
             </article>
           )}
 
+          {/* After a reload / app switch the quarter result is gone from memory, but the quarter is already booked. Let the player move on instead of an empty screen. */}
+          {phase === "resolve" && !resolution && (
+            <article className="cy-card tone-neutral" key={`res-lost-${run.chapter}`}>
+              <p className="journey-kicker">{chapterLabel(run.chapter)} | WELCOME BACK</p>
+              <h2>QUARTER CLOSED</h2>
+              <p className="cy-lead">Your run is saved. The last quarter is already booked into your balance.</p>
+              <div className="cy-actions"><Button className="cy-primary" onClick={continueChapter}>NEXT CHAPTER <ChevronRight /></Button></div>
+            </article>
+          )}
+
         </section>
 
         <aside className="cy-trail">
