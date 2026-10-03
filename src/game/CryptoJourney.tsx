@@ -1174,7 +1174,7 @@ export function CryptoJourney() {
     if (playOpening(120)) return;
     playSfx("quarter");
     const from = run.chapter;
-    rec({ t: "quarter", c: from });
+    rec({ t: "quarter", c: from, n: Math.round(netOf(run)), cash: Math.round(run.cash) });
     const next = from + 1;
     const startNet = netOf(run);
     const lines: string[] = [];
@@ -1435,7 +1435,7 @@ export function CryptoJourney() {
       seen: milestone ? [...run.seen, milestone.id] : run.seen,
       logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
     };
-    setRun(nextRun);
+    setRun((r) => ({ ...nextRun, audit: r.audit ?? [] }));
     if ([1, 4, 12].includes(next)) trackGameBeat(`month_${next * 3}`, { tournament: cfg.tournament });
     setResolution({ title, detail, tone, delta: delta + convCash + planCash, move, lines, inflow, outflow });
     setPhase("resolve");

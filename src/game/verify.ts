@@ -8,7 +8,7 @@ import {
   ARCHETYPES, CHAPTERS, COINS, DIFFICULTIES, TAX_RATE, TOURNAMENT_RULES, XP, XP_EXTRA,
   attackFor, bossFightFor, careCost, chapterMonth, chapterPlayFor, crashFor, custodyOf,
   decisionForChapter, failureFor, housingOf, isTaxChapter, jobOf, levelFor,
-  levelPerk, lootDraw, missionFor, monthsSurvived, personaFor, pickLifeEvent,
+  MODIFIERS, levelPerk, lootDraw, missionFor, monthsSurvived, personaFor, pickLifeEvent,
   presaleFor, situationFor, skillCheckFor,
   type CoinSymbol, type CustodyId, type HousingId, type JobId,
 } from "./journey-data";
@@ -30,12 +30,6 @@ export interface VerifyInput {
 
 export type VerifyResult = { ok: true } | { ok: false; reason: string };
 
-const MODIFIERS = [
-  { id: "straight", name: "STRAIGHT START" },
-  { id: "debt", name: "DEBT CARRY" },
-  { id: "leverage", name: "LEVERAGE BAIT" },
-  { id: "lowcap", name: "LOW-CAP SEASON" },
-] as const;
 
 // Mirrors the client's STANCES table (CryptoJourney.tsx) — kept local so this
 // module stays importable from the server without pulling in the game screen.
@@ -72,7 +66,13 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   const seed = hashString(`tcfb-season-${input.season}`);
   const modifier = MODIFIERS[Math.floor(det(seed, "modifier") * MODIFIERS.length) % MODIFIERS.length]!.id;
   const bias = personaFor(det(seed, "persona")).bias;
-  const noise = Array.from({ length: 84 }, (_, i) => (det(seed, `noise-${i}`) - 0.5) * 0.036);
+  // Mirrors the client's makeNoise for the CLASSIC market (tournament rules):
+  // a capped random-walk multiplier per month, not an independent jitter.
+  let drift = 0;
+  const noise = Array.from({ length: 84 }, (_, i) => {
+    drift = Math.max(-0.12, Math.min(0.12, drift + (det(seed, `noise-${i}`) * 2 - 1) * 0.018));
+    return 1 + drift;
+  });
 
   const coin = (symbol: string) => COINS.find((c) => c.symbol === symbol);
   const monthOf = (chapter: number) => chapterMonth(Math.min(Math.max(chapter, 0), CHAPTERS - 1));
@@ -81,24 +81,29 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     return Number.isFinite(price) && price > 0 ? price : 0;
   };
   const priceAt = (symbol: CoinSymbol, chapter: number) =>
-    clamp(rawAt(symbol, chapter) * (1 + (noise[monthOf(chapter)] ?? 0)), 0.00000001);
+    Math.max(rawAt(symbol, chapter) * (noise[monthOf(chapter)] ?? 1), 0.00000001);
 
   // Live price range for a chapter: entries use the live tape, so accept any
   // price the tape could have shown (with and without a sweep wick).
   const liveRange = (symbol: CoinSymbol, chapter: number): [number, number] => {
     const attack = attackFor(chapter, det(seed, `attack-${chapter}`), bias);
     const sweeping = attack?.id === "SWEEP";
-    let lo = Infinity, hi = 0;
-    for (let i = 0; i <= 40; i++) {
-      const t = i / 40;
-      const a = priceAt(symbol, chapter), b = priceAt(symbol, chapter + 1);
-      let p = a + (b - a) * t;
-      const amp = Math.max(a * 0.02, 0.00000001);
-      p += Math.sin(t * Math.PI * 6 + chapter * 1.7) * amp * 0.9;
-      p += Math.sin(t * Math.PI * 14 + monthOf(chapter)) * amp * 0.35;
-      if (sweeping) p += a * 0.05 * Math.sin(t * Math.PI);
-      if (p < lo) lo = p;
-      if (p > hi) hi = p;
+    // Exact client livePrice() (classic market), sampled densely across the quarter.
+    const a = priceAt(symbol, chapter);
+    const b = priceAt(symbol, chapter + 1) || a;
+    const span = Math.abs(b / a - 1);
+    const phase = det(seed, `wick-${chapter}-${symbol}`) * Math.PI * 2;
+    const amp = (0.35 + det(seed, `amp-${chapter}-${symbol}`) * 0.7) * Math.max(0.05, span);
+    let lo = a, hi = a;
+    for (let i = 0; i <= 200; i++) {
+      const t = i / 200;
+      const wick = Math.sin(t * Math.PI * 3 + phase) * amp * (1 - t * 0.55);
+      for (const sw of sweeping ? [false, true] : [false]) {
+        const hunt = sw ? -Math.max(0, Math.sin(t * Math.PI * 2)) * (0.05 + span * 0.5) : 0;
+        const p = Math.max(a * 0.02, (a + (b - a) * t) * (1 + wick + hunt));
+        if (p < lo) lo = p;
+        if (p > hi) hi = p;
+      }
     }
     return [lo * 0.97, hi * 1.03];
   };
@@ -125,7 +130,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
   const valueOf = (p: VPos, price: number) =>
     p.kind === "spot" ? p.qty * price : p.margin + pnlOf(p, price);
   const netOf = (chapter: number) =>
-    st.cash + st.positions.reduce((a, p) => a + valueOf(p, priceAt(p.symbol, chapter)), 0);
+    st.cash + st.positions.reduce((a, p) => a + valueOf(p, priceAt(p.symbol, chapter)), 0) - st.taxDebt;
   const spotValue = (chapter: number) =>
     st.positions.filter((p) => p.kind === "spot").reduce((a, p) => a + valueOf(p, priceAt(p.symbol, chapter)), 0);
 
@@ -296,11 +301,14 @@ export function verifyRun(input: VerifyInput): VerifyResult {
     const c = e.c;
     if (e.t === "quarter") {
       if (c !== st.chapter) return fail(`quarter-order@${i}`);
+      if (typeof e.n === "number" && !near(netOf(c), e.n, Math.max(250, Math.abs(e.n) * 0.005))) {
+        return fail(`quarter-net@${c}:${Math.round(netOf(c))}vs${e.n} cash${Math.round(st.cash)}vs${e.cash} ${JSON.stringify(input.log.slice(Math.max(0, i - 8), i))}`);
+      }
       settleQuarter(c);
       if (netOf(st.chapter) <= 0) st.ended = true;
       continue;
     }
-    if (c !== st.chapter) return fail(`stale-chapter@${i}`);
+    if (c !== st.chapter) return fail(`stale-chapter@${i} st${st.chapter} ${JSON.stringify(input.log.slice(0, i + 2))}`);
 
     switch (e.t) {
       case "spot": {
@@ -474,6 +482,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       case "custody": {
         const to = e.to as CustodyId;
         if (!["exchange", "hot", "cold"].includes(to)) return fail(`custody-to@${i}`);
+        if (modifier === "keys" && to === "cold") return fail(`custody-locked@${i}`);
         const fee = Math.round(spotValue(c) * 0.004);
         if (!near(e.fee, fee, Math.max(2, fee * 0.02))) return fail(`custody-fee@${i}`);
         if (st.cash < fee) return fail(`custody-cash@${i}`);
