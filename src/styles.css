@@ -2568,3 +2568,31 @@ body:has(.cy-shell) { background:var(--background); }
 @keyframes cy-brief-go { 50% { box-shadow: 0 10px 40px color-mix(in oklab, var(--pit-amber) 60%, transparent); } }
 @media (min-width: 1024px) { .cy-brief .cy-facts { grid-template-columns: repeat(4, minmax(0,1fr)) !important; } .cy-shell .cy-card.cy-brief { min-height: 560px; } }
 @media (prefers-reduced-motion: reduce) { .cy-brief .cy-primary { animation: none; } }
+
+/* ---------- PHONES: arena always fits — bottom buttons never pushed off ---------- */
+@media (max-width: 640px) {
+  .cy-shell { padding-bottom: calc(env(safe-area-inset-bottom) + 14px) !important; }
+  .cy-shell .cy-arena.is-staged { gap: 5px; padding: 6px; }
+  .cy-arena.is-staged > .cy-season-live, .cy-arena.is-staged > [class*="season"] { flex: 0 0 auto; padding: 4px 8px !important; font-size: 10px; }
+  .cy-arena.is-staged > [class*="season"] p { display: none; }
+  .cy-arena.is-staged .cy-stage-context { flex: 0 0 auto; margin: 2px 4px 0; padding: 5px 6px; gap: 4px; }
+  .cy-stage-context > span { font-size: 9px; padding: 3px 6px; }
+  .cy-arena.is-staged .cy-ctx-hint { flex-basis: 100%; margin: 0; font-size: 11px; line-height: 1.3; text-align: center;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .cy-shell .cy-arena.is-staged .cy-market-visual { flex: 1 1 0; min-height: 0 !important; overflow: hidden; }
+  .cy-arena.is-staged .cy-chart-wrap { flex: 1 1 0; height: auto !important; min-height: 60px; margin-top: 4px; }
+  .cy-arena.is-staged .cy-chart-title { position: relative; top: auto; left: auto; right: auto; flex: 0 0 auto; }
+  .cy-arena.is-staged .cy-chips { margin-top: 2px; flex: 0 0 auto; }
+  .cy-arena.is-staged .cy-moves, .cy-arena.is-staged .cy-quick-row, .cy-arena.is-staged .cy-tape-row { flex: 0 0 auto; }
+  .cy-arena.is-staged .cy-moves:not(.is-guided-row) { margin: 2px 0; gap: 8px; }
+  .cy-shell .cy-arena.is-staged .cy-stage-card { min-height: 0; padding: 7px 8px; gap: 2px; }
+  .cy-arena.is-staged .cy-stage-art { width: 34px; height: 34px; padding: 6px; }
+  .cy-arena.is-staged .cy-stage-card > strong { font-size: 14px !important; }
+  .cy-arena.is-staged .cy-stage-card > small { -webkit-line-clamp: 2; }
+  .cy-arena.is-staged .cy-stage-card > em { display: none !important; }
+  .cy-arena.is-staged .cy-tape-btn { min-height: 44px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 640px) and (max-height: 720px) {
+  .cy-arena.is-staged .cy-ctx-hint { display: none; }
+  .cy-arena.is-staged .cy-stage-art { display: none; }
+}
