@@ -2615,3 +2615,7 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-sheet:has(.cy-sheet-stage) { padding-top: 22dvh !important; }
   .cy-sheet:has(.cy-sheet-stage) .cy-hint { display: none; }
 }
+@media (max-width: 640px) {
+  .cy-sheet:has(.cy-sheet-stage) .cy-duel-stakes { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
+  .cy-sheet:has(.cy-sheet-stage) .cy-duel-stakes > span { padding: 6px 7px; font-size: 11px; }
+}
