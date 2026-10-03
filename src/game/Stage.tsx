@@ -32,7 +32,7 @@ export type Pulse = { x: number; y: number; label: string; id: number };
 export function TapPulse({ pulse }: { pulse: Pulse | null }) {
   if (!pulse) return null;
   return (
-    <i key={pulse.id} className="cy-stage-pulse" style={{ left: `${pulse.x}%`, top: `${pulse.y}%` }} aria-hidden>
+    <i key={pulse.id} className={`cy-stage-pulse${pulse.x < 20 ? " is-left" : pulse.x > 80 ? " is-right" : ""}`} style={{ left: `${pulse.x}%`, top: `${pulse.y}%` }} aria-hidden>
       <b>{pulse.label}</b>
     </i>
   );

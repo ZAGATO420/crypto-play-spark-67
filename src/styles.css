@@ -2377,3 +2377,5 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-stage-boss img, .cy-stage-head, .cy-stage-card, .cy-stage-pulse, .cy-stage-delta, .cy-scrim .cy-sheet { animation: none !important; }
   .cy-stage-pulse { opacity: .9; }
 }
+.cy-stage-pulse.is-left b { left: -4px; transform: none; }
+.cy-stage-pulse.is-right b { left: auto; right: -4px; transform: none; }
