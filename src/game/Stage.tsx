@@ -38,6 +38,22 @@ export function TapPulse({ pulse }: { pulse: Pulse | null }) {
   );
 }
 
+/**
+ * Stage dressing for the big moment sheets (decisions, presales, boss duels):
+ * the Boss looms behind the dialog and the title makes one entrance.
+ * Pure presentation — the sheet keeps every handler and value it had.
+ */
+export function SheetStage({ src, mood, title, sub }: { src: string; mood: string; title: string; sub: string }) {
+  return (
+    <>
+      <div className={`cy-sheet-stage is-${mood}`} aria-hidden>
+        <img src={src} alt="" />
+      </div>
+      <StageHeadline title={title} sub={sub} show />
+    </>
+  );
+}
+
 /** Short +/− flash next to a number whenever it changes materially. */
 export function Delta({ value }: { value: number }) {
   const prev = useRef(value);
