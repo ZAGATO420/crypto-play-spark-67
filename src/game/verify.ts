@@ -257,7 +257,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
       (st.stance === "survive" && delta < 0) ||
       (st.stance === "balanced" && Math.abs(delta) < Math.max(1, startNet * 0.03));
     let planCash = 0;
-    if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(st.heat) : 1));
+    if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(st.heat, power().heatStep) : 1));
     else if (delta < 0) planCash = Math.round(Math.abs(delta) * (1 - plan.loss));
     st.cash = Math.max(0, st.cash + planCash);
     const newHeat = calledRight ? Math.min(9, st.heat + 1) : 0;
@@ -366,7 +366,7 @@ export function verifyRun(input: VerifyInput): VerifyResult {
         const sym = e.sym as CoinSymbol;
         if (!coin(sym)) return fail(`risk-symbol@${i}`);
         if (play.mode !== "ACCUMULATE" && play.mode !== "MOMENTUM" && sym !== "BTC") return fail(`risk-btc@${i}`);
-        const expected = Math.min(Math.max(400, Math.round(netOf(c) * 0.03)), Math.max(0, Math.round(st.cash * 0.25)));
+        const expected = Math.round(Math.min(Math.max(400, Math.round(netOf(c) * 0.03)), Math.max(0, Math.round(st.cash * 0.25))) * power().stakeMul);
         if (!near(e.stake, expected, Math.max(10, expected * 0.12))) return fail(`risk-stake@${i}`);
         if (e.q < 0 || e.q > 1) return fail(`risk-q@${i}`);
         st.riskPlay = { chapter: c, quality: e.q, stake: e.stake, mode: play.mode, symbol: sym, settled: false, timingR: e.timingR };
