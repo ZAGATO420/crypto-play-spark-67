@@ -180,7 +180,8 @@ const STANCES: { id: Stance; name: string; short: string; line: string; win: num
 ];
 const stanceOf = (id: Stance) => STANCES.find((s) => s.id === id) ?? STANCES[1]!;
 /** Calling the quarter right stacks HEAT, and HEAT multiplies your next win. */
-const heatBonus = (heat: number, step = 0.12) => 1 + Math.min(5, heat) * step;
+// Must stay identical to verify.ts heatBonus (server replay).
+const heatBonus = (heat: number, step = 0.12) => 1 + Math.min(9, Math.max(0, heat)) * step;
 
 
 export const AVATARS = [
@@ -1396,7 +1397,7 @@ export function CryptoJourney() {
     const calledRight = (run.stance === "degen" && delta > 0) || (run.stance === "survive" && delta < 0) || (run.stance === "balanced" && Math.abs(delta) < Math.max(1, startNet * 0.03));
     const heat = calledRight ? Math.min(9, run.heat + 1) : 0;
     let planCash = 0;
-    if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(run.heat) : 1));
+    if (delta > 0) planCash = Math.round(delta * (plan.win - 1) * (calledRight ? heatBonus(run.heat, power.heatStep) : 1));
     else if (delta < 0) planCash = Math.round(Math.abs(delta) * (1 - plan.loss));
     if (planCash !== 0) {
       draft.cash = Math.max(0, draft.cash + planCash);
@@ -1408,7 +1409,7 @@ export function CryptoJourney() {
       lines.push(`${plan.name} plan absorbed part of the hit.`);
     }
     lines.push(calledRight
-      ? `You called the quarter right. HEAT x${heat} — next win pays ${Math.round((heatBonus(heat) - 1) * 100)}% more.`
+      ? `You called the quarter right. HEAT x${heat} — next win pays ${Math.round((heatBonus(heat, power.heatStep) - 1) * 100)}% more.`
       : run.heat > 0 ? `Wrong read. HEAT streak of ${run.heat} is gone.` : "No read this quarter. HEAT stays cold.");
     draft.stress = clamp(draft.stress + plan.stress);
 
@@ -1682,7 +1683,7 @@ export function CryptoJourney() {
     : phaseRisk.kind;
   const riskHard = cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80
     || (chapterPlay.mode === "HUNT" && run.chapter >= 8);
-  const phaseStake = Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25)));
+  const phaseStake = Math.round(Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25))) * power.stakeMul);
   const huntTicket = presale ? Math.min(Math.max(presale.min, Math.round(net * 0.05)), Math.max(presale.min, Math.round(run.cash * 0.25))) : 0;
   const stakePilot = guide === null && phaseStake > 0 && !riskPlayed
     && (chapterPlay.mode === "ACCUMULATE" || chapterPlay.mode === "MOMENTUM" || chapterPlay.mode === "PANIC" || chapterPlay.mode === "DEFEND");
@@ -1926,7 +1927,7 @@ export function CryptoJourney() {
               {attack
                 ? <p className="cy-ticker is-attack"><strong>{attack.name}:</strong> {attack.line}</p>
                 : (run.stance !== "balanced" || run.convictionOn || run.heat > 0)
-                  ? <p className="cy-ticker">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat) - 1) * 100)}%)` : ""}</p>
+                  ? <p className="cy-ticker">{stanceOf(run.stance).name} PLAN{run.convictionOn ? " | CONVICTION 1.5x" : ""}{run.heat > 0 ? ` | HEAT x${run.heat} (+${Math.round((heatBonus(run.heat, power.heatStep) - 1) * 100)}%)` : ""}</p>
                   : null}
 
 
