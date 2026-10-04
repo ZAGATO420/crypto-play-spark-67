@@ -37,7 +37,7 @@ export const formatMoney = (value: number) =>
   }).format(value);
 
 export const levelFor = (xp: number) => Math.max(1, XP_LEVELS.filter((threshold) => xp >= threshold).length);
-export type Archetype = "degen" | "trader" | "influencer" | "hodler";
+export type Archetype = "degen" | "trader" | "influencer" | "hodler" | "survivor";
 export type Difficulty = "EASY" | "NORMAL" | "BOSS" | "NIGHTMARE";
 export type BaseMode = "classic" | "chaos" | "historical";
 
@@ -47,6 +47,9 @@ export const ARCHETYPES: { id: Archetype; name: string; cash: number; blurb: str
   { id: "influencer", name: "INFLUENCER", cash: 7500, blurb: "The crowd follows you. More XP per move, but stress builds fast.", risk: 1.1, xp: 1.25 },
   { id: "hodler", name: "HODLER", cash: 12000, blurb: "Deep pockets, iron stomach. Hunger and stress grow slower.", risk: 0.85, xp: 0.9 },
 ];
+
+/** Unlockable character (LUNA SURVIVOR). Custom runs only — never in ARCHETYPES, so the tournament and replay stay unchanged. */
+export const UNLOCK_ARCHETYPE = { id: "survivor" as Archetype, name: "SURVIVOR", cash: 14000, blurb: "Unlocked by living through Luna. Deep stack, steady nerves.", risk: 0.9, xp: 1 };
 
 export const DIFFICULTIES: {
   id: Difficulty; name: string; blurb: string; cost: number; risk: number;

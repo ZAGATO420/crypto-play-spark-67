@@ -21,7 +21,7 @@ import avFrog from "@/assets/tcfb/av-frog.webp.asset.json";
 import avReaper from "@/assets/tcfb/av-reaper.webp.asset.json";
 import avWhale from "@/assets/tcfb/av-whale.webp.asset.json";
 import {
-  ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODE_MOVES, MODE_THEME, MODES, MODIFIERS, PERK_BLURB, PRESALES, PRESETS, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
+  UNLOCK_ARCHETYPE, ARCHETYPES, CHAPTERS, CHAPTER_WARNINGS, COINS, COUNTRIES, CUSTODY, DIFFICULTIES, ENDINGS, ENDING_HINTS, EXPLAIN, HOUSING, HOW_TO_PLAY, JOBS, MILESTONES, MODE_MOVES, MODE_THEME, MODES, MODIFIERS, PERK_BLURB, PRESALES, PRESETS, STATUS_BY_CHOICE, TAX_RATE, TOTAL_MONTHS, TOURNAMENT_RULES, XP, XP_EXTRA,
   actFor, attackFor, bossFightFor, bossReaction, bossScore, careCost, chapterLabel, chapterMonth, chapterPlayFor, crashFor, custodyOf, decisionForChapter, doomIn, failureFor, formatMoney, hintFor, housingOf, isTaxChapter, jobOf, levelFor, levelPerk, lootDraw, missionFor, modifierOf, monthRangeLabel, monthsSurvived, objectiveFor, personaFor, pickLifeEvent, presaleFor, situationFor, skillCheckFor, standingFor, xpProgress,
   type Archetype, type BaseMode, type BossAttack, type BossFight, type ChapterMode, type CoinSymbol, type Country, type CustodyId, type Decision, type DecisionOption, type Difficulty, type EndingKey, type HousingId, type JobId, type LootCard, type ModifierId, type Presale, type Situation,
 } from "./journey-data";
@@ -36,7 +36,8 @@ import { loadBoard, loadTopMark, submitRun, SubmitRunError, type BoardRow, type 
 import { audioLive, getVolumes, initAudio, isMuted, playSfx, playSfxExclusive, preloadSfx, setMood, setMusicVol, setMuted, setSfxVol, setTrack, unlockAudio, wireAudio } from "./audio";
 import { det, randomSeed } from "./rng";
 import { PRIZES, countdown, currentSeasonId, isWallet, playerKey, readName, readWallet, saveName, saveWallet, seasonEnd, seasonLabel, seasonSeed, shortWallet } from "./season";
-import { SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
+import { evaluateUnlocks, hasUnlock, readUnlocks, titleGlyphs, UNLOCKS, type Unlocks } from "./unlocks";
+import { BONUS_RELIC, SYNERGIES, relicChapter, relicOf, relicOffer, relicPower, type Relic } from "./relics";
 import type { LogEvent } from "./runlog";
 
 /** Compact money for tight HUD chips: $1.4M, $920K, $480. */
@@ -79,6 +80,9 @@ type Run = {
   relics: string[];
   /** Tournament audit trail: every money-moving action, replayed server-side before a prize entry counts. */
   audit: LogEvent[];
+  /** Local unlock tracking only. Never part of the audit or the submission. */
+  peakStreak?: number;
+  liquidations?: number;
 };
 
 
@@ -190,7 +194,7 @@ export const AVATARS = [
 ];
 
 const defaultConfig: Config = { name: "", avatar: "ape", arch: "trader", difficulty: "NORMAL", mode: "classic", ironman: false, country: "DE", tournament: false, season: currentSeasonId(), modifier: "straight" };
-const archOf = (id: Archetype) => ARCHETYPES.find((a) => a.id === id) ?? ARCHETYPES[1]!;
+const archOf = (id: Archetype) => (id === UNLOCK_ARCHETYPE.id ? UNLOCK_ARCHETYPE : ARCHETYPES.find((a) => a.id === id) ?? ARCHETYPES[1]!);
 const diffOf = (id: Difficulty) => DIFFICULTIES.find((d) => d.id === id) ?? DIFFICULTIES[1]!;
 const modeOf = (id: BaseMode) => MODES.find((m) => m.id === id) ?? MODES[0]!;
 const modeId = (c: Config) => (c.ironman ? `IRONMAN-${c.mode}` : c.mode);
@@ -1436,6 +1440,7 @@ export function CryptoJourney() {
 
     const nextRun: Run = {
       ...draft, streak, boss, conviction, convictionOn: false, heat, stance: "balanced",
+      peakStreak: Math.max(run.peakStreak ?? 0, streak), liquidations: (run.liquidations ?? 0) + (liquidated ? 1 : 0),
       chronicle: [...draft.chronicle, ...story, ...(milestone ? [milestone.line] : [])].slice(-14),
       seen: milestone ? [...run.seen, milestone.id] : run.seen,
       logs: [{ chapter: next, title, detail, tone }, ...run.logs].slice(0, 12),
@@ -1456,13 +1461,13 @@ export function CryptoJourney() {
 
 
     const finalNet = netOf(nextRun);
-    if (hunger >= 100) return finish("STARVED");
-    if (stress >= 100) return finish("BROKEN");
-    if (finalNet <= 0) return finish(positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
+    if (hunger >= 100) return finish(nextRun, "STARVED");
+    if (stress >= 100) return finish(nextRun, "BROKEN");
+    if (finalNet <= 0) return finish(nextRun, positions.length === 0 && lines.some((l) => l.includes("liquidated")) ? "CASINO" : "BROKE");
     if (next >= CHAPTERS) {
       // beating him means out-trading his book and taking his fights
-      if (finalNet > bossNetOf(nextRun, next) && nextRun.bossWins >= 3 && criticals === 0) return finish("THRONE");
-      return finish(finalNet > startCashFor(cfg) * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
+      if (finalNet > bossNetOf(nextRun, next) && nextRun.bossWins >= 3 && criticals === 0) return finish(nextRun, "THRONE");
+      return finish(nextRun, finalNet > startCashFor(cfg) * 60 && crises >= 6 && criticals === 0 && run.trades >= 12 ? "LEGEND" : "SURVIVOR");
     }
   };
 
@@ -1540,7 +1545,9 @@ export function CryptoJourney() {
     setSkill(null);
     if (guide === 2) setGuide(null);
     if (relicChapter(run.chapter) && !run.seen.includes(`relic-${run.chapter}`)) {
-      const cards = relicOffer(run.relics ?? [], (salt) => det(run.seed, salt), run.chapter);
+      const offer = relicOffer(run.relics ?? [], (salt) => det(run.seed, salt), run.chapter);
+      // BOSS SLAYER unlock: custom runs only, so every tournament offer stays identical.
+      const cards = !cfg.tournament && hasUnlock("boss_slayer") && !(run.relics ?? []).includes(BONUS_RELIC.id) ? [...offer, BONUS_RELIC] : offer;
       if (cards.length) { setDialog({ k: "relic", cards }); return; }
     }
     if (run.chapter >= 1 && !run.seen.includes(`loot-${run.chapter}`)) {
@@ -1551,7 +1558,12 @@ export function CryptoJourney() {
   };
 
 
-  const finish = (key: EndingKey) => { localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
+  const finish = (a: EndingKey | Run, b?: EndingKey) => {
+    const key = (typeof a === "string" ? a : b) as EndingKey;
+    const r = typeof a === "string" ? run : a;
+    // Unlocks: checked once here, stored in their own key, never sent anywhere.
+    evaluateUnlocks({ ending: key, net: netOf(r), chapter: r.chapter, bossWins: r.bossWins, peakStreak: Math.max(r.peakStreak ?? 0, r.streak), liquidations: r.liquidations ?? 0, panicSold: r.statuses.includes("PANIC SELLER") });
+    localStorage.removeItem(SAVE_KEY); setResume(false); setEnding(key); setScreen("end"); playSfx("win"); };
 
   /**
    * The live quarter. While you act, the price actually walks from this
@@ -3000,6 +3012,30 @@ function TournamentRules({ onClose }: { onClose: () => void }) {
 }
 
 /** Everything the player keeps: runs, records, endings, badges. */
+function UnlockBlock({ unlocks }: { unlocks: Unlocks }) {
+  const [open, setOpen] = useState(false);
+  const done = UNLOCKS.filter((u) => unlocks[u.id]).length;
+  return (
+    <section className="start-unlocks" aria-label="Unlocks">
+      <button className="start-unlocks-head" aria-expanded={open} onClick={() => { playSfx("click"); setOpen((o) => !o); }}>
+        <span><small>UNLOCKS | CUSTOM RUN ONLY</small><strong>{done} of {UNLOCKS.length} unlocked</strong></span>
+        <i className="start-unlocks-bar" aria-hidden="true">{UNLOCKS.map((u) => <b key={u.id} className={unlocks[u.id] ? "is-on" : ""} />)}</i>
+        <ChevronRight />
+      </button>
+      {open && (
+        <ul className="start-unlocks-list">
+          {UNLOCKS.map((u) => (
+            <li key={u.id} className={unlocks[u.id] ? "is-on" : ""}>
+              <span className="u-glyph" aria-hidden="true">{u.glyph}</span>
+              <span className="u-text"><strong>{u.name}<em>{unlocks[u.id] ? "UNLOCKED" : "LOCKED"}</em></strong><small>{u.goal}</small><small className="u-reward">{u.reward}</small></span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 function RecordStrip({ profile, onEndings }: { profile: Profile; onEndings: () => void }) {
   const seen = Object.keys(profile.endings).length;
   const total = Object.keys(ENDINGS).length;
@@ -3044,7 +3080,8 @@ function StartScreen({ resume, mark, onTournament, onFreeRun, onResume, onBoard 
   const [endings, setEndings] = useState(false);
   // Read after mount: localStorage is not available while rendering on the server.
   const [profile, setProfile] = useState<Profile | null>(null);
-  useEffect(() => { setProfile(readProfile()); }, []);
+  const [unlocks, setUnlocks] = useState<Unlocks | null>(null);
+  useEffect(() => { setProfile(readProfile()); setUnlocks(readUnlocks()); }, []);
   return (
     <main className="journey-start">
       <picture>
@@ -3065,6 +3102,7 @@ function StartScreen({ resume, mark, onTournament, onFreeRun, onResume, onBoard 
           <SeasonBanner compact />
           <TargetMark mark={mark} />
           {profile && <RecordStrip profile={profile} onEndings={() => setEndings(true)} />}
+          {unlocks && <UnlockBlock unlocks={unlocks} />}
           <div className="start-actions">
             {resume ? <Button className="start-main" onClick={onResume}><Flame />CONTINUE | YOUR RUN IS LIVE <ChevronRight /></Button> : <Button className="start-main" onClick={onTournament}><Trophy />PLAY NOW | $10,000 <ChevronRight /></Button>}
             <div className="start-secondary">
@@ -3146,7 +3184,7 @@ function SetupScreen({ tournament, mark, onBack, onStart }: { tournament: boolea
           {advanced && (
             <section className="setup-block setup-fine">
               <p className="journey-kicker">CHARACTER</p>
-              <div className="seg-row">{ARCHETYPES.map((a) => <button key={a.id} className={config.arch === a.id ? "is-on" : ""} onClick={() => set("arch", a.id)}>{a.name}</button>)}</div>
+              <div className="seg-row">{[...ARCHETYPES, ...(hasUnlock("luna_survivor") ? [UNLOCK_ARCHETYPE] : [])].map((a) => <button key={a.id} className={config.arch === a.id ? "is-on" : ""} onClick={() => set("arch", a.id)}>{a.name}</button>)}</div>
               <p className="journey-kicker">DIFFICULTY</p>
               <div className="seg-row">{DIFFICULTIES.map((d) => <button key={d.id} className={config.difficulty === d.id ? "is-on" : ""} onClick={() => set("difficulty", d.id)}>{d.name}</button>)}</div>
               <p className="journey-kicker">MARKET</p>
@@ -3179,6 +3217,10 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState(false);
   const [view, setView] = useState<"season" | "all">("season");
   const season = currentSeasonId();
+  // Cosmetic unlock titles: shown only on this device, next to the player's own name.
+  const [myUnlocks, setMyUnlocks] = useState<Unlocks>({});
+  const [myName, setMyName] = useState("");
+  useEffect(() => { setMyUnlocks(readUnlocks()); setMyName(readName().trim().toLowerCase()); }, []);
   useEffect(() => {
     let alive = true;
     setRows(null); setError(false);
@@ -3203,11 +3245,12 @@ function BoardScreen({ onBack }: { onBack: () => void }) {
           <div className="board-list">
             {rows.map((r) => {
               const avatar = AVATARS.find((a) => a.id === r.avatar) ?? AVATARS[0];
+              const mine = !!myName && r.name.trim().toLowerCase() === myName;
               return (
                 <div className={`board-row${r.prize ? " is-prize" : ""}`} key={`${r.pos}-${r.name}`}>
                   <b className="board-position">#{r.pos}</b>
-                  {avatar && <img className="board-face" src={avatar.url} alt="" loading="lazy" />}
-                  <span className="board-player"><strong>{r.name}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small><Flag code={r.country} size={15} />{r.rank ? `${r.rank.toUpperCase()} | ` : ""}{r.arch.toUpperCase()} | {r.difficulty.toUpperCase()}</small></span>
+                  {avatar && <span className="board-face-wrap">{mine && myUnlocks.throne_breaker ? <i className="board-crown" aria-label="Throne breaker">👑</i> : null}<img className="board-face" src={avatar.url} alt="" loading="lazy" /></span>}
+                  <span className="board-player"><strong>{r.name}{mine && titleGlyphs(myUnlocks) ? <span className="board-title"> {titleGlyphs(myUnlocks)}</span> : null}{r.prize ? <em className="board-prize">${r.prize} $TCFB</em> : null}</strong><small><Flag code={r.country} size={15} />{r.rank ? `${r.rank.toUpperCase()} | ` : ""}{r.arch.toUpperCase()} | {r.difficulty.toUpperCase()}</small></span>
                   <span className="board-run"><small>LVL {r.level}</small><strong>{r.xp.toLocaleString("en-US")} XP</strong><em>{r.months} / 84 MONTHS</em></span>
                   <span className="board-net"><small>NET WORTH</small><strong>{formatMoney(r.netWorth)}</strong></span>
                   <span className="board-score"><small>BOSS SCORE</small><i>{(r.score ?? 0).toLocaleString("en-US")}</i></span>

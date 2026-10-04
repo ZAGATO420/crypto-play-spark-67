@@ -2619,3 +2619,28 @@ body:has(.cy-shell) { background:var(--background); }
   .cy-sheet:has(.cy-sheet-stage) .cy-duel-stakes { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
   .cy-sheet:has(.cy-sheet-stage) .cy-duel-stakes > span { padding: 6px 7px; font-size: 11px; }
 }
+
+/* Unlocks block on the start screen */
+.start-unlocks { border: 1px solid hsl(var(--border, 210 30% 25%)); background: color-mix(in oklab, var(--background, #0b1117) 82%, transparent); border-radius: 10px; overflow: hidden; }
+.start-unlocks-head { width: 100%; display: flex; align-items: center; gap: .75rem; padding: .6rem .8rem; text-align: left; color: inherit; }
+.start-unlocks-head > span { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.start-unlocks-head small { font: 600 .62rem/1.2 "JetBrains Mono", monospace; letter-spacing: .08em; opacity: .7; }
+.start-unlocks-head strong { font: 700 .95rem/1.2 "Space Grotesk", sans-serif; }
+.start-unlocks-bar { display: flex; gap: 3px; }
+.start-unlocks-bar b { width: 14px; height: 6px; border-radius: 2px; background: color-mix(in oklab, currentColor 18%, transparent); }
+.start-unlocks-bar b.is-on { background: #00E599; box-shadow: 0 0 6px #00E59988; }
+.start-unlocks-head svg { width: 16px; height: 16px; transition: transform .2s; }
+.start-unlocks-head[aria-expanded="true"] svg { transform: rotate(90deg); }
+.start-unlocks-list { list-style: none; margin: 0; padding: 0 .6rem .6rem; display: grid; gap: .4rem; max-height: 40vh; overflow-y: auto; }
+.start-unlocks-list li { display: flex; gap: .6rem; padding: .45rem .55rem; border-radius: 8px; border: 1px dashed color-mix(in oklab, currentColor 22%, transparent); opacity: .72; }
+.start-unlocks-list li.is-on { border-style: solid; border-color: #00E59966; opacity: 1; }
+.start-unlocks-list .u-glyph { font-size: 1.1rem; filter: grayscale(1); }
+.start-unlocks-list li.is-on .u-glyph { filter: none; }
+.start-unlocks-list .u-text { text-align: left; display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.start-unlocks-list strong { font: 700 .8rem/1.2 "Space Grotesk", sans-serif; display: flex; gap: .5rem; align-items: center; }
+.start-unlocks-list em { font: 600 .58rem/1 "JetBrains Mono", monospace; font-style: normal; padding: 2px 5px; border-radius: 3px; background: color-mix(in oklab, currentColor 14%, transparent); }
+.start-unlocks-list li.is-on em { background: #00E599; color: #0B1117; }
+.start-unlocks-list small { font: .7rem/1.3 "JetBrains Mono", monospace; opacity: .85; }
+.start-unlocks-list .u-reward { color: #F5A623; }
+.board-face-wrap { position: relative; display: inline-flex; }
+.board-crown { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: .8rem; font-style: normal; }
