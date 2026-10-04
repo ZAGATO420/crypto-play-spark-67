@@ -10,7 +10,7 @@
 export type RelicId =
   | "laser_eyes" | "diamond_gloves" | "cold_vault" | "mev_bot" | "heat_core"
   | "whale_radar" | "gas_burner" | "copium_tank" | "ramen_reserve" | "boss_tax"
-  | "airdrop_farm" | "paper_shredder";
+  | "airdrop_farm" | "paper_shredder" | "titanium_vault";
 
 export type Relic = {
   id: RelicId;
@@ -38,7 +38,10 @@ export const RELICS: Relic[] = [
   { id: "paper_shredder", name: "PAPER SHREDDER", glyph: "📄", tag: "SKILL", line: "Losses get filed, not felt.", effect: "Red quarters cut your damage by another 20%." },
 ];
 
-export const relicOf = (id: string): Relic | undefined => RELICS.find((r) => r.id === id);
+/** Unlockable relic (BOSS SLAYER). Kept out of RELICS so tournament offers and the replay never change. */
+export const BONUS_RELIC: Relic = { id: "titanium_vault", name: "TITANIUM VAULT", glyph: "🛡", tag: "LIFE", line: "Earned by beating him face to face.", effect: "Stress grows 30% slower." };
+
+export const relicOf = (id: string): Relic | undefined => RELICS.find((r) => r.id === id) ?? (id === BONUS_RELIC.id ? BONUS_RELIC : undefined);
 
 export type Synergy = { name: string; needs: RelicId[]; line: string };
 
@@ -100,7 +103,7 @@ export const relicPower = (owned: string[]): RelicPower => {
     skillFloor,
     timingMul,
     stakeMul: has("gas_burner") ? 1.25 : 1,
-    stressCut: has("copium_tank") ? 0.65 : 1,
+    stressCut: (has("copium_tank") ? 0.65 : 1) * (has("titanium_vault") ? 0.7 : 1),
     hungerCut: has("ramen_reserve") ? 0.5 : 1,
     xpMul: has("airdrop_farm") ? 1.25 : 1,
     duelMul: has("boss_tax") ? 1.5 : 1,

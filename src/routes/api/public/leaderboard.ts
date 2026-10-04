@@ -47,7 +47,7 @@ const COUNTRIES = [
   "DE", "CH", "AT", "GB", "USA", "CA", "BR", "AR", "FR", "IT", "ES", "PT",
   "NL", "PL", "SE", "TR", "AE", "NG", "ZA", "IN", "SG", "JP", "KR", "AU",
 ] as const;
-const ARCHETYPES = ["degen", "trader", "influencer", "hodler"] as const;
+const ARCHETYPES = ["degen", "trader", "influencer", "hodler", "survivor"] as const;
 const DIFFICULTIES = ["EASY", "NORMAL", "BOSS", "NIGHTMARE"] as const;
 const MODES = [
   "classic",
