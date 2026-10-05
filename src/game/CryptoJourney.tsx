@@ -2030,8 +2030,8 @@ export function CryptoJourney() {
                     <div className="cy-ledger-bars">
                       <p><span>IN</span><i className="in" style={{ width: `${(totIn / big) * 100}%` }} /><strong className="positive">+{formatMoney(totIn)}</strong></p>
                       <p><span>OUT</span><i className="out" style={{ width: `${(totOut / big) * 100}%` }} /><strong className="negative">−{formatMoney(totOut)}</strong></p>
-                      <p><span>COINS</span><i className={mkt >= 0 ? "in" : "out"} style={{ width: `${(Math.abs(mkt) / big) * 100}%` }} /><strong className={mkt >= 0 ? "positive" : "negative"}>{mkt >= 0 ? "+" : "−"}{formatMoney(Math.abs(mkt))}</strong></p>
-                      <p className="cy-ledger-sum"><span>=</span><em>IN − OUT ± COINS</em><strong className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : "−"}{formatMoney(Math.abs(change))}</strong></p>
+                      <p><span>MKT</span><i className={mkt >= 0 ? "in" : "out"} style={{ width: `${(Math.abs(mkt) / big) * 100}%` }} /><strong className={mkt >= 0 ? "positive" : "negative"}>{mkt >= 0 ? "+" : "−"}{formatMoney(Math.abs(mkt))}</strong></p>
+                      <p className="cy-ledger-sum"><span>=</span><em>IN − OUT ± MARKET &amp; DEBT</em><strong className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : "−"}{formatMoney(Math.abs(change))}</strong></p>
                     </div>
                     {resolution.cashEnd !== undefined && <p className="cy-ledger-cash">CASH IN WALLET <strong>{formatMoney(resolution.cashEnd)}</strong> · rest is in your coins & positions</p>}
                   </div>
