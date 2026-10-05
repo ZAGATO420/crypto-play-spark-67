@@ -159,7 +159,7 @@ type Dialog =
   | { k: "how" }
   | null;
 type Screen = "start" | "setup" | "board" | "run" | "end";
-type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[]; inflow: Entry[]; outflow: Entry[] };
+type Resolution = { title: string; detail: string; tone: Log["tone"]; delta: number; move: number; lines: string[]; inflow: Entry[]; outflow: Entry[]; startNet?: number; endNet?: number; cashStart?: number; cashEnd?: number };
 type Pop = { id: number; text: string; tone: "xp" | "up" | "down" };
 
 
@@ -1447,7 +1447,7 @@ export function CryptoJourney() {
     };
     setRun((r) => ({ ...nextRun, audit: r.audit ?? [] }));
     if ([1, 4, 12].includes(next)) trackGameBeat(`month_${next * 3}`, { tournament: cfg.tournament });
-    setResolution({ title, detail, tone, delta: delta + convCash + planCash, move, lines, inflow, outflow });
+    setResolution({ title, detail, tone, delta: delta + convCash + planCash, move, lines, inflow, outflow, startNet, endNet: netOf(nextRun), cashStart: run.cash, cashEnd: nextRun.cash });
     setPhase("resolve");
     setTick(0);
     setFast(false);
@@ -2014,14 +2014,37 @@ export function CryptoJourney() {
               <h2>{resolution.title}</h2>
               <p className={`cy-delta ${resolution.delta >= 0 ? "positive" : "negative"}`}>{resolution.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(resolution.delta))}</p>
               <p className="cy-lead">{resolution.detail}</p>
+              {resolution.startNet !== undefined && resolution.endNet !== undefined && (() => {
+                const totIn = resolution.inflow.reduce((s, e) => s + e.amount, 0);
+                const totOut = resolution.outflow.reduce((s, e) => s + Math.abs(e.amount), 0);
+                const change = resolution.endNet - resolution.startNet;
+                const mkt = change - (totIn - totOut);
+                const big = Math.max(totIn, totOut, Math.abs(mkt), 1);
+                return (
+                  <div className="cy-ledger" aria-label="Quarter money summary">
+                    <div className="cy-ledger-bal">
+                      <div><small>START</small><strong>{formatMoney(resolution.startNet)}</strong></div>
+                      <span className={`cy-ledger-arrow ${change >= 0 ? "positive" : "negative"}`}>{change >= 0 ? "▲" : "▼"} {change >= 0 ? "+" : "−"}{formatMoney(Math.abs(change))}</span>
+                      <div><small>NOW</small><strong className={change >= 0 ? "positive" : "negative"}>{formatMoney(resolution.endNet)}</strong></div>
+                    </div>
+                    <div className="cy-ledger-bars">
+                      <p><span>IN</span><i className="in" style={{ width: `${(totIn / big) * 100}%` }} /><strong className="positive">+{formatMoney(totIn)}</strong></p>
+                      <p><span>OUT</span><i className="out" style={{ width: `${(totOut / big) * 100}%` }} /><strong className="negative">−{formatMoney(totOut)}</strong></p>
+                      <p><span>COINS</span><i className={mkt >= 0 ? "in" : "out"} style={{ width: `${(Math.abs(mkt) / big) * 100}%` }} /><strong className={mkt >= 0 ? "positive" : "negative"}>{mkt >= 0 ? "+" : "−"}{formatMoney(Math.abs(mkt))}</strong></p>
+                      <p className="cy-ledger-sum"><span>=</span><em>IN − OUT ± COINS</em><strong className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : "−"}{formatMoney(Math.abs(change))}</strong></p>
+                    </div>
+                    {resolution.cashEnd !== undefined && <p className="cy-ledger-cash">CASH IN WALLET <strong>{formatMoney(resolution.cashEnd)}</strong> · rest is in your coins & positions</p>}
+                  </div>
+                );
+              })()}
               <div className="cy-flows">
                 <div className="cy-flow in">
                   <h4>MONEY IN</h4>
-                  {resolution.inflow.length ? resolution.inflow.map((e, i) => <p key={i}><span>{e.label}</span><strong>+{formatMoney(e.amount)}</strong></p>) : <p className="muted">Nothing came in. Rough quarter.</p>}
+                  {resolution.inflow.length ? [...resolution.inflow].sort((a, b) => b.amount - a.amount).map((e, i) => <p key={i}><span>{e.label}</span><strong>+{formatMoney(e.amount)}</strong></p>) : <p className="muted">Nothing came in. Rough quarter.</p>}
                 </div>
                 <div className="cy-flow out">
                   <h4>MONEY OUT</h4>
-                  {resolution.outflow.length ? resolution.outflow.map((e, i) => <p key={i}><span>{e.label}</span><strong>−{formatMoney(Math.abs(e.amount))}</strong></p>) : <p className="muted">You spent nothing. Suspicious.</p>}
+                  {resolution.outflow.length ? [...resolution.outflow].sort((a, b) => a.amount - b.amount).map((e, i) => <p key={i}><span>{e.label}</span><strong>−{formatMoney(Math.abs(e.amount))}</strong></p>) : <p className="muted">You spent nothing. Suspicious.</p>}
                 </div>
               </div>
               <ul className="cy-lines">{resolution.lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
