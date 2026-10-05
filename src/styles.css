@@ -2666,3 +2666,28 @@ body:has(.cy-shell) { background:var(--background); }
 .cy-ledger-bars span { white-space: nowrap }
 .cy-ledger-sum { border-top: 1px dashed var(--border) !important; padding-top: 6px !important }
 .cy-ledger-sum em { font: 600 10px/1 var(--font-body); letter-spacing: .1em; color: var(--muted-foreground); font-style: normal }
+
+/* ---- Quarter result: one big animated display ---- */
+.cy-boom-card { padding-top: 14px !important }
+.cy-boom { display: grid; gap: 12px; text-align: center; --boom: var(--journey-cyan) }
+.cy-boom.is-down { --boom: var(--journey-pink) }
+.cy-boom-kicker { margin: 0; font: 700 11px/1.2 var(--font-body); letter-spacing: .16em; color: var(--muted-foreground); text-transform: uppercase }
+.cy-boom-hero { display: grid; gap: 4px; padding: 18px 10px; border-radius: 18px; border: 2px solid var(--boom); background: radial-gradient(circle at 50% 30%, color-mix(in oklab, var(--boom) 28%, transparent), transparent 70%); box-shadow: 0 0 40px color-mix(in oklab, var(--boom) 35%, transparent); animation: cy-boom-pop .55s cubic-bezier(.2,1.6,.4,1) both }
+.cy-boom-hero small { font: 800 13px/1 var(--font-body); letter-spacing: .22em; color: var(--boom) }
+.cy-boom-hero strong { font: 800 clamp(40px, 13vw, 72px)/1 var(--font-mono, monospace); color: var(--boom); text-shadow: 0 0 24px color-mix(in oklab, var(--boom) 60%, transparent); white-space: nowrap }
+.cy-boom-hero em { font: 700 16px/1 var(--font-mono, monospace); font-style: normal; color: var(--foreground) }
+.cy-boom-net { display: flex; justify-content: center; align-items: baseline; gap: 10px; font-family: var(--font-mono, monospace); animation: cy-boom-in .5s .35s both }
+.cy-boom-net span { font-size: 16px; color: var(--muted-foreground) } .cy-boom-net b { color: var(--boom) } .cy-boom-net strong { font-size: 22px; color: var(--foreground) }
+.cy-boom-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px }
+.cy-boom-tiles > div { display: grid; gap: 4px; padding: 10px 6px; border-radius: 12px; border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 85%, transparent); min-width: 0; animation: cy-boom-in .45s both }
+.cy-boom-tiles > div:nth-child(1) { animation-delay: .5s } .cy-boom-tiles > div:nth-child(2) { animation-delay: .65s } .cy-boom-tiles > div:nth-child(3) { animation-delay: .8s }
+.cy-boom-tiles .in { border-color: color-mix(in oklab, var(--journey-cyan) 60%, transparent) } .cy-boom-tiles .out { border-color: color-mix(in oklab, var(--journey-pink) 60%, transparent) }
+.cy-boom-tiles small { font: 800 10px/1 var(--font-body); letter-spacing: .16em; color: var(--muted-foreground) }
+.cy-boom-tiles strong { font: 800 clamp(14px, 4.2vw, 19px)/1 var(--font-mono, monospace); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cy-boom-tiles .in strong { color: var(--journey-cyan) } .cy-boom-tiles .out strong { color: var(--journey-pink) }
+.cy-boom-tiles span { font-size: 10px; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cy-boom-cash { margin: 0; font-size: 12px; color: var(--muted-foreground) } .cy-boom-cash strong { color: var(--foreground); font-family: var(--font-mono, monospace) }
+.cy-boom-more { text-align: left } .cy-boom-more summary { cursor: pointer; text-align: center; font: 700 11px/1 var(--font-body); letter-spacing: .16em; color: var(--muted-foreground); padding: 6px }
+@keyframes cy-boom-pop { from { transform: scale(.6); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+@keyframes cy-boom-in { from { transform: translateY(10px); opacity: 0 } to { transform: none; opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .cy-boom-hero, .cy-boom-net, .cy-boom-tiles > div { animation: none } }

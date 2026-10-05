@@ -2009,45 +2009,56 @@ export function CryptoJourney() {
           )}
 
           {phase === "resolve" && resolution && (
-            <article className={`cy-card tone-${resolution.tone}`} key={`res-${run.chapter}`}>
-              <p className="journey-kicker">{chapterLabel(run.chapter)} | THE MARKET ANSWERS</p>
-              <h2>{resolution.title}</h2>
-              <p className={`cy-delta ${resolution.delta >= 0 ? "positive" : "negative"}`}>{resolution.delta >= 0 ? "+" : "−"}{formatMoney(Math.abs(resolution.delta))}</p>
-              <p className="cy-lead">{resolution.detail}</p>
-              {resolution.startNet !== undefined && resolution.endNet !== undefined && (() => {
+            <article className={`cy-card cy-boom-card tone-${resolution.tone}`} key={`res-${run.chapter}`}>
+              {(() => {
+                const hasNet = resolution.startNet !== undefined && resolution.endNet !== undefined;
+                const startNet = resolution.startNet ?? 0;
+                const endNet = resolution.endNet ?? 0;
+                const change = hasNet ? endNet - startNet : resolution.delta;
                 const totIn = resolution.inflow.reduce((s, e) => s + e.amount, 0);
                 const totOut = resolution.outflow.reduce((s, e) => s + Math.abs(e.amount), 0);
-                const change = resolution.endNet - resolution.startNet;
                 const mkt = change - (totIn - totOut);
-                const big = Math.max(totIn, totOut, Math.abs(mkt), 1);
+                const up = change >= 0;
+                const topIn = [...resolution.inflow].sort((a, b) => b.amount - a.amount)[0];
+                const topOut = [...resolution.outflow].sort((a, b) => a.amount - b.amount)[0];
+                const pct = hasNet && startNet > 0 ? (change / startNet) * 100 : null;
                 return (
-                  <div className="cy-ledger" aria-label="Quarter money summary">
-                    <div className="cy-ledger-bal">
-                      <div><small>START</small><strong>{formatMoney(resolution.startNet)}</strong></div>
-                      <span className={`cy-ledger-arrow ${change >= 0 ? "positive" : "negative"}`}>{change >= 0 ? "▲" : "▼"} {change >= 0 ? "+" : "−"}{formatMoney(Math.abs(change))}</span>
-                      <div><small>NOW</small><strong className={change >= 0 ? "positive" : "negative"}>{formatMoney(resolution.endNet)}</strong></div>
+                  <div className={`cy-boom ${up ? "is-up" : "is-down"}`} aria-label="Quarter result">
+                    <p className="cy-boom-kicker">{chapterLabel(run.chapter)} · {resolution.title}</p>
+                    <div className="cy-boom-hero">
+                      <small>{up ? "YOU MADE" : "YOU LOST"}</small>
+                      <strong><CountUp value={Math.abs(change)} prefix={up ? "+" : "−"} /></strong>
+                      {pct !== null && <em>{up ? "▲" : "▼"} {Math.abs(pct).toFixed(1)}%</em>}
                     </div>
-                    <div className="cy-ledger-bars">
-                      <p><span>IN</span><i className="in" style={{ width: `${(totIn / big) * 100}%` }} /><strong className="positive">+{formatMoney(totIn)}</strong></p>
-                      <p><span>OUT</span><i className="out" style={{ width: `${(totOut / big) * 100}%` }} /><strong className="negative">−{formatMoney(totOut)}</strong></p>
-                      <p><span>MKT</span><i className={mkt >= 0 ? "in" : "out"} style={{ width: `${(Math.abs(mkt) / big) * 100}%` }} /><strong className={mkt >= 0 ? "positive" : "negative"}>{mkt >= 0 ? "+" : "−"}{formatMoney(Math.abs(mkt))}</strong></p>
-                      <p className="cy-ledger-sum"><span>=</span><em>IN − OUT ± MARKET &amp; DEBT</em><strong className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : "−"}{formatMoney(Math.abs(change))}</strong></p>
+                    {hasNet && (
+                      <div className="cy-boom-net">
+                        <span>{formatMoney(startNet)}</span><b>→</b><strong>{formatMoney(endNet)}</strong>
+                      </div>
+                    )}
+                    <div className="cy-boom-tiles">
+                      <div className="in"><small>IN</small><strong>+{formatMoney(totIn)}</strong><span>{topIn ? topIn.label : "nothing"}</span></div>
+                      <div className="out"><small>OUT</small><strong>−{formatMoney(totOut)}</strong><span>{topOut ? topOut.label : "nothing"}</span></div>
+                      <div className={mkt >= 0 ? "in" : "out"}><small>MARKET</small><strong>{mkt >= 0 ? "+" : "−"}{formatMoney(Math.abs(mkt))}</strong><span>coins & debt</span></div>
                     </div>
-                    {resolution.cashEnd !== undefined && <p className="cy-ledger-cash">CASH IN WALLET <strong>{formatMoney(resolution.cashEnd)}</strong> · rest is in your coins & positions</p>}
+                    {resolution.cashEnd !== undefined && <p className="cy-boom-cash">CASH <strong>{formatMoney(resolution.cashEnd)}</strong> · rest in coins & positions</p>}
+                    <details className="cy-boom-more">
+                      <summary>ALL DETAILS</summary>
+                      <p className="cy-lead">{resolution.detail}</p>
+                      <div className="cy-flows">
+                        <div className="cy-flow in">
+                          <h4>MONEY IN</h4>
+                          {resolution.inflow.length ? [...resolution.inflow].sort((a, b) => b.amount - a.amount).map((e, i) => <p key={i}><span>{e.label}</span><strong>+{formatMoney(e.amount)}</strong></p>) : <p className="muted">Nothing came in.</p>}
+                        </div>
+                        <div className="cy-flow out">
+                          <h4>MONEY OUT</h4>
+                          {resolution.outflow.length ? [...resolution.outflow].sort((a, b) => a.amount - b.amount).map((e, i) => <p key={i}><span>{e.label}</span><strong>−{formatMoney(Math.abs(e.amount))}</strong></p>) : <p className="muted">You spent nothing.</p>}
+                        </div>
+                      </div>
+                      <ul className="cy-lines">{resolution.lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
+                    </details>
                   </div>
                 );
               })()}
-              <div className="cy-flows">
-                <div className="cy-flow in">
-                  <h4>MONEY IN</h4>
-                  {resolution.inflow.length ? [...resolution.inflow].sort((a, b) => b.amount - a.amount).map((e, i) => <p key={i}><span>{e.label}</span><strong>+{formatMoney(e.amount)}</strong></p>) : <p className="muted">Nothing came in. Rough quarter.</p>}
-                </div>
-                <div className="cy-flow out">
-                  <h4>MONEY OUT</h4>
-                  {resolution.outflow.length ? [...resolution.outflow].sort((a, b) => a.amount - b.amount).map((e, i) => <p key={i}><span>{e.label}</span><strong>−{formatMoney(Math.abs(e.amount))}</strong></p>) : <p className="muted">You spent nothing. Suspicious.</p>}
-                </div>
-              </div>
-              <ul className="cy-lines">{resolution.lines.map((l, i) => <li key={i}>{l}</li>)}</ul>
               <div className="cy-actions"><Button className="cy-primary" onClick={continueChapter}>NEXT CHAPTER <ChevronRight /></Button></div>
             </article>
           )}
