@@ -464,11 +464,11 @@ export function CryptoJourney() {
   // On phones the secondary explainers collapse so one quarter fits a single screen.
   const [intel, setIntel] = useState(false);
   // A loud, unmistakable confirmation that a position really opened.
-  const [fillFx, setFillFx] = useState<{ head: string; sub: string; tone: "buy" | "perp" } | null>(null);
+  const [fillFx, setFillFx] = useState<{ head: string; sub: string; tone: "buy" | "perp" | "win" | "loss"; big?: string } | null>(null);
   const fillTimer = useRef<number | null>(null);
-  const showFill = (head: string, sub: string, tone: "buy" | "perp") => {
+  const showFill = (head: string, sub: string, tone: "buy" | "perp" | "win" | "loss", big?: string) => {
     if (fillTimer.current) window.clearTimeout(fillTimer.current);
-    setFillFx({ head, sub, tone });
+    setFillFx({ head, sub, tone, big });
     fillTimer.current = window.setTimeout(() => setFillFx(null), 1500);
   };
 
@@ -744,7 +744,7 @@ export function CryptoJourney() {
     rec({ t: "spot", c: run.chapter, s: symbol, size, fee, price });
     log({ chapter: run.chapter, title: `LONG ${symbol} SPOT`, detail: `${formatMoney(size)} at ${formatMoney(price)} | held in ${cust.short}.`, tone: "cyan" });
     say(`${formatMoney(size)} into ${symbol}, sitting in your ${cust.short}.`, "cyan");
-    showFill(`${formatMoney(size)} ${symbol} BOUGHT`, `POSITION OPEN | ${cust.short} | entry ${formatMoney(price)}`, "buy");
+    showFill(`${symbol} SPOT BOUGHT`, `POSITION OPEN | ${cust.short} | entry ${formatMoney(price)}`, "buy", formatMoney(size));
     playSfx("buy");
 
     if (run.trades === 0) trackGameBeat("first_trade", { chapter: run.chapter, tournament: cfg.tournament });
@@ -771,7 +771,7 @@ export function CryptoJourney() {
     rec({ t: "perp", c: run.chapter, s: symbol, dir, lev, margin, price });
     log({ chapter: run.chapter, title: `${dir === 1 ? "LONG" : "SHORT"} ${symbol} ${lev}x`, detail: `${formatMoney(margin)} margin at ${formatMoney(price)}. Funding runs every quarter.`, tone: "yellow" });
     say(`${lev}x ${dir === 1 ? "long" : "short"} ${symbol} is live. Perps always sit on the exchange.`, "yellow");
-    showFill(`${lev}x ${dir === 1 ? "LONG" : "SHORT"} ${symbol} LIVE`, `${formatMoney(margin)} margin | entry ${formatMoney(price)}`, "perp");
+    showFill(`${lev}x ${dir === 1 ? "▲ LONG" : "▼ SHORT"} ${symbol} ACTIVATED`, `${formatMoney(margin)} margin | entry ${formatMoney(price)}`, "perp", `${lev}x`);
     playSfx("buy");
     // opening leverage is the loudest moment in the game: the candle shows the
     // exact leverage you picked, never a hardcoded number
@@ -819,6 +819,7 @@ export function CryptoJourney() {
     log({ chapter: run.chapter, title: `CLOSED ${pos.symbol}`, detail: `${formatMoney(back)} back | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}${pos.where === "cold" ? " | settled a quarter late" : ""}.`, tone: gain >= 0 ? "yellow" : "pink" });
     say(`${pos.symbol} closed for ${formatMoney(back)} | ${gain >= 0 ? "+" : ""}${formatMoney(gain)}`, gain >= 0 ? "yellow" : "pink");
     feel(gain >= 0 ? "win" : "loss", gain);
+    showFill(gain >= 0 ? `${pos.symbol} PROFIT SECURED` : `${pos.symbol} LOSS TAKEN`, `${formatMoney(back - fee)} back in cash`, gain >= 0 ? "win" : "loss", `${gain >= 0 ? "+" : "−"}${formatMoney(Math.abs(gain))}`);
     if (gain > 0 && cost > 0 && gain / cost >= 2) triggerGodCandle(`${pos.symbol} ${pos.kind === "perp" ? `${pos.lev}x` : "SPOT"}`, gain / cost + 1, gain);
     grantXp((gain >= 0 ? XP.closeWin : XP.closeLoss) + (quality >= 1 ? XP_EXTRA.minigamePerfect : quality > 0.5 ? XP_EXTRA.minigameOk : 0), gain >= 0 ? "PROFIT TAKEN" : "LESSON");
     if (Math.abs(gain) >= 25_000) setRun((r) => chron(r, gain >= 0
@@ -1788,7 +1789,7 @@ export function CryptoJourney() {
           </div>
         </section>
       )}
-      {fillFx && <div className={`cy-fill tone-${fillFx.tone}`} role="status"><strong>{fillFx.head}</strong><small>{fillFx.sub}</small></div>}
+      {fillFx && <button type="button" className={`cy-fill tone-${fillFx.tone}`} role="status" aria-label="Dismiss" onClick={() => { if (fillTimer.current) window.clearTimeout(fillTimer.current); setFillFx(null); }}>{fillFx.big && <b>{fillFx.big}</b>}<strong>{fillFx.head}</strong><small>{fillFx.sub}</small></button>}
 
 
       {/* ZONE 1 — the duel cockpit: you, the Boss, one line of numbers. */}
@@ -2373,28 +2374,31 @@ function TerminalSheet({ run, start, startTab = "spot", onSpot, onPerp, onPositi
   const liqPrice = price * (1 - (dir / lev) * 0.92);
   const fmt = (v: number) => formatMoney(v);
 
+  const gap = price > 0 ? Math.max(0, (dir === 1 ? (price - liqPrice) : (liqPrice - price)) / price * 100) : 0;
+  const zone = gap > 20 ? "safe" : gap > 10 ? "danger" : "lethal";
+  const spark = (sym: CoinSymbol) => {
+    const pts = [3, 2, 1, 0].map((k) => priceAt(sym, Math.max(0, run.chapter - k), run.noise));
+    const lo = Math.min(...pts), hi = Math.max(...pts), r = hi - lo || 1;
+    return pts.map((v, i) => `${(i / 3) * 100},${28 - ((v - lo) / r) * 24}`).join(" ");
+  };
+
   return (
     <>
-      <p className="journey-kicker"><Zap /> TRADING TERMINAL | {chapterLabel(run.chapter)}</p>
-      <div className="cy-term-strip" role="tablist" aria-label="Markets">
+      <p className="journey-kicker"><Zap /> TRADING TERMINAL | {chapterLabel(run.chapter)} <b className="cy-term-cash">CASH {fmt(run.cash)}</b></p>
+      <div className="cy-term-coins" role="tablist" aria-label="Markets">
         {live.map((c) => {
           const p = priceAt(c.symbol, run.chapter, run.noise);
           const b = priceAt(c.symbol, Math.max(0, run.chapter - 1), run.noise);
           const m = b && p ? (p / b - 1) * 100 : 0;
           return (
-            <button key={c.symbol} className={symbol === c.symbol ? "is-on" : ""} onClick={() => { setSymbol(c.symbol); playSfx("click"); }}>
-              <img src={COIN_LOGO[c.symbol]} alt="" width={20} height={20} />
-              <strong>{c.symbol}</strong>
-              <em className={m >= 0 ? "positive" : "negative"}>{m >= 0 ? "+" : ""}{m.toFixed(1)}%</em>
+            <button key={c.symbol} role="tab" aria-selected={symbol === c.symbol} className={`cy-coin-card ${m >= 0 ? "is-up" : "is-down"} ${symbol === c.symbol ? "is-on" : ""}`} onClick={() => { setSymbol(c.symbol); playSfx("click"); }}>
+              <span className="cy-coin-top"><img src={COIN_LOGO[c.symbol]} alt="" width={26} height={26} /><strong>{c.symbol}</strong></span>
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden><polyline points={spark(c.symbol)} fill="none" strokeWidth="2.4" vectorEffect="non-scaling-stroke" /></svg>
+              <em>{m >= 0 ? "▲ +" : "▼ "}{m.toFixed(1)}%</em>
+              <small>{fmt(p)}</small>
             </button>
           );
         })}
-      </div>
-
-      <div className="cy-term-head">
-        <img src={COIN_LOGO[symbol]} alt="" width={40} height={40} />
-        <span><strong>{symbol}</strong><small>{fmt(price)} | this quarter {move >= 0 ? "+" : ""}{move.toFixed(1)}%</small></span>
-        <b>CASH {fmt(run.cash)}</b>
       </div>
 
       <div className="cy-term-tabs">
@@ -2404,7 +2408,7 @@ function TerminalSheet({ run, start, startTab = "spot", onSpot, onPerp, onPositi
 
       {tab === "spot" ? (
         <div className="cy-term-body">
-          <p className="cy-term-note">You buy the coin and keep it. No liquidation — the worst case is the price falling.</p>
+          <p className="cy-term-note"><strong>{symbol} {fmt(price)}</strong> | {move >= 0 ? "+" : ""}{move.toFixed(1)}% this quarter. You buy the coin and keep it. No liquidation — the worst case is the price falling.</p>
           <div className="cy-term-sizes">
             <Button variant="secondary" onClick={() => onSpot(symbol, 0.25)}>BUY 25%<small>{fmt(run.cash * 0.25)}</small></Button>
             <Button variant="secondary" onClick={() => onSpot(symbol, 0.5)}>BUY 50%<small>{fmt(run.cash * 0.5)}</small></Button>
@@ -2413,17 +2417,16 @@ function TerminalSheet({ run, start, startTab = "spot", onSpot, onPerp, onPositi
         </div>
       ) : (
         <div className="cy-term-body">
-          <div className="cy-toggle">
-            <button className={dir === 1 ? "is-on is-long" : ""} onClick={() => { setDir(1); playSfx("click"); }}><TrendingUp />LONG | PRICE UP</button>
-            <button className={dir === -1 ? "is-on is-short" : ""} onClick={() => { setDir(-1); playSfx("click"); }}><TrendingDown />SHORT | PRICE DOWN</button>
+          <div className="cy-dir-cards">
+            <button className={`cy-dir is-long ${dir === 1 ? "is-on" : ""}`} onClick={() => { setDir(1); playSfx("click"); }}><b>▲</b><strong>LONG</strong><small>you win if {symbol} goes UP</small></button>
+            <button className={`cy-dir is-short ${dir === -1 ? "is-on" : ""}`} onClick={() => { setDir(-1); playSfx("click"); }}><b>▼</b><strong>SHORT</strong><small>you win if {symbol} goes DOWN</small></button>
           </div>
           <div className="cy-toggle">{LEVERAGE.map((l) => <button key={l} className={lev === l ? "is-on" : ""} onClick={() => { setLev(l); playSfx("click"); }}>{l}x</button>)}</div>
-          <div className="cy-term-risk">
-            <span><small>ENTRY PRICE</small><strong>{fmt(price)}</strong></span>
-            <span><small>LIQUIDATION AT</small><strong className="negative">{fmt(liqPrice)}</strong></span>
-            <span><small>10% MOVE PAYS</small><strong className="positive">{(10 * lev).toFixed(0)}%</strong></span>
+          <div className={`cy-liq zone-${zone}`}>
+            <div className="cy-liq-row"><span>LIQ {fmt(liqPrice)}</span><strong>{zone === "safe" ? "SAFE" : zone === "danger" ? "DANGER" : "ONE CANDLE TO ZERO"}</strong><span>NOW {fmt(price)}</span></div>
+            <div className="cy-liq-bar"><i style={{ width: `${Math.min(100, gap * 2)}%` }} /></div>
+            <small>{gap.toFixed(1)}% {dir === 1 ? "drop" : "pump"} wipes the margin | 10% move pays {(10 * lev).toFixed(0)}%</small>
           </div>
-          <p className="cy-term-note">If {symbol} reaches {fmt(liqPrice)}, the margin is gone. Funding is charged every quarter.</p>
           <div className="cy-term-sizes">
             <Button variant="secondary" onClick={() => onPerp(symbol, dir, lev, 0.25)}>OPEN 25%<small>{fmt(run.cash * 0.25)} margin</small></Button>
             <Button variant="secondary" onClick={() => onPerp(symbol, dir, lev, 0.5)}>OPEN 50%<small>{fmt(run.cash * 0.5)} margin</small></Button>
@@ -2435,18 +2438,20 @@ function TerminalSheet({ run, start, startTab = "spot", onSpot, onPerp, onPositi
       {run.positions.length > 0 && (
         <div className="cy-term-open">
           <p className="journey-kicker">YOUR OPEN POSITIONS</p>
+          <div className="cy-pos-grid">
           {run.positions.map((p) => {
             const now = priceAt(p.symbol, run.chapter, run.noise);
             const pnl = pnlOf(p, now);
             return (
-              <button key={p.id} className="cy-term-pos" onClick={() => onPosition(p.id)}>
-                <img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} />
-                <span><strong>{p.symbol}</strong><small>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "LONG" : "SHORT"} ${p.lev}x`} | from {fmt(p.entry)}</small></span>
-                <b className={pnl >= 0 ? "positive" : "negative"}>{pnl >= 0 ? "+" : "−"}{fmt(Math.abs(pnl))}</b>
+              <button key={p.id} className={`cy-pos-card ${pnl >= 0 ? "is-up" : "is-down"}`} onClick={() => onPosition(p.id)}>
+                <span className="cy-coin-top"><img src={COIN_LOGO[p.symbol]} alt="" width={22} height={22} /><strong>{p.symbol}</strong><i>{p.kind === "spot" ? "SPOT" : `${p.dir === 1 ? "▲" : "▼"} ${p.lev}x`}</i></span>
+                <b>{pnl >= 0 ? "+" : "−"}{fmt(Math.abs(pnl))}</b>
+                <small>from {fmt(p.entry)}</small>
                 <em>CLOSE</em>
               </button>
             );
           })}
+          </div>
         </div>
       )}
     </>
