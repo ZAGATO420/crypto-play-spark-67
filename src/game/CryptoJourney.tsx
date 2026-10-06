@@ -464,7 +464,7 @@ export function CryptoJourney() {
   // On phones the secondary explainers collapse so one quarter fits a single screen.
   const [intel, setIntel] = useState(false);
   // A loud, unmistakable confirmation that a position really opened.
-  const [fillFx, setFillFx] = useState<{ head: string; sub: string; tone: "buy" | "perp" | "win" | "loss"; big?: string } | null>(null);
+  const [fillFx, setFillFx] = useState<{ head: string; sub: string; tone: "buy" | "perp" | "win" | "loss"; big?: string | undefined } | null>(null);
   const fillTimer = useRef<number | null>(null);
   const showFill = (head: string, sub: string, tone: "buy" | "perp" | "win" | "loss", big?: string) => {
     if (fillTimer.current) window.clearTimeout(fillTimer.current);
