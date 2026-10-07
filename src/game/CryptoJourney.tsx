@@ -2422,9 +2422,9 @@ function TerminalSheet({ run, start, startTab = "spot", onSpot, onPerp, onPositi
             <button className={`cy-dir is-short ${dir === -1 ? "is-on" : ""}`} onClick={() => { setDir(-1); playSfx("click"); }}><b>▼</b><strong>SHORT</strong><small>you win if {symbol} goes DOWN</small></button>
           </div>
           <div className="cy-toggle">{LEVERAGE.map((l) => <button key={l} className={lev === l ? "is-on" : ""} onClick={() => { setLev(l); playSfx("click"); }}>{l}x</button>)}</div>
-          <div className={`cy-liq zone-${zone}`}>
-            <div className="cy-liq-row"><span>LIQ {fmt(liqPrice)}</span><strong>{zone === "safe" ? "SAFE" : zone === "danger" ? "DANGER" : "ONE CANDLE TO ZERO"}</strong><span>NOW {fmt(price)}</span></div>
-            <div className="cy-liq-bar"><i style={{ width: `${Math.min(100, gap * 2)}%` }} /></div>
+          <div className={`cy-liqg zone-${zone}`}>
+            <div className="cy-liqg-row"><span>LIQ {fmt(liqPrice)}</span><strong>{zone === "safe" ? "SAFE" : zone === "danger" ? "DANGER" : "ONE CANDLE TO ZERO"}</strong><span>NOW {fmt(price)}</span></div>
+            <div className="cy-liqg-bar"><i style={{ width: `${Math.min(100, gap * 2)}%` }} /></div>
             <small>{gap.toFixed(1)}% {dir === 1 ? "drop" : "pump"} wipes the margin | 10% move pays {(10 * lev).toFixed(0)}%</small>
           </div>
           <div className="cy-term-sizes">
