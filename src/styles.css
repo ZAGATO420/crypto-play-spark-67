@@ -2739,3 +2739,22 @@ button.cy-fill { pointer-events:auto; cursor:pointer; color:var(--foreground); f
 .cy-fill.tone-win b, .cy-fill.tone-win strong { color:var(--journey-cyan); }
 .cy-fill.tone-loss { border-color:var(--journey-pink); box-shadow:0 0 34px -8px var(--journey-pink); }
 .cy-fill.tone-loss b, .cy-fill.tone-loss strong { color:var(--journey-pink); }
+
+/* minigame result card */
+.mg-result { display:grid; gap:10px; text-align:center; padding:8px 0; animation: mg-pop .35s cubic-bezier(.2,1.4,.4,1); }
+.mg-result-tier { font: 700 13px/1 var(--font-mono, monospace); letter-spacing:.2em; }
+.mg-result.is-win .mg-result-tier, .mg-result.is-win .mg-result-money { color: var(--journey-cyan); }
+.mg-result.is-loss .mg-result-tier, .mg-result.is-loss .mg-result-money { color: var(--journey-pink); }
+.mg-result-label { font: 400 clamp(26px, 7vw, 38px)/1.05 var(--font-display); margin:0; }
+.mg-result-money { font: 400 clamp(44px, 13vw, 72px)/1 var(--font-display); margin:4px 0; text-shadow: 0 0 24px currentColor; }
+.mg-result-meter { height:10px; border:1px solid var(--border); border-radius:99px; overflow:hidden; }
+.mg-result-meter i { display:block; height:100%; background: var(--journey-yellow); transition: width .6s ease; }
+.mg-result-score { font: 600 12px/1 var(--font-mono, monospace); opacity:.8; margin:0; }
+.mg-result-note { font-size:15px; margin:0 0 6px; }
+@keyframes mg-pop { from { transform: scale(.85); opacity:0 } to { transform:none; opacity:1 } }
+@media (prefers-reduced-motion: reduce) { .mg-result { animation:none } }
+.mg-depth { cursor:pointer; }
+.mg-rug button.is-bad { border-color: var(--journey-cyan); color: var(--journey-cyan); }
+.mg-rug button.is-wrong { border-color: var(--journey-pink); color: var(--journey-pink); }
+.mg-drift-btn.is-real { border-color: var(--journey-cyan); color: var(--journey-cyan); }
+.mg-drift-btn.is-fake { border-color: var(--journey-pink); color: var(--journey-pink); opacity:.7; }
