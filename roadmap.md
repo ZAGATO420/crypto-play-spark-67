@@ -94,3 +94,6 @@
 - [x] Minigames stay the heart of TAKE THE RISK across all 6 phases (2020-2026).
 - [x] Bühne Phase 1: Reload-Test während Ereignistext und Karten-Einfahrt; echter Run verified; Testeintrag löschen; dann auf OK für Phase 2 warten
 ## Phase 2 (done)
+
+## Trailer revision
+- [ ] Ruhigere professionelle Trailer-Version ohne Minigame-Montage erstellen und direkt im Chat liefern.
