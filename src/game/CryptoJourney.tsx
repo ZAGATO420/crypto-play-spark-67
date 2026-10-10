@@ -1480,9 +1480,9 @@ export function CryptoJourney() {
     const atk = attackFor(chapter, det(run.seed, `attack-${chapter}`), personaFor(det(run.seed, "persona")).bias);
     if (atk?.id === "OFFER") cards.push({ k: "offer", attack: atk });
     if (crashFor(chapter)) cards.push({ k: "crash", chapter });
-    if (failureFor(chapter)) cards.push({ k: "failure", chapter });
     const decision = decisionForChapter(chapter);
     if (decision) cards.push({ k: "decision", card: decision });
+    if (failureFor(chapter)) cards.push({ k: "failure", chapter });
     const situation = situationFor(chapter);
     if (situation) cards.push({ k: "situation", card: situation });
     // cold storage occasionally asks you to prove you still own it
