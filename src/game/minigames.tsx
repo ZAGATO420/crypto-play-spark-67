@@ -107,7 +107,7 @@ function TimingBar({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult
         ? { quality: 0.65, label: "GOOD FILL" }
         : { quality: 0.15, label: "SLIPPAGE" };
     setDone(res);
-    window.setTimeout(() => onResult(res), 850);
+    window.setTimeout(() => onResult(res), 450);
   };
 
   return (
@@ -145,7 +145,7 @@ function PanicTap({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult)
     const q = Math.min(1, taps / target);
     const res: MiniResult = q >= 1 ? { quality: 1, label: "YOU GOT OUT" } : q >= 0.6 ? { quality: 0.6, label: "PARTIAL ESCAPE" } : { quality: 0.1, label: "TOO SLOW" };
     setDone(res);
-    window.setTimeout(() => onResult(res), 900);
+    window.setTimeout(() => onResult(res), 450);
   }, [left, done, taps, target, onResult]);
 
   return (
@@ -257,7 +257,7 @@ function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult)
       if (next >= order.current.length) {
         const res: MiniResult = wrong === 0 ? { quality: 1, label: "SEED RECOVERED" } : { quality: 0.6, label: "RECOVERED, BARELY" };
         setDone(res);
-        window.setTimeout(() => onResult(res), 850);
+        window.setTimeout(() => onResult(res), 450);
       }
     } else {
       const w = wrong + 1;
@@ -265,7 +265,7 @@ function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult)
       if (w >= 3) {
         const res: MiniResult = { quality: 0.1, label: "SEED LOST" };
         setDone(res);
-        window.setTimeout(() => onResult(res), 850);
+        window.setTimeout(() => onResult(res), 450);
       }
     }
   };
@@ -309,7 +309,7 @@ function OrderBook({ hard, roll, onResult }: { hard: boolean; roll: number; onRe
     const off = Math.abs(bid - target);
     const result = off <= width / 3 ? { quality: 1, label: "MAKER FILL" } : off <= width ? { quality: .65, label: "PARTIAL FILL" } : { quality: .15, label: "MISSED LIQUIDITY" };
     setDone(result);
-    window.setTimeout(() => onResult(result), 750);
+    window.setTimeout(() => onResult(result), 450);
   };
   return <><p className="journey-kicker"><Target /> ORDER BOOK</p><h2>PLACE THE BID</h2><p className="cy-lead">Your bid line sweeps across the book. Tap when it sits in the <strong>yellow liquidity pocket</strong> — dead centre is a full maker fill.</p><div className="mg-depth" onClick={place}><i style={{ left: `${target - width}%`, width: `${width * 2}%` }} /><b style={{ left: `${bid}%` }} /></div>{done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p> : <Button className="cy-wide cy-primary" onClick={place}>PLACE ORDER NOW</Button>}</>;
 }
@@ -325,7 +325,7 @@ function RugCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) 
     if (picked !== null) return;
     const result = index === bad ? { quality: 1, label: "RUG FLAGGED" } : { quality: .15, label: "YOU MISSED THE BACKDOOR" };
     setPicked(index);
-    window.setTimeout(() => onResult(result), 900);
+    window.setTimeout(() => onResult(result), 450);
   };
   return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">Three lines are safe. <strong>One lets the dev drain the pool.</strong> Tap the dangerous one.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={picked !== null} className={picked === null ? "" : index === bad ? "is-bad" : index === picked ? "is-wrong" : ""} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
 }
@@ -365,7 +365,7 @@ function CandleCatch({ hard, roll, onResult }: { hard: boolean; roll: number; on
     const q = Math.max(0, Math.min(1, (caught - missed * 0.5) / need));
     const res: MiniResult = q >= 0.95 ? { quality: 1, label: "EVERY GREEN CANDLE" } : q >= 0.6 ? { quality: 0.65, label: "GOOD HANDS" } : { quality: 0.15, label: "YOU CHASED RED" };
     setDone(res);
-    window.setTimeout(() => onResult(res), 800);
+    window.setTimeout(() => onResult(res), 450);
   }, [left, done, caught, missed, need, onResult]);
 
   const tap = (d: Drop) => {
@@ -421,7 +421,7 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
     if (done || left > 0) return;
     const res: MiniResult = { quality: 0.1, label: "CLAIM WINDOW CLOSED" };
     setDone(res);
-    window.setTimeout(() => onResult(res), 800);
+    window.setTimeout(() => onResult(res), 450);
   }, [left, done, onResult]);
 
   const pick = (index: number) => {
@@ -430,7 +430,7 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
       ? { quality: 1, label: "AIRDROP CLAIMED" }
       : { quality: 0.15, label: "PHISHING SITE | WALLET DRAINED" };
     setDone(res);
-    window.setTimeout(() => onResult(res), 850);
+    window.setTimeout(() => onResult(res), 450);
   };
 
   return (
@@ -487,7 +487,7 @@ function HoldTheLine({ hard, roll, onResult }: { hard: boolean; roll: number; on
     const q = Math.min(1, held / need);
     const res: MiniResult = q >= 0.95 ? { quality: 1, label: "MARGIN HELD" } : q >= 0.55 ? { quality: 0.6, label: "SHAKEN, NOT LIQUIDATED" } : { quality: 0.1, label: "MARGIN CALL" };
     setDone(res);
-    window.setTimeout(() => onResult(res), 850);
+    window.setTimeout(() => onResult(res), 450);
   }, [left, done, held, need, onResult]);
 
   const inZone = Math.abs(pos - band) <= width;

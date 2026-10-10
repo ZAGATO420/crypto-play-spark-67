@@ -102,6 +102,11 @@ type Pending =
  * One skill moment per phase, fixed to the game that phase already owns.
  * Pressing the risky move plays it; how well you play it decides the payout.
  */
+const RISK_ROTATION: MiniKind[] = ["whale", "gas", "rugcheck", "orderbook", "timing", "airdrop", "hodl", "panic", "seed"];
+const MINI_HEAD: Record<MiniKind, string> = {
+  whale: "CATCH THE GREEN", gas: "OUTBID THE BOTS", rugcheck: "SPOT THE RUG", orderbook: "PLACE THE BID",
+  timing: "TIME THE EXIT", airdrop: "CLAIM THE REAL ONE", hodl: "HOLD THE LINE", panic: "BEAT THE CRASH", seed: "REMEMBER THE SEED",
+};
 const PHASE_RISK: Record<ChapterMode, { kind: MiniKind; head: string; hit: string; ok: string; miss: string }> = {
   ACCUMULATE: { kind: "whale", head: "CATCH THE GREEN",
     hit: "Perfect accumulation — you took every green print the whale left behind.",
@@ -1691,9 +1696,9 @@ export function CryptoJourney() {
   /** Every phase: the risky move is played, not clicked. Stake is visible up front. */
   const phaseRisk = PHASE_RISK[chapterPlay.mode];
   // the hunt alternates between the two scam-spotting games, and tightens with the years
-  const riskKind: MiniKind = chapterPlay.mode === "HUNT"
-    ? (run.chapter % 2 === 0 ? "airdrop" : "rugcheck")
-    : phaseRisk.kind;
+  // all nine minigames rotate through the run — never the same one twice in a row
+  const riskKind: MiniKind = RISK_ROTATION[run.chapter % RISK_ROTATION.length];
+  const riskHead = MINI_HEAD[riskKind];
   const riskHard = cfg.difficulty !== "EASY" || run.hunger >= 80 || run.stress >= 80
     || (chapterPlay.mode === "HUNT" && run.chapter >= 8);
   const phaseStake = Math.round(Math.min(Math.max(400, Math.round(net * 0.03)), Math.max(0, Math.round(run.cash * 0.25))) * power.stakeMul);
@@ -1714,11 +1719,11 @@ export function CryptoJourney() {
   const riskWhy = riskPlayed
     ? "Your one risk moment this quarter is used. End the quarter to see what the market paid."
     : huntPilot && presale
-      ? `${phaseRisk.head} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
+      ? `${riskHead} | ticket ${formatMoney(huntTicket)} | rug risk ${Math.round(presale.rug * 100)}% | upside ${presale.upside[0]}x–${presale.upside[1]}x`
       : duelPilot
-        ? `${phaseRisk.head} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
+        ? `${riskHead} | stake ${formatMoney(duelStake)} | win up to double it plus a perk | lose it all if you fail`
         : stakePilot
-          ? `${phaseRisk.head}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}${chapterPlay.mode === "MOMENTUM" ? " | your click time on the live tape adds up to ±18%" : ""}`
+          ? `${riskHead}: a 4 second skill moment on ${formatMoney(phaseStake)} | the quarter's move decides the size | a fumble always costs ${formatMoney(Math.round(phaseStake * 0.5))}${chapterPlay.mode === "MOMENTUM" ? " | your click time on the live tape adds up to ±18%" : ""}`
           : moves.risk.why;
 
   const riskMove = () => {
@@ -2166,7 +2171,20 @@ export function CryptoJourney() {
               const delta = q >= 0.6 ? Math.round(stake * q) : -Math.round(stake * 0.5);
               return { money: delta, note: delta >= 0 ? "Cash added to your wallet." : "Cash lost from your wallet." };
             }
-            if (p.t === "phaseRisk") return { note: q >= 0.6 ? "Good grade. The money is paid when the quarter ends." : "Bad grade. This will cost you when the quarter ends." };
+            if (p.t === "phaseRisk") {
+              if (q < 0.6) return { money: -Math.round(p.stake * 0.5 * power.fumbleCut), note: `Fumbled. Half of your ${formatMoney(p.stake)} stake is lost when the quarter ends.` };
+              const best = Math.round(p.stake * 1.4 * q * power.payoutMul);
+              const worst = Math.round(p.stake * (1 - q) * power.redCut);
+              return { note: `${formatMoney(p.stake)} rides on the market. Green quarter: up to +${formatMoney(best)}. Red quarter: at most −${formatMoney(worst)}. Paid at the quarter end.` };
+            }
+            if (p.t === "fight") {
+              const d = q >= 0.9 ? Math.round(p.wager * 2 * power.duelMul) : q >= 0.5 ? 0 : -p.wager;
+              return d === 0 ? { note: "A draw. Your stake comes back, nothing won." } : { money: d, note: d > 0 ? "You beat the Boss. Winnings added to your wallet." : "The Boss takes your whole stake." };
+            }
+            if (p.t === "presale") return q < 0.2
+              ? { money: -Math.round(p.size * 0.06), note: "Transaction missed the block. You only lose the gas." }
+              : { note: `You are in with ${formatMoney(p.size)}. Rug or moon is revealed on the next screen.` };
+            if (p.t === "close") return { note: `Fill price ${q >= 0.9 ? "best" : q >= 0.5 ? "fair" : "poor"}: ${(((0.94 + q * 0.08) - 1) * 100).toFixed(1)}% slippage on your sale. Your profit shows next.` };
             if (p.t === "seed") return q >= 0.9 ? { note: "Cold wallet safe. No loss." } : q >= 0.5 ? { money: -400, note: "Recovery service fee." } : { note: "Half of your cold-wallet coins are locked." };
             if (p.t === "crash") return { note: q >= 0.9 ? "Clean exit. Your positions are safe." : q >= 0.5 ? "Partial exit: positions −6%." : "You froze: positions −16%." };
             return { note: "Your result decides the payout on the next screen." };
