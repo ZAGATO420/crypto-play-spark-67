@@ -2751,6 +2751,13 @@ button.cy-fill { pointer-events:auto; cursor:pointer; color:var(--foreground); f
 .mg-result-meter i { display:block; height:100%; background: var(--journey-yellow); transition: width .6s ease; }
 .mg-result-score { font: 600 12px/1 var(--font-mono, monospace); opacity:.8; margin:0; }
 .mg-result-note { font-size:15px; margin:0 0 6px; }
+.mg-result.is-loss { animation: mg-pop .35s cubic-bezier(.2,1.4,.4,1), mg-shake .45s ease .05s; }
+.mg-result.is-perfect .mg-result-money { animation: mg-glow 1s ease-in-out infinite alternate; }
+.mg-result-money { animation: mg-slam .5s cubic-bezier(.2,1.6,.4,1); }
+@keyframes mg-shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes mg-slam { 0% { transform: scale(2.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes mg-glow { to { text-shadow: 0 0 44px currentColor, 0 0 10px currentColor; } }
+@media (prefers-reduced-motion: reduce) { .mg-result, .mg-result-money, .mg-result.is-loss { animation: none; } }
 @keyframes mg-pop { from { transform: scale(.85); opacity:0 } to { transform:none; opacity:1 } }
 @media (prefers-reduced-motion: reduce) { .mg-result { animation:none } }
 .mg-depth { cursor:pointer; }

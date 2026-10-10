@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Fuel, Gift, KeyRound, MousePointerClick, Search, Shield, Target, Waves } from "lucide-react";
+import { playSfx } from "./audio";
 
 /**
  * Tiny skill moments. Every one returns a quality between 0 and 1 so the
@@ -19,17 +20,27 @@ export type MiniOutcome = { money?: number; note: string };
  * shows the verdict, the money effect and a CONTINUE button. The caller's
  * onResult only fires on CONTINUE, with the exact same result — no logic change.
  */
+const buzz = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
+
 export function Minigame({ kind, hard, roll = Math.random(), onResult, describe }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void; describe?: (q: number) => MiniOutcome }) {
   const [res, setRes] = useState<MiniResult | null>(null);
   const sent = useRef(false);
   const report = useCallback((r: MiniResult) => setRes((cur) => cur ?? r), []);
+  // the moment the result lands: sound + vibration, before the card shows
+  useEffect(() => {
+    if (!res) return;
+    if (res.quality >= 0.9) { playSfx("win"); buzz([40, 60, 40, 60, 120]); }
+    else if (res.quality >= 0.6) { playSfx("win"); buzz([50, 50, 80]); }
+    else if (res.quality >= 0.4) { playSfx("hit"); buzz(160); }
+    else { playSfx("crash"); buzz([220, 80, 220]); }
+  }, [res]);
   if (res) {
     const out = describe?.(res.quality);
     const tier = res.quality >= 0.9 ? "PERFECT" : res.quality >= 0.6 ? "CLEAN HIT" : res.quality >= 0.4 ? "SLIPPED" : "REKT";
     const good = res.quality >= 0.6;
-    const go = () => { if (sent.current) return; sent.current = true; onResult(res); };
+    const go = () => { if (sent.current) return; sent.current = true; playSfx("click"); onResult(res); };
     return (
-      <div className={`mg-result ${good ? "is-win" : "is-loss"}`}>
+      <div className={`mg-result ${good ? "is-win" : "is-loss"} ${res.quality >= 0.9 ? "is-perfect" : ""}`}>
         <p className="mg-result-tier">{tier}</p>
         <h2 className="mg-result-label">{res.label}</h2>
         {out?.money !== undefined && out.money !== 0 && (
@@ -42,15 +53,21 @@ export function Minigame({ kind, hard, roll = Math.random(), onResult, describe 
       </div>
     );
   }
-  if (kind === "timing") return <TimingBar hard={hard} onResult={report} />;
-  if (kind === "panic") return <PanicTap hard={hard} onResult={report} />;
-  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={report} />;
-  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={report} />;
-  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={report} />;
-  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={report} />;
-  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={report} />;
-  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={report} />;
-  return <SeedCheck roll={roll} onResult={report} />;
+  const game = kind === "timing" ? <TimingBar hard={hard} onResult={report} />
+    : kind === "panic" ? <PanicTap hard={hard} onResult={report} />
+    : kind === "gas" ? <GasWar hard={hard} roll={roll} onResult={report} />
+    : kind === "orderbook" ? <OrderBook hard={hard} roll={roll} onResult={report} />
+    : kind === "rugcheck" ? <RugCheck roll={roll} onResult={report} />
+    : kind === "whale" ? <CandleCatch hard={hard} roll={roll} onResult={report} />
+    : kind === "airdrop" ? <AirdropClaim hard={hard} roll={roll} onResult={report} />
+    : kind === "hodl" ? <HoldTheLine hard={hard} roll={roll} onResult={report} />
+    : <SeedCheck roll={roll} onResult={report} />;
+  // every tap on a button inside a minigame clicks and ticks the phone
+  return (
+    <div className="mg-wrap" onPointerDownCapture={(e) => { if ((e.target as HTMLElement).closest("button")) { playSfx("click"); buzz(12); } }}>
+      {game}
+    </div>
+  );
 }
 
 
@@ -148,32 +165,61 @@ function PanicTap({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult)
 /* ----------------------------------------------------------------- gas war */
 
 function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
-  const [gas, setGas] = useState(50);
+  // Your gas bid sweeps on its own, the bots keep raising their bid band,
+  // and the next block closes in seconds. Fire when you sit inside the bots.
+  const total = hard ? 4200 : 5200;
+  const w = hard ? 12 : 17;
+  const [gas, setGas] = useState(5);
+  const [lo, setLo] = useState(18 + roll * 22);
+  const [left, setLeft] = useState(total);
   const [done, setDone] = useState<MiniResult | null>(null);
-  const band = useRef({ lo: 25 + roll * 40, w: hard ? 12 : 20 });
+  const dir = useRef(1);
+  const ref = useRef({ gas: 5, lo: 18 + roll * 22 });
 
+  useEffect(() => {
+    if (done) return;
+    const speed = hard ? 3.1 : 2.3;
+    const climb = hard ? 0.32 : 0.22;
+    const id = window.setInterval(() => {
+      let g = ref.current.gas + dir.current * speed;
+      if (g >= 99) { g = 99; dir.current = -1; }
+      if (g <= 1) { g = 1; dir.current = 1; }
+      const l = Math.min(100 - w, ref.current.lo + climb);
+      ref.current = { gas: g, lo: l };
+      setGas(g); setLo(l);
+      setLeft((x) => Math.max(0, x - 40));
+    }, 40);
+    return () => window.clearInterval(id);
+  }, [done, hard, w]);
+
+  useEffect(() => {
+    if (done || left > 0) return;
+    setDone({ quality: 0.05, label: "BLOCK CLOSED | BOTS GOT IT" });
+  }, [left, done]);
+  useEffect(() => { if (done) onResult(done); }, [done, onResult]);
 
   const send = () => {
-    const { lo, w } = band.current;
-    const res: MiniResult = gas < lo
+    if (done) return;
+    const { gas: g, lo: l } = ref.current;
+    setDone(g < l
       ? { quality: 0.05, label: "TOO CHEAP | MISSED THE MINT" }
-      : gas > lo + w
+      : g > l + w
         ? { quality: 0.45, label: "OVERPAID FOR GAS" }
-        : { quality: 1, label: "FIRST BLOCK" };
-    setDone(res);
-    window.setTimeout(() => onResult(res), 900);
+        : { quality: 1, label: "FIRST BLOCK" });
   };
+  const inZone = gas >= lo && gas <= lo + w;
+  const botGwei = Math.round(lo + w / 2);
 
   return (
     <>
       <p className="journey-kicker"><Fuel /> GAS WAR</p>
       <h2>OUTBID THE BOTS</h2>
-      <p className="cy-lead">Bots bid inside the <strong>yellow zone</strong>. Slide your gas into it: too low never mints, too high burns the fee.</p>
-      <div className="mg-depth"><i style={{ left: `${band.current.lo}%`, width: `${band.current.w}%` }} /><b style={{ left: `${gas}%` }} /></div>
-      <input className="mg-range" type="range" min={0} max={100} value={gas} disabled={!!done} onChange={(e) => setGas(Number(e.target.value))} aria-label="Gas price" />
-      <p className="cy-lead"><strong>{gas} GWEI</strong></p>
-      {done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>
-        : <Button className="cy-wide cy-primary" onClick={send}>SEND TRANSACTION</Button>}
+      <p className="cy-lead">The bots keep raising their bid (<strong>yellow</strong>). Your gas swings on its own — hit <strong>SEND</strong> while it's inside the bots, before the block closes.</p>
+      <div className="mg-timer"><i style={{ width: `${(left / total) * 100}%` }} /></div>
+      <p className="cy-lead"><strong>NEXT BLOCK {(left / 1000).toFixed(1)}s</strong> | BOTS ~{botGwei} GWEI</p>
+      <div className="mg-depth" onClick={send}><i style={{ left: `${lo}%`, width: `${w}%` }} /><b style={{ left: `${gas}%` }} /></div>
+      <p className={`cy-delta ${inZone ? "positive" : "negative"}`}>YOU {Math.round(gas)} GWEI {inZone ? "| IN THE BLOCK" : gas < lo ? "| TOO LOW" : "| TOO HIGH"}</p>
+      {!done && <Button className="cy-wide cy-primary" onClick={send}>SEND TRANSACTION NOW</Button>}
     </>
   );
 }
