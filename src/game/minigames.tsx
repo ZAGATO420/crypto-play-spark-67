@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Fuel, Gift, KeyRound, MousePointerClick, Search, Shield, Target, Waves } from "lucide-react";
 
@@ -12,16 +12,45 @@ export type MiniResult = { quality: number; label: string };
 
 const SEED_WORDS = ["throne", "candle", "gorilla", "liquid", "diamond", "vault", "sniper", "ledger"];
 
-export function Minigame({ kind, hard, roll = Math.random(), onResult }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void }) {
-  if (kind === "timing") return <TimingBar hard={hard} onResult={onResult} />;
-  if (kind === "panic") return <PanicTap hard={hard} onResult={onResult} />;
-  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={onResult} />;
-  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={onResult} />;
-  return <SeedCheck roll={roll} onResult={onResult} />;
+export type MiniOutcome = { money?: number; note: string };
+
+/**
+ * Wraps every minigame: the game itself reports a result, then a big result card
+ * shows the verdict, the money effect and a CONTINUE button. The caller's
+ * onResult only fires on CONTINUE, with the exact same result — no logic change.
+ */
+export function Minigame({ kind, hard, roll = Math.random(), onResult, describe }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void; describe?: (q: number) => MiniOutcome }) {
+  const [res, setRes] = useState<MiniResult | null>(null);
+  const sent = useRef(false);
+  const report = useCallback((r: MiniResult) => setRes((cur) => cur ?? r), []);
+  if (res) {
+    const out = describe?.(res.quality);
+    const tier = res.quality >= 0.9 ? "PERFECT" : res.quality >= 0.6 ? "CLEAN HIT" : res.quality >= 0.4 ? "SLIPPED" : "REKT";
+    const good = res.quality >= 0.6;
+    const go = () => { if (sent.current) return; sent.current = true; onResult(res); };
+    return (
+      <div className={`mg-result ${good ? "is-win" : "is-loss"}`}>
+        <p className="mg-result-tier">{tier}</p>
+        <h2 className="mg-result-label">{res.label}</h2>
+        {out?.money !== undefined && out.money !== 0 && (
+          <p className="mg-result-money">{out.money > 0 ? "+" : "−"}${Math.abs(Math.round(out.money)).toLocaleString("en-US")}</p>
+        )}
+        <div className="mg-result-meter"><i style={{ width: `${Math.round(res.quality * 100)}%` }} /></div>
+        <p className="mg-result-score">SKILL {Math.round(res.quality * 100)}%</p>
+        {out?.note && <p className="mg-result-note">{out.note}</p>}
+        <Button className="cy-wide cy-primary" onClick={go} autoFocus>CONTINUE</Button>
+      </div>
+    );
+  }
+  if (kind === "timing") return <TimingBar hard={hard} onResult={report} />;
+  if (kind === "panic") return <PanicTap hard={hard} onResult={report} />;
+  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={report} />;
+  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={report} />;
+  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={report} />;
+  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={report} />;
+  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={report} />;
+  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={report} />;
+  return <SeedCheck roll={roll} onResult={report} />;
 }
 
 
