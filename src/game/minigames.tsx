@@ -148,32 +148,61 @@ function PanicTap({ hard, onResult }: { hard: boolean; onResult: (r: MiniResult)
 /* ----------------------------------------------------------------- gas war */
 
 function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
-  const [gas, setGas] = useState(50);
+  // Your gas bid sweeps on its own, the bots keep raising their bid band,
+  // and the next block closes in seconds. Fire when you sit inside the bots.
+  const total = hard ? 4200 : 5200;
+  const w = hard ? 12 : 17;
+  const [gas, setGas] = useState(5);
+  const [lo, setLo] = useState(18 + roll * 22);
+  const [left, setLeft] = useState(total);
   const [done, setDone] = useState<MiniResult | null>(null);
-  const band = useRef({ lo: 25 + roll * 40, w: hard ? 12 : 20 });
+  const dir = useRef(1);
+  const ref = useRef({ gas: 5, lo: 18 + roll * 22 });
 
+  useEffect(() => {
+    if (done) return;
+    const speed = hard ? 3.1 : 2.3;
+    const climb = hard ? 0.32 : 0.22;
+    const id = window.setInterval(() => {
+      let g = ref.current.gas + dir.current * speed;
+      if (g >= 99) { g = 99; dir.current = -1; }
+      if (g <= 1) { g = 1; dir.current = 1; }
+      const l = Math.min(100 - w, ref.current.lo + climb);
+      ref.current = { gas: g, lo: l };
+      setGas(g); setLo(l);
+      setLeft((x) => Math.max(0, x - 40));
+    }, 40);
+    return () => window.clearInterval(id);
+  }, [done, hard, w]);
+
+  useEffect(() => {
+    if (done || left > 0) return;
+    setDone({ quality: 0.05, label: "BLOCK CLOSED | BOTS GOT IT" });
+  }, [left, done]);
+  useEffect(() => { if (done) onResult(done); }, [done, onResult]);
 
   const send = () => {
-    const { lo, w } = band.current;
-    const res: MiniResult = gas < lo
+    if (done) return;
+    const { gas: g, lo: l } = ref.current;
+    setDone(g < l
       ? { quality: 0.05, label: "TOO CHEAP | MISSED THE MINT" }
-      : gas > lo + w
+      : g > l + w
         ? { quality: 0.45, label: "OVERPAID FOR GAS" }
-        : { quality: 1, label: "FIRST BLOCK" };
-    setDone(res);
-    window.setTimeout(() => onResult(res), 900);
+        : { quality: 1, label: "FIRST BLOCK" });
   };
+  const inZone = gas >= lo && gas <= lo + w;
+  const botGwei = Math.round(lo + w / 2);
 
   return (
     <>
       <p className="journey-kicker"><Fuel /> GAS WAR</p>
       <h2>OUTBID THE BOTS</h2>
-      <p className="cy-lead">Bots bid inside the <strong>yellow zone</strong>. Slide your gas into it: too low never mints, too high burns the fee.</p>
-      <div className="mg-depth"><i style={{ left: `${band.current.lo}%`, width: `${band.current.w}%` }} /><b style={{ left: `${gas}%` }} /></div>
-      <input className="mg-range" type="range" min={0} max={100} value={gas} disabled={!!done} onChange={(e) => setGas(Number(e.target.value))} aria-label="Gas price" />
-      <p className="cy-lead"><strong>{gas} GWEI</strong></p>
-      {done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>
-        : <Button className="cy-wide cy-primary" onClick={send}>SEND TRANSACTION</Button>}
+      <p className="cy-lead">The bots keep raising their bid (<strong>yellow</strong>). Your gas swings on its own — hit <strong>SEND</strong> while it's inside the bots, before the block closes.</p>
+      <div className="mg-timer"><i style={{ width: `${(left / total) * 100}%` }} /></div>
+      <p className="cy-lead"><strong>NEXT BLOCK {(left / 1000).toFixed(1)}s</strong> | BOTS ~{botGwei} GWEI</p>
+      <div className="mg-depth" onClick={send}><i style={{ left: `${lo}%`, width: `${w}%` }} /><b style={{ left: `${gas}%` }} /></div>
+      <p className={`cy-delta ${inZone ? "positive" : "negative"}`}>YOU {Math.round(gas)} GWEI {inZone ? "| IN THE BLOCK" : gas < lo ? "| TOO LOW" : "| TOO HIGH"}</p>
+      {!done && <Button className="cy-wide cy-primary" onClick={send}>SEND TRANSACTION NOW</Button>}
     </>
   );
 }
