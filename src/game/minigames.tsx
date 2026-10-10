@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Fuel, Gift, KeyRound, MousePointerClick, Search, Shield, Target, Waves } from "lucide-react";
+import { playSfx } from "./audio";
 
 /**
  * Tiny skill moments. Every one returns a quality between 0 and 1 so the
@@ -19,17 +20,27 @@ export type MiniOutcome = { money?: number; note: string };
  * shows the verdict, the money effect and a CONTINUE button. The caller's
  * onResult only fires on CONTINUE, with the exact same result — no logic change.
  */
+const buzz = (p: number | number[]) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
+
 export function Minigame({ kind, hard, roll = Math.random(), onResult, describe }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void; describe?: (q: number) => MiniOutcome }) {
   const [res, setRes] = useState<MiniResult | null>(null);
   const sent = useRef(false);
   const report = useCallback((r: MiniResult) => setRes((cur) => cur ?? r), []);
+  // the moment the result lands: sound + vibration, before the card shows
+  useEffect(() => {
+    if (!res) return;
+    if (res.quality >= 0.9) { playSfx("win"); buzz([40, 60, 40, 60, 120]); }
+    else if (res.quality >= 0.6) { playSfx("win"); buzz([50, 50, 80]); }
+    else if (res.quality >= 0.4) { playSfx("hit"); buzz(160); }
+    else { playSfx("crash"); buzz([220, 80, 220]); }
+  }, [res]);
   if (res) {
     const out = describe?.(res.quality);
     const tier = res.quality >= 0.9 ? "PERFECT" : res.quality >= 0.6 ? "CLEAN HIT" : res.quality >= 0.4 ? "SLIPPED" : "REKT";
     const good = res.quality >= 0.6;
-    const go = () => { if (sent.current) return; sent.current = true; onResult(res); };
+    const go = () => { if (sent.current) return; sent.current = true; playSfx("click"); onResult(res); };
     return (
-      <div className={`mg-result ${good ? "is-win" : "is-loss"}`}>
+      <div className={`mg-result ${good ? "is-win" : "is-loss"} ${res.quality >= 0.9 ? "is-perfect" : ""}`}>
         <p className="mg-result-tier">{tier}</p>
         <h2 className="mg-result-label">{res.label}</h2>
         {out?.money !== undefined && out.money !== 0 && (
