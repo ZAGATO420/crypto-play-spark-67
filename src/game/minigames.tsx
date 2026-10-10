@@ -53,15 +53,21 @@ export function Minigame({ kind, hard, roll = Math.random(), onResult, describe 
       </div>
     );
   }
-  if (kind === "timing") return <TimingBar hard={hard} onResult={report} />;
-  if (kind === "panic") return <PanicTap hard={hard} onResult={report} />;
-  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={report} />;
-  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={report} />;
-  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={report} />;
-  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={report} />;
-  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={report} />;
-  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={report} />;
-  return <SeedCheck roll={roll} onResult={report} />;
+  const game = kind === "timing" ? <TimingBar hard={hard} onResult={report} />
+    : kind === "panic" ? <PanicTap hard={hard} onResult={report} />
+    : kind === "gas" ? <GasWar hard={hard} roll={roll} onResult={report} />
+    : kind === "orderbook" ? <OrderBook hard={hard} roll={roll} onResult={report} />
+    : kind === "rugcheck" ? <RugCheck roll={roll} onResult={report} />
+    : kind === "whale" ? <CandleCatch hard={hard} roll={roll} onResult={report} />
+    : kind === "airdrop" ? <AirdropClaim hard={hard} roll={roll} onResult={report} />
+    : kind === "hodl" ? <HoldTheLine hard={hard} roll={roll} onResult={report} />
+    : <SeedCheck roll={roll} onResult={report} />;
+  // every tap on a button inside a minigame clicks and ticks the phone
+  return (
+    <div className="mg-wrap" onPointerDownCapture={(e) => { if ((e.target as HTMLElement).closest("button")) { playSfx("click"); buzz(12); } }}>
+      {game}
+    </div>
+  );
 }
 
 
