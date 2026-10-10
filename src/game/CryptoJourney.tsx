@@ -2157,7 +2157,20 @@ export function CryptoJourney() {
           {dialog.k === "custody" && <CustodySheet run={run} onPick={setCustody} />}
           {dialog.k === "life" && <LifeSheet run={run} onPick={setLife} />}
           {dialog.k === "ledger" && <LedgerSheet run={run} onClose={() => setDialog(null)} />}
-          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={riskHard} onResult={(res) => finishMini(dialog.pending, res)} />}
+          {dialog.k === "mini" && <Minigame kind={dialog.kind} roll={det(run.seed, `mini-${run.chapter}-${dialog.kind}`)} hard={riskHard} onResult={(res) => finishMini(dialog.pending, res)} describe={(raw) => {
+            // preview only — mirrors the resolve* functions, never changes them
+            const q = Math.max(raw, power.skillFloor);
+            const p = dialog.pending;
+            if (p.t === "skill") {
+              const stake = Math.max(300, Math.round(net * 0.02));
+              const delta = q >= 0.6 ? Math.round(stake * q) : -Math.round(stake * 0.5);
+              return { money: delta, note: delta >= 0 ? "Cash added to your wallet." : "Cash lost from your wallet." };
+            }
+            if (p.t === "phaseRisk") return { note: q >= 0.6 ? "Good grade. The money is paid when the quarter ends." : "Bad grade. This will cost you when the quarter ends." };
+            if (p.t === "seed") return q >= 0.9 ? { note: "Cold wallet safe. No loss." } : q >= 0.5 ? { money: -400, note: "Recovery service fee." } : { note: "Half of your cold-wallet coins are locked." };
+            if (p.t === "crash") return { note: q >= 0.9 ? "Clean exit. Your positions are safe." : q >= 0.5 ? "Partial exit: positions −6%." : "You froze: positions −16%." };
+            return { note: "Your result decides the payout on the next screen." };
+          }} />}
           {dialog.k === "decision" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o)} />}
           {dialog.k === "situation" && <DecisionSheet card={dialog.card} onPick={(o) => resolveDecision(o, false)} />}
           {dialog.k === "fight" && <FightSheet chapter={dialog.chapter} cash={run.cash}

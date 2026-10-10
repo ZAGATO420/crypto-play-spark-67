@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Fuel, Gift, KeyRound, MousePointerClick, Search, Shield, Target, Waves } from "lucide-react";
 
@@ -12,16 +12,45 @@ export type MiniResult = { quality: number; label: string };
 
 const SEED_WORDS = ["throne", "candle", "gorilla", "liquid", "diamond", "vault", "sniper", "ledger"];
 
-export function Minigame({ kind, hard, roll = Math.random(), onResult }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void }) {
-  if (kind === "timing") return <TimingBar hard={hard} onResult={onResult} />;
-  if (kind === "panic") return <PanicTap hard={hard} onResult={onResult} />;
-  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={onResult} />;
-  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={onResult} />;
-  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={onResult} />;
-  return <SeedCheck roll={roll} onResult={onResult} />;
+export type MiniOutcome = { money?: number; note: string };
+
+/**
+ * Wraps every minigame: the game itself reports a result, then a big result card
+ * shows the verdict, the money effect and a CONTINUE button. The caller's
+ * onResult only fires on CONTINUE, with the exact same result — no logic change.
+ */
+export function Minigame({ kind, hard, roll = Math.random(), onResult, describe }: { kind: MiniKind; hard: boolean; roll?: number; onResult: (r: MiniResult) => void; describe?: (q: number) => MiniOutcome }) {
+  const [res, setRes] = useState<MiniResult | null>(null);
+  const sent = useRef(false);
+  const report = useCallback((r: MiniResult) => setRes((cur) => cur ?? r), []);
+  if (res) {
+    const out = describe?.(res.quality);
+    const tier = res.quality >= 0.9 ? "PERFECT" : res.quality >= 0.6 ? "CLEAN HIT" : res.quality >= 0.4 ? "SLIPPED" : "REKT";
+    const good = res.quality >= 0.6;
+    const go = () => { if (sent.current) return; sent.current = true; onResult(res); };
+    return (
+      <div className={`mg-result ${good ? "is-win" : "is-loss"}`}>
+        <p className="mg-result-tier">{tier}</p>
+        <h2 className="mg-result-label">{res.label}</h2>
+        {out?.money !== undefined && out.money !== 0 && (
+          <p className="mg-result-money">{out.money > 0 ? "+" : "−"}${Math.abs(Math.round(out.money)).toLocaleString("en-US")}</p>
+        )}
+        <div className="mg-result-meter"><i style={{ width: `${Math.round(res.quality * 100)}%` }} /></div>
+        <p className="mg-result-score">SKILL {Math.round(res.quality * 100)}%</p>
+        {out?.note && <p className="mg-result-note">{out.note}</p>}
+        <Button className="cy-wide cy-primary" onClick={go} autoFocus>CONTINUE</Button>
+      </div>
+    );
+  }
+  if (kind === "timing") return <TimingBar hard={hard} onResult={report} />;
+  if (kind === "panic") return <PanicTap hard={hard} onResult={report} />;
+  if (kind === "gas") return <GasWar hard={hard} roll={roll} onResult={report} />;
+  if (kind === "orderbook") return <OrderBook hard={hard} roll={roll} onResult={report} />;
+  if (kind === "rugcheck") return <RugCheck roll={roll} onResult={report} />;
+  if (kind === "whale") return <CandleCatch hard={hard} roll={roll} onResult={report} />;
+  if (kind === "airdrop") return <AirdropClaim hard={hard} roll={roll} onResult={report} />;
+  if (kind === "hodl") return <HoldTheLine hard={hard} roll={roll} onResult={report} />;
+  return <SeedCheck roll={roll} onResult={report} />;
 }
 
 
@@ -139,7 +168,8 @@ function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResul
     <>
       <p className="journey-kicker"><Fuel /> GAS WAR</p>
       <h2>OUTBID THE BOTS</h2>
-      <p className="cy-lead">Bots are bidding blind for the same block. Too low and you never mint. Too high and the fee eats the trade.</p>
+      <p className="cy-lead">Bots bid inside the <strong>yellow zone</strong>. Slide your gas into it: too low never mints, too high burns the fee.</p>
+      <div className="mg-depth"><i style={{ left: `${band.current.lo}%`, width: `${band.current.w}%` }} /><b style={{ left: `${gas}%` }} /></div>
       <input className="mg-range" type="range" min={0} max={100} value={gas} disabled={!!done} onChange={(e) => setGas(Number(e.target.value))} aria-label="Gas price" />
       <p className="cy-lead"><strong>{gas} GWEI</strong></p>
       {done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>
@@ -212,28 +242,46 @@ function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult)
 
 function OrderBook({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
   const target = Math.round(24 + roll * 52);
-  const [bid, setBid] = useState(50);
-  const [done, setDone] = useState(false);
   const width = hard ? 8 : 13;
+  // the bid line sweeps across the book on its own; tap to stop it in the pocket
+  const [bid, setBid] = useState(4);
+  const [done, setDone] = useState<MiniResult | null>(null);
+  const dir = useRef(1);
+  useEffect(() => {
+    if (done) return;
+    const speed = hard ? 2.6 : 1.8;
+    const id = window.setInterval(() => setBid((b) => {
+      let n = b + dir.current * speed;
+      if (n >= 98) { n = 98; dir.current = -1; }
+      if (n <= 2) { n = 2; dir.current = 1; }
+      return n;
+    }), 30);
+    return () => window.clearInterval(id);
+  }, [done, hard]);
   const place = () => {
+    if (done) return;
     const off = Math.abs(bid - target);
     const result = off <= width / 3 ? { quality: 1, label: "MAKER FILL" } : off <= width ? { quality: .65, label: "PARTIAL FILL" } : { quality: .15, label: "MISSED LIQUIDITY" };
-    setDone(true);
+    setDone(result);
     window.setTimeout(() => onResult(result), 750);
   };
-  return <><p className="journey-kicker"><Target /> ORDER BOOK</p><h2>PLACE THE BID</h2><p className="cy-lead">Find the liquidity pocket. Too far away misses; too close pays the spread.</p><div className="mg-depth"><i style={{ left: `${target - width}%`, width: `${width * 2}%` }} /><b style={{ left: `${bid}%` }} /></div><input className="mg-range" type="range" min={0} max={100} value={bid} disabled={done} onChange={(e) => setBid(Number(e.target.value))} aria-label="Bid position" /><Button className="cy-wide cy-primary" disabled={done} onClick={place}>PLACE ORDER</Button></>;
+  return <><p className="journey-kicker"><Target /> ORDER BOOK</p><h2>PLACE THE BID</h2><p className="cy-lead">Your bid line sweeps across the book. Tap when it sits in the <strong>yellow liquidity pocket</strong> — dead centre is a full maker fill.</p><div className="mg-depth" onClick={place}><i style={{ left: `${target - width}%`, width: `${width * 2}%` }} /><b style={{ left: `${bid}%` }} /></div>{done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p> : <Button className="cy-wide cy-primary" onClick={place}>PLACE ORDER NOW</Button>}</>;
 }
 
 function RugCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) => void }) {
-  const clues = ["Liquidity locked", "Owner can mint", "Audited contract", "Anonymous deployer"];
+  // exactly one red flag on the board; the other lines are genuinely safe
   const bad = roll < .5 ? 1 : 3;
-  const [done, setDone] = useState(false);
+  const clues = bad === 1
+    ? ["Liquidity locked 12 months", "Owner can mint new tokens", "Audited contract", "Team doxxed on X"]
+    : ["Liquidity locked 12 months", "Mint function renounced", "Audited contract", "Deployer can pull liquidity"];
+  const [picked, setPicked] = useState<number | null>(null);
   const pick = (index: number) => {
+    if (picked !== null) return;
     const result = index === bad ? { quality: 1, label: "RUG FLAGGED" } : { quality: .15, label: "YOU MISSED THE BACKDOOR" };
-    setDone(true);
-    window.setTimeout(() => onResult(result), 750);
+    setPicked(index);
+    window.setTimeout(() => onResult(result), 900);
   };
-  return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">One detail can empty the pool. Pick the dangerous line.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={done} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
+  return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">Three lines are safe. <strong>One lets the dev drain the pool.</strong> Tap the dangerous one.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={picked !== null} className={picked === null ? "" : index === bad ? "is-bad" : index === picked ? "is-wrong" : ""} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
 }
 
 /* ------------------------------------------------------- candle catch (whale) */
@@ -306,7 +354,7 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
   // The genuine link is always the tcfb.app one; only its slot rotates.
   const real = Math.floor(roll * 3) % 3;
   const labels = useMemo(() => {
-    const fakes = ["claim-airdrop.xyz", "app.official-claim.io"];
+    const fakes = ["claim-tcfb.app.xyz", "tcfb-app.claim.io"];
     const out = [...fakes];
     out.splice(real, 0, "claim.tcfb.app");
     return out;
@@ -343,11 +391,11 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
     <>
       <p className="journey-kicker"><Gift /> AIRDROP WINDOW</p>
       <h2>CLAIM THE REAL ONE</h2>
-      <p className="cy-lead">Two of these links drain wallets. The genuine one ends in <strong>tcfb.app</strong>. Claim before the window shuts.</p>
+      <p className="cy-lead">Official post from @TCFB: <strong>claim.tcfb.app</strong>. Two look-alike links drain your wallet. Tap the exact official one before the window shuts.</p>
       <div className="mg-timer"><i style={{ width: `${(left / (hard ? 4200 : 5600)) * 100}%` }} /></div>
       <div className="mg-drift">
         {labels.map((label, index) => (
-          <button key={label} type="button" className={`mg-drift-btn${done && index === real ? " is-real" : ""}`} disabled={!!done}
+          <button key={label} type="button" className={`mg-drift-btn${done && index === real ? " is-real" : done ? " is-fake" : ""}`} disabled={!!done}
             style={{ transform: `translateX(${Math.sin(t + index * 1.7) * (hard ? 26 : 16)}px)` }} onClick={() => pick(index)}>
             {label}
           </button>
