@@ -241,28 +241,46 @@ function SeedCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult)
 
 function OrderBook({ hard, roll, onResult }: { hard: boolean; roll: number; onResult: (r: MiniResult) => void }) {
   const target = Math.round(24 + roll * 52);
-  const [bid, setBid] = useState(50);
-  const [done, setDone] = useState(false);
   const width = hard ? 8 : 13;
+  // the bid line sweeps across the book on its own; tap to stop it in the pocket
+  const [bid, setBid] = useState(4);
+  const [done, setDone] = useState<MiniResult | null>(null);
+  const dir = useRef(1);
+  useEffect(() => {
+    if (done) return;
+    const speed = hard ? 2.6 : 1.8;
+    const id = window.setInterval(() => setBid((b) => {
+      let n = b + dir.current * speed;
+      if (n >= 98) { n = 98; dir.current = -1; }
+      if (n <= 2) { n = 2; dir.current = 1; }
+      return n;
+    }), 30);
+    return () => window.clearInterval(id);
+  }, [done, hard]);
   const place = () => {
+    if (done) return;
     const off = Math.abs(bid - target);
     const result = off <= width / 3 ? { quality: 1, label: "MAKER FILL" } : off <= width ? { quality: .65, label: "PARTIAL FILL" } : { quality: .15, label: "MISSED LIQUIDITY" };
-    setDone(true);
+    setDone(result);
     window.setTimeout(() => onResult(result), 750);
   };
-  return <><p className="journey-kicker"><Target /> ORDER BOOK</p><h2>PLACE THE BID</h2><p className="cy-lead">Find the liquidity pocket. Too far away misses; too close pays the spread.</p><div className="mg-depth"><i style={{ left: `${target - width}%`, width: `${width * 2}%` }} /><b style={{ left: `${bid}%` }} /></div><input className="mg-range" type="range" min={0} max={100} value={bid} disabled={done} onChange={(e) => setBid(Number(e.target.value))} aria-label="Bid position" /><Button className="cy-wide cy-primary" disabled={done} onClick={place}>PLACE ORDER</Button></>;
+  return <><p className="journey-kicker"><Target /> ORDER BOOK</p><h2>PLACE THE BID</h2><p className="cy-lead">Your bid line sweeps across the book. Tap when it sits in the <strong>yellow liquidity pocket</strong> — dead centre is a full maker fill.</p><div className="mg-depth" onClick={place}><i style={{ left: `${target - width}%`, width: `${width * 2}%` }} /><b style={{ left: `${bid}%` }} /></div>{done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p> : <Button className="cy-wide cy-primary" onClick={place}>PLACE ORDER NOW</Button>}</>;
 }
 
 function RugCheck({ roll, onResult }: { roll: number; onResult: (r: MiniResult) => void }) {
-  const clues = ["Liquidity locked", "Owner can mint", "Audited contract", "Anonymous deployer"];
+  // exactly one red flag on the board; the other lines are genuinely safe
   const bad = roll < .5 ? 1 : 3;
-  const [done, setDone] = useState(false);
+  const clues = bad === 1
+    ? ["Liquidity locked 12 months", "Owner can mint new tokens", "Audited contract", "Team doxxed on X"]
+    : ["Liquidity locked 12 months", "Mint function renounced", "Audited contract", "Deployer can pull liquidity"];
+  const [picked, setPicked] = useState<number | null>(null);
   const pick = (index: number) => {
+    if (picked !== null) return;
     const result = index === bad ? { quality: 1, label: "RUG FLAGGED" } : { quality: .15, label: "YOU MISSED THE BACKDOOR" };
-    setDone(true);
-    window.setTimeout(() => onResult(result), 750);
+    setPicked(index);
+    window.setTimeout(() => onResult(result), 900);
   };
-  return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">One detail can empty the pool. Pick the dangerous line.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={done} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
+  return <><p className="journey-kicker"><Search /> RUG CHECK</p><h2>FIND THE RED FLAG</h2><p className="cy-lead">Three lines are safe. <strong>One lets the dev drain the pool.</strong> Tap the dangerous one.</p><div className="mg-rug">{clues.map((clue, index) => <Button key={clue} variant="outline" disabled={picked !== null} className={picked === null ? "" : index === bad ? "is-bad" : index === picked ? "is-wrong" : ""} onClick={() => pick(index)}>{clue}</Button>)}</div></>;
 }
 
 /* ------------------------------------------------------- candle catch (whale) */
