@@ -168,7 +168,8 @@ function GasWar({ hard, roll, onResult }: { hard: boolean; roll: number; onResul
     <>
       <p className="journey-kicker"><Fuel /> GAS WAR</p>
       <h2>OUTBID THE BOTS</h2>
-      <p className="cy-lead">Bots are bidding blind for the same block. Too low and you never mint. Too high and the fee eats the trade.</p>
+      <p className="cy-lead">Bots bid inside the <strong>yellow zone</strong>. Slide your gas into it: too low never mints, too high burns the fee.</p>
+      <div className="mg-depth"><i style={{ left: `${band.current.lo}%`, width: `${band.current.w}%` }} /><b style={{ left: `${gas}%` }} /></div>
       <input className="mg-range" type="range" min={0} max={100} value={gas} disabled={!!done} onChange={(e) => setGas(Number(e.target.value))} aria-label="Gas price" />
       <p className="cy-lead"><strong>{gas} GWEI</strong></p>
       {done ? <p className={`cy-delta ${done.quality > 0.5 ? "positive" : "negative"}`}>{done.label}</p>
@@ -353,7 +354,7 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
   // The genuine link is always the tcfb.app one; only its slot rotates.
   const real = Math.floor(roll * 3) % 3;
   const labels = useMemo(() => {
-    const fakes = ["claim-airdrop.xyz", "app.official-claim.io"];
+    const fakes = ["claim-tcfb.app.xyz", "tcfb-app.claim.io"];
     const out = [...fakes];
     out.splice(real, 0, "claim.tcfb.app");
     return out;
@@ -390,11 +391,11 @@ function AirdropClaim({ hard, roll, onResult }: { hard: boolean; roll: number; o
     <>
       <p className="journey-kicker"><Gift /> AIRDROP WINDOW</p>
       <h2>CLAIM THE REAL ONE</h2>
-      <p className="cy-lead">Two of these links drain wallets. The genuine one ends in <strong>tcfb.app</strong>. Claim before the window shuts.</p>
+      <p className="cy-lead">Official post from @TCFB: <strong>claim.tcfb.app</strong>. Two look-alike links drain your wallet. Tap the exact official one before the window shuts.</p>
       <div className="mg-timer"><i style={{ width: `${(left / (hard ? 4200 : 5600)) * 100}%` }} /></div>
       <div className="mg-drift">
         {labels.map((label, index) => (
-          <button key={label} type="button" className={`mg-drift-btn${done && index === real ? " is-real" : ""}`} disabled={!!done}
+          <button key={label} type="button" className={`mg-drift-btn${done && index === real ? " is-real" : done ? " is-fake" : ""}`} disabled={!!done}
             style={{ transform: `translateX(${Math.sin(t + index * 1.7) * (hard ? 26 : 16)}px)` }} onClick={() => pick(index)}>
             {label}
           </button>
