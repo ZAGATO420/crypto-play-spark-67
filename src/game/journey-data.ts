@@ -202,12 +202,12 @@ export const DECISIONS: Decision[] = [
     ] },
   { month: 31, kicker: "AUG 2022 | 3AC & CELSIUS", title: "THE LENDERS ARE INSOLVENT", body: "Celsius freezes withdrawals. 3AC is gone. Your coins on that yield platform are 'safe', they say.",
     options: [
-      { label: "WITHDRAW EVERYTHING", result: "Not your keys, not your coins. You got out days before the freeze became forever.", tone: "win", xp: 850, stress: -6 },
+      { label: "WITHDRAW EVERYTHING", result: "Not your keys, not your coins. You got out days before the freeze became forever.", tone: "win", cash: 1200, xp: 850, stress: -6 },
       { label: "KEEP EARNING 9%", result: "The 9% cost you the principal. Withdrawals are paused. Permanently.", tone: "danger", bagMul: 0.6, cashMul: 0.8, xp: 150, stress: 28 },
     ] },
   { month: 33, kicker: "NOV 2022 | FTX COLLAPSE", title: "THE SECOND BIGGEST EXCHANGE IS A HOLE", body: "$8 billion missing. SBF is tweeting one letter at a time. Your balance still shows on the app.",
     options: [
-      { label: "WITHDRAW NOW", result: "You got your funds out while the withdrawal queue still moved. Ten minutes later it never moved again.", tone: "win", xp: 1200, stress: 10 },
+      { label: "WITHDRAW NOW", result: "You got your funds out while the withdrawal queue still moved. Ten minutes later it never moved again.", tone: "win", cash: 1800, xp: 1200, stress: 10 },
       { label: "BELIEVE THE TWEETS", result: "'Assets are fine.' They were not fine. Your exchange balance is now a bankruptcy claim.", tone: "danger", cashMul: 0.45, bagMul: 0.5, xp: 150, stress: 34 },
       { label: "BUY THE BOTTOM", result: "$15,500 BTC in the middle of maximum fear. This was the cycle low. Enjoy the next two years.", tone: "win", cashMul: 0.45, bagMul: 1.7, xp: 1300, stress: 20 },
     ] },
@@ -692,7 +692,7 @@ export const custodyOf = (id: CustodyId) => CUSTODY.find((c) => c.id === id) ?? 
 
 /** Real counterparty failures: everything still sitting on an exchange takes the hit. */
 export const EXCHANGE_FAILURES: Record<number, { name: string; line: string; haircut: number }> = {
-  9: { name: "CELSIUS FREEZES WITHDRAWALS", line: "The 9% yield desk stops paying. Customer coins are now bankruptcy claims.", haircut: 0.45 },
+  10: { name: "CELSIUS FREEZES WITHDRAWALS", line: "The 9% yield desk stops paying. Customer coins are now bankruptcy claims.", haircut: 0.45 },
   11: { name: "FTX GOES TO ZERO", line: "The second biggest exchange was a hole in the ground. Balances are gone.", haircut: 0.85 },
   21: { name: "MID-TIER CEX HALTS", line: "'Temporary maintenance.' The domain expires two weeks later.", haircut: 0.35 },
 };
